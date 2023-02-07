@@ -21,3 +21,39 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# Terraform state
+.terraform/
+
+# Sensitive data
+*.secrets*tfvars
+
+# Do not ignore the sample secrets file
+!*secrets.tfvars.sample
+*.terraform.lock.hcl
+
+# TF state files
+terraform.tfstate*
+errored.tfstate*
+
+# Key files
+*.key
+*.pem
+
+# kubeconfig template
+*.kubeconfig
+
+# ignore Intellij-IDEA files
+*.iml
+.idea/
+*.iws
+*.ipr
+
+# Eclipse files
+.project
+.classpath
+.factorypath
+.settings/
+
+# Terraform Lock Files
+.terraform.lock.hcl
