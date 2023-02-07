@@ -29,11 +29,6 @@ variable "region" {
   type        = string
   description = "Code of the region"
 }
-variable "padding" {
-  type        = string
-  description = "Padding string to differentiate resource"
-  default     = "001"
-}
 variable "application" {
   type        = string
   description = "Purpose of the IG Gateway"

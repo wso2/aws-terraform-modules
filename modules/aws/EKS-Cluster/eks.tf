@@ -10,7 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_eks_cluster" "eks_cluster" {
-  name     = join("-", ["eks", var.project, var.application, var.environment, var.region, var.padding])
+  name     = join("-", [var.project, var.application, var.environment, var.region, "eks"])
   role_arn = aws_iam_role.iam_role.arn
 
   version = var.kubernetes_version

@@ -8,3 +8,8 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
+
+output "ec2-instance-arn" {
+  value      = aws_instance.ec2_instance.arn
+  depends_on = [aws_instance.ec2_instance]
+}

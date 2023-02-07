@@ -10,7 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_iam_role" "iam_role" {
-  name = var.iam_role_name
+  name = join("-", [var.project, var.iam_role_name, var.environment, var.region, "eks-iam-role"])
 
   assume_role_policy = <<POLICY
 {

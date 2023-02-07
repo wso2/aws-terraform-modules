@@ -44,8 +44,8 @@ resource "aws_route_table" "route_table" {
 
 resource "aws_route_table_association" "public_route_table_association" {
   count          = var.use_existing_subnet == true ? 0 : 1
-  subnet_id      = aws_subnet.ec2_subnet.id
-  route_table_id = aws_route_table.route_table.id
+  subnet_id      = aws_subnet.ec2_subnet.0.id
+  route_table_id = aws_route_table.route_table.0.id
 }
 
 resource "aws_network_interface" "ec2_network_interface" {

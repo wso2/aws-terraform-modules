@@ -10,8 +10,10 @@
 # --------------------------------------------------------------------------------------
 
 output "eks_cluster_name" {
-  value = aws_eks_cluster.eks_cluster.name
+  value      = aws_eks_cluster.eks_cluster.name
+  depends_on = [aws_eks_cluster.eks_cluster]
 }
 output "eks_subnet_ids" {
-  value = aws_subnet.eks_subnet.*.id
+  value      = aws_subnet.eks_subnet.*.id
+  depends_on = [aws_subnet.eks_subnet]
 }

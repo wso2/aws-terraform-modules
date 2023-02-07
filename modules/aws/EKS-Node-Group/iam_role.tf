@@ -10,7 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_iam_role" "iam_role" {
-  name = join("-", [var.eks_cluster_name, "iam-role"])
+  name = join("-", [var.eks_cluster_name, var.node_group_name, "eks-node-group-iam-role"])
 
   assume_role_policy = jsonencode({
     Statement = [{

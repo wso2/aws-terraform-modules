@@ -9,7 +9,20 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "eks_cluster_name" {}
-variable "node_group_name" {}
-variable "subnet_ids" {}
-variable "default_tags" {}
+variable "eks_cluster_name" {
+  description = "Name of the EKS cluster"
+  type        = string
+}
+variable "node_group_name" {
+  type        = string
+  description = "Name of the Node group"
+}
+variable "subnet_ids" {
+  type        = list(string)
+  description = "List of subnets to deploy nodepools"
+}
+variable "default_tags" {
+  type        = string
+  description = "Tags to be associated with the EKS"
+  default     = {}
+}

@@ -10,11 +10,14 @@
 # --------------------------------------------------------------------------------------
 
 output "vpc_cidr_block" {
-  value = aws_vpc.vpc.cidr_block
+  value      = aws_vpc.vpc.cidr_block
+  depends_on = [aws_vpc.vpc]
 }
 output "vpc_id" {
-  value = aws_vpc.vpc.id
+  value      = aws_vpc.vpc.id
+  depends_on = [aws_vpc.vpc]
 }
 output "vpc_route_table_id" {
-  value = aws_vpc.vpc.default_route_table_id
+  value      = aws_vpc.vpc.default_route_table_id
+  depends_on = [aws_vpc.vpc]
 }

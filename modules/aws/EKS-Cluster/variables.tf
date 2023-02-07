@@ -21,11 +21,6 @@ variable "region" {
   type        = string
   description = "Code of the region"
 }
-variable "padding" {
-  type        = string
-  description = "Padding string to differentiate resource"
-  default     = "001"
-}
 variable "application" {
   type        = string
   description = "Purpose of the EKS Cluster"
@@ -73,5 +68,12 @@ variable "custom_routes" {
   description = "Rules to be associated with the EC2 Subnet if provided"
   default     = []
 }
-variable "iam_role_name" {}
-variable "default_tags" {}
+variable "iam_role_name" {
+  type        = string
+  description = "Name for the IAM role used in EKS"
+}
+variable "default_tags" {
+  type        = string
+  description = "Tags to be associated with the EKS"
+  default     = {}
+}
