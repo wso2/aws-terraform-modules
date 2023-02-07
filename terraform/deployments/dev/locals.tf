@@ -4,6 +4,6 @@ locals {
     environment       = var.environment
     availability_zone = var.availability_zone
     terraform         = "true"
-    user              = "hirana@wso2.com"
+    #user              = "hirana@wso2.com" Required for the iPaaS account to track resource owners
   }
 }
