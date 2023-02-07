@@ -48,6 +48,6 @@ resource "aws_route_table" "route_table" {
 resource "aws_route_table_association" "example" {
   count = length(aws_subnet.eks_subnet.*.id)
 
-  subnet_id = aws_subnet.eks_subnet[count.index].id
+  subnet_id      = aws_subnet.eks_subnet[count.index].id
   route_table_id = aws_route_table.route_table.id
 }

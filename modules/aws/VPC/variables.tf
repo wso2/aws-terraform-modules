@@ -9,6 +9,22 @@
 #
 # --------------------------------------------------------------------------------------
 
+variable "project" {
+  type        = string
+  description = "Name of the project"
+}
+variable "environment" {
+  type        = string
+  description = "Name of the environment"
+}
+variable "region" {
+  type        = string
+  description = "Code of the region"
+}
+variable "application" {
+  type        = string
+  description = "Purpose of the Subnet"
+}
 variable "vpc_cidr_block" {
   type        = string
   description = "CIDR block to be used for the VPC"
