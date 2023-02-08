@@ -73,7 +73,7 @@ variable "iam_role_name" {
   description = "Name for the IAM role used in EKS"
 }
 variable "default_tags" {
-  type        = string
+  type        = map(string)
   description = "Tags to be associated with the EKS"
   default     = {}
 }

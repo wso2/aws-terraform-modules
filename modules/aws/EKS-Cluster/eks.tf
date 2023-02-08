@@ -29,8 +29,8 @@ resource "aws_eks_cluster" "eks_cluster" {
   # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling.
   # Otherwise, EKS will not be able to properly delete EKS managed EC2 infrastructure such as Security Groups.
   depends_on = [
-    aws_iam_role_policy_attachment.AmazonEKSClusterPolicy,
-    aws_iam_role_policy_attachment.AmazonEKSVPCResourceController,
+    aws_iam_role_policy_attachment.amazon_eks_cluster_policy,
+    aws_iam_role_policy_attachment.amazon_eks_pc_resource_controller,
   ]
   tags = var.default_tags
 }
