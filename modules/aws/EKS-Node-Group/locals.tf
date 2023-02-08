@@ -9,27 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "project" {
-  type        = string
-  description = "Name of the project"
-}
-variable "environment" {
-  type        = string
-  description = "Name of the environment"
-}
-variable "region" {
-  type        = string
-  description = "Code of the region"
-}
-variable "application" {
-  type        = string
-  description = "Purpose of the ECR"
-}
-variable "assume_role_policy" {
-  type = string
-}
-variable "default_tags" {
-  type        = map(string)
-  description = "Tags to be associated with the EKS"
-  default     = {}
+locals {
+  eks_cluster_name_key = join("", ["k8s.io/cluster-autoscaler/", var.eks_cluster_name])
+  ng_tags              = merge(var.default_tags, { (local.eks_cluster_name_key) : "enabled", "k8s.io/cluster-autoscaler/enabled" : true })
 }

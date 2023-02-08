@@ -14,15 +14,24 @@ resource "aws_eks_node_group" "eks_node_group" {
   node_group_name = join("-", [var.eks_cluster_name, var.node_group_name, "node-group"])
   node_role_arn   = aws_iam_role.iam_role.arn
   subnet_ids      = var.subnet_ids
+  version         = var.k8s_version
 
+  dynamic "taint" {
+    for_each = var.taints
+    content {
+      key    = taint.key
+      value  = taint.value.value
+      effect = taint.value.effect
+    }
+  }
   scaling_config {
-    desired_size = 1
-    max_size     = 2
-    min_size     = 1
+    desired_size = var.desired_size
+    max_size     = var.max_size
+    min_size     = var.min_size
   }
 
   update_config {
-    max_unavailable = 1
+    max_unavailable = var.max_unavailable
   }
 
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
@@ -33,5 +42,5 @@ resource "aws_eks_node_group" "eks_node_group" {
     aws_iam_role_policy_attachment.amazon_ec2_container_registry_read_only,
   ]
 
-  tags = var.default_tags
+  tags = local.ng_tags
 }

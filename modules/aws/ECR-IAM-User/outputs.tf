@@ -9,27 +9,11 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "project" {
-  type        = string
-  description = "Name of the project"
+output "ecr_user_iam_role_id" {
+  value      = aws_iam_role.ecr_access_role.id
+  depends_on = []
 }
-variable "environment" {
-  type        = string
-  description = "Name of the environment"
-}
-variable "region" {
-  type        = string
-  description = "Code of the region"
-}
-variable "application" {
-  type        = string
-  description = "Purpose of the ECR"
-}
-variable "assume_role_policy" {
-  type = string
-}
-variable "default_tags" {
-  type        = map(string)
-  description = "Tags to be associated with the EKS"
-  default     = {}
+output "ecr_user_iam_role_arn" {
+  value      = aws_iam_role.ecr_access_role.arn
+  depends_on = []
 }

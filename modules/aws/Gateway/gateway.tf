@@ -10,12 +10,11 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_internet_gateway" "gw" {
-  vpc_id = var.vpc_id
-
   tags = local.ig_tags
 }
 
 resource "aws_internet_gateway_attachment" "gw_vpc_attachment" {
+  count               = length(var.vpc_ids)
   internet_gateway_id = aws_internet_gateway.gw.id
   vpc_id              = var.vpc_ids[count.index]
 }

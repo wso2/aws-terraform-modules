@@ -9,27 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "project" {
-  type        = string
-  description = "Name of the project"
-}
-variable "environment" {
-  type        = string
-  description = "Name of the environment"
-}
-variable "region" {
-  type        = string
-  description = "Code of the region"
-}
-variable "application" {
-  type        = string
-  description = "Purpose of the ECR"
-}
-variable "assume_role_policy" {
-  type = string
-}
-variable "default_tags" {
-  type        = map(string)
-  description = "Tags to be associated with the EKS"
-  default     = {}
+output "peering_id" {
+  value      = aws_vpc_peering_connection.vpc_peering_connection.id
+  depends_on = [aws_vpc_peering_connection.vpc_peering_connection]
 }

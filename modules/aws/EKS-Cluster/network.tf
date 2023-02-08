@@ -18,7 +18,8 @@ resource "aws_subnet" "eks_subnet" {
 
 
   tags = merge(var.default_tags, {
-    name = join("-", [var.project, var.application, var.environment, var.region, var.subnet_details[count.index].availability_zone, "eks-snet"])
+    Name                              = join("-", [var.project, var.application, var.environment, var.region, var.subnet_details[count.index].availability_zone, "eks-snet"]),
+    "kubernetes.io/role/internal-elb" = 1
   })
 }
 
@@ -45,7 +46,7 @@ resource "aws_route_table" "route_table" {
   }
 }
 
-resource "aws_route_table_association" "example" {
+resource "aws_route_table_association" "route_table_association" {
   count = length(aws_subnet.eks_subnet.*.id)
 
   subnet_id      = aws_subnet.eks_subnet[count.index].id

@@ -70,3 +70,31 @@ variable "custom_routes" {
   description = "Rules to be associated with the EC2 Subnet if provided"
   default     = []
 }
+variable "ip_address_allocation_method" {
+  type        = string
+  description = "How to allocate an IP address, Static, Dynamic"
+}
+variable "ip_type" {
+  type        = string
+  description = "IP Type, Public, Private"
+}
+variable "private_ip" {
+  type        = string
+  description = "Private IP for the EC2 instance, required if ip_type is Static"
+  default     = null
+}
+variable "add_ssh_key" {
+  type        = bool
+  description = "Flag to add SSH key to VM"
+  default     = false
+}
+variable "ssh_public_key" {
+  type        = string
+  description = "SSH Public key for EC2 Instance"
+  default     = null
+}
+variable "security_group_ids" {
+  type        = list(string)
+  description = "List of security groups to be associated with the EC2 instance"
+  default     = []
+}

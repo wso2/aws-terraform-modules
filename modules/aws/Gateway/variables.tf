@@ -9,10 +9,6 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "vpc_id" {
-  description = "VPC ID which should contain the Gateway"
-  type        = string
-}
 variable "default_tags" {
   type        = map(string)
   description = "Default tags to be associated with the resource"

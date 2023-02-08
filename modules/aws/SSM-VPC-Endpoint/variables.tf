@@ -23,13 +23,29 @@ variable "region" {
 }
 variable "application" {
   type        = string
-  description = "Purpose of the ECR"
-}
-variable "assume_role_policy" {
-  type = string
+  description = "Purpose of the SSM Endpoint"
 }
 variable "default_tags" {
   type        = map(string)
-  description = "Tags to be associated with the EKS"
+  description = "Default tags to be associated with the Resource"
   default     = {}
+}
+variable "vpc_id" {
+  type        = string
+  description = "ID of the VPC the endpoint is associated with"
+}
+variable "ssm_endpoint_security_group_ids" {
+  type        = list(string)
+  description = "Security groups that should be associated with the EP"
+  default     = []
+}
+variable "subnet_ids" {
+  type        = list(string)
+  description = "Subnet IDs where the VPC EP should exist"
+  default     = []
+}
+variable "ssm_endpoint_private_dns_enabled" {
+  type        = bool
+  description = "ID of the VPC the endpoint is associated with"
+  default     = true
 }

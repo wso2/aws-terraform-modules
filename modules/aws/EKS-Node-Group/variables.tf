@@ -22,7 +22,35 @@ variable "subnet_ids" {
   description = "List of subnets to deploy nodepools"
 }
 variable "default_tags" {
-  type        = string
+  type        = map(string)
   description = "Tags to be associated with the EKS"
+  default     = {}
+}
+variable "min_size" {
+  type        = number
+  description = "Minimum number of nodes for node group"
+}
+variable "max_size" {
+  type        = number
+  description = "Maximum number of nodes for nodegroup"
+}
+variable "desired_size" {
+  type        = number
+  description = "Desired number of nodes for nodegroup"
+}
+variable "max_unavailable" {
+  type        = number
+  description = "Maximum amount of unavailable nodes"
+}
+variable "k8s_version" {
+  type        = string
+  description = "K8S version to be installed on the nodes"
+}
+variable "taints" {
+  type = map(object({
+    value  = string
+    effect = string
+  }))
+  description = "Taints to be added on to the node group"
   default     = {}
 }

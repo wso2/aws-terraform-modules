@@ -23,13 +23,5 @@ variable "region" {
 }
 variable "application" {
   type        = string
-  description = "Purpose of the ECR"
-}
-variable "assume_role_policy" {
-  type = string
-}
-variable "default_tags" {
-  type        = map(string)
-  description = "Tags to be associated with the EKS"
-  default     = {}
+  description = "Purpose of the IAM Role"
 }

@@ -9,10 +9,18 @@
 #
 # --------------------------------------------------------------------------------------
 
+resource "aws_key_pair" "key_pair" {
+  count      = var.add_ssh_key == true ? 1 : 0
+  key_name   = join("-", [var.project, var.application, var.environment, var.region, var.availability_zone, "ec2-kp"])
+  public_key = var.ssh_public_key
+}
+
 resource "aws_instance" "ec2_instance" {
   ami               = var.ec2_ami
   instance_type     = var.ec2_instance_type
   availability_zone = var.availability_zone
+
+  key_name = var.add_ssh_key == true ? aws_key_pair.key_pair.0.key_name : null
 
   tags = local.ec2_tags
 

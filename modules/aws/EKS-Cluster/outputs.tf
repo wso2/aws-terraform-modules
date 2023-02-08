@@ -17,3 +17,15 @@ output "eks_subnet_ids" {
   value      = aws_subnet.eks_subnet.*.id
   depends_on = [aws_subnet.eks_subnet]
 }
+output "eks_security_group_rule_id" {
+  value      = aws_eks_cluster.eks_cluster.vpc_config.0.cluster_security_group_id
+  depends_on = [aws_subnet.eks_subnet]
+}
+output "autoscaler_role_arn" {
+  value      = aws_iam_role.cluster_autoscaler_role.arn
+  depends_on = [aws_iam_role.cluster_autoscaler_role]
+}
+output "lb_role_arn" {
+  value      = aws_iam_role.cluster_loadbalancer_role.arn
+  depends_on = [aws_iam_role.cluster_loadbalancer_role]
+}

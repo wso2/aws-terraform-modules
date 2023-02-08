@@ -12,6 +12,6 @@
 locals {
   rt_name     = join("-", [var.project, var.application, var.environment, var.region, var.availability_zone, "snet-rt"])
   subnet_name = join("-", [var.project, var.application, var.environment, var.region, var.availability_zone, "snet"])
-  rt_tags     = merge(var.default_tags, { name : local.rt_name })
-  subnet_tags = merge(var.default_tags, { name : local.subnet_name })
+  rt_tags     = merge(var.default_tags, { Name : local.rt_name })
+  subnet_tags = merge(var.default_tags, { Name : local.subnet_name })
 }

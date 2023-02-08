@@ -10,7 +10,14 @@
 # --------------------------------------------------------------------------------------
 
 variable "rules" {
-  type        = list(map(string))
+  type = list(object({
+    direction       = string
+    to_port         = number
+    from_port       = number
+    protocol        = string
+    cidr_blocks     = list(string)
+    security_groups = list(string)
+  }))
   description = "List of rules to be added to the security group"
 }
 variable "security_group_id" {

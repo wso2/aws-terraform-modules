@@ -9,27 +9,10 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "project" {
-  type        = string
-  description = "Name of the project"
+data "aws_eks_cluster" "eks_cluster" {
+  name = aws_eks_cluster.eks_cluster.name
 }
-variable "environment" {
-  type        = string
-  description = "Name of the environment"
-}
-variable "region" {
-  type        = string
-  description = "Code of the region"
-}
-variable "application" {
-  type        = string
-  description = "Purpose of the ECR"
-}
-variable "assume_role_policy" {
-  type = string
-}
-variable "default_tags" {
-  type        = map(string)
-  description = "Tags to be associated with the EKS"
-  default     = {}
+# Obtain TLS certificate for the OIDC provider
+data "tls_certificate" "tls" {
+  url = data.aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
 }

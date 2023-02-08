@@ -23,13 +23,33 @@ variable "region" {
 }
 variable "application" {
   type        = string
-  description = "Purpose of the ECR"
+  description = "Purpose of the Subnet"
 }
-variable "assume_role_policy" {
-  type = string
+variable "cidr_block" {
+  type        = string
+  description = "CIDR block to be used for the VPC"
 }
 variable "default_tags" {
   type        = map(string)
-  description = "Tags to be associated with the EKS"
+  description = "Default tags to be associated with the Resource"
   default     = {}
+}
+variable "vpc_id" {
+  type        = string
+  description = "ID of the VPC"
+}
+variable "availability_zone" {
+  type        = string
+  description = "Avaialability zone of the Subnet"
+  default     = null
+}
+
+variable "custom_routes" {
+  type = list(object({
+    cidr_block = string
+    ep_type    = string
+    ep_id      = string
+  }))
+  description = "Rules to be associated with the EC2 Subnet if provided"
+  default     = []
 }

@@ -54,8 +54,8 @@ variable "eks_vpc_id" {
 }
 variable "subnet_details" {
   type = list(object({
-    availablity_zone = string
-    cidr_block       = string
+    availability_zone = string
+    cidr_block        = string
   }))
   default = []
 }
@@ -67,10 +67,6 @@ variable "custom_routes" {
   }))
   description = "Rules to be associated with the EC2 Subnet if provided"
   default     = []
-}
-variable "iam_role_name" {
-  type        = string
-  description = "Name for the IAM role used in EKS"
 }
 variable "default_tags" {
   type        = map(string)

@@ -9,19 +9,28 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_subnet" "ec2_subnet" {
-  count                   = var.use_existing_subnet == true ? 0 : 1
-  vpc_id                  = var.ec2_vpc_id
-  cidr_block              = var.ec2_subnet_vpc_cidr_block
-  availability_zone       = var.availability_zone
-  map_public_ip_on_launch = var.ip_address_allocation_method == "Dynamic" && var.ip_type == "Public" ? true : false
-  tags                    = local.subnet_tags
+resource "aws_subnet" "subnet" {
+  vpc_id            = var.vpc_id
+  cidr_block        = var.cidr_block
+  availability_zone = var.availability_zone
+
+  tags = local.subnet_tags
+}
+
+resource "aws_nat_gateway" "nat_gateway" {
+  allocation_id = aws_eip.eip.id
+  subnet_id     = aws_subnet.subnet.id
+
+  tags = local.natg_tags
+}
+
+resource "aws_eip" "eip" {
+  tags = local.eip_tags
 }
 
 resource "aws_route_table" "route_table" {
-  count = var.use_existing_subnet == true ? 0 : 1
 
-  vpc_id = var.ec2_vpc_id
+  vpc_id = var.vpc_id
   tags   = local.rt_tags
 
   dynamic "route" {
@@ -43,21 +52,7 @@ resource "aws_route_table" "route_table" {
 }
 
 resource "aws_route_table_association" "route_table_association" {
-  count          = var.use_existing_subnet == true ? 0 : 1
-  subnet_id      = aws_subnet.ec2_subnet.0.id
-  route_table_id = aws_route_table.route_table.0.id
-}
 
-resource "aws_network_interface" "ec2_network_interface" {
-  subnet_id       = var.use_existing_subnet == true ? var.vpc_subnet_id : aws_subnet.ec2_subnet.0.id
-  private_ips     = var.ip_type == "Static" ? [var.private_ip] : null
-  tags            = local.nic_tags
-  security_groups = var.security_group_ids
-}
-
-resource "aws_eip" "eip" {
-  count                     = var.ip_address_allocation_method == "Static" && var.ip_type == "Public" ? 1 : 0
-  network_interface         = aws_network_interface.ec2_network_interface.id
-  associate_with_private_ip = var.ip_type == "Static" ? var.private_ip : null
-  tags                      = local.ip_tags
+  subnet_id      = aws_subnet.subnet.id
+  route_table_id = aws_route_table.route_table.id
 }

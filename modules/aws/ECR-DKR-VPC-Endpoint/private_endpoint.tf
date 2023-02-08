@@ -8,28 +8,17 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
+data "aws_vpc_endpoint_service" "ecr_dkr" {
+  service = "ecr.dkr"
+}
 
-variable "project" {
-  type        = string
-  description = "Name of the project"
-}
-variable "environment" {
-  type        = string
-  description = "Name of the environment"
-}
-variable "region" {
-  type        = string
-  description = "Code of the region"
-}
-variable "application" {
-  type        = string
-  description = "Purpose of the ECR"
-}
-variable "assume_role_policy" {
-  type = string
-}
-variable "default_tags" {
-  type        = map(string)
-  description = "Tags to be associated with the EKS"
-  default     = {}
+resource "aws_vpc_endpoint" "ecr_dkr_manager" {
+  vpc_id            = var.vpc_id
+  service_name      = data.aws_vpc_endpoint_service.ecr_dkr.service_name
+  vpc_endpoint_type = "Interface"
+
+  security_group_ids  = var.ecr_dkr_endpoint_security_group_ids
+  subnet_ids          = var.subnet_ids
+  private_dns_enabled = var.ecr_dkr_endpoint_private_dns_enabled
+  tags                = var.default_tags
 }
