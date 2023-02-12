@@ -20,5 +20,5 @@ resource "aws_vpc_endpoint" "ecr_api_manager" {
   security_group_ids  = var.ecr_api_endpoint_security_group_ids
   subnet_ids          = var.subnet_ids
   private_dns_enabled = var.ecr_api_endpoint_private_dns_enabled
-  tags                = var.default_tags
+  tags                = local.tags
 }

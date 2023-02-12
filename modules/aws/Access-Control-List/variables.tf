@@ -45,3 +45,19 @@ variable "default_tags" {
   description = "Tags to be associated with the EKS"
   default     = {}
 }
+variable "project" {
+  type        = string
+  description = "Name of the project"
+}
+variable "environment" {
+  type        = string
+  description = "Name of the environment"
+}
+variable "region" {
+  type        = string
+  description = "Code of the region"
+}
+variable "application" {
+  type        = string
+  description = "Purpose of the ACL"
+}

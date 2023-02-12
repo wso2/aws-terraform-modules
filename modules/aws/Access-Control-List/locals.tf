@@ -8,17 +8,8 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-data "aws_vpc_endpoint_service" "ecr_dkr" {
-  service = "ecr.dkr"
-}
 
-resource "aws_vpc_endpoint" "ecr_dkr_manager" {
-  vpc_id            = var.vpc_id
-  service_name      = data.aws_vpc_endpoint_service.ecr_dkr.service_name
-  vpc_endpoint_type = "Interface"
-
-  security_group_ids  = var.ecr_dkr_endpoint_security_group_ids
-  subnet_ids          = var.subnet_ids
-  private_dns_enabled = var.ecr_dkr_endpoint_private_dns_enabled
-  tags                = local.tags
+locals {
+  acl_name = join("-", [var.project, var.application, var.environment, var.region, "acl"])
+  acl_tags = merge(var.default_tags, {"Name": local.acl_name})
 }

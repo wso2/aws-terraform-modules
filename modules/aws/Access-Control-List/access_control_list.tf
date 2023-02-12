@@ -38,5 +38,5 @@ resource "aws_network_acl" "network_acl" {
     }
   }
 
-  tags = var.default_tags
+  tags = local.acl_tags
 }
