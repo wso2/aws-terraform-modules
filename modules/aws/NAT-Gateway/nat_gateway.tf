@@ -22,6 +22,11 @@ resource "aws_nat_gateway" "nat_gateway" {
   subnet_id     = aws_subnet.subnet.id
 
   tags = local.natg_tags
+
+  depends_on = [
+    aws_subnet.subnet,
+    aws_eip.eip
+  ]
 }
 
 resource "aws_eip" "eip" {
@@ -55,4 +60,9 @@ resource "aws_route_table_association" "route_table_association" {
 
   subnet_id      = aws_subnet.subnet.id
   route_table_id = aws_route_table.route_table.id
+
+  depends_on = [
+    aws_subnet.subnet,
+    aws_route_table.route_table
+  ]
 }

@@ -35,6 +35,9 @@ resource "aws_iam_policy" "ecr_admin_iam_policy" {
       }
     ]
   })
+  depends_on = [
+    aws_ecr_repository.ecr_repository
+  ]
   tags = var.default_tags
 }
 
@@ -56,4 +59,8 @@ resource "aws_iam_policy" "ecr_pull_only_iam_policy" {
     ]
   })
   tags = var.default_tags
+
+  depends_on = [
+    aws_ecr_repository.ecr_repository
+  ]
 }

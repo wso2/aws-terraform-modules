@@ -24,4 +24,8 @@ resource "aws_security_group_rule" "security_group_rule" {
   to_port           = var.rules[count.index].to_port
   protocol          = var.rules[count.index].protocol
   cidr_blocks       = var.rules[count.index].cidr_blocks
+
+  depends_on = [
+    aws_security_group.security_group
+  ]
 }

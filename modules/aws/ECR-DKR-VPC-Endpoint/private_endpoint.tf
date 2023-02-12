@@ -21,4 +21,8 @@ resource "aws_vpc_endpoint" "ecr_dkr_manager" {
   subnet_ids          = var.subnet_ids
   private_dns_enabled = var.ecr_dkr_endpoint_private_dns_enabled
   tags                = local.tags
+
+  depends_on = [
+    data.aws_vpc_endpoint_service.ecr_dkr
+  ]
 }

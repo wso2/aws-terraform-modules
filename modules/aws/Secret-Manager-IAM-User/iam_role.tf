@@ -29,4 +29,8 @@ resource "aws_iam_role" "secrets_manager_role" {
 resource "aws_iam_role_policy_attachment" "secrets_manager_role_policy_attachment" {
   role       = aws_iam_role.secrets_manager_role.name
   policy_arn = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+
+  depends_on = [
+    aws_iam_role.secrets_manager_role
+  ]
 }

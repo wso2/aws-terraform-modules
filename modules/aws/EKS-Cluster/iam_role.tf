@@ -32,6 +32,10 @@ POLICY
 resource "aws_iam_role_policy_attachment" "amazon_eks_cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
   role       = aws_iam_role.iam_role.name
+
+  depends_on = [
+    aws_iam_role.iam_role
+  ]
 }
 
 # Optionally, enable Security Groups for Pods
@@ -39,50 +43,31 @@ resource "aws_iam_role_policy_attachment" "amazon_eks_cluster_policy" {
 resource "aws_iam_role_policy_attachment" "amazon_eks_pc_resource_controller" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
   role       = aws_iam_role.iam_role.name
-}
 
-data "aws_iam_policy_document" "cluster_autoscaler_sts_policy" {
-  statement {
-    actions = ["sts:AssumeRoleWithWebIdentity"]
-    effect  = "Allow"
-    condition {
-      test     = "StringEquals"
-      variable = "${replace(aws_iam_openid_connect_provider.eks_ca_oidc_provider.url, "https://", "")}:sub"
-      values   = ["system:serviceaccount:kube-system:cluster-autoscaler"]
-    }
-    principals {
-      identifiers = [aws_iam_openid_connect_provider.eks_ca_oidc_provider.arn]
-      type        = "Federated"
-    }
-  }
-}
-
-data "aws_iam_policy_document" "cluster_lb_sts_policy" {
-  statement {
-    actions = ["sts:AssumeRoleWithWebIdentity"]
-    effect  = "Allow"
-    condition {
-      test     = "StringEquals"
-      variable = "${replace(aws_iam_openid_connect_provider.eks_ca_oidc_provider.url, "https://", "")}:sub"
-      values   = ["system:serviceaccount:kube-system:aws-load-balancer-controller"]
-    }
-    principals {
-      identifiers = [aws_iam_openid_connect_provider.eks_ca_oidc_provider.arn]
-      type        = "Federated"
-    }
-  }
+  depends_on = [
+    aws_iam_role.iam_role
+  ]
 }
 
 resource "aws_iam_openid_connect_provider" "eks_ca_oidc_provider" {
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.tls.certificates[0].sha1_fingerprint]
   url             = data.aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
+
+  depends_on = [
+    data.tls_certificate.tls,
+    data.aws_eks_cluster.eks_cluster
+  ]
 }
 
 # IAM Role for IAM Cluster Autoscaler
 resource "aws_iam_role" "cluster_autoscaler_role" {
   assume_role_policy = data.aws_iam_policy_document.cluster_autoscaler_sts_policy.json
   name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-autoscaler-iam-role"])
+
+  depends_on = [
+    data.aws_iam_policy_document.cluster_autoscaler_sts_policy
+  ]
 }
 # IAM Policy for IAM Cluster Autoscaler role allowing ASG operations
 resource "aws_iam_policy" "cluster_autoscaler_policy" {
@@ -109,12 +94,21 @@ resource "aws_iam_policy" "cluster_autoscaler_policy" {
 resource "aws_iam_role_policy_attachment" "eks_ca_iam_policy_attach" {
   role       = aws_iam_role.cluster_autoscaler_role.name
   policy_arn = aws_iam_policy.cluster_autoscaler_policy.arn
+
+  depends_on = [
+    aws_iam_role.cluster_autoscaler_role,
+    aws_iam_policy.cluster_autoscaler_policy
+  ]
 }
 
 # IAM Role for IAM Cluster LoadBalancer
 resource "aws_iam_role" "cluster_loadbalancer_role" {
   assume_role_policy = data.aws_iam_policy_document.cluster_lb_sts_policy.json
   name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-lb-iam-role"])
+
+  depends_on = [
+    data.aws_iam_policy_document.cluster_lb_sts_policy
+  ]
 }
 # IAM Policy for IAM Cluster Autoscaler role allowing ASG operations
 resource "aws_iam_policy" "cluster_loadbalancer_policy" {
@@ -343,4 +337,9 @@ resource "aws_iam_policy" "cluster_loadbalancer_policy" {
 resource "aws_iam_role_policy_attachment" "cluster_loadbalancer_policy_attach" {
   role       = aws_iam_role.cluster_loadbalancer_role.name
   policy_arn = aws_iam_policy.cluster_loadbalancer_policy.arn
+
+  depends_on = [
+    aws_iam_role.cluster_loadbalancer_role,
+    aws_iam_policy.cluster_loadbalancer_policy
+  ]
 }

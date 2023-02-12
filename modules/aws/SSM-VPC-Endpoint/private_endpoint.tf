@@ -21,4 +21,8 @@ resource "aws_vpc_endpoint" "secrets_manager" {
   subnet_ids          = var.subnet_ids
   private_dns_enabled = var.ssm_endpoint_private_dns_enabled
   tags                = local.tags
+
+  depends_on = [
+    data.aws_vpc_endpoint_service.ssm
+  ]
 }

@@ -43,4 +43,10 @@ resource "aws_eks_node_group" "eks_node_group" {
   ]
 
   tags = local.ng_tags
+
+  lifecycle {
+    ignore_changes = [
+      scaling_config.0.desired_size
+    ]
+  }
 }
