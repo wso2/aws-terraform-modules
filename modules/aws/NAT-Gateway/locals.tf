@@ -13,12 +13,12 @@ locals {
   natg_name = join("-", [var.project, var.application, var.environment, var.region, "natg"])
   natg_tags = merge(var.default_tags, { Name : local.natg_name })
 
-  subnet_name = var.availability_zone == null ? join("-", [var.project, var.application, var.environment, var.region, "snet-natg"]) : join("-", [var.project, var.application, var.environment, var.availability_zone, var.region, "snet-natg"])
+  subnet_name = var.availability_zone == null ? join("-", [var.project, var.application, var.environment, var.region, "snet-natg"]) : join("-", [var.project, var.application, var.environment, var.availability_zone, "snet-natg"])
   subnet_tags = merge(var.default_tags, { Name : local.subnet_name })
 
   eip_name = join("-", [var.project, var.application, var.environment, var.region, "eip-natg"])
   eip_tags = merge(var.default_tags, { Name : local.eip_name })
 
-  rt_name = var.availability_zone == null ? join("-", [var.project, var.application, var.environment, var.region, "natg-snet-rt"]) : join("-", [var.project, var.application, var.environment, var.region, var.availability_zone, "natg-snet-rt"])
+  rt_name = var.availability_zone == null ? join("-", [var.project, var.application, var.environment, var.region, "natg-snet-rt"]) : join("-", [var.project, var.application, var.environment, var.availability_zone, "natg-snet-rt"])
   rt_tags = merge(var.default_tags, { Name : local.rt_name })
 }
