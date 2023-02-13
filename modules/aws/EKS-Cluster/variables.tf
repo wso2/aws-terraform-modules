@@ -56,17 +56,13 @@ variable "subnet_details" {
   type = list(object({
     availability_zone = string
     cidr_block        = string
+    custom_routes = list(object({
+      cidr_block = string
+      ep_type    = string
+      ep_id      = string
+    }))
   }))
   default = []
-}
-variable "custom_routes" {
-  type = list(object({
-    cidr_block = string
-    ep_type    = string
-    ep_id      = string
-  }))
-  description = "Rules to be associated with the EC2 Subnet if provided"
-  default     = []
 }
 variable "default_tags" {
   type        = map(string)

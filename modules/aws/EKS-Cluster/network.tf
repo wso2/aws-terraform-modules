@@ -24,12 +24,12 @@ resource "aws_subnet" "eks_subnet" {
 }
 
 resource "aws_route_table" "route_table" {
-
+  count  = length(var.subnet_details)
   vpc_id = var.eks_vpc_id
   tags   = local.rt_tags
 
   dynamic "route" {
-    for_each = var.custom_routes
+    for_each = var.subnet_details[count.index].custom_routes
     content {
       cidr_block                = route.value.cidr_block
       carrier_gateway_id        = route.value.ep_type == "carrier_gateway_id" ? route.value.ep_id : null
@@ -50,7 +50,7 @@ resource "aws_route_table_association" "route_table_association" {
   count = length(aws_subnet.eks_subnet.*.id)
 
   subnet_id      = aws_subnet.eks_subnet[count.index].id
-  route_table_id = aws_route_table.route_table.id
+  route_table_id = aws_route_table.route_table[count.index].id
 
   depends_on = [
     aws_route_table.route_table,
