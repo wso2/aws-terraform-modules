@@ -19,8 +19,7 @@ resource "aws_subnet" "eks_subnet" {
 
   tags = merge(var.default_tags, {
     Name                              = join("-", [var.project, var.application, var.environment, var.subnet_details[count.index].availability_zone, "eks-snet"]),
-    "kubernetes.io/role/elb" = 1,
-    "kubernetes.io/role/elb" = 1
+    "kubernetes.io/role/internal-elb" = 1
   })
 }
 

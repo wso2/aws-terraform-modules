@@ -343,3 +343,22 @@ resource "aws_iam_role_policy_attachment" "cluster_loadbalancer_policy_attach" {
     aws_iam_policy.cluster_loadbalancer_policy
   ]
 }
+
+# IAM Role for IAM Cluster Autoscaler
+resource "aws_iam_role" "cluster_container_cloudwatch_streamer_role" {
+  assume_role_policy = data.aws_iam_policy_document.cluster_container_cloudwatch_streamer_sts_policy.json
+  name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-ccw-iam-role"])
+
+  depends_on = [
+    data.aws_iam_policy_document.cluster_container_cloudwatch_streamer_sts_policy
+  ]
+}
+
+resource "aws_iam_role_policy_attachment" "cluster_container_cloudwatch_streamer_policy_attach" {
+  role       = aws_iam_role.cluster_container_cloudwatch_streamer_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+
+  depends_on = [
+    aws_iam_role.cluster_container_cloudwatch_streamer_role
+  ]
+}

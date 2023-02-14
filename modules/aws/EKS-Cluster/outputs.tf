@@ -29,3 +29,7 @@ output "lb_role_arn" {
   value      = aws_iam_role.cluster_loadbalancer_role.arn
   depends_on = [aws_iam_role.cluster_loadbalancer_role]
 }
+output "cloudwatch_streamer_role_arn" {
+  value      = aws_iam_role.cluster_container_cloudwatch_streamer_role.arn
+  depends_on = [aws_iam_role.cluster_container_cloudwatch_streamer_role]
+}
