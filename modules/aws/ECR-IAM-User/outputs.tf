@@ -9,11 +9,11 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "ecr_user_iam_role_id" {
-  value      = aws_iam_role.ecr_access_role.id
+output "ecr_user_iam_user_id" {
+  value      = aws_iam_user.ecr_access_user.id
   depends_on = []
 }
-output "ecr_user_iam_role_arn" {
-  value      = aws_iam_role.ecr_access_role.arn
+output "ecr_user_iam_user_arn" {
+  value      = aws_iam_user.ecr_access_user.arn
   depends_on = []
 }

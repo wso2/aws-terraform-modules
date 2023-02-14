@@ -9,28 +9,16 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_iam_role" "secrets_manager_role" {
-  name = join("-", [var.project, var.application, var.environment, var.region, "secret-manager-iam-role"])
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = "sts:AssumeRole",
-        Effect = "Allow",
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      }
-    ]
-  })
+resource "aws_iam_user" "secrets_manager_user" {
+  name = join("-", [var.project, var.application, var.environment, var.region, "secret-manager-iam-user"])
 }
 
-# Attach the IAM policy to the IAM role
-resource "aws_iam_role_policy_attachment" "secrets_manager_role_policy_attachment" {
-  role       = aws_iam_role.secrets_manager_role.name
+# Attach the IAM policy to the IAM user
+resource "aws_iam_user_policy_attachment" "secrets_manager_user_policy_attachment" {
+  user       = aws_iam_user.secrets_manager_user.name
   policy_arn = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
 
   depends_on = [
-    aws_iam_role.secrets_manager_role
+    aws_iam_user.secrets_manager_user
   ]
 }
