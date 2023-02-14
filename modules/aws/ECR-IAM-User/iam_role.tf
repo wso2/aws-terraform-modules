@@ -9,20 +9,8 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_iam_role" "ecr_access_role" {
-  name = join("-", [var.project, var.application, var.environment, var.region, "ecr-access-iam-role"])
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = "sts:AssumeRole",
-        Effect = "Allow",
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      }
-    ]
-  })
+resource "aws_iam_user" "ecr_access_user" {
+  name = join("-", [var.project, var.application, var.environment, var.region, "ecr-access-iam-user"])
 }
 
 resource "aws_iam_policy" "ecr_access_policy" {
@@ -54,8 +42,8 @@ resource "aws_iam_policy" "ecr_access_policy" {
   })
 }
 
-# Attach the IAM policy to the IAM role
-resource "aws_iam_role_policy_attachment" "ecr_role_policy_attachment" {
-  role       = aws_iam_role.ecr_access_role.name
+# Attach the IAM policy to the IAM user
+resource "aws_iam_user_policy_attachment" "ecr_user_policy_attachment" {
+  user       = aws_iam_user.ecr_access_user.name
   policy_arn = aws_iam_policy.ecr_access_policy.arn
 }

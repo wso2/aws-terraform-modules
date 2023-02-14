@@ -9,11 +9,11 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "secret_manager_iam_role_id" {
-  value      = aws_iam_role.secrets_manager_role.id
+output "secret_manager_iam_user_id" {
+  value      = aws_iam_user.secrets_manager_user.id
   depends_on = []
 }
-output "secret_manager_iam_role_arn" {
-  value      = aws_iam_role.secrets_manager_role.arn
+output "secret_manager_iam_user_arn" {
+  value      = aws_iam_user.secrets_manager_user.arn
   depends_on = []
 }
