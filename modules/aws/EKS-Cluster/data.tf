@@ -56,3 +56,23 @@ data "aws_iam_policy_document" "cluster_lb_sts_policy" {
     aws_iam_openid_connect_provider.eks_ca_oidc_provider
   ]
 }
+
+data "aws_iam_policy_document" "cluster_container_cloudwatch_streamer_sts_policy" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.eks_ca_oidc_provider.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:amazon-cloudwatch:fluent-bit"]
+    }
+    principals {
+      identifiers = [aws_iam_openid_connect_provider.eks_ca_oidc_provider.arn]
+      type        = "Federated"
+    }
+  }
+
+  depends_on = [
+    aws_iam_openid_connect_provider.eks_ca_oidc_provider
+  ]
+}
