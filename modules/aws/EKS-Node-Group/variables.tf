@@ -54,3 +54,7 @@ variable "taints" {
   description = "Taints to be added on to the node group"
   default     = {}
 }
+variable "instance_types" {
+  type = list(string)
+  description = "Instance types to be associated with the VM"
+}
