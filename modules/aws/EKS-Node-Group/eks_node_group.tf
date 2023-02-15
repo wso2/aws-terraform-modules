@@ -15,6 +15,7 @@ resource "aws_eks_node_group" "eks_node_group" {
   node_role_arn   = aws_iam_role.iam_role.arn
   subnet_ids      = var.subnet_ids
   version         = var.k8s_version
+  instance_types  = var.instance_types
 
   dynamic "taint" {
     for_each = var.taints
