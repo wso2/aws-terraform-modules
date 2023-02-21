@@ -33,3 +33,7 @@ output "cloudwatch_streamer_role_arn" {
   value      = aws_iam_role.cluster_container_cloudwatch_streamer_role.arn
   depends_on = [aws_iam_role.cluster_container_cloudwatch_streamer_role]
 }
+output "ebs_pvc_role_arn" {
+  value      = aws_iam_role.cluster_ebs_pvc_role.arn
+  depends_on = [aws_iam_role.cluster_ebs_pvc_role]
+}

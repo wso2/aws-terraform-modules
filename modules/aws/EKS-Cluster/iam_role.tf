@@ -362,3 +362,22 @@ resource "aws_iam_role_policy_attachment" "cluster_container_cloudwatch_streamer
     aws_iam_role.cluster_container_cloudwatch_streamer_role
   ]
 }
+
+# IAM Role for EBS PVC
+resource "aws_iam_role" "cluster_ebs_pvc_role" {
+  assume_role_policy = data.aws_iam_policy_document.cluster_ebs_pvc_sts_policy.json
+  name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-ebs-pvc-iam-role"])
+
+  depends_on = [
+    data.aws_iam_policy_document.cluster_lb_sts_policy
+  ]
+}
+
+resource "aws_iam_role_policy_attachment" "cluster_ebs_pvc_policy_attach" {
+  role       = aws_iam_role.cluster_ebs_pvc_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+
+  depends_on = [
+    aws_iam_role.cluster_ebs_pvc_role
+  ]
+}
