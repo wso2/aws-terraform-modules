@@ -52,7 +52,7 @@ resource "aws_iam_role_policy_attachment" "amazon_ec2_container_registry_read_on
   ]
 }
 
-resource "aws_iam_role_policy_attachment" "amazon_ec2_container_registry_read_only" {
+resource "aws_iam_role_policy_attachment" "amazon_cloud_watch_agent_policy" {
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
   role       = aws_iam_role.iam_role.name
 
