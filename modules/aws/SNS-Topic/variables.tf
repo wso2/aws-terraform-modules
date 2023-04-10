@@ -12,7 +12,22 @@
 variable "topic_name" {
   description = "The name of the SNS topic"
 }
-
+variable "project" {
+  type        = string
+  description = "Name of the project"
+}
+variable "environment" {
+  type        = string
+  description = "Name of the environment"
+}
+variable "region" {
+  type        = string
+  description = "Code of the region"
+}
+variable "application" {
+  type        = string
+  description = "Purpose of the Subnet"
+}
 variable "subscribers" {
   description = "A list of subscribers for the SNS topic"
   type        = list(object({
