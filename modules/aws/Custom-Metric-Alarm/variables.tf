@@ -9,6 +9,22 @@
 #
 # --------------------------------------------------------------------------------------
 
+variable "project" {
+  type        = string
+  description = "Name of the project"
+}
+variable "environment" {
+  type        = string
+  description = "Name of the environment"
+}
+variable "region" {
+  type        = string
+  description = "Code of the region"
+}
+variable "application" {
+  type        = string
+  description = "Purpose of the Subnet"
+}
 variable "alarm_actions" {
   description = "The ARNs of the actions to take when the alarm changes state"
   type        = list(string)

@@ -9,32 +9,21 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "metric_namespace" {
-  description = "The namespace for the CloudWatch metric"
-  type        = "string"
+variable "project" {
+  type        = string
+  description = "Name of the project"
 }
-variable "metric_name" {
-  description = "The name of the CloudWatch metric"
-  type        = "string"
+variable "environment" {
+  type        = string
+  description = "Name of the environment"
 }
-variable "alarm_actions" {
-  description = "The ARNs of the actions to take when the alarm changes state"
-  type        = list(string)
+variable "region" {
+  type        = string
+  description = "Code of the region"
 }
-variable "insufficient_data_actions" {
-  description = "The ARNs of the actions to take when the alarm changes state into insufficient data"
-  type        = list(string)
-  default     = []
-}
-variable "ok_actions" {
-  description = "The ARNs of the actions to take when the alarm changes state into OK"
-  type        = list(string)
-  default     = []
-}
-variable "unit" {
-  description = "The unit for the metric"
-  type        = "string"
-  default     = null
+variable "application" {
+  type        = string
+  description = "Purpose of the Subnet"
 }
 variable "comparison_operator" {
   description = "The comparison operator for the alarm"
@@ -58,11 +47,6 @@ variable "alarm_description" {
   description = "The description of the alarm"
   type        = "string"
 }
-variable "dimensions" {
-  description = "The dimensions for the metric"
-  type        = map(string)
-  default     = null
-}
 variable "statistic" {
   description = "The statistic for the metric"
   type        = "string"
@@ -78,19 +62,45 @@ variable "extended_statistic" {
   type        = "string"
   default     = null
 }
-variable "project" {
-  type        = string
-  description = "Name of the project"
+variable "alarm_actions" {
+  description = "The ARNs of the actions to take when the alarm changes state"
+  type        = list(string)
 }
-variable "environment" {
-  type        = string
-  description = "Name of the environment"
+variable "insufficient_data_actions" {
+  description = "The ARNs of the actions to take when the alarm changes state into insufficient data"
+  type        = list(string)
+  default     = []
 }
-variable "region" {
-  type        = string
-  description = "Code of the region"
+variable "ok_actions" {
+  description = "The ARNs of the actions to take when the alarm changes state into OK"
+  type        = list(string)
+  default     = []
 }
-variable "application" {
-  type        = string
-  description = "Purpose of the Subnet"
+variable "metric_namespace" {
+  description = "The namespace for the CloudWatch metric"
+  type        = "string"
+}
+variable "container_name" {
+  description = "The name of the container"
+  type        = "string"
+}
+variable "log_pattern" {
+  description = "The pattern to search for in the log"
+  type        = "string"
+}
+variable "cluster_name" {
+  description = "The name of the cluster"
+  type        = "string"
+}
+variable "log_purpose" {
+  description = "The purpose of the log"
+  type        = "string"
+}
+variable "pod_name" {
+  description = "The name of the pod"
+  type        = "string"
+}
+variable "namespace_name" {
+  description = "The name of the namespace"
+  type        = "string"
 }
