@@ -11,11 +11,11 @@
 
 variable "metric_namespace" {
   description = "The namespace for the CloudWatch metric"
-  type        = "string"
+  type        = string
 }
 variable "metric_name" {
   description = "The name of the CloudWatch metric"
-  type        = "string"
+  type        = string
 }
 variable "alarm_actions" {
   description = "The ARNs of the actions to take when the alarm changes state"
@@ -33,12 +33,12 @@ variable "ok_actions" {
 }
 variable "unit" {
   description = "The unit for the metric"
-  type        = "string"
+  type        = string
   default     = null
 }
 variable "comparison_operator" {
   description = "The comparison operator for the alarm"
-  type        = "string"
+  type        = string
 }
 variable "evaluation_periods" {
   description = "The number of periods over which to evaluate the alarm"
@@ -56,7 +56,7 @@ variable "threshold" {
 }
 variable "alarm_description" {
   description = "The description of the alarm"
-  type        = "string"
+  type        = string
 }
 variable "dimensions" {
   description = "The dimensions for the metric"
@@ -65,7 +65,7 @@ variable "dimensions" {
 }
 variable "statistic" {
   description = "The statistic for the metric"
-  type        = "string"
+  type        = string
   default     = null
 }
 variable "enabled" {
@@ -75,7 +75,7 @@ variable "enabled" {
 }
 variable "extended_statistic" {
   description = "The percentile statistic for the metric"
-  type        = "string"
+  type        = string
   default     = null
 }
 variable "project" {
@@ -93,4 +93,8 @@ variable "region" {
 variable "application" {
   type        = string
   description = "Purpose of the Subnet"
+}
+variable "metric_usage_prefix" {
+  type        = string
+  description = "Prefix for the metric usage"
 }

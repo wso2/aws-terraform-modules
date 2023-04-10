@@ -10,22 +10,22 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_cloudwatch_log_metric_filter" "log_metric_filter" {
-  name           = concat("-",[local.log_usage_prefix, "filter"])
-  #pattern        = concat("", ["{ ($.container_name = \"*" , var.container_name, "*\") && ($.log = \"*" , var.log_pattern, "*\") }"])
+  name           = join("-",[local.log_usage_prefix, "filter"])
+  #pattern        = join("", ["{ ($.container_name = \"*" , var.container_name, "*\") && ($.log = \"*" , var.log_pattern, "*\") }"])
   pattern        = "{ ($.kubernetes.container_name = \"${var.container_name}\") && ($.log = \"*${var.log_pattern}*\") } && ($.kubernetes.namespace_name = \"${var.namespace_name}\") && ($.kubernetes.pod_name = \"*${var.pod_name}*\")"
   log_group_name = "/aws/containerinsights/${var.cluster_name}/application"
 
   metric_transformation {
-    name      = concat("-",[var.application, local.log_usage_prefix, "count"])
+    name      = join("-",[var.application, local.log_usage_prefix, "count"])
     namespace = var.metric_namespace
     value     = "1"
   }
 }
 
 resource "aws_cloudwatch_metric_alarm" "alert" {
-  alarm_name          = concat("-",[var.project, var.application, var.environment, var.region, local.log_usage_prefix, "alarm"])
+  alarm_name          = join("-",[var.project, var.application, var.environment, var.region, local.log_usage_prefix, "alarm"])
 
-  metric_name         = concat("-",[var.application, local.log_usage_prefix, "count"])
+  metric_name         = join("-",[var.application, local.log_usage_prefix, "count"])
   namespace           = var.metric_namespace
 
   alarm_description   = var.alarm_description

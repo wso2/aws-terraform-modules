@@ -27,7 +27,7 @@ variable "application" {
 }
 variable "comparison_operator" {
   description = "The comparison operator for the alarm"
-  type        = "string"
+  type        = string
 }
 variable "evaluation_periods" {
   description = "The number of periods over which to evaluate the alarm"
@@ -45,11 +45,11 @@ variable "threshold" {
 }
 variable "alarm_description" {
   description = "The description of the alarm"
-  type        = "string"
+  type        = string
 }
 variable "statistic" {
   description = "The statistic for the metric"
-  type        = "string"
+  type        = string
   default     = null
 }
 variable "enabled" {
@@ -59,7 +59,7 @@ variable "enabled" {
 }
 variable "extended_statistic" {
   description = "The percentile statistic for the metric"
-  type        = "string"
+  type        = string
   default     = null
 }
 variable "alarm_actions" {
@@ -78,29 +78,29 @@ variable "ok_actions" {
 }
 variable "metric_namespace" {
   description = "The namespace for the CloudWatch metric"
-  type        = "string"
+  type        = string
 }
 variable "container_name" {
   description = "The name of the container"
-  type        = "string"
+  type        = string
 }
 variable "log_pattern" {
   description = "The pattern to search for in the log"
-  type        = "string"
+  type        = string
 }
 variable "cluster_name" {
   description = "The name of the cluster"
-  type        = "string"
+  type        = string
 }
 variable "log_purpose" {
   description = "The purpose of the log"
-  type        = "string"
+  type        = string
 }
 variable "pod_name" {
   description = "The name of the pod"
-  type        = "string"
+  type        = string
 }
 variable "namespace_name" {
   description = "The name of the namespace"
-  type        = "string"
+  type        = string
 }

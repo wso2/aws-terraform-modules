@@ -41,12 +41,12 @@ variable "ok_actions" {
 }
 variable "unit" {
   description = "The unit for the metric"
-  type        = "string"
+  type        = string
   default     = null
 }
 variable "comparison_operator" {
   description = "The comparison operator for the alarm"
-  type        = "string"
+  type        = string
 }
 variable "evaluation_periods" {
   description = "The number of periods over which to evaluate the alarm"
@@ -59,7 +59,7 @@ variable "threshold" {
 }
 variable "alarm_description" {
   description = "The description of the alarm"
-  type        = "string"
+  type        = string
 }
 variable "dimensions" {
   description = "The dimensions for the metric"
@@ -90,4 +90,8 @@ variable "metric_queries" {
       unit        = optional(string)
     })), {})
   }))
+}
+variable "metric_usage_prefix" {
+  type        = string
+  description = "Prefix for the metric usage"
 }
