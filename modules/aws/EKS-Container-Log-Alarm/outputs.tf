@@ -10,6 +10,6 @@
 # --------------------------------------------------------------------------------------
 
 output "alert_arn" {
-  value       = aws_cloudwatch_metric_alarm.alert.arn
-  depends_on  = [aws_cloudwatch_metric_alarm.alert]
+  value       = aws_cloudwatch_metric_alarm.metric_alarm.arn
+  depends_on  = [aws_cloudwatch_metric_alarm.metric_alarm]
 }

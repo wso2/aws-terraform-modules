@@ -22,7 +22,7 @@ resource "aws_cloudwatch_log_metric_filter" "log_metric_filter" {
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "alert" {
+resource "aws_cloudwatch_metric_alarm" "metric_alarm" {
   alarm_name          = join("-",[var.project, var.application, var.environment, var.region, local.log_usage_prefix, "alarm"])
 
   metric_name         = join("-",[var.application, local.log_usage_prefix, "count"])
