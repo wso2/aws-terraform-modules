@@ -10,5 +10,5 @@
 # --------------------------------------------------------------------------------------
 
 output "transit_gateway_vpc_attachment_ids" {
-  value = aws_ec2_transit_gateway_vpc_attachment.ec2_transit_gateway_vpc_attachment.*.id
+  value = aws_ec2_transit_gateway_vpc_attachment.ec2_transit_gateway_vpc_attachment.id
 }

@@ -9,7 +9,8 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "private_dns_zone_id" {
-  value      = aws_route53_zone.private_route53_zone.id
-  depends_on = [aws_route53_zone.private_route53_zone]
+resource "aws_vpn_gateway" "vpn_gw" {
+  vpc_id            = var.vpc_id
+  availability_zone = var.availability_zone
+  tags              = local.vpn_gw_tags
 }

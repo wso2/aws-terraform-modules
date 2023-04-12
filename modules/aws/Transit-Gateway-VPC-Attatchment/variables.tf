@@ -9,11 +9,13 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "vpc_map" {
-  type = map(object({
-    vpc_id = string
-    subnet_ids = list(string)
-  }))
+variable "vpc_id" {
+  type = string
+    description = "VPC ID to be used for the Transit Gateway attachment"
+}
+variable "subnet_ids" {
+  type = list(string)
+  description = "Subnet IDs to be used for the Transit Gateway attachment"
 }
 variable "transit_gateway_id" {
   type = string

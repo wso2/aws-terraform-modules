@@ -46,7 +46,7 @@ variable "default_tags" {
 variable "availability_zone" {
   type        = string
   description = "Availability zones for the Subnet"
-  default = null
+  default     = null
 }
 variable "auto_assign_public_ip" {
   type        = bool

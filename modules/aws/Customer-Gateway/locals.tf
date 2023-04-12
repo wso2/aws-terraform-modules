@@ -9,7 +9,8 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "private_dns_zone_id" {
-  value      = aws_route53_zone.private_route53_zone.id
-  depends_on = [aws_route53_zone.private_route53_zone]
+locals {
+  name_prefix      = join("-", [var.project, var.application, var.environment, var.region])
+  customer_gw_name = join("-", [local.name_prefix, "vpn-gw"])
+  customer_gw_tags = merge(var.default_tags, { Name : local.customer_gw_name })
 }

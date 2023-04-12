@@ -8,8 +8,3 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-
-output "private_dns_zone_id" {
-  value      = aws_route53_zone.private_route53_zone.id
-  depends_on = [aws_route53_zone.private_route53_zone]
-}

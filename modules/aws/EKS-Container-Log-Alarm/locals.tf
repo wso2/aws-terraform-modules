@@ -10,5 +10,5 @@
 # --------------------------------------------------------------------------------------
 
 locals {
-  log_usage_prefix = join("-",[var.container_name, var.log_purpose])
+  log_usage_prefix = join("-", [var.container_name, var.log_purpose])
 }

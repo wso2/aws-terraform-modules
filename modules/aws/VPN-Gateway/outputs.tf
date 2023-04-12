@@ -8,3 +8,12 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
+
+output "vpn_gateway_arn" {
+  value      = aws_vpn_gateway.vpn_gw.arn
+  depends_on = [aws_vpn_gateway.vpn_gw]
+}
+output "vpn_gateway_id" {
+  value      = aws_vpn_gateway.vpn_gw.id
+  depends_on = [aws_vpn_gateway.vpn_gw]
+}

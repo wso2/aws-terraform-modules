@@ -10,9 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_ec2_transit_gateway_vpc_attachment" "ec2_transit_gateway_vpc_attachment" {
-  for_each = var.vpc_map
-
   transit_gateway_id = var.transit_gateway_id
-  vpc_id             = each.value.vpc_id
-  subnet_ids         = each.value.subnet_ids
+  vpc_id             = var.vpc_id
+  subnet_ids         = var.subnet_ids
 }
