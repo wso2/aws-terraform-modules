@@ -11,21 +11,21 @@
 
 variable "zone_id" {
   description = "ID of the Private DNS Zone"
-  type = string
+  type        = string
 }
 variable "name" {
   description = "Name of the record"
-  type = string
+  type        = string
 }
 variable "ttl" {
   description = "Time to Live of the record"
-  type = number
+  type        = number
 }
 variable "type" {
   description = "Type of the A Record"
-  type = string
+  type        = string
 }
 variable "records" {
   description = "Records to be associated with the DNS entry"
-  type = list(string)
+  type        = list(string)
 }

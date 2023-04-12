@@ -10,14 +10,14 @@
 # --------------------------------------------------------------------------------------
 
 variable "vpc_id" {
-  type = string
+  type        = string
   description = "ID of the VPC the dns should be associated with"
 }
 variable "tags" {
-  type = map(string)
+  type        = map(string)
   description = "List of default tags"
 }
 variable "dns_zone_name" {
-  type = string
+  type        = string
   description = "Name of the Private DNS"
 }

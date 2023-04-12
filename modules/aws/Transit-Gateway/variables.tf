@@ -26,11 +26,11 @@ variable "application" {
   description = "Purpose of the Subnet"
 }
 variable "description" {
-  type = string
+  type        = string
   description = "Description of the Transit Gateway"
 }
 variable "default_tags" {
-  type = map(string)
+  type        = map(string)
   description = "Default tags for the Transit Gateway"
 }
 variable "dns_support" {

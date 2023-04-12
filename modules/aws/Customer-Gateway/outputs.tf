@@ -9,7 +9,11 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "private_dns_zone_id" {
-  value      = aws_route53_zone.private_route53_zone.id
-  depends_on = [aws_route53_zone.private_route53_zone]
+output "customer_gateway_arn" {
+  value      = aws_customer_gateway.customer_gateway.arn
+  depends_on = [aws_customer_gateway.customer_gateway]
+}
+output "customer_gateway_id" {
+  value      = aws_customer_gateway.customer_gateway.id
+  depends_on = [aws_customer_gateway.customer_gateway]
 }

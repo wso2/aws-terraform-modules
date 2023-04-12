@@ -10,12 +10,12 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_ec2_transit_gateway" "ec2_transit_gateway" {
-  name        = local.vpc_name
-  description = var.description
-  dns_support = var.dns_support
-  multicast_support = var.multicast_support
+  name                            = local.vpc_name
+  description                     = var.description
+  dns_support                     = var.dns_support
+  multicast_support               = var.multicast_support
   default_route_table_association = var.default_route_table_association
   default_route_table_propagation = var.default_route_table_propagation
-  auto_accept_shared_attachments = var.auto_accept_shared_attachments
-  tags        = var.default_tags
+  auto_accept_shared_attachments  = var.auto_accept_shared_attachments
+  tags                            = var.default_tags
 }

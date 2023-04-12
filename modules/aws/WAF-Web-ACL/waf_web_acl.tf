@@ -10,13 +10,13 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_wafv2_web_acl" "web_acl" {
-  name               = var.name
-  scope              = var.scope
-  description        = var.description
-  
+  name        = var.name
+  scope       = var.scope
+  description = var.description
+
   visibility_config {
     cloudwatch_metrics_enabled = var.cloudwatch_metrics_enabled
-    metric_name                 = var.cloudwatch_metric_name
+    metric_name                = var.cloudwatch_metric_name
     sampled_requests_enabled   = var.sampled_requests_enabled
   }
 
@@ -42,7 +42,7 @@ resource "aws_wafv2_web_acl" "web_acl" {
           for_each = var.default_action.response_header == null ? [1] : []
           content {
             custom_response_body_key = var.default_action.custom_response_body_key
-            response_code = var.default_action.response_code
+            response_code            = var.default_action.response_code
             response_header {
               name  = var.default_action.response_header.name
               value = var.default_action.response_header.value
@@ -59,7 +59,7 @@ resource "aws_wafv2_web_acl" "web_acl" {
     content {
       content      = var.custom_response_body.content
       content_type = var.custom_response_body.content_type
-      key   = var.custom_response_body.key
+      key          = var.custom_response_body.key
     }
   }
 
@@ -91,7 +91,7 @@ resource "aws_wafv2_web_acl" "web_acl" {
               for_each = rule.value.action.response_header == null ? [1] : []
               content {
                 custom_response_body_key = rule.value.action.custom_response_body_key
-                response_code = rule.value.action.response_code
+                response_code            = rule.value.action.response_code
                 response_header {
                   name  = rule.value.action.response_header.name
                   value = rule.value.action.response_header.value
@@ -118,7 +118,7 @@ resource "aws_wafv2_web_acl" "web_acl" {
       }
       visibility_config {
         cloudwatch_metrics_enabled = rule.value.cloudwatch_metrics_enabled
-        metric_name                 = rule.value.cloudwatch_metric_name
+        metric_name                = rule.value.cloudwatch_metric_name
         sampled_requests_enabled   = rule.value.sampled_requests_enabled
       }
     }

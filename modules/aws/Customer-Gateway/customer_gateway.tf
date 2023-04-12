@@ -9,7 +9,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "private_dns_zone_id" {
-  value      = aws_route53_zone.private_route53_zone.id
-  depends_on = [aws_route53_zone.private_route53_zone]
+resource "aws_customer_gateway" "customer_gateway" {
+  bgp_asn         = var.bgp_asn
+  ip_address      = var.customer_gateway_ip_address
+  type            = var.type
+  device_name     = var.device_name
+  certificate_arn = var.certificate_arn
+
+  tags = local.customer_gw_tags
 }

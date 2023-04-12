@@ -73,15 +73,15 @@ variable "enabled" {
 }
 variable "metric_queries" {
   description = "A map of metric queries"
-  type        = map(object({
-    id = string
-    label      = optional(string)
-    account_id = optional(string)
-    expression = optional(string)
-    metric     = optional(string)
-    period     = optional(number)
+  type = map(object({
+    id          = string
+    label       = optional(string)
+    account_id  = optional(string)
+    expression  = optional(string)
+    metric      = optional(string)
+    period      = optional(number)
     return_data = optional(bool)
-    metrics    = optional(map(object({
+    metrics = optional(map(object({
       dimensions  = optional(string)
       metric_name = optional(string)
       namespace   = optional(string)

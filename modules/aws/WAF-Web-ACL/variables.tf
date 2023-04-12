@@ -14,38 +14,38 @@ variable "name" {
   description = "Name of the WAF ACL"
 }
 variable "scope" {
-  type = string
+  type        = string
   description = "The scope of the WAF ACL. Valid values are REGIONAL or CLOUDFRONT"
 }
 variable "description" {
-  type = string
+  type        = string
   description = "The description of the WAF ACL"
 }
 variable "cloudwatch_metrics_enabled" {
-  type = bool
+  type        = bool
   description = "Whether the associated resource sends metrics to CloudWatch"
-  default = true
+  default     = true
 }
 variable "cloudwatch_metric_name" {
-  type = string
+  type        = string
   description = "The name of the CloudWatch metric"
-  default = "WAFACL"
+  default     = "WAFACL"
 }
 variable "sampled_requests_enabled" {
-  type = string
+  type        = string
   description = "Whether AWS WAF should store a sampling of the web requests that match the rules"
 }
 variable "default_action" {
   type = map(object({
     type = string
     insert_header = optional(map(object({
-      name = string
+      name  = string
       value = string
     })))
     custom_response_body_key = optional(string)
-    response_code = optional(string)
+    response_code            = optional(string)
     response_header = optional(map(object({
-      name = string
+      name  = string
       value = string
     })))
   }))
@@ -54,29 +54,29 @@ variable "default_action" {
 variable "custom_response_body" {
   type = map(object({
     content_type = string
-    content = string
-    key = string
+    content      = string
+    key          = string
   }))
   description = "The custom response to send (for example, custom page) when a request is blocked"
-  default = null
+  default     = null
 }
 variable "rules" {
   type = map(object({
-    name = string
-    priority = number
+    name                       = string
+    priority                   = number
     cloudwatch_metrics_enabled = bool
-    cloudwatch_metric_name = string
-    sampled_requests_enabled = string
+    cloudwatch_metric_name     = string
+    sampled_requests_enabled   = string
     action = map(object({
       type = string
       insert_header = optional(map(object({
-        name = string
+        name  = string
         value = string
       })))
       custom_response_body_key = optional(string)
-      response_code = optional(string)
+      response_code            = optional(string)
       response_header = optional(map(object({
-        name = string
+        name  = string
         value = string
       })))
     }))

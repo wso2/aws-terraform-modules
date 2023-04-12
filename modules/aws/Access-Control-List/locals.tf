@@ -11,5 +11,5 @@
 
 locals {
   acl_name = join("-", [var.project, var.application, var.environment, var.region, "acl"])
-  acl_tags = merge(var.default_tags, {"Name": local.acl_name})
+  acl_tags = merge(var.default_tags, { "Name" : local.acl_name })
 }

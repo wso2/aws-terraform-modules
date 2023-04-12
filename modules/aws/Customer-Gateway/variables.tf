@@ -9,8 +9,10 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "topic_name" {
-  description = "The name of the SNS topic"
+variable "default_tags" {
+  type        = map(string)
+  description = "Default tags for the Subnet resource"
+  default     = {}
 }
 variable "project" {
   type        = string
@@ -28,14 +30,26 @@ variable "application" {
   type        = string
   description = "Purpose of the Subnet"
 }
-variable "subscribers" {
-  description = "A list of subscribers for the SNS topic"
-  type = list(object({
-    protocol               = string
-    endpoint               = string
-    raw_message_delivery   = optional(bool, false)
-    filter_policy          = optional(string)
-    filter_policy_scope    = optional(string, "MessageAttributes")
-    endpoint_auto_confirms = optional(bool, false)
-  }))
+variable "bgp_asn" {
+  type        = number
+  description = "The BGP Autonomous System Number (ASN) for the router"
+}
+variable "customer_gateway_ip_address" {
+  type        = string
+  description = "The customer-side IP address of the BGP interface"
+  default     = null
+}
+variable "type" {
+  type        = string
+  description = "The type of Customer gateway"
+}
+variable "certificate_arn" {
+  type        = string
+  description = "The ARN of the customer gateway certificate"
+  default     = null
+}
+variable "device_name" {
+  type        = string
+  description = "The name of the VPN device"
+  default     = null
 }

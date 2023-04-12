@@ -55,6 +55,6 @@ variable "taints" {
   default     = {}
 }
 variable "instance_types" {
-  type = list(string)
+  type        = list(string)
   description = "Instance types to be associated with the VM"
 }

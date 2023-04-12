@@ -11,7 +11,7 @@
 
 variable "routes" {
   type = map(object({
-    destination_cidr_block = string
+    destination_cidr_block        = string
     transit_gateway_attachment_id = string
   }))
   description = "The routes to be added to the transit gateway route table."
