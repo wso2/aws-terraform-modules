@@ -32,6 +32,7 @@ variable "description" {
 variable "default_tags" {
   type        = map(string)
   description = "Default tags for the Transit Gateway"
+  default = {}
 }
 variable "dns_support" {
   type        = string
