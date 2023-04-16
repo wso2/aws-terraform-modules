@@ -9,18 +9,14 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_vpn_connection" "vpn_connection`" {
+resource "aws_vpn_connection" "vpn_connection" {
   customer_gateway_id                     = var.customer_gateway_id
   type                                    = var.type
-  transit_gateway_id                      = var.transit_gateway_id
   vpn_gateway_id                          = var.vpn_gateway_id
   static_routes_only                      = var.static_routes_only
-  enable_acceleration                     = var.enable_acceleration
   local_ipv4_network_cidr                 = var.local_ipv4_network_cidr
-  local_ipv6_network_cidr                 = var.local_ipv6_network_cidr
   outside_ip_address_type                 = var.outside_ip_address_type
   remote_ipv4_network_cidr                = var.remote_ipv4_network_cidr
-  remote_ipv6_network_cidr                = var.remote_ipv6_network_cidr
   tunnel1_inside_cidr                     = var.tunnel1_inside_cidr
   tunnel1_preshared_key                   = var.tunnel1_preshared_key
   tunnel1_dpd_timeout_action              = var.tunnel1_dpd_timeout_action
