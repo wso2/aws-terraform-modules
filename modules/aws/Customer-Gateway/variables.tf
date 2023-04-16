@@ -28,7 +28,7 @@ variable "region" {
 }
 variable "application" {
   type        = string
-  description = "Purpose of the Subnet"
+  description = "Purpose of the Customer gateway"
 }
 variable "bgp_asn" {
   type        = number

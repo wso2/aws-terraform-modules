@@ -18,11 +18,6 @@ variable "type" {
   type        = string
   description = "The type of VPN connection. The only type AWS supports is ipsec.1."
 }
-variable "transit_gateway_id" {
-  description = "The ID of the transit gateway."
-  default     = null
-  type        = string
-}
 variable "vpn_gateway_id" {
   description = "The ID of the VPN gateway."
   default     = null
@@ -33,18 +28,8 @@ variable "static_routes_only" {
   default     = false
   type        = bool
 }
-variable "enable_acceleration" {
-  description = "Indicates whether the VPN connection uses acceleration."
-  default     = false
-  type        = bool
-}
 variable "local_ipv4_network_cidr" {
   description = "The IPv4 CIDR on the customer gateway (on-premises) side of the VPN connection."
-  default     = null
-  type        = string
-}
-variable "local_ipv6_network_cidr" {
-  description = "The IPv6 CIDR on the customer gateway (on-premises) side of the VPN connection."
   default     = null
   type        = string
 }
@@ -55,11 +40,6 @@ variable "outside_ip_address_type" {
 }
 variable "remote_ipv4_network_cidr" {
   description = "The IPv4 CIDR on the AWS side of the VPN connection."
-  default     = null
-  type        = string
-}
-variable "remote_ipv6_network_cidr" {
-  description = "The IPv6 CIDR on the AWS side of the VPN connection."
   default     = null
   type        = string
 }
