@@ -53,7 +53,5 @@ resource "aws_vpn_connection" "vpn_connection" {
   tunnel2_startup_action                  = var.tunnel2_startup_action
   transport_transit_gateway_attachment_id = var.transport_transit_gateway_attachment_id
 
-  tags = {
-    Name = "terraform_ipsec_vpn_example"
-  }
+  tags = local.connection_tags
 }
