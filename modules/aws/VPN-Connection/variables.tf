@@ -218,3 +218,24 @@ variable "transport_transit_gateway_attachment_id" {
   default     = null
   type        = string
 }
+variable "project" {
+  type        = string
+  description = "Name of the project"
+}
+variable "environment" {
+  type        = string
+  description = "Name of the environment"
+}
+variable "region" {
+  type        = string
+  description = "Code of the region"
+}
+variable "application" {
+  type        = string
+  description = "Purpose of the Customer gateway"
+}
+variable "default_tags" {
+  type        = map(string)
+  description = "Default tags for the Connection resource"
+  default     = {}
+}

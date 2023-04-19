@@ -11,7 +11,7 @@
 
 variable "default_tags" {
   type        = map(string)
-  description = "Default tags for the Subnet resource"
+  description = "Default tags for the Customer Gateway resource"
   default     = {}
 }
 variable "project" {
