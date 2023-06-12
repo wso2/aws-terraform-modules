@@ -30,7 +30,6 @@ resource "aws_cloudwatch_metric_alarm" "metric_alarm" {
   threshold           = var.threshold
   comparison_operator = var.comparison_operator
   evaluation_periods  = var.evaluation_periods
-  unit                = "Count"
 
   alarm_actions             = var.alarm_actions
   ok_actions                = var.ok_actions
