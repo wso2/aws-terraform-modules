@@ -38,8 +38,8 @@ resource "aws_cloudwatch_metric_alarm" "metric_alarm" {
 
   actions_enabled = var.enabled
 
-  metric_name = "K8SApplicationLogsCount"
-  namespace   = "${var.cluster_name}-${var.error_log_summary}"
+  metric_name = "${var.cluster_name}-${var.error_log_summary}"
+  namespace   = "K8SApplicationLogsCount"
   period    = var.time_window
   statistic = "Sum"
 
