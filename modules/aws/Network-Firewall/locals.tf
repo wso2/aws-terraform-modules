@@ -9,11 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "nat_gateway_id" {
-  value      = aws_nat_gateway.nat_gateway.id
-  depends_on = [aws_nat_gateway.nat_gateway]
-}
-output "route_table_id" {
-  value = aws_route_table.route_table.id
-  depends_on = [aws_route_table.route_table]
+locals {
+  this_stateful_group_arn  = concat(aws_networkfirewall_rule_group.suricata_stateful_group[*].arn, aws_networkfirewall_rule_group.domain_stateful_group[*].arn, aws_networkfirewall_rule_group.fivetuple_stateful_group[*].arn, var.aws_managed_rule_group)
+  this_stateless_group_arn = concat(aws_networkfirewall_rule_group.stateless_group[*].arn)
 }

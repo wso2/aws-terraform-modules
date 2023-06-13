@@ -9,11 +9,15 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "nat_gateway_id" {
-  value      = aws_nat_gateway.nat_gateway.id
-  depends_on = [aws_nat_gateway.nat_gateway]
+variable "routes" {
+  type = list(object({
+    cidr_block = string
+    ep_type    = string
+    ep_id      = string
+  }))
+  description = "Rules to be associated with the EC2 Subnet if provided"
+  default     = []
 }
-output "route_table_id" {
-  value = aws_route_table.route_table.id
-  depends_on = [aws_route_table.route_table]
+variable "route_table_id" {
+  type = string
 }
