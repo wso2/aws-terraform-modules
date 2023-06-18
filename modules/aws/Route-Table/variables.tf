@@ -11,7 +11,7 @@
 
 variable "vpc_id" {
   type        = string
-  description = "ID of the VPC containing the EC3 instance"
+  description = "ID of the VPC containing the route table"
 }
 
 variable "default_tags" {
@@ -40,7 +40,7 @@ variable "region" {
 }
 variable "application" {
   type        = string
-  description = "Purpose of the EC2 Instance"
+  description = "Purpose of the route table"
 }
 variable "custom_routes" {
   type = list(object({
@@ -48,6 +48,6 @@ variable "custom_routes" {
     ep_type    = string
     ep_id      = string
   }))
-  description = "Rules to be associated with the EC2 Subnet if provided"
+  description = "Rules to be associated with the Subnet if provided"
   default     = []
 }
