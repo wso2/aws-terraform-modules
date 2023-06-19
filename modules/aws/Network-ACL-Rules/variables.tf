@@ -9,9 +9,15 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_ec2_transit_gateway_vpc_attachment" "ec2_transit_gateway_vpc_attachment" {
-  transit_gateway_id = var.transit_gateway_id
-  vpc_id             = var.vpc_id
-  subnet_ids         = var.subnet_ids
-  appliance_mode_support = var.appliance_mode_support
+variable "acl_rule" {
+  type = map(object({
+      name = string
+      action = string
+      ip_address = string
+      ip_mask = string
+      protocol = string
+      port = string
+      description = string
+  }))
+  description = "ACL rule details"
 }

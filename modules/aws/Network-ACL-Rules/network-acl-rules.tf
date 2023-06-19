@@ -9,9 +9,16 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_ec2_transit_gateway_vpc_attachment" "ec2_transit_gateway_vpc_attachment" {
-  transit_gateway_id = var.transit_gateway_id
-  vpc_id             = var.vpc_id
-  subnet_ids         = var.subnet_ids
-  appliance_mode_support = var.appliance_mode_support
+# Create aws_network_acl_rule for each var.acl_rule
+resource "aws_network_acl_rule" "acl_rule" {
+  count = length(var.acl_rule)
+
+  network_acl_id = var.network_acl_rule_id
+  egress         = var.acl_rule[count.index].egress
+  protocol       = var.acl_rule[count.index].protocol
+  rule_no        = var.acl_rule[count.index].rule_no
+  rule_action    = var.acl_rule[count.index].rule_action
+  cidr_block     = var.acl_rule[count.index].cidr_block
+  from_port      = var.acl_rule[count.index].from_port
+  to_port        = var.acl_rule[count.index].to_port
 }
