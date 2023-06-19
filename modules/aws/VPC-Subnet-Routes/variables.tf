@@ -9,9 +9,15 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_ec2_transit_gateway_vpc_attachment" "ec2_transit_gateway_vpc_attachment" {
-  transit_gateway_id = var.transit_gateway_id
-  vpc_id             = var.vpc_id
-  subnet_ids         = var.subnet_ids
-  appliance_mode_support = var.appliance_mode_support
+variable "routes" {
+  type = list(object({
+    cidr_block = string
+    ep_type    = string
+    ep_id      = string
+  }))
+  description = "Rules to be associated with the EC2 Subnet if provided"
+  default     = []
+}
+variable "route_table_id" {
+  type = string
 }

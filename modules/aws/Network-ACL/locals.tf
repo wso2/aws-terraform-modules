@@ -9,9 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_ec2_transit_gateway_vpc_attachment" "ec2_transit_gateway_vpc_attachment" {
-  transit_gateway_id = var.transit_gateway_id
-  vpc_id             = var.vpc_id
-  subnet_ids         = var.subnet_ids
-  appliance_mode_support = var.appliance_mode_support
+locals {
+  network_acl_name = join("-", [var.project, var.application, var.environment, var.region, "nw-acl"])
+  network_acl_tags = merge(var.tags, { Name : local.network_acl_name })
 }

@@ -20,3 +20,8 @@ variable "subnet_ids" {
 variable "transit_gateway_id" {
   type = string
 }
+variable "appliance_mode_support" {
+  type = string
+  description = "Appliance mode support for the Transit Gateway attachment"
+  default = "disable"
+}
