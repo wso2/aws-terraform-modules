@@ -25,3 +25,24 @@ variable "appliance_mode_support" {
   description = "Appliance mode support for the Transit Gateway attachment"
   default = "disable"
 }
+variable "tags" {
+  default = {}
+  description = "Tags to be used for the Transit Gateway attachment"
+  type = map(string)
+}
+variable "project" {
+  type        = string
+  description = "Name of the project"
+}
+variable "environment" {
+  type        = string
+  description = "Name of the environment"
+}
+variable "region" {
+  type        = string
+  description = "Code of the region"
+}
+variable "application" {
+  type        = string
+  description = "Purpose of the Subnet"
+}
