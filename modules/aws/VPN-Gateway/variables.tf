@@ -40,7 +40,7 @@ variable "vpc_id" {
   description = "VPC ID for the VPN Gateway"
 }
 variable "amazon_side_asn" {
-  type = string
+  type        = string
   description = "ASN for the VPN Gateway"
-  default = null
+  default     = null
 }

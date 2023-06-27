@@ -9,7 +9,17 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-  attachment_name = join("-", [var.project, var.application, var.environment, var.region, "tgw-atmt"])
-  attachment_tags = merge(var.tags, { Name : local.attachment_name })
+variable "gateway_id" {
+  type        = string
+  description = "The ID of the Internet/VPC Gateway to which the route table should be associated with"
+  default     = null
+}
+variable "subnet_id" {
+  type        = string
+  description = "The ID of the subnet to which the route table should be associated with"
+  default     = null
+}
+variable "route_table_id" {
+  type        = string
+  description = "The ID of the route table to which the route should be added"
 }

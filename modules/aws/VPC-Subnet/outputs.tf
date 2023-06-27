@@ -14,6 +14,6 @@ output "subnet_id" {
   depends_on = [aws_subnet.subnet]
 }
 output "route_table_id" {
-  value = aws_route_table.route_table.id
+  value      = aws_route_table.route_table.id
   depends_on = [aws_route_table.route_table]
 }

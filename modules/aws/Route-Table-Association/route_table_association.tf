@@ -9,7 +9,8 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-  attachment_name = join("-", [var.project, var.application, var.environment, var.region, "tgw-atmt"])
-  attachment_tags = merge(var.tags, { Name : local.attachment_name })
+resource "aws_route_table_association" "route_table_association" {
+  subnet_id      = var.subnet_id
+  gateway_id     = var.gateway_id
+  route_table_id = var.route_table_id
 }

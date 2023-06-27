@@ -10,7 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 locals {
-  name_prefix      = join("-", [var.project, var.application, var.environment, var.region])
+  name_prefix     = join("-", [var.project, var.application, var.environment, var.region])
   connection_name = join("-", [local.name_prefix, "vpn-conn"])
   connection_tags = merge(var.default_tags, { Name : local.connection_name })
 }

@@ -10,7 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_route" "route" {
-  count = length(var.routes)
+  count                     = length(var.routes)
   route_table_id            = var.route_table_id
   destination_cidr_block    = var.routes[count.index].cidr_block
   carrier_gateway_id        = var.routes[count.index].ep_type == "carrier_gateway_id" ? var.routes[count.index].ep_id : null

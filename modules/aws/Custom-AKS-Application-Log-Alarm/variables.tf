@@ -11,23 +11,23 @@
 
 variable "k8s_container_name" {
   description = "Name of the container"
-  type = string
+  type        = string
 }
 variable "cluster_name" {
   description = "Name of the cluster"
-  type = string
+  type        = string
 }
 variable "error_log_summary" {
   description = "Error log summary"
-  type = string
+  type        = string
 }
 variable "namespace" {
   description = "Namespace which contains the container"
-  type = string
+  type        = string
 }
 variable "log_entry" {
   description = "Log entry to be detected"
-  type = string
+  type        = string
 }
 variable "project" {
   type        = string
@@ -61,23 +61,23 @@ variable "ok_actions" {
 }
 variable "log_alarm_description" {
   description = "Description of the alarm"
-  type = string
+  type        = string
 }
 variable "threshold" {
   description = "Threshold for the alarm"
-  type = number
+  type        = number
 }
 variable "comparison_operator" {
   description = "Comparison operator for the alarm"
-  type = string
+  type        = string
 }
 variable "evaluation_periods" {
   description = "How often the alarm needs to be evaluated"
-  type = number
+  type        = number
 }
 variable "time_window" {
-    description = "Time window for the alarm"
-    type = number
+  description = "Time window for the alarm"
+  type        = number
 }
 variable "enabled" {
   description = "Whether the alarm should be enabled"

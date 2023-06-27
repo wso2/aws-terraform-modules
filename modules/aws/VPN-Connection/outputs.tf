@@ -10,18 +10,18 @@
 # --------------------------------------------------------------------------------------
 
 output "vpn_connection_id" {
-  value = aws_vpn_connection.vpn_connection.id
+  value      = aws_vpn_connection.vpn_connection.id
   depends_on = [aws_vpn_connection.vpn_connection]
 }
 output "vpn_connection_arn" {
-  value = aws_vpn_connection.vpn_connection.arn
+  value      = aws_vpn_connection.vpn_connection.arn
   depends_on = [aws_vpn_connection.vpn_connection]
 }
 output "vpn_connection_tunnel2_address" {
-  value = aws_vpn_connection.vpn_connection.tunnel2_address
+  value      = aws_vpn_connection.vpn_connection.tunnel2_address
   depends_on = [aws_vpn_connection.vpn_connection]
 }
 output "vpn_connection_tunnel1_address" {
-  value = aws_vpn_connection.vpn_connection.tunnel1_address
+  value      = aws_vpn_connection.vpn_connection.tunnel1_address
   depends_on = [aws_vpn_connection.vpn_connection]
 }
