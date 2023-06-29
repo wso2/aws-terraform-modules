@@ -57,6 +57,7 @@ variable "suricata_stateful_rule_group" {
 variable "stateless_rule_group" {
   description = "Config for stateless rule group"
   type        = any
+  default     = []
 }
 variable "subnet_mapping" {
   description = "Subnet ids mapping to have individual firewall endpoint"

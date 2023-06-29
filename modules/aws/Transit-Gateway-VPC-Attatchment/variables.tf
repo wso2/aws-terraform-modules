@@ -10,25 +10,25 @@
 # --------------------------------------------------------------------------------------
 
 variable "vpc_id" {
-  type = string
-    description = "VPC ID to be used for the Transit Gateway attachment"
+  type        = string
+  description = "VPC ID to be used for the Transit Gateway attachment"
 }
 variable "subnet_ids" {
-  type = list(string)
+  type        = list(string)
   description = "Subnet IDs to be used for the Transit Gateway attachment"
 }
 variable "transit_gateway_id" {
   type = string
 }
 variable "appliance_mode_support" {
-  type = string
+  type        = string
   description = "Appliance mode support for the Transit Gateway attachment"
-  default = "disable"
+  default     = "disable"
 }
 variable "tags" {
-  default = {}
+  default     = {}
   description = "Tags to be used for the Transit Gateway attachment"
-  type = map(string)
+  type        = map(string)
 }
 variable "project" {
   type        = string

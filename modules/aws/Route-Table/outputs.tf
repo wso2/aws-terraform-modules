@@ -9,7 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-  attachment_name = join("-", [var.project, var.application, var.environment, var.region, "tgw-atmt"])
-  attachment_tags = merge(var.tags, { Name : local.attachment_name })
+output "route_table_id" {
+  value      = aws_route_table.route_table.id
+  depends_on = [aws_route_table.route_table]
 }

@@ -10,27 +10,27 @@
 # --------------------------------------------------------------------------------------
 
 variable "ingress_rules" {
-    type = list(object({
-        protocol      = string
-        rule_no = number
-        action   = string
-        cidr_block  = string
-        from_port      = number
-        to_port      = number
-    }))
+  type = list(object({
+    protocol   = string
+    rule_no    = number
+    action     = string
+    cidr_block = string
+    from_port  = number
+    to_port    = number
+  }))
 }
 variable "egress_rules" {
-    type = list(object({
-        protocol      = string
-        rule_no = number
-        action   = string
-        cidr_block  = string
-        from_port      = number
-        to_port      = number
-    }))
+  type = list(object({
+    protocol   = string
+    rule_no    = number
+    action     = string
+    cidr_block = string
+    from_port  = number
+    to_port    = number
+  }))
 }
 variable "tags" {
-    type = map(string)
+  type = map(string)
 }
 variable "project" {
   type        = string
@@ -49,10 +49,10 @@ variable "application" {
   description = "Purpose of the Subnet"
 }
 variable "vpc_id" {
-  type = string
+  type        = string
   description = "ID of the VPC"
 }
 variable "subnet_id" {
-  type = string
+  type        = string
   description = "ID of the Subnet"
 }

@@ -11,13 +11,13 @@
 
 variable "acl_rule" {
   type = map(object({
-      name = string
-      action = string
-      ip_address = string
-      ip_mask = string
-      protocol = string
-      port = string
-      description = string
+    name        = string
+    action      = string
+    ip_address  = string
+    ip_mask     = string
+    protocol    = string
+    port        = string
+    description = string
   }))
   description = "ACL rule details"
 }

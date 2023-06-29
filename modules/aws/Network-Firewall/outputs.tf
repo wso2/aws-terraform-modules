@@ -10,15 +10,15 @@
 # --------------------------------------------------------------------------------------
 
 output "firewall_id" {
-  value = aws_networkfirewall_firewall.networkfirewall_firewall.id
+  value      = aws_networkfirewall_firewall.networkfirewall_firewall.id
   depends_on = [aws_networkfirewall_firewall.networkfirewall_firewall]
 }
 output "firewall_arn" {
-  value = aws_networkfirewall_firewall.networkfirewall_firewall.arn
+  value      = aws_networkfirewall_firewall.networkfirewall_firewall.arn
   depends_on = [aws_networkfirewall_firewall.networkfirewall_firewall]
 }
 output "firewall_endpoints_id" {
-  value =  flatten(aws_networkfirewall_firewall.networkfirewall_firewall.firewall_status[*].sync_states[*].attachment[*])[*].endpoint_id
+  value = flatten(aws_networkfirewall_firewall.networkfirewall_firewall.firewall_status[*].sync_states[*].attachment[*])[*].endpoint_id
 }
 output "firewall_endpoints_id_sync_states" {
   description = "Created Network Firewall states"
