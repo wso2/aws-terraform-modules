@@ -98,7 +98,7 @@ variable "security_group_ids" {
   default     = null
 }
 variable "subnet_group_name" {
-  type        = list(string)
+  type        = string
   description = "Subnet IDs of the Elastic Cache"
   default     = null
 }
