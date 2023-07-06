@@ -42,19 +42,9 @@ variable "final_snapshot_identifier" {
   description = "Name of the final snapshot"
   default     = null
 }
-variable "availability_zone" {
-  type        = string
-  description = "Availability zone of the Elastic Cache"
-  default     = null
-}
-variable "ip_discovery" {
-  type        = string
-  description = "IP discovery type of the Elastic Cache"
-  default     = null
-}
-variable "network_type" {
-  type        = string
-  description = "Network type of the Elastic Cache"
+variable "availability_zones" {
+  type        = list(string)
+  description = "Availability zones of the Elastic Cache"
   default     = null
 }
 variable "apply_immediately" {
@@ -101,4 +91,19 @@ variable "subnet_group_name" {
   type        = string
   description = "Subnet IDs of the Elastic Cache"
   default     = null
+}
+variable "enable_transit_encryption" {
+  type        = string
+  description = "Enable encryption at transit for redis"
+  default     = true
+}
+variable "at_rest_encryption_enabled" {
+  type        = string
+  description = "Enable encryption at rest for redis"
+  default     = true
+}
+variable "auth_token" {
+  type        = string
+  sensitive   = true
+  description = "Auth token for redis"
 }

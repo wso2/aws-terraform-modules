@@ -9,29 +9,34 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_elasticache_cluster" "single_node_elasticache_cluster" {
-  cluster_id           = join("-", [var.project, var.application, var.environment, var.region, "ec-rds"])
-  engine               = "redis"
-  node_type            = var.node_type
-  num_cache_nodes      = 1
+resource "aws_elasticache_replication_group" "single_node_elasticache_replication_group" {
+  engine                     = "redis"
+  engine_version             = var.engine_version
+  transit_encryption_enabled = var.enable_transit_encryption
+  auth_token                 = var.auth_token
+  at_rest_encryption_enabled = var.at_rest_encryption_enabled
+  num_cache_clusters         = 1
+  automatic_failover_enabled = false
+  availability_zones         = var.availability_zones
+  replication_group_id       = join("-", [var.project, var.application, var.environment, var.region, "ec-rds-rg"])
+  node_type                  = var.node_type
+
   parameter_group_name = var.parameter_group_name
-  engine_version       = var.engine_version
+  port                 = var.port
+  subnet_group_name    = var.subnet_group_name
+  security_group_ids   = var.security_group_ids
+
+  snapshot_window          = var.snapshot_window
+  maintenance_window       = var.maintenance_window
+  snapshot_retention_limit = var.snapshot_retention_limit
+
+  final_snapshot_identifier = var.final_snapshot_identifier
 
   apply_immediately          = var.apply_immediately
   auto_minor_version_upgrade = var.auto_minor_version_upgrade
-  port                       = var.port
-
-  availability_zone         = var.availability_zone
-  final_snapshot_identifier = var.final_snapshot_identifier
-  ip_discovery              = var.ip_discovery
-  network_type              = var.network_type
-
-  maintenance_window       = var.maintenance_window
-  snapshot_retention_limit = var.snapshot_retention_limit
-  snapshot_window          = var.snapshot_window
-
-  security_group_ids = var.security_group_ids
-  subnet_group_name  = var.subnet_group_name
 
   tags = var.tags
+
+  description = "Elasticache Replication Group for ${var.project}-${var.application}-${var.environment}-${var.region}"
+
 }
