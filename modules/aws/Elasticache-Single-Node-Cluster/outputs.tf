@@ -17,7 +17,7 @@ output "redis_cluster_id" {
   value      = aws_elasticache_replication_group.single_node_elasticache_replication_group.id
   depends_on = [aws_elasticache_replication_group.single_node_elasticache_replication_group]
 }
-ouptut "node_id" {
+output "node_id" {
   value      = join("-", [aws_elasticache_replication_group.single_node_elasticache_replication_group.id, "001"])
   depends_on = [aws_elasticache_replication_group.single_node_elasticache_replication_group]
 }
