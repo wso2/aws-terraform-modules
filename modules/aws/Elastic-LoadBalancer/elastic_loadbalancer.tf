@@ -9,15 +9,14 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "nat_gateway_id" {
-  value      = aws_nat_gateway.nat_gateway.id
-  depends_on = [aws_nat_gateway.nat_gateway]
-}
-output "route_table_id" {
-  value      = aws_route_table.route_table.id
-  depends_on = [aws_route_table.route_table]
-}
-output "subnet_id" {
-  value      = aws_subnet.subnet.id
-  depends_on = [aws_subnet.subnet]
+resource "aws_lb" "lb" {
+  name               = join("-", [var.project, var.application, var.environment, var.region, "elb"])
+  internal           = var.internal_usage_flag
+  load_balancer_type = var.load_balancer_type
+  security_groups    = var.security_group_ids
+  subnets            = var.subnet_ids
+
+  enable_deletion_protection = var.deletion_protection_flag
+
+  tags = var.default_tags
 }
