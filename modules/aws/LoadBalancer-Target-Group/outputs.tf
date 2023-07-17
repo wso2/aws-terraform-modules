@@ -9,15 +9,11 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "nat_gateway_id" {
-  value      = aws_nat_gateway.nat_gateway.id
-  depends_on = [aws_nat_gateway.nat_gateway]
+output "loadbalancer_target_group_id" {
+  value      = aws_lb_target_group.lb_target_group.id
+  depends_on = [aws_lb_target_group.lb_target_group]
 }
-output "route_table_id" {
-  value      = aws_route_table.route_table.id
-  depends_on = [aws_route_table.route_table]
-}
-output "subnet_id" {
-  value      = aws_subnet.subnet.id
-  depends_on = [aws_subnet.subnet]
+output "loadbalancer_target_group_arn" {
+  value      = aws_lb_target_group.lb_target_group.arn
+  depends_on = [aws_lb_target_group.lb_target_group]
 }
