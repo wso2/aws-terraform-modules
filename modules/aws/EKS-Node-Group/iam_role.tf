@@ -60,3 +60,34 @@ resource "aws_iam_role_policy_attachment" "amazon_cloud_watch_agent_policy" {
     aws_iam_role.iam_role
   ]
 }
+
+resource "aws_iam_policy" "node_group_autoscaler_policy" {
+  name = join("-", [var.eks_cluster_name, var.node_group_name, "eks-cluster-auto-scaler-policy"])
+  policy = jsonencode({
+    Statement = [{
+      Action = [
+        "autoscaling:DescribeAutoScalingGroups",
+        "autoscaling:DescribeAutoScalingInstances",
+        "autoscaling:DescribeLaunchConfigurations",
+        "autoscaling:DescribeTags",
+        "autoscaling:SetDesiredCapacity",
+        "autoscaling:TerminateInstanceInAutoScalingGroup",
+        "ec2:DescribeLaunchTemplateVersions",
+        "ec2:DescribeInstanceTypes"
+      ]
+      Effect   = "Allow"
+      Resource = "*"
+    }]
+    Version = "2012-10-17"
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "eks_ca_iam_policy_attach" {
+  role       = aws_iam_role.iam_role.name
+  policy_arn = aws_iam_policy.node_group_autoscaler_policy.arn
+
+  depends_on = [
+    aws_iam_role.iam_role,
+    aws_iam_policy.node_group_autoscaler_policy
+  ]
+}

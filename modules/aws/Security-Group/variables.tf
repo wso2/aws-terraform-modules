@@ -44,3 +44,8 @@ variable "vpc_id" {
   type        = string
   description = "VPC that Security group should be associated with"
 }
+variable "tags" {
+  type        = string
+  description = "Tags to be added to the security group"
+  default     = {}
+}
