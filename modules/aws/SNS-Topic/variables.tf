@@ -39,3 +39,8 @@ variable "subscribers" {
     endpoint_auto_confirms = optional(bool, false)
   }))
 }
+variable "tags" {
+  type        = string
+  description = "Tags to be added to the security group"
+  default     = {}
+}

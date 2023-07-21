@@ -13,6 +13,8 @@ resource "aws_security_group" "security_group" {
   name        = join("-", [var.project, var.application, var.environment, var.region, "sg"])
   description = var.description
   vpc_id      = var.vpc_id
+
+  tags = var.default_tags
 }
 
 resource "aws_security_group_rule" "security_group_rule" {
