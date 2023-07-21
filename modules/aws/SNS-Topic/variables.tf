@@ -40,7 +40,7 @@ variable "subscribers" {
   }))
 }
 variable "tags" {
-  type        = string
+  type        = map(string)
   description = "Tags to be added to the security group"
   default     = {}
 }
