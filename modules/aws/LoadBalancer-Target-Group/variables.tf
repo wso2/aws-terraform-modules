@@ -49,3 +49,8 @@ variable "target_group_attachments" {
   }))
   description = "List of target group attachments"
 }
+variable "tags" {
+  type        = map(string)
+  description = "Tags to be added to the resources"
+  default     = {}
+}
