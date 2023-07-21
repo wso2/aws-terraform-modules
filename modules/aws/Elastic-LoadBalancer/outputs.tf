@@ -17,3 +17,7 @@ output "load_balancer_id" {
   value      = aws_lb.lb.id
   depends_on = [aws_lb.lb]
 }
+output "load_balancer_dns_name" {
+  value      = aws_lb.lb.dns_name
+  depends_on = [aws_lb.lb]
+}
