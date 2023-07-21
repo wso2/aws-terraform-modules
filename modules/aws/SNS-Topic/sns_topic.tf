@@ -11,6 +11,7 @@
 
 resource "aws_sns_topic" "sns_topic" {
   name = join("-", [var.project, var.application, var.environment, var.region, var.topic_name])
+  tags = var.tags
 }
 
 resource "aws_sns_topic_subscription" "subscription" {
