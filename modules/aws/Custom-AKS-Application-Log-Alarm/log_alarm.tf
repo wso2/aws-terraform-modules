@@ -42,4 +42,5 @@ resource "aws_cloudwatch_metric_alarm" "metric_alarm" {
   period      = var.time_window
   statistic   = "Sum"
 
+  tags = var.tags
 }

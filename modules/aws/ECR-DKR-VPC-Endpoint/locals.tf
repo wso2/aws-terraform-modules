@@ -11,5 +11,5 @@
 
 locals {
   ecr_dkr_vpc_ep_name = join("-", [var.project, var.application, var.environment, var.region, "ecr-dkr-vpc-ep"])
-  tags                = merge(var.default_tags, { "Name" : local.ecr_dkr_vpc_ep_name })
+  tags                = merge(var.tags, { "Name" : local.ecr_dkr_vpc_ep_name })
 }

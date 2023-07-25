@@ -29,7 +29,7 @@ variable "description" {
   type        = string
   description = "Description of the Transit Gateway"
 }
-variable "default_tags" {
+variable "tags" {
   type        = map(string)
   description = "Default tags for the Transit Gateway"
   default     = {}

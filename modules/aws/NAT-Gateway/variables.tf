@@ -29,7 +29,7 @@ variable "cidr_block" {
   type        = string
   description = "CIDR block to be used for the VPC"
 }
-variable "default_tags" {
+variable "tags" {
   type        = map(string)
   description = "Default tags to be associated with the Resource"
   default     = {}

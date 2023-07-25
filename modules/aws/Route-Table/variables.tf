@@ -14,7 +14,7 @@ variable "vpc_id" {
   description = "ID of the VPC containing the route table"
 }
 
-variable "default_tags" {
+variable "tags" {
   type        = map(string)
   description = "Tags to be associated with the resource"
   default     = {}

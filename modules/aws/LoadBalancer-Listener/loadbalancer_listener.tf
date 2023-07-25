@@ -16,7 +16,7 @@ resource "aws_lb_listener" "lb_listener" {
   port              = var.port
   protocol          = var.protocol
   ssl_policy        = var.ssl_policy
-  tags              = var.default_tags
+  tags              = var.tags
 
   default_action {
     type = var.default_action_type

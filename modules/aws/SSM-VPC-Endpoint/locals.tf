@@ -11,5 +11,5 @@
 
 locals {
   ssm_vpc_ep_name = join("-", [var.project, var.application, var.environment, var.region, "ssm-vpc-ep"])
-  tags            = merge(var.default_tags, { "Name" : local.ssm_vpc_ep_name })
+  tags            = merge(var.tags, { "Name" : local.ssm_vpc_ep_name })
 }

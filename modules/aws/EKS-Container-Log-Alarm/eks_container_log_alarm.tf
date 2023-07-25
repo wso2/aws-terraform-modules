@@ -39,4 +39,6 @@ resource "aws_cloudwatch_metric_alarm" "metric_alarm" {
   alarm_actions             = var.alarm_actions
   ok_actions                = var.ok_actions
   insufficient_data_actions = var.insufficient_data_actions
+
+  tags = var.tags
 }

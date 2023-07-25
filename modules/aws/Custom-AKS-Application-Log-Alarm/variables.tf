@@ -84,3 +84,8 @@ variable "enabled" {
   type        = bool
   default     = true
 }
+variable "tags" {
+  description = "Tags to be added to the alarm"
+  type        = map(string)
+  default     = {}
+}

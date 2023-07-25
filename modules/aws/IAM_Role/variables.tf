@@ -28,7 +28,7 @@ variable "application" {
 variable "assume_role_policy" {
   type = string
 }
-variable "default_tags" {
+variable "tags" {
   type        = map(string)
   description = "Tags to be associated with the EKS"
   default     = {}

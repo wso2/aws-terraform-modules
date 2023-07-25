@@ -95,3 +95,8 @@ variable "metric_usage_prefix" {
   type        = string
   description = "Prefix for the metric usage"
 }
+variable "tags" {
+  description = "Tags to be added to the alarm"
+  type        = map(string)
+  default     = {}
+}

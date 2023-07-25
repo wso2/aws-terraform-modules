@@ -15,4 +15,6 @@ resource "aws_vpc_peering_connection" "vpc_peering_connection" {
   vpc_id        = var.vpc_id
   auto_accept   = var.auto_accept
   peer_region   = var.peer_region
+
+  tags = local.peering_connection_tags
 }

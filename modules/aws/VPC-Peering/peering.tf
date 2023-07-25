@@ -16,6 +16,8 @@ resource "aws_vpc_peering_connection" "vpc_peering_connection" {
   auto_accept   = var.auto_accept
   peer_region   = var.peer_region
 
+  tags = local.peering_connection_tags
+
   accepter {
     allow_remote_vpc_dns_resolution  = var.accepter_allow_remote_vpc_dns_resolution
     allow_classic_link_to_remote_vpc = var.accepter_allow_classic_link_to_remote_vpc

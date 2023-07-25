@@ -32,7 +32,7 @@ variable "availability_zone" {
   description = "Availability zones of the VPC Subnet"
   default     = null
 }
-variable "default_tags" {
+variable "tags" {
   type        = map(string)
   description = "Tags to be associated with the resource"
   default     = {}

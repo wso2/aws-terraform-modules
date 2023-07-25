@@ -60,3 +60,16 @@ variable "requester_allow_vpc_to_remote_classic_link" {
   description = "Allow Requester instances to communicate with the Classic Instances in the Remote VPC"
   default     = false
 }
+variable "tags" {
+  type        = map(string)
+  description = "A mapping of tags to assign to the resource"
+  default     = {}
+}
+variable "vpc_name" {
+  type        = string
+  description = "Name of the VPC"
+}
+variable "peer_vpc_name" {
+  type        = string
+  description = "Name of the VPC"
+}

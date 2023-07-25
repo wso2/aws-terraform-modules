@@ -38,7 +38,7 @@ variable "cidr_block" {
   type        = string
   description = "CIDR block for the subnet"
 }
-variable "default_tags" {
+variable "tags" {
   type        = map(string)
   description = "Default tags for the Subnet resource"
   default     = {}

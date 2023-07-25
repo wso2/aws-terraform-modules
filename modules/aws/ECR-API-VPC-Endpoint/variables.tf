@@ -25,7 +25,7 @@ variable "application" {
   type        = string
   description = "Purpose of the SSM Endpoint"
 }
-variable "default_tags" {
+variable "tags" {
   type        = map(string)
   description = "Default tags to be associated with the Resource"
   default     = {}

@@ -21,7 +21,7 @@ variable "subnet_ids" {
   type        = list(string)
   description = "List of subnets to deploy nodepools"
 }
-variable "default_tags" {
+variable "tags" {
   type        = map(string)
   description = "Tags to be associated with the EKS"
   default     = {}

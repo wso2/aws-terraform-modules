@@ -98,3 +98,8 @@ variable "metric_usage_prefix" {
   type        = string
   description = "Prefix for the metric usage"
 }
+variable "tags" {
+  type        = map(string)
+  description = "Tags to be attached to the resource"
+  default     = {}
+}

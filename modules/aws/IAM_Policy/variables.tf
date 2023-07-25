@@ -25,7 +25,7 @@ variable "application" {
   type        = string
   description = "Purpose of the ECR"
 }
-variable "default_tags" {
+variable "tags" {
   type        = map(string)
   description = "Tags to be associated with the EKS"
   default     = {}

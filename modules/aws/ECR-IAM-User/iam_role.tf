@@ -11,10 +11,12 @@
 
 resource "aws_iam_user" "ecr_access_user" {
   name = join("-", [var.project, var.application, var.environment, var.region, "ecr-access-iam-user"])
+  tags = var.tags
 }
 
 resource "aws_iam_policy" "ecr_access_policy" {
   name = join("-", [var.project, var.application, var.environment, var.region, "ecr-access-iam-policy"])
+  tags = var.tags
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [

@@ -20,3 +20,25 @@ variable "transit_gateway_id" {
   type        = string
   description = "The ID of the transit gateway."
 }
+
+variable "project" {
+  type        = string
+  description = "Name of the project"
+}
+variable "environment" {
+  type        = string
+  description = "Name of the environment"
+}
+variable "region" {
+  type        = string
+  description = "Code of the region"
+}
+variable "application" {
+  type        = string
+  description = "Purpose of the route table"
+}
+variable "tags" {
+  type        = map(string)
+  description = "Tags to be attached to the route table"
+  default     = {}
+}

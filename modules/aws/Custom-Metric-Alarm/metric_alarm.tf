@@ -49,4 +49,5 @@ resource "aws_cloudwatch_metric_alarm" "metric_alarm" {
       }
     }
   }
+  tags = var.tags
 }

@@ -11,5 +11,5 @@
 
 locals {
   ig_name = join("-", [var.project, var.application, var.environment, var.region, "ig"])
-  ig_tags = merge(var.default_tags, { Name : local.ig_name })
+  ig_tags = merge(var.tags, { Name : local.ig_name })
 }

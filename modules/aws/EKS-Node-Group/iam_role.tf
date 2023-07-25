@@ -22,7 +22,7 @@ resource "aws_iam_role" "iam_role" {
     }]
     Version = "2012-10-17"
   })
-  tags = var.default_tags
+  tags = var.tags
 }
 
 resource "aws_iam_role_policy_attachment" "amazon_eks_worker_node_policy" {
@@ -80,6 +80,7 @@ resource "aws_iam_policy" "node_group_autoscaler_policy" {
     }]
     Version = "2012-10-17"
   })
+  tags = var.tags
 }
 
 resource "aws_iam_role_policy_attachment" "eks_ca_iam_policy_attach" {

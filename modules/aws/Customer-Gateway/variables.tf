@@ -9,7 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "default_tags" {
+variable "tags" {
   type        = map(string)
   description = "Default tags for the Customer Gateway resource"
   default     = {}
