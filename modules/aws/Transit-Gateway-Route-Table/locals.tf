@@ -9,24 +9,8 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "project" {
-  type        = string
-  description = "Name of the project"
-}
-variable "environment" {
-  type        = string
-  description = "Name of the environment"
-}
-variable "region" {
-  type        = string
-  description = "Code of the region"
-}
-variable "application" {
-  type        = string
-  description = "Purpose of the ECR"
-}
-variable "tags" {
-  type        = map(string)
-  description = "Tags to be associated with the EKS"
-  default     = {}
+locals {
+  name_prefix = join("-", [var.project, var.application, var.environment, var.region])
+  tgw_rt_name = join("-", [local.name_prefix, "tgw-rt"])
+  tgw_rt_tags = merge(var.tags, { Name : local.tgw_rt_name })
 }

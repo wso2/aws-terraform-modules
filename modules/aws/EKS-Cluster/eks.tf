@@ -32,5 +32,5 @@ resource "aws_eks_cluster" "eks_cluster" {
     aws_iam_role_policy_attachment.amazon_eks_cluster_policy,
     aws_iam_role_policy_attachment.amazon_eks_pc_resource_controller,
   ]
-  tags = var.default_tags
+  tags = var.tags
 }

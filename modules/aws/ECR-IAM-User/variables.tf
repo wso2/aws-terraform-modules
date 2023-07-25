@@ -25,3 +25,8 @@ variable "application" {
   type        = string
   description = "Purpose of the IAM Role"
 }
+variable "tags" {
+  type        = map(string)
+  description = "Tags to be added to the resources"
+  default     = {}
+}

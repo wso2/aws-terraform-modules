@@ -11,5 +11,5 @@
 
 locals {
   tgw_name = join("-", [var.project, var.application, var.environment, var.region, "tgw"])
-  tgw_tags = merge(var.default_tags, { Name : local.tgw_name })
+  tgw_tags = merge(var.tags, { Name : local.tgw_name })
 }

@@ -32,3 +32,16 @@ variable "peer_region" {
   description = "The region of the accepter VPC of the VPC Peering Connection. auto_accept must be false, and use the aws_vpc_peering_connection_accepter to manage the accepter side."
   default     = null
 }
+variable "tags" {
+  type        = map(string)
+  description = "A mapping of tags to assign to the resource"
+  default     = {}
+}
+variable "vpc_name" {
+  type        = string
+  description = "Name of the VPC"
+}
+variable "peer_vpc_name" {
+  type        = string
+  description = "Name of the VPC"
+}

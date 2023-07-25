@@ -64,7 +64,7 @@ variable "subnet_details" {
   }))
   default = []
 }
-variable "default_tags" {
+variable "tags" {
   type        = map(string)
   description = "Tags to be associated with the EKS"
   default     = {}

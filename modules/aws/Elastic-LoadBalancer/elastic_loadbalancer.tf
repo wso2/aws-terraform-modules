@@ -18,5 +18,5 @@ resource "aws_lb" "lb" {
 
   enable_deletion_protection = var.deletion_protection_flag
 
-  tags = var.default_tags
+  tags = var.tags
 }

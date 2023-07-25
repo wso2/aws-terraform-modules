@@ -12,5 +12,5 @@
 locals {
   name_prefix = var.availability_zone == null ? join("-", [var.project, var.application, var.environment, var.region]) : join("-", [var.project, var.application, var.environment, var.region, var.availability_zone])
   vpn_gw_name = join("-", [local.name_prefix, "vpn-gw"])
-  vpn_gw_tags = merge(var.default_tags, { Name : local.vpn_gw_name })
+  vpn_gw_tags = merge(var.tags, { Name : local.vpn_gw_name })
 }

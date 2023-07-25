@@ -53,7 +53,7 @@ resource "aws_networkfirewall_rule_group" "suricata_stateful_group" {
 
   }
 
-  tags = merge(var.default_tags)
+  tags = merge(var.tags)
 }
 
 resource "aws_networkfirewall_rule_group" "domain_stateful_group" {
@@ -102,7 +102,7 @@ resource "aws_networkfirewall_rule_group" "domain_stateful_group" {
     }
   }
 
-  tags = merge(var.default_tags)
+  tags = merge(var.tags)
 }
 
 resource "aws_networkfirewall_rule_group" "fivetuple_stateful_group" {
@@ -136,7 +136,7 @@ resource "aws_networkfirewall_rule_group" "fivetuple_stateful_group" {
     }
   }
 
-  tags = merge(var.default_tags)
+  tags = merge(var.tags)
 }
 
 resource "aws_networkfirewall_rule_group" "stateless_group" {
@@ -204,5 +204,5 @@ resource "aws_networkfirewall_rule_group" "stateless_group" {
     }
   }
 
-  tags = merge(var.default_tags)
+  tags = merge(var.tags)
 }

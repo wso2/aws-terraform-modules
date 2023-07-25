@@ -14,6 +14,8 @@ resource "aws_wafv2_web_acl" "web_acl" {
   scope       = var.scope
   description = var.description
 
+  tags = var.tags
+
   visibility_config {
     cloudwatch_metrics_enabled = var.cloudwatch_metrics_enabled
     metric_name                = var.cloudwatch_metric_name

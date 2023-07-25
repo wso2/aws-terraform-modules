@@ -13,5 +13,5 @@ resource "aws_iam_policy" "iam_policy" {
   name = join("-", [var.project, var.application, var.environment, var.region, "iam-policy"])
 
   policy = var.policy
-  tags   = var.default_tags
+  tags   = var.tags
 }

@@ -11,7 +11,7 @@
 
 resource "aws_ecr_repository" "ecr_repository" {
   name = join("-", [var.project, var.application, var.environment, var.region, "ecr"])
-  tags = var.default_tags
+  tags = var.tags
 }
 
 resource "aws_iam_policy" "ecr_admin_iam_policy" {
@@ -38,7 +38,7 @@ resource "aws_iam_policy" "ecr_admin_iam_policy" {
   depends_on = [
     aws_ecr_repository.ecr_repository
   ]
-  tags = var.default_tags
+  tags = var.tags
 }
 
 resource "aws_iam_policy" "ecr_pull_only_iam_policy" {
@@ -58,7 +58,7 @@ resource "aws_iam_policy" "ecr_pull_only_iam_policy" {
       }
     ]
   })
-  tags = var.default_tags
+  tags = var.tags
 
   depends_on = [
     aws_ecr_repository.ecr_repository

@@ -26,7 +26,7 @@ resource "aws_networkfirewall_firewall" "networkfirewall_firewall" {
     }
   }
 
-  tags = var.default_tags
+  tags = var.tags
 }
 
 resource "aws_networkfirewall_firewall_policy" "networkfirewall_firewall_policy" {
@@ -54,14 +54,14 @@ resource "aws_networkfirewall_firewall_policy" "networkfirewall_firewall_policy"
       }
     }
   }
-  tags = merge(var.default_tags)
+  tags = merge(var.tags)
 }
 
 resource "aws_cloudwatch_log_group" "nfw_cloudwatch_log_group" {
   for_each = try(var.logging_config, {})
   name     = "/aws/network-firewall/${each.key}"
 
-  tags = merge(var.default_tags)
+  tags = merge(var.tags)
 
   retention_in_days = each.value.retention_in_days
 }

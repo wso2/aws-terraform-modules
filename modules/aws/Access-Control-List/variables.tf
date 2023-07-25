@@ -40,7 +40,7 @@ variable "egress_rules" {
   }))
   description = "List of egress rules"
 }
-variable "default_tags" {
+variable "tags" {
   type        = map(string)
   description = "Tags to be associated with the EKS"
   default     = {}

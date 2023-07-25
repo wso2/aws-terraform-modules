@@ -37,7 +37,7 @@ variable "ssl_policy" {
   description = "The security policy that defines which protocols and ciphers are supported. For more information, see Security Policies in the Application Load Balancers Guide and Security Policies in the Network Load Balancers Guide."
   default     = null
 }
-variable "default_tags" {
+variable "tags" {
   type        = map(string)
   description = "Default tags for the resource"
   default     = {}

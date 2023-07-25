@@ -26,7 +26,7 @@ variable "application" {
   description = "Purpose of the Subnet"
 }
 
-variable "default_tags" {
+variable "tags" {
   description = "The tags for the resources"
   type        = map(any)
   default     = {}

@@ -11,6 +11,7 @@
 
 resource "aws_iam_user" "secrets_manager_user" {
   name = join("-", [var.project, var.application, var.environment, var.region, "secret-manager-iam-user"])
+  tags = var.tags
 }
 
 # Attach the IAM policy to the IAM user

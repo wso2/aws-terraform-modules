@@ -45,7 +45,7 @@ variable "deletion_protection_flag" {
   description = "Flag to indicate whether the ALB instance is protected from accidental termination or not"
   default     = true
 }
-variable "default_tags" {
+variable "tags" {
   type        = map(string)
   description = "Default tags to be added to the ALB instance"
   default     = {}

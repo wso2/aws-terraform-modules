@@ -33,3 +33,8 @@ variable "parameters" {
   type        = list(map(string))
   description = "List of parameters in the Param group"
 }
+variable "tags" {
+  type        = map(string)
+  description = "Tags to be added to the resource"
+  string      = {}
+}

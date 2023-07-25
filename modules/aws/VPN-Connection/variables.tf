@@ -234,7 +234,7 @@ variable "application" {
   type        = string
   description = "Purpose of the Customer gateway"
 }
-variable "default_tags" {
+variable "tags" {
   type        = map(string)
   description = "Default tags for the Connection resource"
   default     = {}

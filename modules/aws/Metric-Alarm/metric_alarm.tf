@@ -31,4 +31,6 @@ resource "aws_cloudwatch_metric_alarm" "metric_alarm" {
   actions_enabled = var.enabled
 
   dimensions = var.dimensions
+
+  tags = var.tags
 }

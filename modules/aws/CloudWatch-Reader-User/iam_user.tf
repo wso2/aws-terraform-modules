@@ -11,6 +11,7 @@
 
 resource "aws_iam_user" "cloudwatch_reader_user" {
   name = join("-", [var.project, var.application, var.environment, var.region, "cloudwatch-reader-iam-user"])
+  tags = var.tags
 }
 
 # Attach the IAM policy to the IAM user

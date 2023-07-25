@@ -12,4 +12,6 @@
 resource "aws_elasticache_subnet_group" "elasticache_subnet_group" {
   name       = join("-", [var.project, var.application, var.environment, var.region, "ec-snet-group"])
   subnet_ids = var.subnet_ids
+
+  tags = var.tags
 }

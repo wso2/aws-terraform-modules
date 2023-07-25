@@ -13,7 +13,7 @@ variable "log_group_name" {
   description = "The name of the log group to create."
   type        = string
 }
-variable "default_tags" {
+variable "tags" {
   description = "Default tags for resources."
   type        = map(string)
   default     = {}

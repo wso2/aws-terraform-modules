@@ -12,5 +12,5 @@
 locals {
   name_prefix = var.availability_zone == null ? join("-", [var.project, var.application, var.environment, var.region]) : join("-", [var.project, var.application, var.environment, var.availability_zone])
   rt_name     = join("-", [local.name_prefix, "snet-rt"])
-  rt_tags     = merge(var.default_tags, { Name : local.rt_name })
+  rt_tags     = merge(var.tags, { Name : local.rt_name })
 }
