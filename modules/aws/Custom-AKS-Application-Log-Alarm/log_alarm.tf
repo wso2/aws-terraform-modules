@@ -10,7 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 # Resource block for metric filter
-resource "aws_cloudwatch_log_metric_filter" "aks_application_log_metric_filter" {
+resource "aws_cloudwatch_log_metric_filter" "eks_application_log_metric_filter" {
   name           = join("-", [var.project, var.application, var.environment, var.region, var.error_log_summary, "metric-filter"])
   pattern        = "{ ($.kubernetes.container_name = \"${var.k8s_container_name}\") && ($.kubernetes.namespace_name = \"${var.namespace}\") && ($.log = \"*${var.log_entry}*\") } "
   log_group_name = "/aws/containerinsights/${var.cluster_name}/application"

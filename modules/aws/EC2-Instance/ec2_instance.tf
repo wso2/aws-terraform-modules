@@ -26,6 +26,8 @@ resource "aws_instance" "ec2_instance" {
 
   tags = local.ec2_tags
 
+  iam_instance_profile = aws_iam_instance_profile.iam_instance_profile.name
+
   network_interface {
     device_index         = 0
     network_interface_id = aws_network_interface.ec2_network_interface.id
