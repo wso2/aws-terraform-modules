@@ -98,3 +98,13 @@ variable "security_group_ids" {
   description = "List of security groups to be associated with the EC2 instance"
   default     = []
 }
+variable "enable_session_manager" {
+  type        = bool
+  description = "Flag to enable session manager"
+  default     = true
+}
+variable "enable_instance_connect" {
+  type        = bool
+  description = "Flag to enable instance connect"
+  default     = false
+}
