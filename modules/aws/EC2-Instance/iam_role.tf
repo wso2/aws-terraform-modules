@@ -23,11 +23,10 @@ resource "aws_iam_policy" "session_manager_policy" {
         "ssmmessages:OpenDataChannel"
       ]
       Effect   = "Allow"
-      Resource = [aws_instance.ec2_instance.arn]
+      Resource = "*"
     }]
     Version = "2012-10-17"
   })
-  depends_on = [aws_instance.ec2_instance]
 }
 
 resource "aws_iam_role" "iam_role" {
