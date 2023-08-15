@@ -10,50 +10,50 @@
 # --------------------------------------------------------------------------------------
 
 variable "log_destination" {
-  type = string
+  type        = string
   description = "The log destination for Flow Log"
 }
 variable "log_destination_type" {
-    type = string
-    description = "The log destination type for Flow Log"
+  type        = string
+  description = "The log destination type for Flow Log"
 }
 variable "traffic_type" {
-    type = string
-    description = "The traffic type for Flow Log"
+  type        = string
+  description = "The traffic type for Flow Log"
 }
 variable "vpc_id" {
-    type = string
-    description = "The VPC ID which is associated with the Flow Log"
+  type        = string
+  description = "The VPC ID which is associated with the Flow Log"
 }
 variable "subnet_id" {
-    type = string
-    description = "The Subnet ID which is associated with the Flow Log"
+  type        = string
+  description = "The Subnet ID which is associated with the Flow Log"
 }
 variable "tags" {
-    type = map(string)
-    description = "The tags for Flow Log"
+  type        = map(string)
+  description = "The tags for Flow Log"
 }
 variable "eni_id" {
-    type = string
-    description = "The ENI ID which is associated with the Flow Log"
+  type        = string
+  description = "The ENI ID which is associated with the Flow Log"
 }
 variable "transit_gateway_id" {
-    type = string
-    description = "The Transit Gateway ID which is associated with the Flow Log"
+  type        = string
+  description = "The Transit Gateway ID which is associated with the Flow Log"
 }
 variable "transit_gateway_attachment_id" {
-    type = string
-    description = "The Transit Gateway Attachment ID which is associated with the Flow Log"
+  type        = string
+  description = "The Transit Gateway Attachment ID which is associated with the Flow Log"
 }
 variable "log_format" {
-  type = string
+  type        = string
   description = "The log format for Flow Log"
-  default = null
+  default     = null
 }
-variable 'max_aggregation_interval' {
-  type = number
-  description = 'The maximum interval of time during which a flow of packets is captured and aggregated into a flow log record. Measured in seconds'
-  default = 600
+variable "max_aggregation_interval" {
+  type        = number
+  description = "The maximum interval of time during which a flow of packets is captured and aggregated into a flow log record. Measured in seconds"
+  default     = 600
 }
 variable "project" {
   type        = string
