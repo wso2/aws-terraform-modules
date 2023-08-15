@@ -64,6 +64,11 @@ variable "subnet_details" {
   }))
   default = []
 }
+variable "enabled_cluster_log_types" {
+  type        = list(string)
+  description = "List of cluster log types to enable"
+  default     = []
+}
 variable "tags" {
   type        = map(string)
   description = "Tags to be associated with the EKS"
