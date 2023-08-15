@@ -24,3 +24,7 @@ output "firewall_endpoints_id_sync_states" {
   description = "Created Network Firewall states"
   value       = flatten(aws_networkfirewall_firewall.networkfirewall_firewall.firewall_status[*].sync_states[*])
 }
+output "firewall_name" {
+  value      = aws_networkfirewall_firewall.networkfirewall_firewall.name
+  depends_on = [aws_networkfirewall_firewall.networkfirewall_firewall]
+}
