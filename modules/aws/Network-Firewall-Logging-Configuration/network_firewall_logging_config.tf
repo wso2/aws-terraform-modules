@@ -16,10 +16,10 @@ resource "aws_networkfirewall_logging_configuration" "networkfirewall_logging_co
       for_each = var.log_destination_configs
       content {
         log_destination = {
-          bucketName = log_destination_config.value.bucket_name
-          prefix     = log_destination_config.value.prefix
+          bucketName     = log_destination_config.value.bucket_name
+          prefix         = log_destination_config.value.prefix
           deliveryStream = log_destination_config.value.delivery_stream
-          logGroup = log_destination_config.value.log_group
+          logGroup       = log_destination_config.value.log_group
         }
         log_destination_type = log_destination_config.value.log_destination_type
         log_type             = log_destination_config.value.log_type

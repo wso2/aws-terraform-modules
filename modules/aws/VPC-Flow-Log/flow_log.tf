@@ -14,14 +14,14 @@ resource "aws_flow_log" "flow_log" {
   log_destination_type = var.log_destination_type
   traffic_type         = var.traffic_type
 
-  vpc_id               = var.vpc_id
-  eni_id = var.eni_id
-  transit_gateway_id = var.transit_gateway_id
-  subnet_id = var.subnet_id
+  vpc_id                        = var.vpc_id
+  eni_id                        = var.eni_id
+  transit_gateway_id            = var.transit_gateway_id
+  subnet_id                     = var.subnet_id
   transit_gateway_attachment_id = var.transit_gateway_attachment_id
-  log_format = var.log_format
+  log_format                    = var.log_format
 
   max_aggregation_interval = var.max_aggregation_interval
-  iam_role_arn = var.log_destination_type == "cloudwatch" ? aws_iam_role.iam_role.0.arn : null
-  tags = local.flow_log_tags
+  iam_role_arn             = var.log_destination_type == "cloud-watch-logs" ? aws_iam_role.iam_role.0.arn : null
+  tags                     = local.flow_log_tags
 }
