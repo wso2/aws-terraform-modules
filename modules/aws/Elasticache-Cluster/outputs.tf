@@ -10,14 +10,14 @@
 # --------------------------------------------------------------------------------------
 
 output "primary_endpoint_address" {
-  value      = aws_elasticache_replication_group.single_node_elasticache_replication_group.primary_endpoint_address
-  depends_on = [aws_elasticache_replication_group.single_node_elasticache_replication_group]
+  value      = aws_elasticache_replication_group.elasticache_replication_group.primary_endpoint_address
+  depends_on = [aws_elasticache_replication_group.elasticache_replication_group]
 }
 output "redis_cluster_id" {
-  value      = aws_elasticache_replication_group.single_node_elasticache_replication_group.id
-  depends_on = [aws_elasticache_replication_group.single_node_elasticache_replication_group]
+  value      = aws_elasticache_replication_group.elasticache_replication_group.id
+  depends_on = [aws_elasticache_replication_group.elasticache_replication_group]
 }
 output "node_id" {
-  value      = join("-", [aws_elasticache_replication_group.single_node_elasticache_replication_group.id, "001"])
-  depends_on = [aws_elasticache_replication_group.single_node_elasticache_replication_group]
+  value      = join("-", [aws_elasticache_replication_group.elasticache_replication_group.id, "001"])
+  depends_on = [aws_elasticache_replication_group.elasticache_replication_group]
 }
