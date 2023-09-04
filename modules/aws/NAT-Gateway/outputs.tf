@@ -13,11 +13,3 @@ output "nat_gateway_id" {
   value      = aws_nat_gateway.nat_gateway.id
   depends_on = [aws_nat_gateway.nat_gateway]
 }
-output "route_table_id" {
-  value      = aws_route_table.route_table.id
-  depends_on = [aws_route_table.route_table]
-}
-output "subnet_id" {
-  value      = aws_subnet.subnet.id
-  depends_on = [aws_subnet.subnet]
-}
