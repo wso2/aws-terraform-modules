@@ -11,6 +11,7 @@
 
 resource "aws_vpn_connection" "vpn_connection" {
   customer_gateway_id                     = var.customer_gateway_id
+  transit_gateway_id                      = var.transit_gateway_id
   type                                    = var.type
   vpn_gateway_id                          = var.vpn_gateway_id
   static_routes_only                      = var.static_routes_only

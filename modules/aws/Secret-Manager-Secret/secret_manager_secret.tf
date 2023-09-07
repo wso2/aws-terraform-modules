@@ -9,9 +9,16 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_ec2_transit_gateway_route" "ec2_transit_gateway_route" {
-  for_each                       = var.routes
-  destination_cidr_block         = each.value.destination_cidr_block
-  transit_gateway_attachment_id  = each.value.transit_gateway_attachment_id
-  transit_gateway_route_table_id = var.transit_gateway_route_table_id
+resource "aws_secretsmanager_secret" "secretsmanager_secret" {
+  name = var.secret_name
+  policy = var.policy_name
+}
+
+resource "aws_secretsmanager_secret_version" "secretsmanager_secret_version" {
+  secret_id     = aws_secretsmanager_secret.secretsmanager_secret.id
+  secret_string = var.secret_string
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }

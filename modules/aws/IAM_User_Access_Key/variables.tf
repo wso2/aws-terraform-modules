@@ -9,9 +9,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_ec2_transit_gateway_route" "ec2_transit_gateway_route" {
-  for_each                       = var.routes
-  destination_cidr_block         = each.value.destination_cidr_block
-  transit_gateway_attachment_id  = each.value.transit_gateway_attachment_id
-  transit_gateway_route_table_id = var.transit_gateway_route_table_id
+variable "rotation_days" {
+  type = number
+  default = 180
+  description = "The number of days after which the key will be rotated"
+}
+variable "iam_user_name" {
+  type = string
+  description = "The name of the IAM user"
 }
