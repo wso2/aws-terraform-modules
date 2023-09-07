@@ -9,9 +9,15 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_ec2_transit_gateway_route" "ec2_transit_gateway_route" {
-  for_each                       = var.routes
-  destination_cidr_block         = each.value.destination_cidr_block
-  transit_gateway_attachment_id  = each.value.transit_gateway_attachment_id
-  transit_gateway_route_table_id = var.transit_gateway_route_table_id
+variable "secret_string" {
+  type = string
+  description = "String value for string"
+}
+variable "secret_name" {
+  type = string
+  description = "Secret name for string"
+}
+variable "policy_name" {
+  type = string
+  description = "Policy name for accessing the secret"
 }

@@ -8,10 +8,24 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
+resource "time_rotating" "time_rotating" {
+  rotation_days = var.rotation_days
+}
 
-resource "aws_ec2_transit_gateway_route" "ec2_transit_gateway_route" {
-  for_each                       = var.routes
-  destination_cidr_block         = each.value.destination_cidr_block
-  transit_gateway_attachment_id  = each.value.transit_gateway_attachment_id
-  transit_gateway_route_table_id = var.transit_gateway_route_table_id
+# which then updates the leapfrog toggle
+resource "toggles_leapfrog" "toggle" {
+  trigger = time_rotating.time_rotating.rotation_rfc3339
+}
+
+resource "aws_iam_access_key" "iam_access_key" {
+  user = var.iam_user_name
+
+  lifecycle {
+    replace_triggered_by = [
+      toggles_leapfrog.toggle.alpha,
+    ]
+
+    # And we always want some credentials to exist, so create before destroy
+    create_before_destroy = true
+  }
 }

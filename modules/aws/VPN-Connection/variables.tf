@@ -9,7 +9,11 @@
 #
 # --------------------------------------------------------------------------------------
 
-
+variable "transit_gateway_id" {
+  description = "The ID of the transit gateway."
+  type        = string
+  default     = null
+}
 variable "customer_gateway_id" {
   description = "The ID of the customer gateway."
   type        = string
