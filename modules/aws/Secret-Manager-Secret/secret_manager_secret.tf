@@ -11,7 +11,8 @@
 
 resource "aws_secretsmanager_secret" "secretsmanager_secret" {
   name = var.secret_name
-  policy = var.policy_name
+
+  tags = var.tags
 }
 
 resource "aws_secretsmanager_secret_version" "secretsmanager_secret_version" {
@@ -21,4 +22,17 @@ resource "aws_secretsmanager_secret_version" "secretsmanager_secret_version" {
   lifecycle {
     create_before_destroy = true
   }
+}
+
+resource "aws_secretsmanager_secret_policy" "secretsmanager_secret_policy" {
+
+  count = var.create_secret_reader_iam_policy ? 1 : 0
+
+  secret_arn = aws_secretsmanager_secret.secretsmanager_secret.arn
+  policy    = data.aws_iam_policy_document.iam_policy_document.0.json
+
+  depends_on = [
+    data.aws_iam_policy_document.iam_policy_document,
+    aws_secretsmanager_secret.secretsmanager_secret
+  ]
 }

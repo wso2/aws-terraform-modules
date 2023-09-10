@@ -9,26 +9,22 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "secret_string" {
-  type = string
-  description = "String value for string"
-}
-variable "secret_name" {
-  type = string
-  description = "Secret name for string"
-}
-variable "tags" {
-  type = map(string)
-  description = "Tags for string"
-  default = {}
-}
-variable "create_secret_reader_iam_policy" {
-  type = bool
-  description = "Create IAM policy for secret reader"
-  default = true
-}
-variable "access_principals" {
-  type = list(string)
-  description = "Access principals for secret"
-  default = []
+data "aws_iam_policy_document" "iam_policy_document" {
+
+  count = var.create_secret_reader_iam_policy ? 1 : 0
+
+  statement {
+    sid    = "EnableAnotherAWSAccountToReadTheSecret"
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = var.access_principals
+    }
+
+    actions   = ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"]
+    resources = [aws_secretsmanager_secret.secretsmanager_secret.arn]
+  }
+
+  depends_on = [aws_secretsmanager_secret.secretsmanager_secret]
 }
