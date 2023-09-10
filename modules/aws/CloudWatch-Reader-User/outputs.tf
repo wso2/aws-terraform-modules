@@ -9,11 +9,15 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "secret_manager_iam_user_id" {
+output "cloudwatch_reader_user_iam_user_id" {
   value      = aws_iam_user.cloudwatch_reader_user.id
   depends_on = [aws_iam_user.cloudwatch_reader_user]
 }
-output "secret_manager_iam_user_arn" {
+output "cloudwatch_reader_user_iam_user_arn" {
   value      = aws_iam_user.cloudwatch_reader_user.arn
+  depends_on = [aws_iam_user.cloudwatch_reader_user]
+}
+output "cloudwatch_reader_user_iam_user_name" {
+  value      = aws_iam_user.cloudwatch_reader_user.name
   depends_on = [aws_iam_user.cloudwatch_reader_user]
 }
