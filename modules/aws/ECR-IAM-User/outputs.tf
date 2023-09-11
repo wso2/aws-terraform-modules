@@ -11,9 +11,13 @@
 
 output "ecr_user_iam_user_id" {
   value      = aws_iam_user.ecr_access_user.id
-  depends_on = []
+  depends_on = [aws_iam_user.ecr_access_user]
 }
 output "ecr_user_iam_user_arn" {
   value      = aws_iam_user.ecr_access_user.arn
-  depends_on = []
+  depends_on = [aws_iam_user.ecr_access_user]
+}
+output "ecr_user_iam_user_name" {
+  value      = aws_iam_user.ecr_access_user.name
+  depends_on = [aws_iam_user.ecr_access_user]
 }

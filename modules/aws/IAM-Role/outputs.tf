@@ -8,24 +8,16 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-resource "time_rotating" "time_rotating" {
-  rotation_days = var.rotation_days
+
+output "iam_role_id" {
+  value      = aws_iam_role.iam_role.id
+  depends_on = [aws_iam_role.iam_role]
 }
-
-# which then updates the leapfrog toggle
-resource "toggles_leapfrog" "toggle" {
-  trigger = time_rotating.time_rotating.rotation_rfc3339
+output "iam_role_arn" {
+  value      = aws_iam_role.iam_role.arn
+  depends_on = [aws_iam_role.iam_role]
 }
-
-resource "aws_iam_access_key" "iam_access_key" {
-  user = var.iam_user_name
-
-  lifecycle {
-    replace_triggered_by = [
-      toggles_leapfrog.toggle.alpha,
-    ]
-
-    # And we always want some credentials to exist, so create before destroy
-    create_before_destroy = true
-  }
+output "iam_role_name" {
+  value      = aws_iam_role.iam_role.name
+  depends_on = [aws_iam_role.iam_role]
 }

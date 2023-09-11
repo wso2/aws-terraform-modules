@@ -17,7 +17,18 @@ variable "secret_name" {
   type = string
   description = "Secret name for string"
 }
-variable "policy_name" {
-  type = string
-  description = "Policy name for accessing the secret"
+variable "tags" {
+  type = map(string)
+  description = "Tags for string"
+  default = {}
+}
+variable "create_secret_reader_iam_policy" {
+  type = bool
+  description = "Create IAM policy for secret reader"
+  default = true
+}
+variable "access_principals" {
+  type = list(string)
+  description = "Access principals for secret"
+  default = []
 }

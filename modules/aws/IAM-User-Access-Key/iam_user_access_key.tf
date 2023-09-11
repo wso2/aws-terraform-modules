@@ -9,15 +9,11 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "secret_manager_iam_user_id" {
-  value      = aws_iam_user.secrets_manager_user.id
-  depends_on = [aws_iam_user.secrets_manager_user]
-}
-output "secret_manager_iam_user_arn" {
-  value      = aws_iam_user.secrets_manager_user.arn
-  depends_on = [aws_iam_user.secrets_manager_user]
-}
-output "secret_manager_iam_user_name" {
-  value      = aws_iam_user.secrets_manager_user.name
-  depends_on = [aws_iam_user.secrets_manager_user]
+resource "aws_iam_access_key" "iam_access_key" {
+  user = var.iam_user_name
+
+  lifecycle {
+    # And we always want some credentials to exist, so create before destroy
+    create_before_destroy = true
+  }
 }

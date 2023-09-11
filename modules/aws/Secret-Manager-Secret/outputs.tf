@@ -9,15 +9,15 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "secret_manager_iam_user_id" {
-  value      = aws_iam_user.secrets_manager_user.id
-  depends_on = [aws_iam_user.secrets_manager_user]
+output "secret_id" {
+  value = "${aws_secretsmanager_secret.secretsmanager_secret.id}"
+  depends_on = [aws_secretsmanager_secret.secretsmanager_secret]
 }
-output "secret_manager_iam_user_arn" {
-  value      = aws_iam_user.secrets_manager_user.arn
-  depends_on = [aws_iam_user.secrets_manager_user]
+output "secret_arn" {
+  value = "${aws_secretsmanager_secret.secretsmanager_secret.arn}"
+  depends_on = [aws_secretsmanager_secret.secretsmanager_secret]
 }
-output "secret_manager_iam_user_name" {
-  value      = aws_iam_user.secrets_manager_user.name
-  depends_on = [aws_iam_user.secrets_manager_user]
+output "secret_version" {
+  value = "${aws_secretsmanager_secret_version.secretsmanager_secret_version.version_id}"
+  depends_on = [aws_secretsmanager_secret.secretsmanager_secret]
 }
