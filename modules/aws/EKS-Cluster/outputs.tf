@@ -37,3 +37,15 @@ output "ebs_pvc_role_arn" {
   value      = aws_iam_role.cluster_ebs_pvc_role.arn
   depends_on = [aws_iam_role.cluster_ebs_pvc_role]
 }
+output "oidc_provider_arn" {
+  value      = aws_iam_openid_connect_provider.eks_ca_oidc_provider.arn
+  depends_on = [aws_iam_openid_connect_provider.eks_ca_oidc_provider]
+}
+output "oidc_provider_id" {
+  value      = aws_iam_openid_connect_provider.eks_ca_oidc_provider.id
+  depends_on = [aws_iam_openid_connect_provider.eks_ca_oidc_provider]
+}
+output "oidc_provider_url" {
+  value      = aws_iam_openid_connect_provider.eks_ca_oidc_provider.url
+  depends_on = [aws_iam_openid_connect_provider.eks_ca_oidc_provider]
+}
