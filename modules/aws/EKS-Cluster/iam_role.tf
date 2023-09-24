@@ -103,6 +103,38 @@ resource "aws_iam_role_policy_attachment" "eks_ca_iam_policy_attach" {
   ]
 }
 
+# IAM Role for EFS
+resource "aws_iam_policy" "node_efs_policy" {
+  name        = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-efs-iam-policy"])
+  path        = "/"
+  description = "Policy for EKS nodes to use EFS"
+
+  policy = jsonencode({
+    "Statement" : [
+      {
+        "Action" : [
+          "elasticfilesystem:DescribeMountTargets",
+          "elasticfilesystem:DescribeFileSystems",
+          "elasticfilesystem:DescribeAccessPoints",
+          "elasticfilesystem:CreateAccessPoint",
+          "elasticfilesystem:DeleteAccessPoint",
+          "ec2:DescribeAvailabilityZones"
+        ],
+        "Effect" : "Allow",
+        "Resource" : "*",
+        "Sid" : ""
+      }
+    ],
+    "Version" : "2012-10-17"
+    }
+  )
+}
+
+resource "aws_iam_role_policy_attachment" "test-attach" {
+  role       = aws_iam_role.iam_role.name
+  policy_arn = aws_iam_policy.node_efs_policy.arn
+}
+
 # IAM Role for IAM Cluster LoadBalancer
 resource "aws_iam_role" "cluster_loadbalancer_role" {
   assume_role_policy = data.aws_iam_policy_document.cluster_lb_sts_policy.json

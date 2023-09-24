@@ -26,6 +26,6 @@ output "vpn_connection_tunnel1_address" {
   depends_on = [aws_vpn_connection.vpn_connection]
 }
 output "vpn_connection_transit_gateway_connection_id" {
-  value = aws_vpn_connection.vpn_connection.transit_gateway_attachment_id
+  value      = aws_vpn_connection.vpn_connection.transit_gateway_attachment_id
   depends_on = [aws_vpn_connection.vpn_connection]
 }

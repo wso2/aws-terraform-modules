@@ -29,7 +29,7 @@ resource "aws_secretsmanager_secret_policy" "secretsmanager_secret_policy" {
   count = var.create_secret_reader_iam_policy ? 1 : 0
 
   secret_arn = aws_secretsmanager_secret.secretsmanager_secret.arn
-  policy    = data.aws_iam_policy_document.iam_policy_document.0.json
+  policy     = data.aws_iam_policy_document.iam_policy_document.0.json
 
   depends_on = [
     data.aws_iam_policy_document.iam_policy_document,

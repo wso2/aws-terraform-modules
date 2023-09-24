@@ -10,11 +10,11 @@
 # --------------------------------------------------------------------------------------
 
 variable "rotation_days" {
-  type = number
-  default = 180
+  type        = number
+  default     = 180
   description = "The number of days after which the key will be rotated"
 }
 variable "iam_user_name" {
-  type = string
+  type        = string
   description = "The name of the IAM user"
 }

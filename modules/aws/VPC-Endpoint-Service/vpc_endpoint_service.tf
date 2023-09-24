@@ -9,26 +9,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "secret_string" {
-  type        = string
-  description = "String value for string"
-}
-variable "secret_name" {
-  type        = string
-  description = "Secret name for string"
-}
-variable "tags" {
-  type        = map(string)
-  description = "Tags for string"
-  default     = {}
-}
-variable "create_secret_reader_iam_policy" {
-  type        = bool
-  description = "Create IAM policy for secret reader"
-  default     = true
-}
-variable "access_principals" {
-  type        = list(string)
-  description = "Access principals for secret"
-  default     = []
+resource "aws_vpc_endpoint_service" "vpc_endpoint_service" {
+  acceptance_required        = var.acceptance_required
+  network_load_balancer_arns = var.network_load_balancer_arns
+  gateway_load_balancer_arns = var.gateway_load_balancer_arns
+  allowed_principals         = var.allowed_principals
+  tags                       = local.tags
+  supported_ip_address_types = var.supported_ip_address_types
+  private_dns_name           = var.private_dns_name
 }
