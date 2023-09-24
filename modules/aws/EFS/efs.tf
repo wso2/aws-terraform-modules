@@ -60,4 +60,3 @@ resource "aws_efs_mount_target" "efs_mount_target" {
   security_groups = each.value.security_groups
   ip_address      = each.value.ip_address
 }
-
