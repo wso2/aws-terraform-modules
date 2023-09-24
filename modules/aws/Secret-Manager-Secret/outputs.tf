@@ -10,14 +10,14 @@
 # --------------------------------------------------------------------------------------
 
 output "secret_id" {
-  value = "${aws_secretsmanager_secret.secretsmanager_secret.id}"
+  value      = aws_secretsmanager_secret.secretsmanager_secret.id
   depends_on = [aws_secretsmanager_secret.secretsmanager_secret]
 }
 output "secret_arn" {
-  value = "${aws_secretsmanager_secret.secretsmanager_secret.arn}"
+  value      = aws_secretsmanager_secret.secretsmanager_secret.arn
   depends_on = [aws_secretsmanager_secret.secretsmanager_secret]
 }
 output "secret_version" {
-  value = "${aws_secretsmanager_secret_version.secretsmanager_secret_version.version_id}"
+  value      = aws_secretsmanager_secret_version.secretsmanager_secret_version.version_id
   depends_on = [aws_secretsmanager_secret.secretsmanager_secret]
 }

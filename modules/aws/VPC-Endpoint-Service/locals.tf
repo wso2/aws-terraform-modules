@@ -9,26 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "secret_string" {
-  type        = string
-  description = "String value for string"
-}
-variable "secret_name" {
-  type        = string
-  description = "Secret name for string"
-}
-variable "tags" {
-  type        = map(string)
-  description = "Tags for string"
-  default     = {}
-}
-variable "create_secret_reader_iam_policy" {
-  type        = bool
-  description = "Create IAM policy for secret reader"
-  default     = true
-}
-variable "access_principals" {
-  type        = list(string)
-  description = "Access principals for secret"
-  default     = []
+locals {
+  vpc_ep_name = join("-", [var.project, var.application, var.environment, var.region, var.service_short_hand_name, "vpc-ep-svc"])
+  tags        = merge(var.tags, { "Name" : local.vpc_ep_name })
 }
