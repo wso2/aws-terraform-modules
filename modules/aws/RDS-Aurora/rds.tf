@@ -12,7 +12,6 @@
 resource "aws_rds_cluster" "rds_cluster" {
 
   allow_major_version_upgrade     = var.allow_major_version_upgrade
-  apply_modifications_immediately = var.apply_modifications_immediately
 
   availability_zones = var.availability_zones
   network_type       = var.network_type
@@ -26,7 +25,7 @@ resource "aws_rds_cluster" "rds_cluster" {
   database_name               = var.database_name
   master_username             = var.master_username
   master_password             = var.master_password
-  manage_master_user_password = var.master_password == null ? true : false
+  manage_master_user_password = var.master_password == null ? true : null
 
   db_cluster_parameter_group_name  = var.db_cluster_parameter_group_name
   db_instance_parameter_group_name = var.allow_major_version_upgrade == true ? var.db_instance_parameter_group_name : null
@@ -84,7 +83,6 @@ resource "aws_rds_cluster_instance" "cluster_instances" {
   monitoring_interval                            = var.cluster_common_monitoring_interval == null ? each.value.monitoring_interval : var.cluster_common_monitoring_interval
   monitoring_role_arn                            = var.cluster_common_monitoring_role_arn == null ? each.value.monitoring_role_arn : var.cluster_common_monitoring_role_arn
   performance_insights_enabled                   = var.cluster_common_performance_insights_enabled == null ? each.value.performance_insights_enabled : var.cluster_common_performance_insights_enabled
-  performance_insights_insights_retention_period = var.cluster_common_performance_insights_insights_retention_period == null ? each.value.performance_insights_insights_retention_period : var.cluster_common_performance_insights_insights_retention_period
 
   preferred_backup_window      = var.preferred_backup_window != null ? null : each.value.preferred_backup_window
   preferred_maintenance_window = var.preferred_maintenance_window == null ? each.value.preferred_maintenance_window : var.preferred_maintenance_window

@@ -14,11 +14,6 @@ variable "allow_major_version_upgrade" {
   type        = bool
   default     = false
 }
-variable "apply_modifications_immediately" {
-  description = "Apply modifications immediately"
-  type        = bool
-  default     = false
-}
 variable "availability_zones" {
   description = "Availability zones"
   type        = list(string)
@@ -50,6 +45,7 @@ variable "database_name" {
 variable "db_cluster_instance_class" {
   description = "DB cluster instance class"
   type        = string
+  default     = null
 }
 variable "deletion_protection" {
   description = "Deletion protection"
@@ -63,10 +59,12 @@ variable "db_subnet_group_name" {
 variable "db_cluster_parameter_group_name" {
   description = "DB cluster parameter group name"
   type        = string
+  default     = null
 }
 variable "db_instance_parameter_group_name" {
   description = "DB instance parameter group name"
   type        = string
+  default     = null
 }
 variable "enable_http_endpoint" {
   description = "Flag to Enable HTTP endpoint"
@@ -185,7 +183,6 @@ variable "cluster_instances" {
     monitoring_interval                   = optional(number, 0)
     monitoring_role_arn                   = optional(string)
     performance_insights_enabled          = optional(bool, false)
-    performance_insights_retention_period = optional(number, 0)
     preferred_backup_window               = optional(string)
     preferred_maintenance_window          = optional(string)
 
