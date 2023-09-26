@@ -66,3 +66,29 @@ variable "efs_mount_targets" {
   }))
   default = {}
 }
+variable "creation_token" {
+  description = "Token to be used for the EFS account"
+  type        = string
+  sensitive   = true
+}
+variable "tags" {
+  description = "A mapping of tags to assign to the resource"
+  type        = map(string)
+  default     = {}
+}
+variable "project" {
+  type        = string
+  description = "Name of the project"
+}
+variable "environment" {
+  type        = string
+  description = "Name of the environment"
+}
+variable "region" {
+  type        = string
+  description = "AWS Code of the region"
+}
+variable "application" {
+  type        = string
+  description = "Purpose of the EFS Account"
+}

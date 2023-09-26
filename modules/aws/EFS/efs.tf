@@ -18,11 +18,9 @@ resource "aws_efs_file_system" "efs_file_system" {
   throughput_mode                 = var.throughput_mode
   provisioned_throughput_in_mibps = var.throughput_mode == "provisioned" ? var.provisioned_throughput_in_mibps : null
 
-  creation_token = "wso2-token"
+  creation_token = var.creation_token
 
-  tags = {
-    Name = "wso2-pekin-eks-efs"
-  }
+  tags = local.tags
 }
 
 resource "aws_efs_access_point" "efs_access_point" {
