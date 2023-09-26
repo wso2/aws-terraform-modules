@@ -19,11 +19,11 @@ variable "environment" {
 }
 variable "region" {
   type        = string
-  description = "Code of the region"
+  description = "AWS Code of the region"
 }
 variable "application" {
   type        = string
-  description = "Purpose of the EKS Cluster"
+  description = "Purpose of the DB Subnet group"
 }
 variable "subnet_ids" {
   type        = list(string)
@@ -31,6 +31,6 @@ variable "subnet_ids" {
 }
 variable "tags" {
   type        = map(string)
-  description = "Tags for string"
+  description = "Tags for the Resource"
   default     = {}
 }
