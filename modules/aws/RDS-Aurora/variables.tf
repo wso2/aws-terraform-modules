@@ -210,3 +210,7 @@ variable "application" {
   type        = string
   description = "Purpose of the EKS Cluster"
 }
+variable "vpc_security_group_ids" {
+  type        = list(string)
+  description = "List of security group ids"
+}
