@@ -14,7 +14,7 @@ locals {
   tags = merge(
     var.tags,
     {
-      "Name" = efs_name
+      "Name" = local.efs_name
     }
   )
 }
