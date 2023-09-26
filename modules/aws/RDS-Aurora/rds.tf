@@ -46,6 +46,8 @@ resource "aws_rds_cluster" "rds_cluster" {
 
   iam_database_authentication_enabled = var.iam_database_authentication_enabled
 
+  vpc_security_group_ids = var.vpc_security_group_ids
+
   deletion_protection = var.deletion_protection
 
   cluster_identifier = local.cluster_name
