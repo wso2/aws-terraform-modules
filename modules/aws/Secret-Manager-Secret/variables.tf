@@ -32,3 +32,8 @@ variable "access_principals" {
   description = "Access principals for secret"
   default     = []
 }
+variable "recovery_window_in_days" {
+  type = number
+  description = "Recovery window in days for secret"
+  default = 7
+}
