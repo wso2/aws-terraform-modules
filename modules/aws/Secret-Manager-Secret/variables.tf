@@ -33,7 +33,7 @@ variable "access_principals" {
   default     = []
 }
 variable "recovery_window_in_days" {
-  type = number
+  type        = number
   description = "Recovery window in days for secret"
-  default = 7
+  default     = 7
 }

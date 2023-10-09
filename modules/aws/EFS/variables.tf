@@ -17,7 +17,7 @@ variable "availability_zone_name" {
 variable "encrypted" {
   description = "Whether the volume should be encrypted"
   type        = bool
-  default     = null
+  default     = true
 }
 variable "kms_key_id" {
   description = "The ARN of the AWS Key Management Service (AWS KMS) customer master key (CMK) to be used to protect the volume encryption key for the volume"

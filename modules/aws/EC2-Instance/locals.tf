@@ -16,9 +16,11 @@ locals {
   subnet_name = join("-", [local.name_prefix, "ec2-snet"])
   nic_name    = join("-", [local.name_prefix, "ec2-nic"])
   ip_name     = join("-", [local.name_prefix, "ec2-eip"])
+  volume_name = join("-", [local.name_prefix, "ec2-volume"])
   ec2_tags    = merge(var.tags, { Name : local.ec2_name })
   rt_tags     = merge(var.tags, { Name : local.rt_name })
   subnet_tags = merge(var.tags, { Name : local.subnet_name })
   nic_tags    = merge(var.tags, { Name : local.nic_name })
   ip_tags     = merge(var.tags, { Name : local.ip_name })
+  volume_tags = merge(var.tags, { Name : local.volume_name })
 }

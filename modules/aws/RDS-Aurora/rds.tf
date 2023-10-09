@@ -11,7 +11,7 @@
 
 resource "aws_rds_cluster" "rds_cluster" {
 
-  allow_major_version_upgrade     = var.allow_major_version_upgrade
+  allow_major_version_upgrade = var.allow_major_version_upgrade
 
   availability_zones = var.availability_zones
   network_type       = var.network_type
@@ -52,6 +52,9 @@ resource "aws_rds_cluster" "rds_cluster" {
 
   cluster_identifier = local.cluster_name
 
+  storage_encrypted = var.storage_encrypted
+  kms_key_id        = var.storage_encrypted == true ? var.kms_key_id : null
+
   dynamic "scaling_configuration" {
     for_each = var.enable_scaling_configuration == true && var.engine_mode == "serverless" ? [1] : []
     content {
@@ -82,9 +85,9 @@ resource "aws_rds_cluster_instance" "cluster_instances" {
   custom_iam_instance_profile = var.cluster_custom_iam_instance_profile == null ? each.value.custom_iam_instance_profile : var.cluster_custom_iam_instance_profile
   db_parameter_group_name     = var.db_cluster_parameter_group_name == null ? each.value.db_parameter_group_name : var.db_cluster_parameter_group_name
 
-  monitoring_interval                            = var.cluster_common_monitoring_interval == null ? each.value.monitoring_interval : var.cluster_common_monitoring_interval
-  monitoring_role_arn                            = var.cluster_common_monitoring_role_arn == null ? each.value.monitoring_role_arn : var.cluster_common_monitoring_role_arn
-  performance_insights_enabled                   = var.cluster_common_performance_insights_enabled == null ? each.value.performance_insights_enabled : var.cluster_common_performance_insights_enabled
+  monitoring_interval          = var.cluster_common_monitoring_interval == null ? each.value.monitoring_interval : var.cluster_common_monitoring_interval
+  monitoring_role_arn          = var.cluster_common_monitoring_role_arn == null ? each.value.monitoring_role_arn : var.cluster_common_monitoring_role_arn
+  performance_insights_enabled = var.cluster_common_performance_insights_enabled == null ? each.value.performance_insights_enabled : var.cluster_common_performance_insights_enabled
 
   preferred_backup_window      = var.preferred_backup_window != null ? null : each.value.preferred_backup_window
   preferred_maintenance_window = var.preferred_maintenance_window == null ? each.value.preferred_maintenance_window : var.preferred_maintenance_window

@@ -108,3 +108,18 @@ variable "enable_instance_connect" {
   description = "Flag to enable instance connect"
   default     = false
 }
+variable "kms_key_id" {
+  type        = string
+  description = "KMS Key ID to be used for encryption"
+  default     = null
+}
+variable "root_volume_size" {
+  type        = number
+  description = "Type of the volume"
+  default     = 20
+}
+variable "encrypt_root_volume" {
+  type        = bool
+  description = "Flag to encrypt the root volume"
+  default     = true
+}

@@ -176,15 +176,15 @@ variable "publicly_accessible" {
 variable "cluster_instances" {
   description = "List of cluster instances"
   type = map(object({
-    name                                  = string
-    custom_iam_instance_profile           = optional(string)
-    db_parameter_group_name               = optional(string)
-    instance_class                        = optional(string)
-    monitoring_interval                   = optional(number, 0)
-    monitoring_role_arn                   = optional(string)
-    performance_insights_enabled          = optional(bool, false)
-    preferred_backup_window               = optional(string)
-    preferred_maintenance_window          = optional(string)
+    name                         = string
+    custom_iam_instance_profile  = optional(string)
+    db_parameter_group_name      = optional(string)
+    instance_class               = optional(string)
+    monitoring_interval          = optional(number, 0)
+    monitoring_role_arn          = optional(string)
+    performance_insights_enabled = optional(bool, false)
+    preferred_backup_window      = optional(string)
+    preferred_maintenance_window = optional(string)
 
   }))
 }
@@ -213,4 +213,14 @@ variable "application" {
 variable "vpc_security_group_ids" {
   type        = list(string)
   description = "List of security group ids"
+}
+variable "storage_encrypted" {
+  type        = bool
+  description = "Flag to enable storage encryption"
+  default     = true
+}
+variable "kms_key_id" {
+  type        = string
+  description = "KMS key id"
+  default     = null
 }
