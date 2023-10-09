@@ -10,9 +10,11 @@
 # --------------------------------------------------------------------------------------
 
 locals {
-  eks_cluster_name_key = join("", ["k8s.io/cluster-autoscaler/", var.eks_cluster_name])
-  ng_tags              = merge(var.tags, { (local.eks_cluster_name_key) : "enabled", "k8s.io/cluster-autoscaler/enabled" : true })
-  ng_instance_tags     = merge(var.tags, { "Name" : join("-", [var.eks_cluster_name, var.node_group_name, "node-group-instance"]) })
-  ng_volume_tags       = merge(var.tags, { "Name" : join("-", [var.eks_cluster_name, var.node_group_name, "node-group-instance-volume"]) })
-
+  sg_name = join("-", [var.project, var.application, var.environment, var.region, "sg"])
+  sg_tags = merge(
+    var.tags,
+    {
+      "Name" = local.sg_name
+    }
+  )
 }

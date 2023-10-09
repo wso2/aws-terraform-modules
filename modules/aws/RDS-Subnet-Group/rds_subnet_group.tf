@@ -9,7 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_db_subnet_group" "db_subnet_group"{
+resource "aws_db_subnet_group" "db_subnet_group" {
   name       = join("-", [var.project, var.application, var.environment, var.region, "db-subnet-group"])
   subnet_ids = var.subnet_ids
   tags       = var.tags

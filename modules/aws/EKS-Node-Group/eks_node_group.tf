@@ -17,6 +17,11 @@ resource "aws_eks_node_group" "eks_node_group" {
   version         = var.k8s_version
   instance_types  = var.instance_types
 
+  launch_template {
+    name    = aws_launch_template.eks_launch_template.name
+    version = "$Latest"
+  }
+
   dynamic "taint" {
     for_each = var.taints
     content {
@@ -49,5 +54,32 @@ resource "aws_eks_node_group" "eks_node_group" {
     ignore_changes = [
       scaling_config.0.desired_size
     ]
+  }
+}
+
+resource "aws_launch_template" "eks_launch_template" {
+  name_prefix = join("-", [var.eks_cluster_name, var.node_group_name, "launch-template"])
+
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    ebs {
+      volume_size = var.node_disk_size
+      encrypted   = var.enable_encryption_at_rest
+      kms_key_id  = var.enable_encryption_at_rest == true ? var.kms_key_id : null
+    }
+  }
+
+  tag_specifications {
+    resource_type = "instance"
+    tags          = local.ng_instance_tags
+  }
+
+  tag_specifications {
+    resource_type = "volume"
+    tags          = local.ng_volume_tags
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }

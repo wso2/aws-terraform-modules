@@ -58,3 +58,18 @@ variable "instance_types" {
   type        = list(string)
   description = "Instance types to be associated with the VM"
 }
+variable "node_disk_size" {
+  type        = number
+  description = "Disk size of the worker nodes"
+  default     = 20
+}
+variable "kms_key_id" {
+  type        = string
+  description = "KMS key ID to be used for encrypting EBS volumes"
+  default     = null
+}
+variable "enable_encryption_at_rest" {
+  type        = bool
+  description = "Enable encryption at rest for EBS volumes"
+  default     = true
+}

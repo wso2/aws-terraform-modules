@@ -18,5 +18,5 @@ output "route_table_id" {
   depends_on = [aws_route_table.route_table]
 }
 output "subnet_name" {
-  value      = local.subnet_name
+  value = local.subnet_name
 }
