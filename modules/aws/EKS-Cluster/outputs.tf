@@ -14,11 +14,11 @@ output "eks_cluster_name" {
   depends_on = [aws_eks_cluster.eks_cluster]
 }
 output "eks_subnet_ids" {
-  value      = aws_subnet.eks_subnet.*.id
+  value      = aws_subnet.eks_subnet[*].id
   depends_on = [aws_subnet.eks_subnet]
 }
 output "eks_security_group_rule_id" {
-  value      = aws_eks_cluster.eks_cluster.vpc_config.0.cluster_security_group_id
+  value      = aws_eks_cluster.eks_cluster.vpc_config[0].cluster_security_group_id
   depends_on = [aws_subnet.eks_subnet]
 }
 output "autoscaler_role_arn" {

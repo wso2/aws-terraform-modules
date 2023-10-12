@@ -22,7 +22,7 @@ resource "aws_instance" "ec2_instance" {
   instance_type     = var.ec2_instance_type
   availability_zone = var.availability_zone
 
-  key_name = var.add_ssh_key == true ? aws_key_pair.key_pair.0.key_name : null
+  key_name = var.add_ssh_key == true ? aws_key_pair.key_pair[0].key_name : null
 
   tags = local.ec2_tags
 

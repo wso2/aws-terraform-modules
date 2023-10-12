@@ -30,15 +30,6 @@ variable "tags" {
   description = "Default tags to be associated with the Resource"
   default     = {}
 }
-variable "vpc_id" {
-  type        = string
-  description = "ID of the VPC"
-}
-variable "availability_zone" {
-  type        = string
-  description = "Avaialability zone of the Subnet"
-  default     = null
-}
 variable "subnet_id" {
   type        = string
   description = "ID of the Subnet to host the NAT Gateway"

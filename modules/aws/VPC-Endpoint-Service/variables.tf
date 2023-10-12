@@ -32,6 +32,7 @@ variable "tags" {
 }
 variable "acceptance_required" {
   description = "Whether to check for acceptance of the Endpoint service request from service provider"
+  type        = bool
   default     = true
 }
 variable "network_load_balancer_arns" {

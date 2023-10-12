@@ -31,7 +31,7 @@ resource "aws_iam_policy" "ecr_admin_iam_policy" {
           "ecr:CompleteLayerUpload"
         ],
         Effect   = "Allow",
-        Resource = "${aws_ecr_repository.ecr_repository.arn}"
+        Resource = aws_ecr_repository.ecr_repository.arn
       }
     ]
   })
@@ -54,7 +54,7 @@ resource "aws_iam_policy" "ecr_pull_only_iam_policy" {
           "ecr:BatchCheckLayerAvailability"
         ],
         Effect   = "Allow",
-        Resource = "${aws_ecr_repository.ecr_repository.arn}"
+        Resource = aws_ecr_repository.ecr_repository.arn
       }
     ]
   })

@@ -123,11 +123,6 @@ variable "replication_source_identifier" {
   type        = string
   default     = null
 }
-variable "storage_type" {
-  description = "Storage type"
-  type        = string
-  default     = ""
-}
 variable "enable_scaling_configuration" {
   description = "Flag to enable scaling configuration"
   type        = bool
@@ -162,11 +157,6 @@ variable "cluster_common_performance_insights_enabled" {
   description = "Performance insights enabled for all instances"
   type        = bool
   default     = false
-}
-variable "cluster_common_performance_insights_insights_retention_period" {
-  description = "Performance insights retention period for all instances"
-  type        = number
-  default     = 0
 }
 variable "publicly_accessible" {
   description = "Flag to make the DB publicly accessible"
