@@ -19,7 +19,7 @@ resource "aws_eks_cluster" "eks_cluster" {
     endpoint_private_access = var.endpoint_private_access
     endpoint_public_access  = var.endpoint_public_access
     public_access_cidrs     = var.public_access_cidrs
-    subnet_ids              = aws_subnet.eks_subnet.*.id
+    subnet_ids              = aws_subnet.eks_subnet[*].id
   }
 
   kubernetes_network_config {

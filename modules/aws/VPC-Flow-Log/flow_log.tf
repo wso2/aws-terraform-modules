@@ -22,6 +22,6 @@ resource "aws_flow_log" "flow_log" {
   log_format                    = var.log_format
 
   max_aggregation_interval = var.max_aggregation_interval
-  iam_role_arn             = var.log_destination_type == "cloud-watch-logs" ? aws_iam_role.iam_role.0.arn : null
+  iam_role_arn             = var.log_destination_type == "cloud-watch-logs" ? aws_iam_role.iam_role[0].arn : null
   tags                     = local.flow_log_tags
 }

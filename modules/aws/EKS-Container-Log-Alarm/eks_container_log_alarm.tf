@@ -36,6 +36,8 @@ resource "aws_cloudwatch_metric_alarm" "metric_alarm" {
   extended_statistic  = var.extended_statistic
   threshold           = var.threshold
 
+  actions_enabled = var.enabled
+
   alarm_actions             = var.alarm_actions
   ok_actions                = var.ok_actions
   insufficient_data_actions = var.insufficient_data_actions
