@@ -9,9 +9,24 @@
 #
 # --------------------------------------------------------------------------------------
 
+# Scan on Push is configured as a customizable parameter
+# Usage of CMK for encryption is provided as a customizable parameter
+# trivy:ignore:AVD-AWS-0030
+# trivy:ignore:AVD-AWS-0033
 resource "aws_ecr_repository" "ecr_repository" {
   name = join("-", [var.project, var.application, var.environment, var.region, "ecr"])
   tags = var.tags
+
+  image_tag_mutability = var.image_tag_mutability
+
+  image_scanning_configuration {
+    scan_on_push = var.scan_on_push # Custom parameter for AVD-AWS-0030
+  }
+
+  encryption_configuration {
+    encryption_type = var.encryption_type # Custom parameter for AVD-AWS-0033
+    kms_key         = var.encryption_type == "KMS" ? var.kms_key : null
+  }
 }
 
 resource "aws_iam_policy" "ecr_admin_iam_policy" {

@@ -28,6 +28,8 @@ resource "aws_iam_role" "iam_role" {
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
+# Permissions required as defined at https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs-cwl.html
+# trivy:ignore:AVD-AWS-0057
 data "aws_iam_policy_document" "iam_policy_document" {
   statement {
     effect = "Allow"

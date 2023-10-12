@@ -61,6 +61,8 @@ resource "aws_iam_role_policy_attachment" "amazon_cloud_watch_agent_policy" {
   ]
 }
 
+# Recommended Policy as per https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#full-cluster-autoscaler-features-policy-recommended
+# trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "node_group_autoscaler_policy" {
   name = join("-", [var.eks_cluster_name, var.node_group_name, "eks-cluster-auto-scaler-policy"])
   policy = jsonencode({

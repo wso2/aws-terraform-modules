@@ -45,3 +45,8 @@ variable "tags" {
   description = "Tags to be added to the security group"
   default     = {}
 }
+variable "kms_master_key_id" {
+  type        = string
+  description = "The ID of an AWS-managed customer master key (CMK) for Amazon SNS or a custom CMK"
+  default     = null
+}

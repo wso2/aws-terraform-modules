@@ -68,7 +68,6 @@ variable "event_selector" {
 variable "kms_key_arn" {
   type        = string
   description = "Specifies the KMS key ARN to use to encrypt the logs delivered by CloudTrail"
-  default     = ""
 }
 variable "is_organization_trail" {
   type        = bool

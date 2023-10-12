@@ -72,6 +72,8 @@ resource "aws_iam_role" "cluster_autoscaler_role" {
   ]
 }
 # IAM Policy for IAM Cluster Autoscaler role allowing ASG operations
+# Recommended Policy as per https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#full-cluster-autoscaler-features-policy-recommended
+# trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "cluster_autoscaler_policy" {
   name = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-autoscaler-iam-policy"])
   policy = jsonencode({
@@ -104,6 +106,8 @@ resource "aws_iam_role_policy_attachment" "eks_ca_iam_policy_attach" {
 }
 
 # IAM Role for EFS
+# Tag Definition only allows for accessing resources with a specific tag
+# trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "node_efs_policy" {
   name        = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-efs-iam-policy"])
   path        = "/"
@@ -122,6 +126,11 @@ resource "aws_iam_policy" "node_efs_policy" {
         ],
         "Effect" : "Allow",
         "Resource" : "*",
+        "Condition" : {
+          "StringEquals" : {
+            "aws:RequestTag/eks-cluster-usage" : aws_eks_cluster.eks_cluster.name # Special Tag definition for AVD-AWS-0057
+          }
+        }
         "Sid" : ""
       }
     ],
@@ -144,7 +153,10 @@ resource "aws_iam_role" "cluster_loadbalancer_role" {
     data.aws_iam_policy_document.cluster_lb_sts_policy
   ]
 }
-# IAM Policy for IAM Cluster Autoscaler role allowing ASG operations
+# IAM Policy for Cluster Load Balancer
+# Per the required policy definition defined at https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.5.4/docs/install/iam_policy.json
+# Based on the following doc https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html
+# trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "cluster_loadbalancer_policy" {
   name = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-lb-iam-policy"])
   policy = jsonencode({
@@ -400,7 +412,7 @@ resource "aws_iam_role_policy_attachment" "cluster_loadbalancer_policy_attach" {
   ]
 }
 
-# IAM Role for IAM Cluster Autoscaler
+# IAM Role for CloudWatch Agents
 resource "aws_iam_role" "cluster_container_cloudwatch_streamer_role" {
   assume_role_policy = data.aws_iam_policy_document.cluster_container_cloudwatch_streamer_sts_policy.json
   name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-ccw-iam-role"])

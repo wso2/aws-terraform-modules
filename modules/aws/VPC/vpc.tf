@@ -9,6 +9,8 @@
 #
 # --------------------------------------------------------------------------------------
 
+# Flow logs are enabled via a separate module at the subnet level (Refer VPC-Flow-Log Module)
+# trivy:ignore:AVD-AWS-0178
 resource "aws_vpc" "vpc" {
   cidr_block           = var.vpc_cidr_block
   enable_dns_support   = var.enable_dns_support

@@ -14,6 +14,8 @@ resource "aws_iam_user" "ecr_access_user" {
   tags = var.tags
 }
 
+# Ignoring as this IAM User is an Admin user used for accessing any ECR repository
+#trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "ecr_access_policy" {
   name = join("-", [var.project, var.application, var.environment, var.region, "ecr-access-iam-policy"])
   tags = var.tags
