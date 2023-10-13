@@ -17,7 +17,6 @@ resource "aws_elasticache_replication_group" "elasticache_replication_group" {
   at_rest_encryption_enabled = var.at_rest_encryption_enabled
   num_cache_clusters         = var.num_cache_clusters
   automatic_failover_enabled = var.automatic_failover_enabled
-  availability_zones         = var.availability_zones
   replication_group_id       = join("-", [var.project, var.application, var.environment, var.region, "ec-rds-rg"])
   node_type                  = var.node_type
 
@@ -25,6 +24,8 @@ resource "aws_elasticache_replication_group" "elasticache_replication_group" {
   port                 = var.port
   subnet_group_name    = var.subnet_group_name
   security_group_ids   = var.security_group_ids
+
+  preferred_cache_cluster_azs = var.availability_zones
 
   snapshot_window          = var.snapshot_window
   maintenance_window       = var.maintenance_window
