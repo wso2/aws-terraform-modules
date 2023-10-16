@@ -9,8 +9,13 @@
 #
 # --------------------------------------------------------------------------------------
 
-# Scan on Push is configured as a customizable parameter
-# Usage of CMK for encryption is provided as a customizable parameter
+# AVD-AWS-0030 checks whether AWS's default scanning tool is enabled for the ECR repository,
+# This ideally should be a customized parameter, based on the user's requirement
+# https://avd.aquasec.com/misconfig/aws/ecr/avd-aws-0030/
+# AVD-AWS-0033 checks whether AWS's default encryption is enabled for the ECR repository,
+# While it has been enabled by default at the module level (check `encryption_type`) users may configure it
+# as per their requirement
+# https://avd.aquasec.com/misconfig/aws/ecr/avd-aws-0033/
 # trivy:ignore:AVD-AWS-0030
 # trivy:ignore:AVD-AWS-0033
 resource "aws_ecr_repository" "ecr_repository" {

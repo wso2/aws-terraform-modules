@@ -61,7 +61,10 @@ resource "aws_iam_role_policy_attachment" "amazon_cloud_watch_agent_policy" {
   ]
 }
 
-# Recommended Policy as per https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#full-cluster-autoscaler-features-policy-recommended
+# avd-aws-0057 misconfig checks for IAM policy with wildcards for resource scope.
+# This however is an AWS Recommended Policy as per https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#full-cluster-autoscaler-features-policy-recommended
+# This policy provides the necessary permissions for configuring the cluster autoscaler
+# https://avd.aquasec.com/misconfig/aws/iam/avd-aws-0057/
 # trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "node_group_autoscaler_policy" {
   name = join("-", [var.eks_cluster_name, var.node_group_name, "eks-cluster-auto-scaler-policy"])

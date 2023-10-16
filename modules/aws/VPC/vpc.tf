@@ -9,7 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
-# Flow logs are enabled via a separate module at the subnet level (Refer VPC-Flow-Log Module)
+# avd-aws-0178 checks for whether flow logs are enabled.
+# However whether flow logs are required  via a separate module at the subnet level (Refer VPC-Flow-Log Module)
+# # https://avd.aquasec.com/misconfig/aws/iam/avd-aws-0178
 # trivy:ignore:AVD-AWS-0178
 resource "aws_vpc" "vpc" {
   cidr_block           = var.vpc_cidr_block

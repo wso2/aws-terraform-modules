@@ -9,7 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
-# Defines internal/external usage of the LB
+# avd-aws-0053 checks whether the Load Balancer is internal or not.
+# However based on the use case we may need public load balancers which has been configured as a parameter.
+# https://avd.aquasec.com/misconfig/aws/iam/avd-aws-0053/
 # trivy:ignore:AVD-AWS-0053
 resource "aws_lb" "lb" {
   name               = join("-", [var.project, var.application, var.environment, var.region, "elb"])

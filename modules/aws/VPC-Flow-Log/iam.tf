@@ -28,7 +28,10 @@ resource "aws_iam_role" "iam_role" {
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
-# Permissions required as defined at https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs-cwl.html
+# avd-aws-0057 misconfig checks for IAM policy with wildcards for resource scope.
+# This however is an AWS Recommended Policy as per https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs-cwl.html
+# This policy allows the User publishing Flow logs to Cloudwatch with the required permissions.
+# https://avd.aquasec.com/misconfig/aws/iam/avd-aws-0057/
 # trivy:ignore:AVD-AWS-0057
 data "aws_iam_policy_document" "iam_policy_document" {
   statement {
