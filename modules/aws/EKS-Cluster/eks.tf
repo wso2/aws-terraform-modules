@@ -9,9 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
-# avd-aws-0038 Checks whether cluster has logging enabled, but this may not be required based on the purpose of the cluster.
-# As such this has been configured as a parameter
-# https://avd.aquasec.com/misconfig/aws/ecr/avd-aws-0038/
+# Ignore: AVD-AWS-0038 (https://avd.aquasec.com/misconfig/aws/ecr/avd-aws-0038/)
+# Reason: Requirement to enable logs for EKS cluster will vary based on cluster purpose and requirements
+# Therefore has not been enforced as a requirement
 # trivy:ignore:AVD-AWS-0038
 resource "aws_eks_cluster" "eks_cluster" {
   name     = join("-", [var.project, var.application, var.environment, var.region, "eks"])

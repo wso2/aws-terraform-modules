@@ -72,10 +72,9 @@ resource "aws_iam_role" "cluster_autoscaler_role" {
   ]
 }
 
-# avd-aws-0057 misconfig checks for IAM policy with wildcards for resource scope.
-# This however is an AWS Recommended Policy as per https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#full-cluster-autoscaler-features-policy-recommended
-# This policy provides the necessary permissions for configuring the cluster autoscaler
-# https://avd.aquasec.com/misconfig/aws/iam/avd-aws-0057/
+# Ignore: AVD-AWS-0057 (https://avd.aquasec.com/misconfig/aws/iam/avd-aws-0057/)
+# Reason: This policy provides the necessary permissions for configuring the cluster autoscaler
+# AWS Documentation: https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#full-cluster-autoscaler-features-policy-recommended
 # trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "cluster_autoscaler_policy" {
   name = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-autoscaler-iam-policy"])
@@ -108,10 +107,9 @@ resource "aws_iam_role_policy_attachment" "eks_ca_iam_policy_attach" {
   ]
 }
 
-# avd-aws-0057 misconfig checks for IAM policy with wildcards for resource scope.
+# Ignore: AVD-AWS-0057 (https://avd.aquasec.com/misconfig/aws/iam/avd-aws-0057/)
+# Reason: This policy provides the necessary permissions for the EKS cluster to mount an EFS as a persistent volume
 # Despite the wildcard, the tag definition only allows for accessing resources with a specific tag
-# This policy provides the necessary permissions for the EKS cluster to mount an EFS as a persistent volume
-# https://avd.aquasec.com/misconfig/aws/iam/avd-aws-0057/
 # trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "node_efs_policy" {
   name        = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-efs-iam-policy"])
@@ -158,11 +156,9 @@ resource "aws_iam_role" "cluster_loadbalancer_role" {
     data.aws_iam_policy_document.cluster_lb_sts_policy
   ]
 }
-# avd-aws-0057 misconfig checks for IAM policy with wildcards for resource scope.
-# This however is an AWS Recommended Policy as per https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.5.4/docs/install/iam_policy.json
-# which was based on the following doc https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html
-# This policy provides the necessary permissions for the EKS cluster to create AWS Load Balancers
-# https://avd.aquasec.com/misconfig/aws/iam/avd-aws-0057/
+# Ignore: AVD-AWS-0057 (https://avd.aquasec.com/misconfig/aws/iam/avd-aws-0057/)# This however is an AWS Recommended Policy as per https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.5.4/docs/install/iam_policy.json
+# Reason: This policy provides the necessary permissions for the EKS cluster to create AWS Load Balancers
+# AWS Documentation: https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html
 # trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "cluster_loadbalancer_policy" {
   name = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-lb-iam-policy"])
