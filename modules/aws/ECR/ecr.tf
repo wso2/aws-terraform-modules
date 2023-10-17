@@ -9,9 +9,27 @@
 #
 # --------------------------------------------------------------------------------------
 
+# Ignore: AVD-AWS-0030 (https://avd.aquasec.com/misconfig/aws/ecr/avd-aws-0030/)
+# Reason: Scanning on Image push should not be enabled by default and should be customizable per user requirement
+# Ignore: AVD-AWS-0033 (https://avd.aquasec.com/misconfig/aws/ecr/avd-aws-0033/)
+# Reason: While it has been enabled by default at the module level (check `encryption_type`)
+# Further use of customer managed keys will be required per user requirement
+# trivy:ignore:AVD-AWS-0030
+# trivy:ignore:AVD-AWS-0033
 resource "aws_ecr_repository" "ecr_repository" {
   name = join("-", [var.project, var.application, var.environment, var.region, "ecr"])
   tags = var.tags
+
+  image_tag_mutability = var.image_tag_mutability
+
+  image_scanning_configuration {
+    scan_on_push = var.scan_on_push # Custom parameter for AVD-AWS-0030
+  }
+
+  encryption_configuration {
+    encryption_type = var.encryption_type # Custom parameter for AVD-AWS-0033
+    kms_key         = var.encryption_type == "KMS" ? var.kms_key : null
+  }
 }
 
 resource "aws_iam_policy" "ecr_admin_iam_policy" {

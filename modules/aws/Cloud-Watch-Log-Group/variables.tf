@@ -23,3 +23,8 @@ variable "retention_in_days" {
   type        = number
   default     = 30
 }
+variable "kms_key_id" {
+  description = "The ARN of the KMS Key to use when encrypting log data."
+  type        = string
+  default     = null
+}

@@ -9,9 +9,12 @@
 #
 # --------------------------------------------------------------------------------------
 
+# Ignore: AVD-AWS-0053 (https://avd.aquasec.com/misconfig/aws/elb/avd-aws-0053/)
+# Reason: We may need public load balancers. As such this has been configured as a parameter.
+# trivy:ignore:AVD-AWS-0053
 resource "aws_lb" "lb" {
   name               = join("-", [var.project, var.application, var.environment, var.region, "elb"])
-  internal           = var.internal_usage_flag
+  internal           = var.internal_usage_flag # Defines the Load balancer network connectivity required by AVD-AWS-0053
   load_balancer_type = var.load_balancer_type
   security_groups    = var.security_group_ids
   subnets            = var.subnet_ids

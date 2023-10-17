@@ -30,3 +30,23 @@ variable "tags" {
   description = "Tags to be associated with the EKS"
   default     = {}
 }
+variable "encryption_type" {
+  type        = string
+  description = "Encryption type for the ECR"
+  default     = "AES256"
+}
+variable "kms_key" {
+  type        = string
+  description = "KMS key ID for the ECR"
+  default     = null
+}
+variable "scan_on_push" {
+  type        = bool
+  description = "Whether to scan on push"
+  default     = false
+}
+variable "image_tag_mutability" {
+  type        = string
+  description = "Whether to allow image tag mutability"
+  default     = "IMMUTABLE"
+}

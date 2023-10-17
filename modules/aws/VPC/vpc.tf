@@ -9,6 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
+# Ignore: AVD-AWS-0178 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-0178)
+# Reason: For more granular control Flow logs are enabled at the subnet level via a separate module at the subnet level (Refer VPC-Flow-Log Module), instead of the VPC level.
+# trivy:ignore:AVD-AWS-0178
 resource "aws_vpc" "vpc" {
   cidr_block           = var.vpc_cidr_block
   enable_dns_support   = var.enable_dns_support

@@ -14,6 +14,9 @@ resource "aws_iam_user" "ecr_access_user" {
   tags = var.tags
 }
 
+# Ignore: AVD-AWS-0057 (https://avd.aquasec.com/misconfig/aws/iam/avd-aws-0057/)
+# Reason: This if for an Admin user with access to all ECR resources. Hence, the wildcard is required.
+# trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "ecr_access_policy" {
   name = join("-", [var.project, var.application, var.environment, var.region, "ecr-access-iam-policy"])
   tags = var.tags
