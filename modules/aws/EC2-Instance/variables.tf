@@ -123,3 +123,13 @@ variable "encrypt_root_volume" {
   description = "Flag to encrypt the root volume"
   default     = true
 }
+variable "imds_enabled" {
+  type        = string
+  description = "Flag to enable IMDS"
+  default     = "required"
+}
+variable "user_data" {
+  type        = string
+  description = "User data to be passed to the EC2 instance"
+  default     = null
+}

@@ -73,3 +73,8 @@ variable "enable_encryption_at_rest" {
   description = "Enable encryption at rest for EBS volumes"
   default     = true
 }
+variable "imds_enabled" {
+  type        = string
+  description = "Flag to enable IMDS"
+  default     = "required"
+}

@@ -33,10 +33,16 @@ resource "aws_instance" "ec2_instance" {
     network_interface_id = aws_network_interface.ec2_network_interface.id
   }
 
+  metadata_options {
+    http_tokens = var.imds_enabled
+  }
+
   root_block_device {
     encrypted   = var.encrypt_root_volume
     kms_key_id  = var.encrypt_root_volume == true ? var.kms_key_id : null
     volume_size = var.root_volume_size
     tags        = local.volume_tags
   }
+
+  user_data = var.user_data
 }
