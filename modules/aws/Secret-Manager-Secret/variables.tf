@@ -37,3 +37,8 @@ variable "recovery_window_in_days" {
   description = "Recovery window in days for secret"
   default     = 7
 }
+variable "kms_key_id" {
+  type        = string
+  description = "KMS key id for secret"
+  default     = null
+}
