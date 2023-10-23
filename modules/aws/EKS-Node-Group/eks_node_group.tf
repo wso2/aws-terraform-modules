@@ -79,6 +79,10 @@ resource "aws_launch_template" "eks_launch_template" {
     tags          = local.ng_volume_tags
   }
 
+  metadata_options {
+    http_tokens = var.imds_enabled
+  }
+
   lifecycle {
     create_before_destroy = true
   }

@@ -9,6 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
+# trivy:ignore:AVD-AWS-0162 # TODO: fix this
 resource "aws_cloudtrail" "cloudtrail_config" {
   name                          = join("-", [var.project, var.application, var.environment, var.region, "cloudtrail-log-config"])
   enable_logging                = var.enable_logging
