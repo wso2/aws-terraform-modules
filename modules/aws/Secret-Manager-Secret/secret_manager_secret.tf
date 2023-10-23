@@ -9,10 +9,11 @@
 #
 # --------------------------------------------------------------------------------------
 
-# trivy:ignore:AVD-AWS-0098 # TODO: fix this
 resource "aws_secretsmanager_secret" "secretsmanager_secret" {
   name                    = var.secret_name
   recovery_window_in_days = var.recovery_window_in_days
+
+  kms_key_id = var.kms_key_id
 
   tags = var.tags
 }
