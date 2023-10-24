@@ -50,7 +50,7 @@ resource "aws_route_table_association" "route_table_association" {
 
 resource "aws_network_interface" "ec2_network_interface" {
   subnet_id       = var.use_existing_subnet == true ? var.vpc_subnet_id : aws_subnet.ec2_subnet[0].id
-  private_ips     = var.ip_type == "Static" ? [var.private_ip] : null
+  private_ips     = var.ip_address_allocation_method == "Static" ? [var.private_ip] : null
   tags            = local.nic_tags
   security_groups = var.security_group_ids
 }
