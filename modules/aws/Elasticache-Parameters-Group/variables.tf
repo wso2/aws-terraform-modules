@@ -36,5 +36,5 @@ variable "parameters" {
 variable "tags" {
   type        = map(string)
   description = "Tags to be added to the resource"
-  string      = {}
+  default     = {}
 }

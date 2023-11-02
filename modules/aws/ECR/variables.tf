@@ -12,22 +12,18 @@
 variable "project" {
   type        = string
   description = "Name of the project"
-  default     = null
 }
 variable "environment" {
   type        = string
   description = "Name of the environment"
-  default     = null
 }
 variable "region" {
   type        = string
   description = "Code of the region"
-  default     = null
 }
 variable "application" {
   type        = string
   description = "Purpose of the ECR"
-  default     = null
 }
 variable "tags" {
   type        = map(string)
