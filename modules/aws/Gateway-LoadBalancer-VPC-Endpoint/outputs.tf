@@ -9,14 +9,15 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_vpc_endpoint" "gw_lb_vpc_endpoint" {
-  vpc_id            = var.vpc_id
-  service_name      = var.gateway_lb_service_name
-  vpc_endpoint_type = var.gateway_lb_service_type
-
-  security_group_ids  = var.endpoint_security_group_ids
-  subnet_ids          = var.subnet_ids
-  private_dns_enabled = var.endpoint_private_dns_enabled
-  tags                = local.tags
-
+output "vpc_endpoint_arn" {
+  value      = aws_vpc_endpoint.gw_lb_vpc_endpoint.arn
+  depends_on = [aws_vpc_endpoint.gw_lb_vpc_endpoint]
+}
+output "vpc_endpoint_id" {
+  value      = aws_vpc_endpoint.gw_lb_vpc_endpoint.id
+  depends_on = [aws_vpc_endpoint.gw_lb_vpc_endpoint]
+}
+output "vpc_endpoint_name" {
+  value      = aws_vpc_endpoint.gw_lb_vpc_endpoint.service_name
+  depends_on = [aws_vpc_endpoint.gw_lb_vpc_endpoint]
 }

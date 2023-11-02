@@ -17,7 +17,7 @@
 # trivy:ignore:AVD-AWS-0030
 # trivy:ignore:AVD-AWS-0033
 resource "aws_ecr_repository" "ecr_repository" {
-  name = join("-", [var.project, var.application, var.environment, var.region, "ecr"])
+  name = var.generate_name == true ? join("-", [var.project, var.application, var.environment, var.region, "ecr"]) : var.image_repo_name
   tags = var.tags
 
   image_tag_mutability = var.image_tag_mutability

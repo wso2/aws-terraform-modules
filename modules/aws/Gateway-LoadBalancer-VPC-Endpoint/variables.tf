@@ -34,11 +34,6 @@ variable "vpc_id" {
   type        = string
   description = "ID of the VPC the endpoint is associated with"
 }
-variable "endpoint_security_group_ids" {
-  type        = list(string)
-  description = "Security groups that should be associated with the EP"
-  default     = []
-}
 variable "subnet_ids" {
   type        = list(string)
   description = "Subnet IDs where the VPC EP should exist"
@@ -49,13 +44,9 @@ variable "endpoint_private_dns_enabled" {
   description = "ID of the VPC the endpoint is associated with"
   default     = true
 }
-variable "gateway_lb_service_name" {
+variable "gateway_service_name" {
   type        = string
   description = "Service endpoint to be used for the VPC Endpoint"
-}
-variable "gateway_lb_service_type" {
-  type        = string
-  description = "Service Type to be used for the VPC Endpoint"
 }
 variable "service_short_hand_name" {
   type        = string
