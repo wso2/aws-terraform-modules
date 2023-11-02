@@ -23,7 +23,7 @@ variable "region" {
 }
 variable "application" {
   type        = string
-  description = "Purpose of the SSM Endpoint"
+  description = "Purpose of the Endpoint"
 }
 variable "tags" {
   type        = map(string)
