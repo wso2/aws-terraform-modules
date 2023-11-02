@@ -63,5 +63,5 @@ variable "is_multi_region" {
 variable "enable_key_rotation" {
   type        = bool
   description = "Specifies whether key rotation is enabled. Defaults to false."
-  default     = false
+  default     = true
 }
