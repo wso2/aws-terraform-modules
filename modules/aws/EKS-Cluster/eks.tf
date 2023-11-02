@@ -13,7 +13,6 @@
 # Reason: Requirement to enable logs for EKS cluster will vary based on cluster purpose and requirements
 # Therefore has not been enforced as a requirement
 # trivy:ignore:AVD-AWS-0038
-# trivy:ignore:AVD-AWS-0039 # TODO: fix this
 resource "aws_eks_cluster" "eks_cluster" {
   name     = join("-", [var.project, var.application, var.environment, var.region, "eks"])
   role_arn = aws_iam_role.iam_role.arn
@@ -25,6 +24,16 @@ resource "aws_eks_cluster" "eks_cluster" {
     endpoint_public_access  = var.endpoint_public_access
     public_access_cidrs     = var.public_access_cidrs
     subnet_ids              = aws_subnet.eks_subnet[*].id
+  }
+
+  dynamic "encryption_config" {
+    for_each = var.secret_encryption_cmk != null ? [1] : []
+    content {
+      provider = {
+        key_arn = var.secret_encryption_cmk
+      }
+      resources = ["secrets"]
+    }
   }
 
   kubernetes_network_config {

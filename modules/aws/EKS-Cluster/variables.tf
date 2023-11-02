@@ -64,6 +64,11 @@ variable "subnet_details" {
   }))
   default = []
 }
+variable "secret_encryption_cmk" {
+  type        = string
+  description = "KMS Key ID for encrypting Kubernetes secrets"
+  default     = null
+}
 variable "enabled_cluster_log_types" {
   type        = list(string)
   description = "List of cluster log types to enable"
