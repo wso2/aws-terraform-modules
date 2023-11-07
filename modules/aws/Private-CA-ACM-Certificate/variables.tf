@@ -9,12 +9,21 @@
 #
 # --------------------------------------------------------------------------------------
 
-terraform {
-  required_version = ">= 1.3.8"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
+variable "tags" {
+  description = "Tags to be associated with the resource"
+  type        = map(string)
+  default     = {}
+}
+variable "domain_name" {
+  description = "Domain name"
+  type        = string
+}
+variable "subject_alternative_names" {
+  description = "Subject alternative names"
+  type        = list(string)
+  default     = []
+}
+variable "certificate_authority_arn" {
+  description = "Certificate authority arn"
+  type        = string
 }

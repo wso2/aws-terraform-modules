@@ -9,6 +9,8 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-  name_prefix = "${var.project}-${var.application}-${var.environment}-${var.region}"
+resource "aws_vpc_endpoint_route_table_association" "vpc_endpoint_route_table_association" {
+  count           = length(var.route_table_ids)
+  vpc_endpoint_id = var.vpc_endpoint_id
+  route_table_id  = var.route_table_ids[count.index]
 }

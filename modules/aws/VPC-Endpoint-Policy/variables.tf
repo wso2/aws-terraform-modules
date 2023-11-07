@@ -9,6 +9,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-  name_prefix = "${var.project}-${var.application}-${var.environment}-${var.region}"
+variable "vpc_endpoint_id" {
+  type        = string
+  description = "ID of the VPC endpoint"
+}
+variable "policy" {
+  type        = string
+  description = "policy"
+  default     = null
 }

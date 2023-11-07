@@ -9,15 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "vpc_endpoint_arn" {
-  value      = aws_vpc_endpoint.gw_lb_vpc_endpoint.arn
-  depends_on = [aws_vpc_endpoint.gw_lb_vpc_endpoint]
-}
-output "vpc_endpoint_id" {
-  value      = aws_vpc_endpoint.gw_lb_vpc_endpoint.id
-  depends_on = [aws_vpc_endpoint.gw_lb_vpc_endpoint]
-}
-output "vpc_endpoint_name" {
-  value      = aws_vpc_endpoint.gw_lb_vpc_endpoint.service_name
-  depends_on = [aws_vpc_endpoint.gw_lb_vpc_endpoint]
+resource "aws_vpc_endpoint_policy" "vpc_endpoint_policy" {
+  vpc_endpoint_id = var.vpc_endpoint_id
+  policy          = var.policy
 }

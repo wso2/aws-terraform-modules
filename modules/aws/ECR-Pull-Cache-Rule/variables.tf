@@ -9,6 +9,11 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-  name_prefix = "${var.project}-${var.application}-${var.environment}-${var.region}"
+variable "ecr_repository_prefix" {
+  type        = string
+  description = "ECR repository prefix"
+}
+variable "upstream_registry_url" {
+  type        = string
+  description = "Upstream registry url"
 }

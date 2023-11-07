@@ -11,5 +11,5 @@
 
 resource "aws_iam_role_policy_attachment" "amazon_eks_pc_resource_controller" {
   policy_arn = var.iam_policy_arn
-  role       = var.iam_role_arn
+  role       = var.iam_role_name
 }

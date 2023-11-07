@@ -9,13 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_vpc_endpoint" "gw_lb_vpc_endpoint" {
-  vpc_id            = var.vpc_id
-  service_name      = var.gateway_service_name
-  vpc_endpoint_type = "GatewayLoadBalancer"
-
-  subnet_ids = var.subnet_ids
-
-  private_dns_enabled = var.endpoint_private_dns_enabled
-  tags                = local.tags
+output "private_ca_arn" {
+  value = aws_acmpca_certificate_authority.acmpca_certificate_authority.arn
+}
+output "private_ca_id" {
+  value = aws_acmpca_certificate_authority.acmpca_certificate_authority.id
 }

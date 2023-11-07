@@ -9,6 +9,11 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-  name_prefix = "${var.project}-${var.application}-${var.environment}-${var.region}"
+resource "aws_acm_certificate" "cert" {
+  domain_name               = var.domain_name
+  certificate_authority_arn = var.certificate_authority_arn
+
+  subject_alternative_names = var.subject_alternative_names
+
+  tags = var.tags
 }

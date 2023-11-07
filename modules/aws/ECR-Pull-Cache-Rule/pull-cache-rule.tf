@@ -9,6 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-  name_prefix = "${var.project}-${var.application}-${var.environment}-${var.region}"
+resource "aws_ecr_pull_through_cache_rule" "ecr_pull_through_cache_rule" {
+  ecr_repository_prefix = var.ecr_repository_prefix
+  upstream_registry_url = var.upstream_registry_url
 }

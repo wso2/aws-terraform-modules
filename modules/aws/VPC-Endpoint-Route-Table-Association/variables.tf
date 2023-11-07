@@ -9,6 +9,11 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-  name_prefix = "${var.project}-${var.application}-${var.environment}-${var.region}"
+variable "vpc_endpoint_id" {
+  type        = string
+  description = "The ID of the VPC endpoint."
+}
+variable "route_table_ids" {
+  type        = list(string)
+  description = "The IDs of the route table."
 }

@@ -9,6 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-  name_prefix = "${var.project}-${var.application}-${var.environment}-${var.region}"
+output "vpc_endpoint_id" {
+  value      = aws_vpc_endpoint.gw_lb_vpc_endpoint.id
+  depends_on = [aws_vpc_endpoint.gw_lb_vpc_endpoint]
 }
