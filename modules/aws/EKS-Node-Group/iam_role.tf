@@ -97,6 +97,10 @@ resource "aws_iam_role_policy_attachment" "eks_ca_iam_policy_attach" {
   ]
 }
 
+# Ignore: AVD-AWS-0057 (https://avd.aquasec.com/misconfig/aws/iam/avd-aws-0057/)
+# Reason: This policy provides the necessary permissions to use pull through cache to the Node Group
+# AWS Documentation: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache.html
+# trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "amazon_ec2_cache_policy" {
   name = join("-", [var.eks_cluster_name, var.node_group_name, "eks-cluster-ecr-pull-cache-policy"])
   policy = jsonencode({
