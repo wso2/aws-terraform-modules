@@ -25,6 +25,7 @@ resource "aws_iam_role" "iam_role" {
   tags = var.tags
 }
 
+# Required as per https://docs.aws.amazon.com/eks/latest/userguide/create-node-role.html
 resource "aws_iam_role_policy_attachment" "amazon_eks_worker_node_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
   role       = aws_iam_role.iam_role.name
@@ -34,6 +35,7 @@ resource "aws_iam_role_policy_attachment" "amazon_eks_worker_node_policy" {
   ]
 }
 
+# Required as per https://docs.aws.amazon.com/eks/latest/userguide/create-node-role.html
 resource "aws_iam_role_policy_attachment" "amazon_eks_cni_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
   role       = aws_iam_role.iam_role.name
@@ -43,6 +45,7 @@ resource "aws_iam_role_policy_attachment" "amazon_eks_cni_policy" {
   ]
 }
 
+# Required as per https://docs.aws.amazon.com/eks/latest/userguide/create-node-role.html
 resource "aws_iam_role_policy_attachment" "amazon_ec2_container_registry_read_only" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.iam_role.name
@@ -52,6 +55,7 @@ resource "aws_iam_role_policy_attachment" "amazon_ec2_container_registry_read_on
   ]
 }
 
+/* TODO:: Review and remove if not required
 resource "aws_iam_role_policy_attachment" "amazon_cloud_watch_agent_policy" {
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
   role       = aws_iam_role.iam_role.name
@@ -94,5 +98,37 @@ resource "aws_iam_role_policy_attachment" "eks_ca_iam_policy_attach" {
   depends_on = [
     aws_iam_role.iam_role,
     aws_iam_policy.node_group_autoscaler_policy
+  ]
+}
+*/
+
+# Required for accessing ECR Cache registries
+# Ignore: AVD-AWS-0057 (https://avd.aquasec.com/misconfig/aws/iam/avd-aws-0057/)
+# Reason: This policy provides the necessary permissions to use pull through cache to the Node Group
+# AWS Documentation: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache.html
+# trivy:ignore:AVD-AWS-0057
+resource "aws_iam_policy" "amazon_ec2_cache_policy" {
+  name = join("-", [var.eks_cluster_name, var.node_group_name, "eks-cluster-ecr-pull-cache-policy"])
+  policy = jsonencode({
+    Statement = [{
+      Action = [
+        "ecr:CreatePullThroughCacheRule",
+        "ecr:BatchImportUpstreamImage",
+        "ecr:CreateRepository"
+      ]
+      Effect   = "Allow"
+      Resource = "*"
+    }]
+    Version = "2012-10-17"
+  })
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "amazon_ec2_cache_policy_attachment" {
+  policy_arn = aws_iam_policy.amazon_ec2_cache_policy.arn
+  role       = aws_iam_role.iam_role.name
+
+  depends_on = [
+    aws_iam_role.iam_role
   ]
 }

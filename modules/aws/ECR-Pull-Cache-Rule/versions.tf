@@ -9,11 +9,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "iam_policy_arn" {
-  type        = string
-  description = "ARN of the IAM Policy"
-}
-variable "iam_role_name" {
-  type        = string
-  description = "Name of the IAM Role"
+terraform {
+  required_version = ">= 1.3.8"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
 }

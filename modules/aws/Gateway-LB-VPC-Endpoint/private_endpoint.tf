@@ -15,8 +15,13 @@ resource "aws_vpc_endpoint" "gw_lb_vpc_endpoint" {
   vpc_endpoint_type = var.gateway_lb_service_type
 
   security_group_ids  = var.endpoint_security_group_ids
+  route_table_ids     = var.route_table_ids
   subnet_ids          = var.subnet_ids
   private_dns_enabled = var.endpoint_private_dns_enabled
   tags                = local.tags
+
+  lifecycle {
+    ignore_changes = [route_table_ids]
+  }
 
 }

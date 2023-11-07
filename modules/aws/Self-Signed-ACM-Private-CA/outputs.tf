@@ -9,11 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "iam_policy_arn" {
-  type        = string
-  description = "ARN of the IAM Policy"
+output "private_ca_arn" {
+  value = aws_acmpca_certificate_authority.acmpca_certificate_authority.arn
 }
-variable "iam_role_name" {
-  type        = string
-  description = "Name of the IAM Role"
+output "private_ca_id" {
+  value = aws_acmpca_certificate_authority.acmpca_certificate_authority.id
 }

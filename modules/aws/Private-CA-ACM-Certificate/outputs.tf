@@ -9,11 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "iam_policy_arn" {
-  type        = string
-  description = "ARN of the IAM Policy"
+output "certificate_arn" {
+  value = aws_acm_certificate.cert.arn
 }
-variable "iam_role_name" {
-  type        = string
-  description = "Name of the IAM Role"
+output "certificate_id" {
+  value = aws_acm_certificate.cert.id
 }

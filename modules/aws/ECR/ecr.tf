@@ -17,7 +17,7 @@
 # trivy:ignore:AVD-AWS-0030
 # trivy:ignore:AVD-AWS-0033
 resource "aws_ecr_repository" "ecr_repository" {
-  name = join("-", [var.project, var.application, var.environment, var.region, "ecr"])
+  name = var.generate_name == true ? join("-", [local.name_prefix, "ecr"]) : var.image_repo_name
   tags = var.tags
 
   image_tag_mutability = var.image_tag_mutability
@@ -33,7 +33,7 @@ resource "aws_ecr_repository" "ecr_repository" {
 }
 
 resource "aws_iam_policy" "ecr_admin_iam_policy" {
-  name = join("-", [var.project, var.application, var.environment, var.region, "ecr-admin-iam-policy"])
+  name = join("-", [local.name_prefix, "ecr-admin-iam-policy"])
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -60,7 +60,7 @@ resource "aws_iam_policy" "ecr_admin_iam_policy" {
 }
 
 resource "aws_iam_policy" "ecr_pull_only_iam_policy" {
-  name = join("-", [var.project, var.application, var.environment, var.region, "ecr-pull-only-iam-policy"])
+  name = join("-", [local.name_prefix, "ecr-pull-only-iam-policy"])
 
   policy = jsonencode({
     Version = "2012-10-17",

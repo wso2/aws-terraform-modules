@@ -9,11 +9,21 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "iam_policy_arn" {
-  type        = string
-  description = "ARN of the IAM Policy"
+variable "tags" {
+  description = "Tags to be associated with the resource"
+  type        = map(string)
+  default     = {}
 }
-variable "iam_role_name" {
+variable "domain_name" {
+  description = "Domain name"
   type        = string
-  description = "Name of the IAM Role"
+}
+variable "subject_alternative_names" {
+  description = "Subject alternative names"
+  type        = list(string)
+  default     = []
+}
+variable "certificate_authority_arn" {
+  description = "Certificate authority arn"
+  type        = string
 }

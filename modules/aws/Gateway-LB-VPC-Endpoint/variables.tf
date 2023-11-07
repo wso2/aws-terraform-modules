@@ -61,3 +61,8 @@ variable "service_short_hand_name" {
   type        = string
   description = "Service endpoint to be used for the VPC Endpoint"
 }
+variable "route_table_ids" {
+  type        = list(string)
+  description = "Route Table IDs to be associated with the VPC Endpoint"
+  default     = []
+}

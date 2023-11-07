@@ -9,11 +9,6 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "iam_policy_arn" {
-  type        = string
-  description = "ARN of the IAM Policy"
-}
-variable "iam_role_name" {
-  type        = string
-  description = "Name of the IAM Role"
+locals {
+  name_prefix = "${var.project}-${var.application}-${var.environment}-${var.region}"
 }

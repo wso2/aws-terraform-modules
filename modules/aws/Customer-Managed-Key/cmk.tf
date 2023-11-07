@@ -9,11 +9,17 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "iam_policy_arn" {
-  type        = string
-  description = "ARN of the IAM Policy"
-}
-variable "iam_role_name" {
-  type        = string
-  description = "Name of the IAM Role"
+# Ignore: AVD-AWS-0065 ( https://avd.aquasec.com/misconfig/avd-aws-0065/)
+# Reason: Rotation has been configured as an optional parameter with a default value of true
+# trivy:ignore:AVD-AWS-0065
+resource "aws_kms_key" "kms_key" {
+  description             = var.description
+  key_usage               = var.key_usage
+  deletion_window_in_days = var.deletion_window_in_days
+  policy                  = var.policy
+  is_enabled              = var.is_enabled
+  multi_region            = var.is_multi_region
+  enable_key_rotation     = var.enable_key_rotation
+
+  tags = local.tags
 }

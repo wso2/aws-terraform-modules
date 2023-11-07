@@ -12,8 +12,11 @@
 # Ignore: AVD-AWS-0038 (https://avd.aquasec.com/misconfig/aws/eks/avd-aws-0038/)
 # Reason: Requirement to enable logs for EKS cluster will vary based on cluster purpose and requirements
 # Therefore has not been enforced as a requirement
+# Ignore: AVD-AWS-0039 (https://avd.aquasec.com/misconfig/aws/eks/avd-aws-0039/)
+# Reason: Encrypting Secrets will depend on Cluster usage (usage of CSI driver etc) as such
+# This has been configured as an optional parameter
 # trivy:ignore:AVD-AWS-0038
-# trivy:ignore:AVD-AWS-0039 # TODO: fix this
+# trivy:ignore:AVD-AWS-0039
 resource "aws_eks_cluster" "eks_cluster" {
   name     = join("-", [var.project, var.application, var.environment, var.region, "eks"])
   role_arn = aws_iam_role.iam_role.arn
@@ -25,6 +28,16 @@ resource "aws_eks_cluster" "eks_cluster" {
     endpoint_public_access  = var.endpoint_public_access
     public_access_cidrs     = var.public_access_cidrs
     subnet_ids              = aws_subnet.eks_subnet[*].id
+  }
+
+  dynamic "encryption_config" {
+    for_each = var.secret_encryption_cmk != null ? [1] : []
+    content {
+      provider = {
+        key_arn = var.secret_encryption_cmk
+      }
+      resources = ["secrets"]
+    }
   }
 
   kubernetes_network_config {

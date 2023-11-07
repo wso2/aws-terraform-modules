@@ -9,6 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
+# Ignore: AVD-AWS-0343 (https://avd.aquasec.com/misconfig/aws/rds/avd-aws-0343/)
+# Reason: Delete protection has been configured as an optional parameter as this will depend on the usage of the RDS
+# trivy:ignore:AVD-AWS-0343
 resource "aws_rds_cluster" "rds_cluster" {
 
   allow_major_version_upgrade = var.allow_major_version_upgrade

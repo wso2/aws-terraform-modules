@@ -9,11 +9,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "iam_policy_arn" {
-  type        = string
-  description = "ARN of the IAM Policy"
-}
-variable "iam_role_name" {
-  type        = string
-  description = "Name of the IAM Role"
+locals {
+  name = join("-", [var.project, var.application, var.environment, var.region, "cmk"])
+  tags = merge(
+    var.tags,
+    {
+      "Name" = local.name
+    }
+  )
 }

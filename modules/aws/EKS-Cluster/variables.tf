@@ -64,6 +64,11 @@ variable "subnet_details" {
   }))
   default = []
 }
+variable "secret_encryption_cmk" {
+  type        = string
+  description = "KMS Key ID for encrypting Kubernetes secrets"
+  default     = null
+}
 variable "enabled_cluster_log_types" {
   type        = list(string)
   description = "List of cluster log types to enable"
@@ -73,4 +78,14 @@ variable "tags" {
   type        = map(string)
   description = "Tags to be associated with the EKS"
   default     = {}
+}
+variable "enable_ebs_csi_driver" {
+  type        = bool
+  description = "Enable EBS CSI Driver"
+  default     = false
+}
+variable "enable_efs_csi_driver" {
+  type        = bool
+  description = "Enable EFS CSI Driver"
+  default     = false
 }

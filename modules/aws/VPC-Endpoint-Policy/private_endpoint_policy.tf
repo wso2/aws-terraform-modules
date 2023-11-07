@@ -9,11 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "iam_policy_arn" {
-  type        = string
-  description = "ARN of the IAM Policy"
-}
-variable "iam_role_name" {
-  type        = string
-  description = "Name of the IAM Role"
+resource "aws_vpc_endpoint_policy" "vpc_endpoint_policy" {
+  vpc_endpoint_id = var.vpc_endpoint_id
+  policy          = var.policy
 }

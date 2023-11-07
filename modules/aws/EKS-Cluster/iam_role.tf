@@ -107,46 +107,6 @@ resource "aws_iam_role_policy_attachment" "eks_ca_iam_policy_attach" {
   ]
 }
 
-# Ignore: AVD-AWS-0057 (https://avd.aquasec.com/misconfig/aws/iam/avd-aws-0057/)
-# Reason: This policy provides the necessary permissions for the EKS cluster to mount an EFS as a persistent volume
-# Despite the wildcard, the tag definition only allows for accessing resources with a specific tag
-# trivy:ignore:AVD-AWS-0057
-resource "aws_iam_policy" "node_efs_policy" {
-  name        = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-efs-iam-policy"])
-  path        = "/"
-  description = "Policy for EKS nodes to use EFS"
-
-  policy = jsonencode({
-    "Statement" : [
-      {
-        "Action" : [
-          "elasticfilesystem:DescribeMountTargets",
-          "elasticfilesystem:DescribeFileSystems",
-          "elasticfilesystem:DescribeAccessPoints",
-          "elasticfilesystem:CreateAccessPoint",
-          "elasticfilesystem:DeleteAccessPoint",
-          "ec2:DescribeAvailabilityZones"
-        ],
-        "Effect" : "Allow",
-        "Resource" : "*",
-        "Condition" : {
-          "StringEquals" : {
-            "aws:RequestTag/eks-cluster-usage" : aws_eks_cluster.eks_cluster.name # Special Tag definition for AVD-AWS-0057
-          }
-        }
-        "Sid" : ""
-      }
-    ],
-    "Version" : "2012-10-17"
-    }
-  )
-}
-
-resource "aws_iam_role_policy_attachment" "efs_policy_attachment" {
-  role       = aws_iam_role.iam_role.name
-  policy_arn = aws_iam_policy.node_efs_policy.arn
-}
-
 # IAM Role for IAM Cluster LoadBalancer
 resource "aws_iam_role" "cluster_loadbalancer_role" {
   assume_role_policy = data.aws_iam_policy_document.cluster_lb_sts_policy.json
@@ -434,21 +394,44 @@ resource "aws_iam_role_policy_attachment" "cluster_container_cloudwatch_streamer
   ]
 }
 
-# IAM Role for EBS PVC
-resource "aws_iam_role" "cluster_ebs_pvc_role" {
-  assume_role_policy = data.aws_iam_policy_document.cluster_ebs_pvc_sts_policy.json
-  name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-ebs-pvc-iam-role"])
+# IAM Role for EBS CSI Driver
+resource "aws_iam_role" "cluster_ebs_csi_driver_role" {
+  count              = var.enable_ebs_csi_driver ? 1 : 0
+  assume_role_policy = data.aws_iam_policy_document.cluster_ebs_csi_driver_sts_policy.json
+  name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-ebs-csi-driver-iam-role"])
 
   depends_on = [
-    data.aws_iam_policy_document.cluster_lb_sts_policy
+    data.aws_iam_policy_document.cluster_ebs_csi_driver_sts_policy
   ]
 }
 
-resource "aws_iam_role_policy_attachment" "cluster_ebs_pvc_policy_attach" {
-  role       = aws_iam_role.cluster_ebs_pvc_role.name
+resource "aws_iam_role_policy_attachment" "cluster_ebs_csi_driver_role_policy_attach" {
+  count      = var.enable_ebs_csi_driver ? 1 : 0
+  role       = aws_iam_role.cluster_ebs_csi_driver_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 
   depends_on = [
-    aws_iam_role.cluster_ebs_pvc_role
+    aws_iam_role.cluster_ebs_csi_driver_role
+  ]
+}
+
+# IAM Role for EBS CSI Driver
+resource "aws_iam_role" "cluster_efs_csi_driver_role" {
+  count              = var.enable_efs_csi_driver ? 1 : 0
+  assume_role_policy = data.aws_iam_policy_document.cluster_efs_csi_driver_sts_policy.json
+  name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-efs-csi-driver-iam-role"])
+
+  depends_on = [
+    data.aws_iam_policy_document.cluster_efs_csi_driver_sts_policy
+  ]
+}
+
+resource "aws_iam_role_policy_attachment" "cluster_efs_csi_driver_role_policy_attach" {
+  count      = var.enable_efs_csi_driver ? 1 : 0
+  role       = aws_iam_role.cluster_ebs_csi_driver_role[0].name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy"
+
+  depends_on = [
+    aws_iam_role.cluster_efs_csi_driver_role
   ]
 }

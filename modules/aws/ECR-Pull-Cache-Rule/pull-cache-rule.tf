@@ -9,11 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "iam_policy_arn" {
-  type        = string
-  description = "ARN of the IAM Policy"
-}
-variable "iam_role_name" {
-  type        = string
-  description = "Name of the IAM Role"
+resource "aws_ecr_pull_through_cache_rule" "ecr_pull_through_cache_rule" {
+  ecr_repository_prefix = var.ecr_repository_prefix
+  upstream_registry_url = var.upstream_registry_url
 }

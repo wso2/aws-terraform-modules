@@ -9,11 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "iam_policy_arn" {
-  type        = string
-  description = "ARN of the IAM Policy"
-}
-variable "iam_role_name" {
-  type        = string
-  description = "Name of the IAM Role"
+locals {
+  vpc_ep_name = join("-", [var.project, var.application, var.environment, var.region, var.service_short_hand_name, "vpc-ep"])
+  tags        = merge(var.tags, { "Name" : local.vpc_ep_name })
 }

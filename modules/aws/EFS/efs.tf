@@ -27,6 +27,10 @@ resource "aws_efs_access_point" "efs_access_point" {
   for_each       = var.efs_access_points
   file_system_id = aws_efs_file_system.efs_file_system.id
 
+  tags = merge(var.tags, {
+    Name : join("-", [local.efs_name, "ap", each.key])
+  })
+
   dynamic "posix_user" {
     for_each = each.value.posix_user == null ? [] : [each.value.posix_user]
     content {

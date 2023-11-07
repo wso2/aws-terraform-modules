@@ -9,11 +9,18 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "iam_policy_arn" {
-  type        = string
-  description = "ARN of the IAM Policy"
+output "efs_id" {
+  value = aws_efs_file_system.efs_file_system.id
 }
-variable "iam_role_name" {
-  type        = string
-  description = "Name of the IAM Role"
+output "efs_arn" {
+  value = aws_efs_file_system.efs_file_system.arn
+}
+output "efs_dns_name" {
+  value = aws_efs_file_system.efs_file_system.dns_name
+}
+output "efs_access_point_ids" {
+  value = zipmap(values(aws_efs_access_point.efs_access_point)[*].tags["Name"], values(aws_efs_access_point.efs_access_point)[*].id)
+}
+output "efs_access_point_arns" {
+  value = zipmap(values(aws_efs_access_point.efs_access_point)[*].tags["Name"], values(aws_efs_access_point.efs_access_point)[*].arn)
 }

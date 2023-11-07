@@ -9,11 +9,8 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "iam_policy_arn" {
-  type        = string
-  description = "ARN of the IAM Policy"
-}
-variable "iam_role_name" {
-  type        = string
-  description = "Name of the IAM Role"
+resource "aws_vpc_endpoint_route_table_association" "vpc_endpoint_route_table_association" {
+  count           = length(var.route_table_ids)
+  vpc_endpoint_id = var.vpc_endpoint_id
+  route_table_id  = var.route_table_ids[count.index]
 }

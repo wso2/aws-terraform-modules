@@ -13,3 +13,7 @@ output "ec2-instance-arn" {
   value      = aws_instance.ec2_instance.arn
   depends_on = [aws_instance.ec2_instance]
 }
+output "ec2-instance-role-name" {
+  value      = aws_iam_role.iam_role.name
+  depends_on = [aws_iam_role.iam_role]
+}

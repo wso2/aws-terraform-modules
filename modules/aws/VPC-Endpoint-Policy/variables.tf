@@ -9,11 +9,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "iam_policy_arn" {
+variable "vpc_endpoint_id" {
   type        = string
-  description = "ARN of the IAM Policy"
+  description = "ID of the VPC endpoint"
 }
-variable "iam_role_name" {
+variable "policy" {
   type        = string
-  description = "Name of the IAM Role"
+  description = "policy"
+  default     = null
 }

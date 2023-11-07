@@ -23,40 +23,32 @@ variable "region" {
 }
 variable "application" {
   type        = string
-  description = "Purpose of the ECR"
+  description = "Purpose of the Endpoint"
 }
 variable "tags" {
   type        = map(string)
-  description = "Tags to be associated with the EKS"
+  description = "Default tags to be associated with the Resource"
   default     = {}
 }
-variable "encryption_type" {
+variable "vpc_id" {
   type        = string
-  description = "Encryption type for the ECR"
-  default     = "AES256"
+  description = "ID of the VPC the endpoint is associated with"
 }
-variable "kms_key" {
-  type        = string
-  description = "KMS key ID for the ECR"
-  default     = null
+variable "route_table_ids" {
+  type        = list(string)
+  description = "Subnet IDs where the VPC EP should exist"
+  default     = []
 }
-variable "scan_on_push" {
+variable "endpoint_private_dns_enabled" {
   type        = bool
-  description = "Whether to scan on push"
-  default     = false
+  description = "ID of the VPC the endpoint is associated with"
+  default     = true
 }
-variable "image_tag_mutability" {
+variable "gateway_service_name" {
   type        = string
-  description = "Whether to allow image tag mutability"
-  default     = "IMMUTABLE"
+  description = "Service endpoint to be used for the VPC Endpoint"
 }
-variable "image_repo_name" {
+variable "service_short_hand_name" {
   type        = string
-  description = "Name of the image repository"
-  default     = null
-}
-variable "generate_name" {
-  type        = bool
-  description = "Whether to generate name for the image repository"
-  default     = false
+  description = "Service endpoint to be used for the VPC Endpoint"
 }

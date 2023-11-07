@@ -9,11 +9,13 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "iam_policy_arn" {
-  type        = string
-  description = "ARN of the IAM Policy"
-}
-variable "iam_role_name" {
-  type        = string
-  description = "Name of the IAM Role"
+resource "aws_vpc_endpoint" "gw_vpc_endpoint" {
+  vpc_id            = var.vpc_id
+  service_name      = var.gateway_service_name
+  vpc_endpoint_type = "Gateway"
+
+  route_table_ids = var.route_table_ids
+
+  private_dns_enabled = var.endpoint_private_dns_enabled
+  tags                = local.tags
 }

@@ -9,11 +9,15 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "iam_policy_arn" {
-  type        = string
-  description = "ARN of the IAM Policy"
-}
-variable "iam_role_name" {
-  type        = string
-  description = "Name of the IAM Role"
+resource "aws_acm_certificate" "cert" {
+  domain_name               = var.domain_name
+  certificate_authority_arn = var.certificate_authority_arn
+
+  subject_alternative_names = var.subject_alternative_names
+
+  tags = var.tags
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }

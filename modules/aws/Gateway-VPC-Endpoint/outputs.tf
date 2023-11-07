@@ -9,11 +9,15 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "iam_policy_arn" {
-  type        = string
-  description = "ARN of the IAM Policy"
+output "vpc_endpoint_arn" {
+  value      = aws_vpc_endpoint.gw_vpc_endpoint.arn
+  depends_on = [aws_vpc_endpoint.gw_vpc_endpoint]
 }
-variable "iam_role_name" {
-  type        = string
-  description = "Name of the IAM Role"
+output "vpc_endpoint_id" {
+  value      = aws_vpc_endpoint.gw_vpc_endpoint.id
+  depends_on = [aws_vpc_endpoint.gw_vpc_endpoint]
+}
+output "vpc_endpoint_name" {
+  value      = aws_vpc_endpoint.gw_vpc_endpoint.service_name
+  depends_on = [aws_vpc_endpoint.gw_vpc_endpoint]
 }

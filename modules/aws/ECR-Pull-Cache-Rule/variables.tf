@@ -9,11 +9,11 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "iam_policy_arn" {
+variable "ecr_repository_prefix" {
   type        = string
-  description = "ARN of the IAM Policy"
+  description = "ECR repository prefix"
 }
-variable "iam_role_name" {
+variable "upstream_registry_url" {
   type        = string
-  description = "Name of the IAM Role"
+  description = "Upstream registry url"
 }
