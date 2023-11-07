@@ -79,3 +79,13 @@ variable "tags" {
   description = "Tags to be associated with the EKS"
   default     = {}
 }
+variable "enable_ebs_csi_driver" {
+  type        = bool
+  description = "Enable EBS CSI Driver"
+  default     = false
+}
+variable "enable_efs_csi_driver" {
+  type        = bool
+  description = "Enable EFS CSI Driver"
+  default     = false
+}
