@@ -132,4 +132,3 @@ resource "aws_iam_role_policy_attachment" "amazon_ec2_cache_policy_attachment" {
     aws_iam_role.iam_role
   ]
 }
-
