@@ -34,11 +34,11 @@ output "cloudwatch_streamer_role_arn" {
   depends_on = [aws_iam_role.cluster_container_cloudwatch_streamer_role]
 }
 output "ebs_csi_driver_role_arn" {
-  value      = var.enable_ebs_csi_driver ? aws_iam_role.cluster_ebs_csi_driver_role[0].arn: null
+  value      = var.enable_ebs_csi_driver ? aws_iam_role.cluster_ebs_csi_driver_role[0].arn : null
   depends_on = [aws_iam_role.cluster_ebs_csi_driver_role[0]]
 }
 output "efs_csi_driver_role_arn" {
-  value      = var.enable_efs_csi_driver ? aws_iam_role.cluster_efs_csi_driver_role[0].arn: null
+  value      = var.enable_efs_csi_driver ? aws_iam_role.cluster_efs_csi_driver_role[0].arn : null
   depends_on = [aws_iam_role.cluster_efs_csi_driver_role[0]]
 }
 output "oidc_provider_arn" {

@@ -396,7 +396,7 @@ resource "aws_iam_role_policy_attachment" "cluster_container_cloudwatch_streamer
 
 # IAM Role for EBS CSI Driver
 resource "aws_iam_role" "cluster_ebs_csi_driver_role" {
-  count = var.enable_ebs_csi_driver ? 1 : 0
+  count              = var.enable_ebs_csi_driver ? 1 : 0
   assume_role_policy = data.aws_iam_policy_document.cluster_ebs_csi_driver_sts_policy.json
   name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-ebs-csi-driver-iam-role"])
 
@@ -406,7 +406,7 @@ resource "aws_iam_role" "cluster_ebs_csi_driver_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "cluster_ebs_csi_driver_role_policy_attach" {
-  count = var.enable_ebs_csi_driver ? 1 : 0
+  count      = var.enable_ebs_csi_driver ? 1 : 0
   role       = aws_iam_role.cluster_ebs_csi_driver_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 
@@ -417,7 +417,7 @@ resource "aws_iam_role_policy_attachment" "cluster_ebs_csi_driver_role_policy_at
 
 # IAM Role for EBS CSI Driver
 resource "aws_iam_role" "cluster_efs_csi_driver_role" {
-  count = var.enable_efs_csi_driver ? 1 : 0
+  count              = var.enable_efs_csi_driver ? 1 : 0
   assume_role_policy = data.aws_iam_policy_document.cluster_efs_csi_driver_sts_policy.json
   name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-efs-csi-driver-iam-role"])
 
@@ -427,7 +427,7 @@ resource "aws_iam_role" "cluster_efs_csi_driver_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "cluster_efs_csi_driver_role_policy_attach" {
-  count = var.enable_efs_csi_driver ? 1 : 0
+  count      = var.enable_efs_csi_driver ? 1 : 0
   role       = aws_iam_role.cluster_ebs_csi_driver_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEFSCSIDriverPolicy"
 
