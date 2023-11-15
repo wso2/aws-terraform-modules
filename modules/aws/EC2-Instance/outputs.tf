@@ -14,8 +14,8 @@ output "ec2-instance-arn" {
   depends_on = [aws_instance.ec2_instance]
 }
 output "ec2-instance-id" {
-    value      = aws_instance.ec2_instance.id
-    depends_on = [aws_instance.ec2_instance]
+  value      = aws_instance.ec2_instance.id
+  depends_on = [aws_instance.ec2_instance]
 }
 output "ec2-instance-role-name" {
   value      = aws_iam_role.iam_role.name
