@@ -24,10 +24,12 @@ variable "traffic_type" {
 variable "vpc_id" {
   type        = string
   description = "The VPC ID which is associated with the Flow Log"
+  default     = null
 }
 variable "subnet_id" {
   type        = string
   description = "The Subnet ID which is associated with the Flow Log"
+  default     = null
 }
 variable "tags" {
   type        = map(string)
@@ -36,14 +38,17 @@ variable "tags" {
 variable "eni_id" {
   type        = string
   description = "The ENI ID which is associated with the Flow Log"
+  default     = null
 }
 variable "transit_gateway_id" {
   type        = string
   description = "The Transit Gateway ID which is associated with the Flow Log"
+  default     = null
 }
 variable "transit_gateway_attachment_id" {
   type        = string
   description = "The Transit Gateway Attachment ID which is associated with the Flow Log"
+  default     = null
 }
 variable "log_format" {
   type        = string
