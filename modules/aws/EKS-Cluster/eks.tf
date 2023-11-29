@@ -33,7 +33,7 @@ resource "aws_eks_cluster" "eks_cluster" {
   dynamic "encryption_config" {
     for_each = var.secret_encryption_cmk != null ? [1] : []
     content {
-      provider = {
+      provider {
         key_arn = var.secret_encryption_cmk
       }
       resources = ["secrets"]
