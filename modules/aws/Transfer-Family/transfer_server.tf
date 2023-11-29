@@ -20,7 +20,7 @@ resource "aws_iam_role" "iam_for_transfer" {
 resource "aws_transfer_server" "transfer_server" {
   endpoint_type = var.endpoint_type
 
-  logging_role                = aws_iam_role.iam_for_transfer.0.arn
+  logging_role                = aws_iam_role.iam_for_transfer[0].arn
   structured_log_destinations = var.structured_log_destinations
 
   protocols            = var.protocols
