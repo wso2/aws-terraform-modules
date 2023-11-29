@@ -18,9 +18,9 @@ resource "aws_efs_access_point" "access_point" {
   root_directory {
     path = var.root_directory_path
     creation_info {
-      owner_gid     = var.owner_gid
-      owner_uid     = var.owner_uid
-      permissions   = var.permissions
+      owner_gid   = var.owner_gid
+      owner_uid   = var.owner_uid
+      permissions = var.permissions
     }
   }
   tags = var.tags
