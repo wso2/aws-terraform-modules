@@ -22,18 +22,18 @@ output "ec2-instance-role-name" {
   depends_on = [aws_iam_role.iam_role]
 }
 output "ec2-instance-subnet-id" {
-  value      = aws_subnet.ec2_subnet.id
+  value      = aws_subnet.ec2_subnet[0].id
   depends_on = [aws_subnet.ec2_subnet]
 }
 output "ec2-instance-subnet-arn" {
-  value      = aws_subnet.ec2_subnet.arn
+  value      = aws_subnet.ec2_subnet[0].arn
   depends_on = [aws_subnet.ec2_subnet]
 }
 output "ec2-instance-route-table-id" {
-  value      = aws_route_table.route_table.id
+  value      = aws_route_table.route_table[0].id
   depends_on = [aws_route_table.route_table]
 }
 output "ec2-instance-route-table-arn" {
-  value      = aws_route_table.route_table.arn
+  value      = aws_route_table.route_table[0].arn
   depends_on = [aws_route_table.route_table]
 }
