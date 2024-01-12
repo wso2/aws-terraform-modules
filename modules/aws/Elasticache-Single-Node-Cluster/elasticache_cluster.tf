@@ -17,7 +17,6 @@ resource "aws_elasticache_replication_group" "single_node_elasticache_replicatio
   at_rest_encryption_enabled = var.at_rest_encryption_enabled
   num_cache_clusters         = 1
   automatic_failover_enabled = false
-  availability_zones         = var.availability_zones
   replication_group_id       = join("-", [var.project, var.application, var.environment, var.region, "ec-rds-rg"])
   node_type                  = var.node_type
 
