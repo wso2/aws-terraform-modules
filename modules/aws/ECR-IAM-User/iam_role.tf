@@ -9,6 +9,10 @@
 #
 # --------------------------------------------------------------------------------------
 
+# Ignore: AVD-AWS-0143 (https://avd.aquasec.com/misconfig/aws/iam/avd-aws-0143/)
+# Reason: Ignoring as this user is made for a specific access only and access doesn't need to be shared among
+# multiple users.
+# trivy:ignore:AVD-AWS-0143
 resource "aws_iam_user" "ecr_access_user" {
   name = join("-", [var.project, var.application, var.environment, var.region, "ecr-access-iam-user"])
   tags = var.tags
