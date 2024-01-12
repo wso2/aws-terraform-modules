@@ -42,11 +42,6 @@ variable "final_snapshot_identifier" {
   description = "Name of the final snapshot"
   default     = null
 }
-variable "availability_zones" {
-  type        = list(string)
-  description = "Availability zones of the Elastic Cache"
-  default     = null
-}
 variable "apply_immediately" {
   type        = bool
   description = "Apply db changes immediately or wait for the next maintenance window"

@@ -15,8 +15,11 @@ resource "aws_route53_resolver_rule" "route53_resolver_rule" {
   rule_type            = var.rule_type
   resolver_endpoint_id = var.resolver_endpoint_id
 
-  target_ip {
-    ip = var.target_ip
+  dynamic "target_ip" {
+    for_each = var.target_ips
+    content {
+      ip = target_ip.value
+    }
   }
 
   tags = var.tags

@@ -14,8 +14,8 @@ variable "tags" {
   default     = {}
   description = "tags to be associated with the rule"
 }
-variable "target_ip" {
-  type        = string
+variable "target_ips" {
+  type        = map(string)
   description = "Target IP to resolve the DNS query"
 }
 variable "resolver_endpoint_id" {
