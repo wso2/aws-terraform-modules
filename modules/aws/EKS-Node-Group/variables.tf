@@ -78,3 +78,8 @@ variable "imds_enabled" {
   description = "Flag to enable IMDS"
   default     = "required"
 }
+variable "labels" {
+  type        = map(string)
+  description = "Labels to be associated with the node group"
+  default     = {}
+}
