@@ -9,6 +9,12 @@
 #
 # --------------------------------------------------------------------------------------
 
+# Ignore: AVD-AWS-0070 (https://avd.aquasec.com/misconfig/avd-aws-0070)
+# Ignore: AVD-AWS-0071 (https://avd.aquasec.com/misconfig/avd-aws-0070)
+# Reason: Requirement to enable logs for EKS cluster will vary based on cluster purpose and requirements (ie; Cost implications)
+# This has been configured as an optional parameter
+# trivy:ignore:AVD-AWS-0070
+# trivy:ignore:AVD-AWS-0071
 resource "aws_mq_broker" "mq" {
   broker_name = join("-", [var.project, var.application, var.environment, var.region, "mq"])
 
