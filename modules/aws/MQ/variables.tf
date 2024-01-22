@@ -32,34 +32,34 @@ variable "instance_type" {
   type = string
 }
 variable "security_group_ids" {
-  type = list(string)
+  type    = list(string)
   default = null
 }
 variable "audit_logs_enabled" {
-  type = bool
+  type    = bool
   default = false
 }
 variable "general_logs_enabled" {
-  type = bool
+  type    = bool
   default = false
 }
 variable "users" {
   type = list(object({
-    username = string
-    password = string
+    username       = string
+    password       = string
     console_access = bool
   }))
   default = []
 }
 variable "subnet_ids" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 variable "public_access" {
-  type = bool
+  type    = bool
   default = false
 }
 variable "auto_minor_version_upgrade" {
-  type = bool
+  type    = bool
   default = false
 }
