@@ -83,3 +83,13 @@ variable "labels" {
   description = "Labels to be associated with the node group"
   default     = {}
 }
+variable "ami_type" {
+  type        = string
+  description = "AMI type to be used for the node group. Valid values, AL2_x86_64 | AL2_x86_64_GPU | AL2_ARM_64 | CUSTOM | BOTTLEROCKET_ARM_64 | BOTTLEROCKET_x86_64 | BOTTLEROCKET_ARM_64_NVIDIA | BOTTLEROCKET_x86_64_NVIDIA | WINDOWS_CORE_2019_x86_64 | WINDOWS_FULL_2019_x86_64 | WINDOWS_CORE_2022_x86_64 | WINDOWS_FULL_2022_x86_64"
+  default     = "AL2_x86_64"
+}
+variable "custom_ami_id" {
+  type        = string
+  description = "Custom AMI ID to be used for the node group"
+  default     = null
+}

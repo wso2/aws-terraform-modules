@@ -18,6 +18,8 @@ resource "aws_eks_node_group" "eks_node_group" {
   labels          = var.labels
   instance_types  = var.instance_types
 
+  ami_type = var.ami_type
+
   launch_template {
     name    = aws_launch_template.eks_launch_template.name
     version = "$Latest"
@@ -60,6 +62,8 @@ resource "aws_eks_node_group" "eks_node_group" {
 
 resource "aws_launch_template" "eks_launch_template" {
   name_prefix = join("-", [var.eks_cluster_name, var.node_group_name, "launch-template"])
+
+  image_id = var.ami_type == "CUSTOM" ? var.custom_ami_id : null
 
   block_device_mappings {
     device_name = "/dev/xvda"
