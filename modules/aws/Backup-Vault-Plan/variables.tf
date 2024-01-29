@@ -48,32 +48,32 @@ variable "enable_continuous_backup" {
 variable "start_window" {
   description = "Start window of the backup"
   type        = string
-  default = null
+  default     = null
 }
 variable "completion_window" {
   description = "Completion window of the backup"
   type        = string
-  default = null
+  default     = null
 }
 variable "cold_storage_after" {
-    description = "Cold storage after of the backup"
-    type        = string
-  default = null
+  description = "Cold storage after of the backup"
+  type        = string
+  default     = null
 }
 variable "delete_after" {
-    description = "Delete after of the backup"
-    type        = string
+  description = "Delete after of the backup"
+  type        = string
 }
 variable "opt_in_to_archive_for_supported_resource" {
-    description = "Opt in to archive for supported resource"
-    type        = bool
-  default = false
+  description = "Opt in to archive for supported resource"
+  type        = bool
+  default     = false
 }
 variable "backup_resources" {
-    description = "Backup resources"
-    type        = list(string)
+  description = "Backup resources"
+  type        = list(string)
 }
 variable "backup_selection_name" {
-    description = "Backup selection name"
-    type        = string
+  description = "Backup selection name"
+  type        = string
 }
