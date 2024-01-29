@@ -10,10 +10,10 @@
 # --------------------------------------------------------------------------------------
 
 output "backup_vault_arn" {
-  value = aws_backup_vault.backup_vault.arn
+  value      = aws_backup_vault.backup_vault.arn
   depends_on = [aws_backup_vault.backup_vault]
 }
 output "backup_vault_name" {
-  value = aws_backup_vault.backup_vault.name
+  value      = aws_backup_vault.backup_vault.name
   depends_on = [aws_backup_vault.backup_vault]
 }

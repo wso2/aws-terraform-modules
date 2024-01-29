@@ -26,7 +26,7 @@ variable "application" {
   description = "Purpose of the EKS Cluster"
 }
 variable "tags" {
-  type = map(string)
+  type        = map(string)
   description = "Tags for the resources"
-  default = {}
+  default     = {}
 }

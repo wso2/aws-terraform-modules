@@ -35,17 +35,17 @@ resource "aws_backup_plan" "backup_plan" {
   name = var.backup_plan_name
 
   rule {
-    rule_name         = var.rule_name
-    target_vault_name = var.vault_name
-    schedule          = "cron(${var.schedule})"
+    rule_name                = var.rule_name
+    target_vault_name        = var.vault_name
+    schedule                 = "cron(${var.schedule})"
     enable_continuous_backup = var.enable_continuous_backup
 
-    start_window = var.start_window
+    start_window      = var.start_window
     completion_window = var.completion_window
 
     lifecycle {
-      cold_storage_after = var.cold_storage_after
-      delete_after = var.delete_after
+      cold_storage_after                        = var.cold_storage_after
+      delete_after                              = var.delete_after
       opt_in_to_archive_for_supported_resources = var.opt_in_to_archive_for_supported_resource
     }
   }

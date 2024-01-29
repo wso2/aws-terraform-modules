@@ -12,5 +12,5 @@
 resource "aws_backup_vault" "backup_vault" {
   name        = join("-", [var.project, var.application, var.environment, var.region, "backup-vault"])
   kms_key_arn = var.key_arn
-  tags = var.tags
+  tags        = var.tags
 }
