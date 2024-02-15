@@ -113,3 +113,8 @@ variable "principals" {
   description = "List of IAM Principals"
   default     = {"*": ["*"]}
 }
+variable "create_service_linked_role" {
+  type        = bool
+  description = "Specifies whether to create a service-linked role"
+  default     = true
+}
