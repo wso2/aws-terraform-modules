@@ -91,4 +91,3 @@ resource "aws_opensearch_domain" "opensearch_domain" {
 
   depends_on = [aws_iam_service_linked_role.vpc_enabled_service_linked_role]
 }
-
