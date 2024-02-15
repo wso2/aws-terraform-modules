@@ -50,10 +50,10 @@ variable "engine_version" {
 }
 variable "ebs_volume" {
   type = object({
-    volume_size = number
-    volume_type = string
-    iops        = number
-    throughput  = number
+    size = optional(number)
+    type = optional(string)
+    iops        = optional(number)
+    throughput  = optional(number)
   })
   description = "EBS Volume Configuration"
   default     = null
@@ -93,7 +93,6 @@ variable "advanced_security_options" {
     })
   })
   description = "Advanced Security Options"
-  sensitive   = true
   default     = null
 }
 variable "vpc_options" {
@@ -108,4 +107,9 @@ variable "advanced_options" {
   type        = map(string)
   description = "Key-value string pairs to specify advanced configuration options"
   default     = {}
+}
+variable "principals" {
+  type        = map(list(string))
+  description = "List of IAM Principals"
+  default     = {"*": ["*"]}
 }

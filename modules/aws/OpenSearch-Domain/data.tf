@@ -17,11 +17,11 @@ data "aws_iam_policy_document" "es_admins_policy_document" {
   statement {
     effect = "Allow"
 
-    dynamic "principal" {
+    dynamic "principals" {
       for_each = var.principals
       content {
-        type        = principal.value["type"]
-        identifiers = principal.value["identifiers"]
+        type        = principals.key
+        identifiers = principals.value
       }
     }
 
