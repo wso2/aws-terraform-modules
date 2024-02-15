@@ -71,9 +71,9 @@ resource "aws_opensearch_domain" "opensearch_domain" {
       enabled                        = var.advanced_security_options.enabled
       internal_user_database_enabled = var.advanced_security_options.internal_user_database_enabled
       master_user_options {
-        master_user_arn      = var.advanced_security_options.master_user_arn
-        master_user_name     = var.advanced_security_options.master_user_name
-        master_user_password = var.advanced_security_options.master_user_name
+        master_user_arn      = var.advanced_security_options.master_user_options.master_user_arn
+        master_user_name     = var.advanced_security_options.master_user_options.master_user_name
+        master_user_password = var.advanced_security_options.master_user_options.master_user_name
       }
     }
   }
@@ -85,6 +85,11 @@ resource "aws_opensearch_domain" "opensearch_domain" {
       security_group_ids = var.vpc_options.security_group_ids
       subnet_ids         = var.vpc_options.subnet_ids
     }
+  }
+
+  domain_endpoint_options {
+    enforce_https = true
+    tls_security_policy = "Policy-Min-TLS-1-2-2019-07"
   }
 
   tags = var.tags
