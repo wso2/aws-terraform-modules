@@ -10,6 +10,10 @@
 # --------------------------------------------------------------------------------------
 
 # Session Manager
+# Ignore: AVD-AWS-0057 (https://avd.aquasec.com/misconfig/aws/iam/avd-aws-0057/)
+# Reason: This policy provides the permissions to use AWS Session Manager
+# AWS Documentation: # Required permissions as per https://docs.aws.amazon.com/systems-manager/latest/userguide/getting-started-add-permissions-to-existing-profile.html
+# trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "session_manager_policy" {
   count = var.enable_session_manager == true ? 1 : 0
   name  = join("-", [var.project, var.application, var.environment, var.region, "ec2-session-manager-iam-policy"])
