@@ -50,10 +50,10 @@ variable "engine_version" {
 }
 variable "ebs_volume" {
   type = object({
-    size = optional(number)
-    type = optional(string)
-    iops        = optional(number)
-    throughput  = optional(number)
+    size       = optional(number)
+    type       = optional(string)
+    iops       = optional(number)
+    throughput = optional(number)
   })
   description = "EBS Volume Configuration"
   default     = null
@@ -111,7 +111,7 @@ variable "advanced_options" {
 variable "principals" {
   type        = map(list(string))
   description = "List of IAM Principals"
-  default     = {"*": ["*"]}
+  default     = { "*" : ["*"] }
 }
 variable "create_service_linked_role" {
   type        = bool
