@@ -435,3 +435,22 @@ resource "aws_iam_role_policy_attachment" "cluster_efs_csi_driver_role_policy_at
     aws_iam_role.cluster_efs_csi_driver_role
   ]
 }
+
+# CloudWatch Agent Policy
+resource "aws_iam_role" "cluster_cloudwatch_role" {
+  assume_role_policy = data.aws_iam_policy_document.cluster_cloudwatch_sts_policy.json
+  name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-cw-iam-role"])
+
+  depends_on = [
+    data.aws_iam_policy_document.cluster_efs_csi_driver_sts_policy
+  ]
+}
+
+resource "aws_iam_role_policy_attachment" "cluster_cloudwatch_role_policy_attach" {
+  role       = aws_iam_role.cluster_cloudwatch_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+
+  depends_on = [
+    aws_iam_role.cluster_cloudwatch_role
+  ]
+}
