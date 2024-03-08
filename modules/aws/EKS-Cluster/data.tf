@@ -57,7 +57,7 @@ data "aws_iam_policy_document" "cluster_lb_sts_policy" {
   ]
 }
 
-data "aws_iam_policy_document" "cluster_container_cloudwatch_streamer_sts_policy" {
+data "aws_iam_policy_document" "cluster_container_cloudwatch_fluent_bit_agent_sts_policy" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
     effect  = "Allow"
@@ -77,7 +77,7 @@ data "aws_iam_policy_document" "cluster_container_cloudwatch_streamer_sts_policy
   ]
 }
 
-data "aws_iam_policy_document" "cluster_cloudwatch_sts_policy" {
+data "aws_iam_policy_document" "cluster_cloudwatch_agent_sts_policy" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
     effect  = "Allow"

@@ -29,13 +29,13 @@ output "lb_role_arn" {
   value      = aws_iam_role.cluster_loadbalancer_role.arn
   depends_on = [aws_iam_role.cluster_loadbalancer_role]
 }
-output "cloudwatch_streamer_role_arn" {
-  value      = aws_iam_role.cluster_container_cloudwatch_streamer_role.arn
-  depends_on = [aws_iam_role.cluster_container_cloudwatch_streamer_role]
+output "cloudwatch_fluent_bit_agent_role_arn" {
+  value      = aws_iam_role.cluster_container_cloudwatch_fluent_bit_agent_role.arn
+  depends_on = [aws_iam_role.cluster_container_cloudwatch_fluent_bit_agent_role]
 }
 output "cloudwatch_agent_role_arn" {
-  value      = aws_iam_role.cluster_cloudwatch_role.arn
-  depends_on = [aws_iam_role.cluster_cloudwatch_role]
+  value      = aws_iam_role.cluster_cloudwatch_agent_role.arn
+  depends_on = [aws_iam_role.cluster_cloudwatch_agent_role]
 }
 output "ebs_csi_driver_role_arn" {
   value      = var.enable_ebs_csi_driver ? aws_iam_role.cluster_ebs_csi_driver_role[0].arn : null
