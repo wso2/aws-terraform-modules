@@ -23,10 +23,10 @@ variable "region" {
 }
 variable "application" {
   type        = string
-  description = "Purpose of the ECR"
+  description = "Purpose of the IAM User"
 }
 variable "tags" {
   type        = map(string)
-  description = "Tags to be associated with the EKS"
+  description = "Tags to be associated with the IAM User"
   default     = {}
 }
