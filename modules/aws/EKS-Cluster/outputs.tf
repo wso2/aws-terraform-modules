@@ -59,5 +59,5 @@ output "oidc_provider_url" {
 }
 output "eks_cluster_endpoint" {
   value      = aws_eks_cluster.eks_cluster.endpoint
-  depends_on = [aws_eks_cluster.eks_cluster.name]
+  depends_on = [aws_eks_cluster.eks_cluster]
 }
