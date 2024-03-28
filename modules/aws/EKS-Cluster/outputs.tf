@@ -57,3 +57,7 @@ output "oidc_provider_url" {
   value      = aws_iam_openid_connect_provider.eks_ca_oidc_provider.url
   depends_on = [aws_iam_openid_connect_provider.eks_ca_oidc_provider]
 }
+output "eks_cluster_endpoint" {
+  value      = aws_eks_cluster.eks_cluster.endpoint
+  depends_on = [aws_eks_cluster.eks_cluster.name]
+}
