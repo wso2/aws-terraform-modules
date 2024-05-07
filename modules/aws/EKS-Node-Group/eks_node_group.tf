@@ -20,6 +20,12 @@ resource "aws_eks_node_group" "eks_node_group" {
 
   ami_type = var.ami_type
 
+  lifecycle {
+    ignore_changes = [
+      launch_template
+    ]
+  }
+
   launch_template {
     name    = aws_launch_template.eks_launch_template.name
     version = "$Latest"
