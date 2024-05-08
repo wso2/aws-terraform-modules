@@ -124,7 +124,7 @@ data "aws_iam_policy_document" "cluster_efs_csi_driver_sts_policy" {
     condition {
       test     = "StringEquals"
       variable = "${replace(aws_iam_openid_connect_provider.eks_ca_oidc_provider.url, "https://", "")}:sub"
-      values   = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
+      values   = ["system:serviceaccount:kube-system:efs-csi-controller-sa"]
     }
     principals {
       identifiers = [aws_iam_openid_connect_provider.eks_ca_oidc_provider.arn]
