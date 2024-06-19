@@ -22,7 +22,7 @@ resource "aws_eks_node_group" "eks_node_group" {
 
   lifecycle {
     ignore_changes = [
-      launch_template
+      launch_template, scaling_config
     ]
   }
 
@@ -61,7 +61,7 @@ resource "aws_eks_node_group" "eks_node_group" {
 
   lifecycle {
     ignore_changes = [
-      scaling_config[0].desired_size
+
     ]
   }
 }
