@@ -18,3 +18,6 @@ output "association_default_route_table_id" {
 output "propagation_default_route_table_id" {
   value = aws_ec2_transit_gateway.ec2_transit_gateway.propagation_default_route_table_id
 }
+output "transit_gateway_arn" {
+    value = aws_ec2_transit_gateway.ec2_transit_gateway.arn
+}
