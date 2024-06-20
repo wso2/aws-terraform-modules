@@ -59,11 +59,6 @@ resource "aws_eks_node_group" "eks_node_group" {
 
   tags = local.ng_tags
 
-  lifecycle {
-    ignore_changes = [
-
-    ]
-  }
 }
 
 resource "aws_launch_template" "eks_launch_template" {

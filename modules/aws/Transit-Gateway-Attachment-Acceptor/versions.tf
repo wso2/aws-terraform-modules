@@ -9,15 +9,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "transit_gateway_id" {
-  value = aws_ec2_transit_gateway.ec2_transit_gateway.id
-}
-output "association_default_route_table_id" {
-  value = aws_ec2_transit_gateway.ec2_transit_gateway.association_default_route_table_id
-}
-output "propagation_default_route_table_id" {
-  value = aws_ec2_transit_gateway.ec2_transit_gateway.propagation_default_route_table_id
-}
-output "transit_gateway_arn" {
-  value = aws_ec2_transit_gateway.ec2_transit_gateway.arn
+terraform {
+  required_version = ">= 1.3.8"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
 }
