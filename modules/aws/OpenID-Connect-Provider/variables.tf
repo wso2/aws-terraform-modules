@@ -8,31 +8,16 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-variable "project" {
-  type        = string
-  description = "Name of the project"
-}
-variable "environment" {
-  type        = string
-  description = "Name of the environment"
-}
-variable "region" {
-  type        = string
-  description = "Code of the region"
-}
-variable "application" {
-  type        = string
-  description = "Purpose of the route table"
+
+variable "thumbprint_list" {
+  description = "List of thumbprints of the OIDC provider"
+  type        = list(string)
 }
 variable "tags" {
-  type        = map(string)
   description = "Tags to be added with all resources"
-}
-variable "resource_arns" {
   type        = map(string)
-  description = "ARN of the resource to share"
 }
-variable "account_id" {
+variable "url" {
+  description = "URL of the OIDC provider"
   type        = string
-  description = "ID of the account to share the resource with"
 }

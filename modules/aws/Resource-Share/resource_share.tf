@@ -10,17 +10,17 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_ram_resource_share" "ram_resource_share" {
-  name = "terraform-example"
+  name = join("-", [var.project, var.application, var.environment, var.region])
   tags = var.tags
 }
 
-# Share the transit gateway...
+# For each resource arn add it to the share resource.
 resource "aws_ram_resource_association" "aws_ram_resource_association" {
-  resource_arn       = var.resource_arn
+  for_each           = var.resource_arns
+  resource_arn       = each.value
   resource_share_arn = aws_ram_resource_share.ram_resource_share.id
 }
 
-# ...with the second account.
 resource "aws_ram_principal_association" "ram_principal_association" {
   principal          = var.account_id
   resource_share_arn = aws_ram_resource_share.ram_resource_share.id
