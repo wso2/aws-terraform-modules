@@ -89,3 +89,27 @@ variable "enable_efs_csi_driver" {
   description = "Enable EFS CSI Driver"
   default     = false
 }
+variable "enable_autoscaler" {
+  type        = bool
+  description = "Enable Cluster Autoscaler"
+  default     = false
+}
+variable "enable_cluster_loadbalancer" {
+  type        = bool
+  description = "Enable Cluster Load Balancer"
+  default     = false
+}
+variable "enable_fluent_bit" {
+  type        = bool
+  description = "Enable Fluent Bit"
+  default     = false
+}
+variable "enable_cloudwatch_agent" {
+  type        = bool
+  description = "Enable CloudWatch Agent"
+  default     = false
+}
+variable "cluster_iam_role_arn" {
+  type        = string
+  description = "IAM Role ARN for the EKS Cluster"
+}

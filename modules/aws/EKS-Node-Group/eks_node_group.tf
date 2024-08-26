@@ -12,7 +12,7 @@
 resource "aws_eks_node_group" "eks_node_group" {
   cluster_name    = var.eks_cluster_name
   node_group_name = join("-", [var.eks_cluster_name, var.node_group_name, "node-group"])
-  node_role_arn   = aws_iam_role.iam_role.arn
+  node_role_arn   = var.node_iam_role_arn == null ? aws_iam_role.iam_role.arn : var.node_iam_role_arn
   subnet_ids      = var.subnet_ids
   version         = var.k8s_version
   labels          = var.labels

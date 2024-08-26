@@ -10,7 +10,8 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_iam_role" "iam_role" {
-  name = join("-", [var.eks_cluster_name, var.node_group_name, "eks-node-group-iam-role"])
+  count = var.node_iam_role_arn != null ? 0 : 1
+  name  = join("-", [var.eks_cluster_name, var.node_group_name, "eks-node-group-iam-role"])
 
   assume_role_policy = jsonencode({
     Statement = [{
@@ -27,8 +28,9 @@ resource "aws_iam_role" "iam_role" {
 
 # Required as per https://docs.aws.amazon.com/eks/latest/userguide/create-node-role.html
 resource "aws_iam_role_policy_attachment" "amazon_eks_worker_node_policy" {
+  count      = var.node_iam_role_arn != null ? 0 : 1
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = aws_iam_role.iam_role.name
+  role       = aws_iam_role[0].iam_role.name
 
   depends_on = [
     aws_iam_role.iam_role
@@ -37,8 +39,9 @@ resource "aws_iam_role_policy_attachment" "amazon_eks_worker_node_policy" {
 
 # Required as per https://docs.aws.amazon.com/eks/latest/userguide/create-node-role.html
 resource "aws_iam_role_policy_attachment" "amazon_eks_cni_policy" {
+  count      = var.node_iam_role_arn != null ? 0 : 1
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = aws_iam_role.iam_role.name
+  role       = aws_iam_role[0].iam_role.name
 
   depends_on = [
     aws_iam_role.iam_role
@@ -48,7 +51,8 @@ resource "aws_iam_role_policy_attachment" "amazon_eks_cni_policy" {
 # Required as per https://docs.aws.amazon.com/eks/latest/userguide/create-node-role.html
 resource "aws_iam_role_policy_attachment" "amazon_ec2_container_registry_read_only" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = aws_iam_role.iam_role.name
+  count      = var.node_iam_role_arn != null ? 0 : 1
+  role       = aws_iam_role[0].iam_role.name
 
   depends_on = [
     aws_iam_role.iam_role
@@ -108,7 +112,8 @@ resource "aws_iam_role_policy_attachment" "eks_ca_iam_policy_attach" {
 # AWS Documentation: https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache.html
 # trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "amazon_ec2_cache_policy" {
-  name = join("-", [var.eks_cluster_name, var.node_group_name, "eks-cluster-ecr-pull-cache-policy"])
+  count = var.node_iam_role_arn != null ? 0 : 1
+  name  = join("-", [var.eks_cluster_name, var.node_group_name, "eks-cluster-ecr-pull-cache-policy"])
   policy = jsonencode({
     Statement = [{
       Action = [
@@ -125,8 +130,9 @@ resource "aws_iam_policy" "amazon_ec2_cache_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "amazon_ec2_cache_policy_attachment" {
-  policy_arn = aws_iam_policy.amazon_ec2_cache_policy.arn
-  role       = aws_iam_role.iam_role.name
+  count      = var.node_iam_role_arn != null ? 0 : 1
+  policy_arn = aws_iam_policy[0].amazon_ec2_cache_policy.arn
+  role       = aws_iam_role[0].iam_role.name
 
   depends_on = [
     aws_iam_role.iam_role
