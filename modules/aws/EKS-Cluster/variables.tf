@@ -113,3 +113,8 @@ variable "cluster_iam_role_arn" {
   type        = string
   description = "IAM Role ARN for the EKS Cluster"
 }
+variable "cluster_subnet_ids" {
+  type        = list(string)
+  description = "Subnet IDs for the EKS Cluster"
+  default     = []
+}
