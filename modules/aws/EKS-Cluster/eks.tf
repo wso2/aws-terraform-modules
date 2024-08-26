@@ -19,7 +19,7 @@
 # trivy:ignore:AVD-AWS-0039
 resource "aws_eks_cluster" "eks_cluster" {
   name     = join("-", [var.project, var.application, var.environment, var.region, "eks"])
-  role_arn = aws_iam_role.iam_role.arn
+  role_arn = aws_iam_role.iam_role[0].arn
 
   version = var.kubernetes_version
 

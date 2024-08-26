@@ -30,7 +30,7 @@ resource "aws_iam_role" "iam_role" {
 resource "aws_iam_role_policy_attachment" "amazon_eks_worker_node_policy" {
   count      = var.node_iam_role_arn != null ? 0 : 1
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = aws_iam_role[0].iam_role.name
+  role       = aws_iam_role.iam_role[0].name
 
   depends_on = [
     aws_iam_role.iam_role
@@ -41,7 +41,7 @@ resource "aws_iam_role_policy_attachment" "amazon_eks_worker_node_policy" {
 resource "aws_iam_role_policy_attachment" "amazon_eks_cni_policy" {
   count      = var.node_iam_role_arn != null ? 0 : 1
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = aws_iam_role[0].iam_role.name
+  role       = aws_iam_role.iam_role[0].name
 
   depends_on = [
     aws_iam_role.iam_role
@@ -52,7 +52,7 @@ resource "aws_iam_role_policy_attachment" "amazon_eks_cni_policy" {
 resource "aws_iam_role_policy_attachment" "amazon_ec2_container_registry_read_only" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   count      = var.node_iam_role_arn != null ? 0 : 1
-  role       = aws_iam_role[0].iam_role.name
+  role       = aws_iam_role.iam_role[0].name
 
   depends_on = [
     aws_iam_role.iam_role
@@ -131,8 +131,8 @@ resource "aws_iam_policy" "amazon_ec2_cache_policy" {
 
 resource "aws_iam_role_policy_attachment" "amazon_ec2_cache_policy_attachment" {
   count      = var.node_iam_role_arn != null ? 0 : 1
-  policy_arn = aws_iam_policy[0].amazon_ec2_cache_policy.arn
-  role       = aws_iam_role[0].iam_role.name
+  policy_arn = aws_iam_policy.amazon_ec2_cache_policy[0].arn
+  role       = aws_iam_role.iam_role[0].name
 
   depends_on = [
     aws_iam_role.iam_role

@@ -32,7 +32,7 @@ POLICY
 
 resource "aws_iam_role_policy_attachment" "amazon_eks_cluster_policy" {
   count      = var.cluster_iam_role_arn != null ? 0 : 1
-  role       = aws_iam_role[0].iam_role.name
+  role       = aws_iam_role.iam_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 
   depends_on = [
@@ -44,7 +44,7 @@ resource "aws_iam_role_policy_attachment" "amazon_eks_cluster_policy" {
 # Reference: https://docs.aws.amazon.com/eks/latest/userguide/security-groups-for-pods.html
 resource "aws_iam_role_policy_attachment" "amazon_eks_pc_resource_controller" {
   count      = var.cluster_iam_role_arn != null ? 0 : 1
-  role       = aws_iam_role[0].iam_role.name
+  role       = aws_iam_role.iam_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
 
   depends_on = [
