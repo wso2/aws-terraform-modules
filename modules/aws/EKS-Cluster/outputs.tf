@@ -69,3 +69,7 @@ output "eks_cluster_issuer" {
   value      = data.aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
   depends_on = [data.aws_eks_cluster.eks_cluster]
 }
+output "eks_route_table_ids" {
+  value      = aws_route_table.route_table[*].id
+  depends_on = [aws_route_table.route_table]
+}
