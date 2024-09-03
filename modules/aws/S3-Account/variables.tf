@@ -47,7 +47,7 @@ variable "restrict_public_buckets" {
 variable "server_side_encryption" {
   type = object({
     algorithm  = string
-    kms_key_id = optional(string)
+    kms_key_id = optional(string, null)
   })
   description = "Server side encryption to be applied to the bucket"
   default = {

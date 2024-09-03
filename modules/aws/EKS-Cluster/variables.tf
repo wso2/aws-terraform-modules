@@ -112,6 +112,7 @@ variable "enable_cloudwatch_agent" {
 variable "cluster_iam_role_arn" {
   type        = string
   description = "IAM Role ARN for the EKS Cluster"
+  default     = null
 }
 variable "cluster_subnet_ids" {
   type        = list(string)
