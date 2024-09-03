@@ -27,7 +27,7 @@ resource "aws_s3_bucket_acl" "bucket_acl" {
 # Reason: Versioning has been enabled as a parameter with default value true
 # trivy:ignore:AVD-AWS-0090
 resource "aws_s3_bucket_versioning" "s3_bucket_versioning" {
-  bucket  = aws_s3_bucket.s3_bucket.id
+  bucket = aws_s3_bucket.s3_bucket.id
   versioning_configuration {
     status = var.versioning_enabled ? "Enabled" : "Suspended"
   }
