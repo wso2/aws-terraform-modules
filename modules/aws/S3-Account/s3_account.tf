@@ -28,7 +28,9 @@ resource "aws_s3_bucket_acl" "bucket_acl" {
 # trivy:ignore:AVD-AWS-0090
 resource "aws_s3_bucket_versioning" "s3_bucket_versioning" {
   bucket  = aws_s3_bucket.s3_bucket.id
-  enabled = var.versioning_enabled
+  versioning_configuration {
+    status = var.versioning_enabled ? "Enabled" : "Suspended"
+  }
 }
 
 # Ignore: AVD-AWS-0087 (https://avd.aquasec.com/misconfig/avd-aws-0087)
@@ -50,7 +52,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "s3_bucket_server_
 
   rule {
     apply_server_side_encryption_by_default {
-      kms_master_key_id = var.server_side_encryption.key_id
+      kms_master_key_id = var.server_side_encryption.kms_key_id
       sse_algorithm     = var.server_side_encryption.algorithm
     }
   }

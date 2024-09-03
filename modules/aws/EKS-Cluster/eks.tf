@@ -27,7 +27,7 @@ resource "aws_eks_cluster" "eks_cluster" {
     endpoint_private_access = var.endpoint_private_access
     endpoint_public_access  = var.endpoint_public_access
     public_access_cidrs     = var.public_access_cidrs
-    subnet_ids              = len(var.cluster_subnet_ids) == 0 ? aws_subnet.eks_subnet[*].id : var.cluster_subnet_ids
+    subnet_ids              = length(var.cluster_subnet_ids) == 0 ? aws_subnet.eks_subnet[*].id : var.cluster_subnet_ids
   }
 
   dynamic "encryption_config" {
