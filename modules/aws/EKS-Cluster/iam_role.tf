@@ -10,7 +10,8 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_iam_role" "iam_role" {
-  name = join("-", [var.project, var.application, var.environment, var.region, "eks-iam-role"])
+  count = var.cluster_iam_role_arn != null ? 0 : 1
+  name  = join("-", [var.project, var.application, var.environment, var.region, "eks-iam-role"])
 
   assume_role_policy = <<POLICY
 {
@@ -30,8 +31,9 @@ POLICY
 }
 
 resource "aws_iam_role_policy_attachment" "amazon_eks_cluster_policy" {
+  count      = var.cluster_iam_role_arn != null ? 0 : 1
+  role       = aws_iam_role.iam_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.iam_role.name
 
   depends_on = [
     aws_iam_role.iam_role
@@ -41,8 +43,9 @@ resource "aws_iam_role_policy_attachment" "amazon_eks_cluster_policy" {
 # Optionally, enable Security Groups for Pods
 # Reference: https://docs.aws.amazon.com/eks/latest/userguide/security-groups-for-pods.html
 resource "aws_iam_role_policy_attachment" "amazon_eks_pc_resource_controller" {
+  count      = var.cluster_iam_role_arn != null ? 0 : 1
+  role       = aws_iam_role.iam_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
-  role       = aws_iam_role.iam_role.name
 
   depends_on = [
     aws_iam_role.iam_role
@@ -70,6 +73,7 @@ resource "aws_iam_openid_connect_provider" "eks_ca_oidc_provider" {
 
 # IAM Role for IAM Cluster Autoscaler
 resource "aws_iam_role" "cluster_autoscaler_role" {
+  count              = var.enable_autoscaler == false ? 0 : 1
   assume_role_policy = data.aws_iam_policy_document.cluster_autoscaler_sts_policy.json
   name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-autoscaler-iam-role"])
 
@@ -83,7 +87,8 @@ resource "aws_iam_role" "cluster_autoscaler_role" {
 # AWS Documentation: https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#full-cluster-autoscaler-features-policy-recommended
 # trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "cluster_autoscaler_policy" {
-  name = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-autoscaler-iam-policy"])
+  count = var.enable_autoscaler == false ? 0 : 1
+  name  = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-autoscaler-iam-policy"])
   policy = jsonencode({
     Statement = [{
       Action = [
@@ -104,8 +109,9 @@ resource "aws_iam_policy" "cluster_autoscaler_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "eks_ca_iam_policy_attach" {
-  role       = aws_iam_role.cluster_autoscaler_role.name
-  policy_arn = aws_iam_policy.cluster_autoscaler_policy.arn
+  count      = var.enable_autoscaler == false ? 0 : 1
+  role       = aws_iam_role.cluster_autoscaler_role[0].name
+  policy_arn = aws_iam_policy.cluster_autoscaler_policy[0].arn
 
   depends_on = [
     aws_iam_role.cluster_autoscaler_role,
@@ -115,6 +121,7 @@ resource "aws_iam_role_policy_attachment" "eks_ca_iam_policy_attach" {
 
 # IAM Role for IAM Cluster LoadBalancer
 resource "aws_iam_role" "cluster_loadbalancer_role" {
+  count              = var.enable_cluster_loadbalancer == false ? 0 : 1
   assume_role_policy = data.aws_iam_policy_document.cluster_lb_sts_policy.json
   name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-lb-iam-role"])
 
@@ -127,7 +134,8 @@ resource "aws_iam_role" "cluster_loadbalancer_role" {
 # AWS Documentation: https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html
 # trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "cluster_loadbalancer_policy" {
-  name = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-lb-iam-policy"])
+  count = var.enable_cluster_loadbalancer == false ? 0 : 1
+  name  = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-lb-iam-policy"])
   policy = jsonencode({
     Statement : [
       {
@@ -372,8 +380,9 @@ resource "aws_iam_policy" "cluster_loadbalancer_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "cluster_loadbalancer_policy_attach" {
-  role       = aws_iam_role.cluster_loadbalancer_role.name
-  policy_arn = aws_iam_policy.cluster_loadbalancer_policy.arn
+  count      = var.enable_cluster_loadbalancer == false ? 0 : 1
+  role       = aws_iam_role.cluster_loadbalancer_role[0].name
+  policy_arn = aws_iam_policy.cluster_loadbalancer_policy[0].arn
 
   depends_on = [
     aws_iam_role.cluster_loadbalancer_role,
@@ -383,6 +392,7 @@ resource "aws_iam_role_policy_attachment" "cluster_loadbalancer_policy_attach" {
 
 # IAM Role for CloudWatch Agents
 resource "aws_iam_role" "cluster_container_cloudwatch_fluent_bit_agent_role" {
+  count              = var.enable_fluent_bit == false ? 0 : 1
   assume_role_policy = data.aws_iam_policy_document.cluster_container_cloudwatch_fluent_bit_agent_sts_policy.json
   name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-ccw-iam-role"])
 
@@ -392,7 +402,8 @@ resource "aws_iam_role" "cluster_container_cloudwatch_fluent_bit_agent_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "cluster_container_cloudwatch_fluent_bit_agent_policy_attach" {
-  role       = aws_iam_role.cluster_container_cloudwatch_fluent_bit_agent_role.name
+  count      = var.enable_fluent_bit == false ? 0 : 1
+  role       = aws_iam_role.cluster_container_cloudwatch_fluent_bit_agent_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 
   depends_on = [
@@ -444,6 +455,7 @@ resource "aws_iam_role_policy_attachment" "cluster_efs_csi_driver_role_policy_at
 
 # CloudWatch Agent Policy
 resource "aws_iam_role" "cluster_cloudwatch_agent_role" {
+  count              = var.enable_cloudwatch_agent == false ? 0 : 1
   assume_role_policy = data.aws_iam_policy_document.cluster_cloudwatch_agent_sts_policy.json
   name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-cw-iam-role"])
 
@@ -453,7 +465,8 @@ resource "aws_iam_role" "cluster_cloudwatch_agent_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "cluster_cloudwatch_agent_role_policy_attach" {
-  role       = aws_iam_role.cluster_cloudwatch_agent_role.name
+  count      = var.enable_cloudwatch_agent == false ? 0 : 1
+  role       = aws_iam_role.cluster_cloudwatch_agent_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 
   depends_on = [

@@ -19,7 +19,7 @@
 # trivy:ignore:AVD-AWS-0039
 resource "aws_eks_cluster" "eks_cluster" {
   name     = join("-", [var.project, var.application, var.environment, var.region, "eks"])
-  role_arn = aws_iam_role.iam_role.arn
+  role_arn = aws_iam_role.iam_role[0].arn
 
   version = var.kubernetes_version
 
@@ -27,7 +27,7 @@ resource "aws_eks_cluster" "eks_cluster" {
     endpoint_private_access = var.endpoint_private_access
     endpoint_public_access  = var.endpoint_public_access
     public_access_cidrs     = var.public_access_cidrs
-    subnet_ids              = aws_subnet.eks_subnet[*].id
+    subnet_ids              = len(var.cluster_subnet_ids) == 0 ? aws_subnet.eks_subnet[*].id : var.cluster_subnet_ids
   }
 
   dynamic "encryption_config" {

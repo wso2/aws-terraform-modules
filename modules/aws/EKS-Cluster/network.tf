@@ -10,7 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_subnet" "eks_subnet" {
-  count = length(var.subnet_details)
+  count = length(var.cluster_subnet_ids) == 0 ? length(var.subnet_details) : 0
 
   vpc_id            = var.eks_vpc_id
   cidr_block        = var.subnet_details[count.index].cidr_block
@@ -23,7 +23,7 @@ resource "aws_subnet" "eks_subnet" {
 }
 
 resource "aws_route_table" "route_table" {
-  count  = length(var.subnet_details)
+  count  = length(var.cluster_subnet_ids) == 0 ? length(var.subnet_details) : 0
   vpc_id = var.eks_vpc_id
   tags   = local.rt_tags
 

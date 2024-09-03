@@ -9,6 +9,11 @@
 #
 # --------------------------------------------------------------------------------------
 
+variable "node_iam_role_arn" {
+  type        = string
+  description = "IAM role ARN to be associated with the node group"
+  default     = null
+}
 variable "eks_cluster_name" {
   description = "Name of the EKS cluster"
   type        = string

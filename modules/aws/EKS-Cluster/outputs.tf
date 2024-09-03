@@ -22,20 +22,20 @@ output "eks_security_group_rule_id" {
   depends_on = [aws_subnet.eks_subnet]
 }
 output "autoscaler_role_arn" {
-  value      = aws_iam_role.cluster_autoscaler_role.arn
-  depends_on = [aws_iam_role.cluster_autoscaler_role]
+  value      = aws_iam_role.cluster_autoscaler_role[0].arn
+  depends_on = [aws_iam_role.cluster_autoscaler_role[0]]
 }
 output "lb_role_arn" {
-  value      = aws_iam_role.cluster_loadbalancer_role.arn
-  depends_on = [aws_iam_role.cluster_loadbalancer_role]
+  value      = aws_iam_role.cluster_loadbalancer_role[0].arn
+  depends_on = [aws_iam_role.cluster_loadbalancer_role[0]]
 }
 output "cloudwatch_fluent_bit_agent_role_arn" {
-  value      = aws_iam_role.cluster_container_cloudwatch_fluent_bit_agent_role.arn
-  depends_on = [aws_iam_role.cluster_container_cloudwatch_fluent_bit_agent_role]
+  value      = aws_iam_role.cluster_container_cloudwatch_fluent_bit_agent_role[0].arn
+  depends_on = [aws_iam_role.cluster_container_cloudwatch_fluent_bit_agent_role[0]]
 }
 output "cloudwatch_agent_role_arn" {
-  value      = aws_iam_role.cluster_cloudwatch_agent_role.arn
-  depends_on = [aws_iam_role.cluster_cloudwatch_agent_role]
+  value      = aws_iam_role.cluster_cloudwatch_agent_role[0].arn
+  depends_on = [aws_iam_role.cluster_cloudwatch_agent_role[0]]
 }
 output "ebs_csi_driver_role_arn" {
   value      = var.enable_ebs_csi_driver ? aws_iam_role.cluster_ebs_csi_driver_role[0].arn : null
@@ -68,4 +68,8 @@ output "tls_cert_sha1_fingerprint" {
 output "eks_cluster_issuer" {
   value      = data.aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
   depends_on = [data.aws_eks_cluster.eks_cluster]
+}
+output "eks_route_table_ids" {
+  value      = aws_route_table.route_table[*].id
+  depends_on = [aws_route_table.route_table]
 }
