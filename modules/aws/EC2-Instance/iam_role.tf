@@ -35,7 +35,7 @@ resource "aws_iam_policy" "session_manager_policy" {
 
 resource "aws_iam_role" "iam_role" {
   name = join("-", [var.project, var.application, var.environment, var.region, "ec2-iam-role"])
-
+  count = var.ec2_iam_role_arn != null ? 0 : 1
   assume_role_policy = <<POLICY
 {
   "Version": "2012-10-17",
@@ -56,19 +56,20 @@ POLICY
 
 resource "aws_iam_instance_profile" "iam_instance_profile" {
   name = join("-", [var.project, var.application, var.environment, var.region, "ec2-instance-profile"])
-  role = aws_iam_role.iam_role.name
+  count = var.ec2_iam_role_arn != null ? 0 : 1
+  role = aws_iam_role.iam_role[0].name
 
   depends_on = [aws_iam_role.iam_role]
 }
 
 resource "aws_iam_role_policy_attachment" "instance_connect" {
   count      = var.enable_instance_connect == true ? 1 : 0
-  role       = aws_iam_role.iam_role.name
+  role       = aws_iam_role.iam_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonSSMManagedInstanceCore"
 }
 
 resource "aws_iam_role_policy_attachment" "session_manager" {
   count      = var.enable_session_manager == true ? 1 : 0
-  role       = aws_iam_role.iam_role.name
+  role       = aws_iam_role.iam_role[0].name
   policy_arn = aws_iam_policy.session_manager_policy[0].arn
 }

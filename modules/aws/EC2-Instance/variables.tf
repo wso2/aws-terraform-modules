@@ -133,3 +133,7 @@ variable "user_data" {
   description = "User data to be passed to the EC2 instance"
   default     = null
 }
+variable "ec2_iam_role_arn" {
+  type        = string
+  description = "IAM Role ARN for the EC2"
+}
