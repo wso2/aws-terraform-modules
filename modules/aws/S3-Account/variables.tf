@@ -34,6 +34,11 @@ variable "acl" {
   type        = string
   description = "ACL to be applied to the bucket"
 }
+variable "object_ownership" {
+  type        = string
+  description = "Bucket ownership controls"
+  default     = "BucketOwnerPreferred"
+}
 variable "block_public_acls" {
   type        = bool
   description = "Block public access to the bucket"
