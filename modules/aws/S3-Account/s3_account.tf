@@ -18,7 +18,16 @@ resource "aws_s3_bucket" "s3_bucket" {
   tags = var.tags
 }
 
+resource "aws_s3_bucket_ownership_controls" "s3_bucket_ownership_controls" {
+  bucket = aws_s3_bucket.s3_bucket.id
+  rule {
+    object_ownership = var.object_ownership
+  }
+}
+
 resource "aws_s3_bucket_acl" "bucket_acl" {
+  depends_on = [aws_s3_bucket_ownership_controls.s3_bucket_ownership_controls  ]
+
   bucket = aws_s3_bucket.s3_bucket.id
   acl    = var.acl
 }
