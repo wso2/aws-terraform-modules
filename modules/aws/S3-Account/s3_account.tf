@@ -18,11 +18,6 @@ resource "aws_s3_bucket" "s3_bucket" {
   tags = var.tags
 }
 
-resource "aws_s3_bucket_acl" "bucket_acl" {
-  bucket = aws_s3_bucket.s3_bucket.id
-  acl    = var.acl
-}
-
 # Ignore: AVD-AWS-0090 (https://avd.aquasec.com/misconfig/avd-aws-0090)
 # Reason: Versioning has been enabled as a parameter with default value true
 # trivy:ignore:AVD-AWS-0090
