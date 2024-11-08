@@ -9,14 +9,6 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "ecr_admin_iam_policy_arn" {
-  value      = aws_iam_policy.ecr_admin_iam_policy.arn
-  depends_on = [aws_iam_policy.ecr_admin_iam_policy]
-}
-output "ecr_pull_only_iam_policy_arn" {
-  value      = aws_iam_policy.ecr_pull_only_iam_policy.arn
-  depends_on = [aws_iam_policy.ecr_pull_only_iam_policy]
-}
 output "ecr_id" {
   value      = aws_ecr_repository.ecr_repository.id
   depends_on = [aws_ecr_repository.ecr_repository]
