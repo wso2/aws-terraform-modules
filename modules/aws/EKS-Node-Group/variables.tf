@@ -98,3 +98,8 @@ variable "custom_ami_id" {
   description = "Custom AMI ID to be used for the node group"
   default     = null
 }
+variable "enable_ssm_access" {
+  type        = bool
+  description = "Flag to enable SSM access"
+  default     = false
+}

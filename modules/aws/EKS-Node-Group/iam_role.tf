@@ -59,6 +59,16 @@ resource "aws_iam_role_policy_attachment" "amazon_ec2_container_registry_read_on
   ]
 }
 
+resource "aws_iam_role_policy_attachment" "amazon_ssm_managed_instance_core" {
+  count      = var.enable_ssm_access == false ? 0 : 1
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  role       = aws_iam_role.iam_role.name
+
+  depends_on = [
+    aws_iam_role.iam_role
+  ]
+}
+
 /* TODO:: Review and remove if not required
 resource "aws_iam_role_policy_attachment" "amazon_cloud_watch_agent_policy" {
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
