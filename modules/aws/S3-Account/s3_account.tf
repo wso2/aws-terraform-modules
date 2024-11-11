@@ -42,6 +42,9 @@ resource "aws_s3_bucket_public_access_block" "s3_bucket_public_access_block" {
   restrict_public_buckets = var.restrict_public_buckets
 }
 
+# Ignore: AVD-AWS-0132 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-00132)
+# Reason: Variable KMS_KEY_ID is defined and can be used for explicit key encryption
+# trivy:ignore:AVD-AWS-0132
 resource "aws_s3_bucket_server_side_encryption_configuration" "s3_bucket_server_side_encryption_configuration" {
   bucket = aws_s3_bucket.s3_bucket.id
 

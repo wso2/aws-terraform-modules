@@ -9,6 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
+# Ignore: AVD-AWS-0017 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-0017)
+# Reason: Variable KMS_KEY_ID is defined and can be used for explicit key encryption
+# trivy:ignore:AVD-AWS-0017
 resource "aws_cloudwatch_log_group" "log_group" {
   name              = var.log_group_name
   retention_in_days = var.retention_in_days

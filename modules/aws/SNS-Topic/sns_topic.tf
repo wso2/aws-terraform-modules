@@ -9,6 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
+# Ignore: AVD-AWS-0095 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-0095)
+# Reason: Variable KMS_KEY_ID is defined and can be used for explicit key encryption
+# trivy:ignore:AVD-AWS-0095
 resource "aws_sns_topic" "sns_topic" {
   name              = join("-", [var.project, var.application, var.environment, var.region, var.topic_name])
   kms_master_key_id = var.kms_master_key_id
