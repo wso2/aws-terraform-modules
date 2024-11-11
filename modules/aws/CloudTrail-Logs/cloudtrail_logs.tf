@@ -9,6 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
+# Ignore: AVD-AWS-0015 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-0017)
+# Reason: Variable KMS_KEY_ID is defined and can be used for explicit key encryption
+# trivy:ignore:AVD-AWS-0015
 # trivy:ignore:AVD-AWS-0162 # TODO: fix this
 resource "aws_cloudtrail" "cloudtrail_config" {
   name                          = join("-", [var.project, var.application, var.environment, var.region, "cloudtrail-log-config"])

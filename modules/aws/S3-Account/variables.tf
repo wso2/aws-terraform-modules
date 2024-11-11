@@ -30,10 +30,6 @@ variable "tags" {
   description = "Tags for the resources"
   default     = {}
 }
-variable "acl" {
-  type        = string
-  description = "ACL to be applied to the bucket"
-}
 variable "block_public_acls" {
   type        = bool
   description = "Block public access to the bucket"

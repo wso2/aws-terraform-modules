@@ -9,6 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
+# Ignore: AVD-AWS-0098 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-0098)
+# Reason: Variable KMS_KEY_ID is defined and can be used for explicit key encryption
+# trivy:ignore:AVD-AWS-0098
 resource "aws_secretsmanager_secret" "secretsmanager_secret" {
   name                    = var.secret_name
   recovery_window_in_days = var.recovery_window_in_days

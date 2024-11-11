@@ -32,53 +32,59 @@ resource "aws_ecr_repository" "ecr_repository" {
   }
 }
 
-resource "aws_iam_policy" "ecr_admin_iam_policy" {
-  name = join("-", [local.name_prefix, "ecr-admin-iam-policy"])
+data "aws_iam_policy_document" "admin_policy" {
+  statement {
+    sid    = "External Admin policy"
+    effect = "Allow"
 
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = [
-          "ecr:GetDownloadUrlForLayer",
-          "ecr:BatchGetImage",
-          "ecr:BatchCheckLayerAvailability",
-          "ecr:PutImage",
-          "ecr:InitiateLayerUpload",
-          "ecr:UploadLayerPart",
-          "ecr:CompleteLayerUpload"
-        ],
-        Effect   = "Allow",
-        Resource = aws_ecr_repository.ecr_repository.arn
-      }
+    principals {
+      type        = "AWS"
+      identifiers = var.external_admin_account_ids
+    }
+
+    actions = [
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:PutImage",
+      "ecr:InitiateLayerUpload",
+      "ecr:UploadLayerPart",
+      "ecr:CompleteLayerUpload",
+      "ecr:DescribeRepositories",
+      "ecr:GetRepositoryPolicy",
+      "ecr:ListImages",
+      "ecr:DeleteRepository",
+      "ecr:BatchDeleteImage",
+      "ecr:SetRepositoryPolicy",
+      "ecr:DeleteRepositoryPolicy",
     ]
-  })
-  depends_on = [
-    aws_ecr_repository.ecr_repository
-  ]
-  tags = var.tags
+  }
 }
 
-resource "aws_iam_policy" "ecr_pull_only_iam_policy" {
-  name = join("-", [local.name_prefix, "ecr-pull-only-iam-policy"])
+resource "aws_ecr_repository_policy" "admin_policy" {
+  repository = aws_ecr_repository.ecr_repository.name
+  policy     = data.aws_iam_policy_document.admin_policy.json
+}
 
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = [
-          "ecr:GetDownloadUrlForLayer",
-          "ecr:BatchGetImage",
-          "ecr:BatchCheckLayerAvailability"
-        ],
-        Effect   = "Allow",
-        Resource = aws_ecr_repository.ecr_repository.arn
-      }
+data "aws_iam_policy_document" "pull_only_policy" {
+  statement {
+    sid    = "External Pull only policy"
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = var.external_pull_only_account_ids
+    }
+
+    actions = [
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage",
+      "ecr:BatchCheckLayerAvailability"
     ]
-  })
-  tags = var.tags
+  }
+}
 
-  depends_on = [
-    aws_ecr_repository.ecr_repository
-  ]
+resource "aws_ecr_repository_policy" "pull_only_policy" {
+  repository = aws_ecr_repository.ecr_repository.name
+  policy     = data.aws_iam_policy_document.pull_only_policy.json
 }

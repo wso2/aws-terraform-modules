@@ -10,8 +10,14 @@
 # --------------------------------------------------------------------------------------
 
 # Ignore: AVD-AWS-0343 (https://avd.aquasec.com/misconfig/aws/rds/avd-aws-0343/)
+# Ignore: AVD-AWS-0059 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-0079)
+# Ignore: AVD-AWS-0059 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-0077)
 # Reason: Delete protection has been configured as an optional parameter as this will depend on the usage of the RDS
+# Reason: Variable KMS_KEY_ID is defined and can be used for explicit key encryption
+# Reason: Variable backup_retention_period is defined and can be used for explicitlty setting backup retention
 # trivy:ignore:AVD-AWS-0343
+# trivy:ignore:AVD-AWS-0079
+# trivy:ignore:AVD-AWS-0077
 resource "aws_rds_cluster" "rds_cluster" {
 
   allow_major_version_upgrade = var.allow_major_version_upgrade

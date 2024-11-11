@@ -175,7 +175,8 @@ resource "aws_iam_policy" "cluster_loadbalancer_policy" {
           "elasticloadbalancing:DescribeTargetGroups",
           "elasticloadbalancing:DescribeTargetGroupAttributes",
           "elasticloadbalancing:DescribeTargetHealth",
-          "elasticloadbalancing:DescribeTags"
+          "elasticloadbalancing:DescribeTags",
+          "elasticloadbalancing:DescribeListenerAttributes"
         ],
         Resource : "*"
       },
