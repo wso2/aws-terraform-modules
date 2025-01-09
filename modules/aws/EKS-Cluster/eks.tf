@@ -35,7 +35,6 @@ resource "aws_eks_cluster" "eks_cluster" {
     bootstrap_cluster_creator_admin_permissions = var.bootstrap_cluster_creator_admin_permissions
   }
 
-
   dynamic "encryption_config" {
     for_each = var.secret_encryption_cmk != null ? [1] : []
     content {
