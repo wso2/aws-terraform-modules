@@ -30,6 +30,11 @@ resource "aws_eks_cluster" "eks_cluster" {
     subnet_ids              = length(var.cluster_subnet_ids) == 0 ? aws_subnet.eks_subnet[*].id : var.cluster_subnet_ids
   }
 
+  access_config {
+    authentication_mode                         = var.authentication_mode
+    bootstrap_cluster_creator_admin_permissions = var.bootstrap_cluster_creator_admin_permissions
+  }
+
   dynamic "encryption_config" {
     for_each = var.secret_encryption_cmk != null ? [1] : []
     content {

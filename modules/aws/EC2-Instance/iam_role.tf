@@ -64,7 +64,7 @@ resource "aws_iam_instance_profile" "iam_instance_profile" {
 resource "aws_iam_role_policy_attachment" "instance_connect" {
   count      = var.enable_instance_connect == true ? 1 : 0
   role       = aws_iam_role.iam_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonSSMManagedInstanceCore"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 resource "aws_iam_role_policy_attachment" "session_manager" {
