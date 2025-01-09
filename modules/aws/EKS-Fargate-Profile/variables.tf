@@ -18,12 +18,6 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "fargate_iam_role_arn" {
-  description = "IAM role ARN to be associated with the fargate"
-  type        = string
-  default     = null
-}
-
 variable "eks_cluster_name" {
   description = "Name of the EKS cluster"
   type        = string

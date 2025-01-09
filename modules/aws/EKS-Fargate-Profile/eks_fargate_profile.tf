@@ -21,7 +21,7 @@
 resource "aws_eks_fargate_profile" "eks_fargate_profile" {
   cluster_name           = var.eks_cluster_name
   fargate_profile_name   = var.fargate_profile_name
-  pod_execution_role_arn = var.fargate_iam_role_arn == null ? aws_iam_role.iam_role[0].arn : var.fargate_iam_role_arn
+  pod_execution_role_arn = aws_iam_role.iam_role.arn
   subnet_ids             = var.subnet_ids
   tags                   = var.tags
 

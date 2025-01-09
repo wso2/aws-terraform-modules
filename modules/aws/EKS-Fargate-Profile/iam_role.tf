@@ -19,8 +19,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_iam_role" "iam_role" {
-  count = var.fargate_iam_role_arn != null ? 0 : 1
-  name  = join("-", [var.eks_cluster_name, var.fargate_profile_name, "eks-fargate-profile-iam-role"])
+  name = join("-", [var.eks_cluster_name, var.fargate_profile_name, "eks-fargate-profile-iam-role"])
 
   assume_role_policy = jsonencode({
     Statement = [{
@@ -37,7 +36,7 @@ resource "aws_iam_role" "iam_role" {
 
 resource "aws_iam_role_policy_attachment" "amazon_eks_fargate_pod_execution_role_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy"
-  role       = aws_iam_role.iam_role[0].name
+  role       = aws_iam_role.iam_role.name
 
   depends_on = [
     aws_iam_role.iam_role
