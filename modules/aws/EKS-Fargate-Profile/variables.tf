@@ -23,23 +23,28 @@ variable "fargate_iam_role_arn" {
   type        = string
   default     = null
 }
+
 variable "eks_cluster_name" {
   description = "Name of the EKS cluster"
   type        = string
 }
+
 variable "fargate_profile_name" {
   description = "Name of the fargate profile"
   type        = string
 }
+
 variable "tags" {
   description = "Tags to be associated with the EKS"
   type        = map(string)
   default     = {}
 }
+
 variable "fargate_namespaces" {
   description = "Namespaces to be used in Fargate profile"
   type        = list(string)
 }
+
 variable "subnet_ids" {
   description = "List of subnets to deploy nodepools"
   type        = list(string)
