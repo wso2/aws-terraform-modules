@@ -119,3 +119,13 @@ variable "cluster_subnet_ids" {
   description = "Subnet IDs for the EKS Cluster"
   default     = []
 }
+variable "authentication_mode" {
+  type        = string
+  description = "EKS Cluster authentication mode"
+  default     = "CONFIG_MAP"
+}
+variable "bootstrap_cluster_creator_admin_permissions" {
+  type        = bool
+  description = "Whether or not to bootstrap the access config values to the cluster"
+  default     = false
+}
