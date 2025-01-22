@@ -29,19 +29,19 @@ variable "eks_addon_name" {
 }
 
 variable "eks_addon_version" {
-  description = "Version of the EKS addon (optional)"
+  description = "Version of the EKS addon (optional). If set to null, allows the provider to use the default version"
   type        = string
   default     = null
 }
 
 variable "eks_addon_update_conflict" {
-  description = "Strategy for resolving conflicts on addon update (optional)"
+  description = "Strategy for resolving conflicts on addon update (optional). If set to null, allows the provider to use the default behavior"
   type        = string
   default     = null
 }
 
 variable "eks_addon_update_create" {
-  description = "Strategy for resolving conflicts on addon creation (optional)"
+  description = "Strategy for resolving conflicts on addon creation (optional). If set to null, allows the provider to use the default behavior"
   type        = string
   default     = null
 }
