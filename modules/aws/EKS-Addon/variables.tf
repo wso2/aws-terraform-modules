@@ -31,19 +31,19 @@ variable "eks_addon_name" {
 variable "eks_addon_version" {
   description = "Version of the EKS addon (optional)"
   type        = string
-  default     = null # Allows AWS to pick the latest version if not set
+  default     = null
 }
 
 variable "eks_addon_update_conflict" {
   description = "Strategy for resolving conflicts on addon update (optional)"
   type        = string
-  default     = null # Allows the provider to use the default behavior
+  default     = null
 }
 
 variable "eks_addon_update_create" {
   description = "Strategy for resolving conflicts on addon creation (optional)"
   type        = string
-  default     = null # Allows the provider to use the default behavior
+  default     = null
 }
 
 variable "eks_addon_configuration_values" {

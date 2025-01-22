@@ -19,13 +19,11 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_eks_addon" "eks_addon" {
-  cluster_name = var.eks_cluster_name
-  addon_name   = var.eks_addon_name
-
-  # Conditionally set optional values only if provided
-  addon_version               = var.eks_addon_version != null ? var.eks_addon_version : null
-  resolve_conflicts_on_update = var.eks_addon_update_conflict != null ? var.eks_addon_update_conflict : null
-  resolve_conflicts_on_create = var.eks_addon_update_create != null ? var.eks_addon_update_create : null
-  configuration_values        = var.eks_addon_configuration_values != null ? var.eks_addon_configuration_values : null
+  cluster_name                = var.eks_cluster_name
+  addon_name                  = var.eks_addon_name
+  addon_version               = var.eks_addon_version
+  resolve_conflicts_on_update = var.eks_addon_update_conflict
+  resolve_conflicts_on_create = var.eks_addon_update_create
+  configuration_values        = var.eks_addon_configuration_values
 }
 
