@@ -17,6 +17,7 @@ variable "rules" {
     protocol        = string
     cidr_blocks     = list(string)
     security_groups = list(string)
+    prefix_list_ids = list(string)
   }))
   description = "List of rules to be added to the security group"
 }
