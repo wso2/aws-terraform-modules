@@ -11,27 +11,27 @@
 
 variable "tags" {
   description = "Tags to be associated with the resource"
-  type = map(string)
-  default = {}
+  type        = map(string)
+  default     = {}
 }
 variable "domain_name" {
   description = "Domain name"
-  type = string
+  type        = string
 }
 variable "subject_alternative_names" {
   description = "Subject alternative names"
-  type = list(string)
-  default = []
+  type        = list(string)
+  default     = []
 }
 variable "key_algorithm" {
   description = "Key algorithm to be used to generate the certificate"
-  type = string
+  type        = string
 }
 variable "validation_domain" {
   description = "Domain name to be used for validation"
-  type = string
+  type        = string
 }
 variable "validation_method" {
   description = "Validation method to be used"
-  type = string
+  type        = string
 }

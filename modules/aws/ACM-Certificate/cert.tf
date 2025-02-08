@@ -10,7 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_acm_certificate" "cert" {
-  domain_name       = var.domain_name
+  domain_name = var.domain_name
 
   key_algorithm = var.key_algorithm
 
