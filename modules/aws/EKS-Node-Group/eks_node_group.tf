@@ -65,6 +65,7 @@ resource "aws_launch_template" "eks_launch_template" {
   name_prefix = join("-", [var.eks_cluster_name, var.node_group_name, "launch-template"])
 
   image_id = var.ami_type == "CUSTOM" ? var.custom_ami_id : null
+  user_data = var.user_data
 
   block_device_mappings {
     device_name = "/dev/xvda"
