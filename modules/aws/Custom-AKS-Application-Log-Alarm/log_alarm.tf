@@ -12,7 +12,7 @@
 # Resource block for metric filter
 resource "aws_cloudwatch_log_metric_filter" "eks_application_log_metric_filter" {
   name           = join("-", [var.project, var.application, var.environment, var.region, var.error_log_summary, "metric-filter"])
-  pattern        = "{ ($.kubernetes.container_name = \"${var.k8s_container_name}\") && ($.kubernetes.namespace_name = \"${var.namespace}\") && ($.log = \"*${var.log_entry}*\") } "
+  pattern        = "{ ($.kubernetes.container_name = \"${var.k8s_container_name}\") && ($.kubernetes.namespace_name = \"${var.namespace}\") && ($.log = \"*${var.log_entry}*\") && ($.kubernetes.pod_name = \"${local.pod_name}\") } "
   log_group_name = "/aws/containerinsights/${var.cluster_name}/application"
 
   metric_transformation {
@@ -24,7 +24,7 @@ resource "aws_cloudwatch_log_metric_filter" "eks_application_log_metric_filter" 
 
 # Log entry
 resource "aws_cloudwatch_metric_alarm" "metric_alarm" {
-  alarm_name        = join("-", [var.project, var.application, var.environment, var.region, var.error_log_summary, "log-alarn"])
+  alarm_name        = join("-", [var.project, var.application, var.environment, var.region, var.error_log_summary, "log-alarm"])
   alarm_description = var.log_alarm_description
 
   threshold           = var.threshold
