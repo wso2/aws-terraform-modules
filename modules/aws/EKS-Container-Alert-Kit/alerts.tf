@@ -42,7 +42,7 @@ module "container-pod-metric-alerts" {
   for_each = var.metric_pod_alerts
 
   alarm_actions             = each.value.priority == "Critical" ? var.critical_alarm_actions : each.value.priority == "Warning" ? var.warning_alarm_actions : var.info_alarm_actions
-  alarm_description         = "[${upper(each.value.priority)}] ${each.value.statistic} ${replace(each.value.metric_name,"_"," ")} of the pod ${var.pod_name} in namespace ${var.namespace} in cluster ${var.cluster_name} ${each.value.comparison_operator} ${each.value.threshold} within last ${each.value.evaluation_periods} ${each.value.period} second periods"
+  alarm_description         = "[${upper(each.value.priority)}] ${each.value.statistic} ${replace(each.value.metric_name, "_", " ")} of the pod ${var.pod_name} in namespace ${var.namespace} in cluster ${var.cluster_name} ${each.value.comparison_operator} ${each.value.threshold} within last ${each.value.evaluation_periods} ${each.value.period} second periods"
   application               = var.application
   tags                      = var.default_tags
   project                   = var.project
@@ -73,7 +73,7 @@ module "container-service-metric-alerts" {
   for_each = var.metric_service_alerts
 
   alarm_actions             = each.value.priority == "Critical" ? var.critical_alarm_actions : each.value.priority == "Warning" ? var.warning_alarm_actions : var.info_alarm_actions
-  alarm_description         = "[${upper(each.value.priority)}] ${each.value.statistic} ${replace(each.value.metric_name,"_"," ")} of the service ${var.service_name} in namespace ${var.namespace} in cluster ${var.cluster_name} ${each.value.comparison_operator} ${each.value.threshold} within last ${each.value.evaluation_periods} ${each.value.period} second periods"
+  alarm_description         = "[${upper(each.value.priority)}] ${each.value.statistic} ${replace(each.value.metric_name, "_", " ")} of the service ${var.service_name} in namespace ${var.namespace} in cluster ${var.cluster_name} ${each.value.comparison_operator} ${each.value.threshold} within last ${each.value.evaluation_periods} ${each.value.period} second periods"
   application               = var.application
   tags                      = var.default_tags
   project                   = var.project
@@ -94,7 +94,7 @@ module "container-service-metric-alerts" {
 
   dimensions = {
     ClusterName = var.cluster_name
-    Service = var.service_name
+    Service     = var.service_name
     Namespace   = var.namespace
   }
 }
