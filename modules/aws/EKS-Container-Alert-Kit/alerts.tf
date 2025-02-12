@@ -24,7 +24,7 @@ module "container-log-alerts" {
   alarm_actions             = each.value.priority == "Critical" ? var.critical_alarm_actions : each.value.priority == "Warning" ? var.warning_alarm_actions : var.info_alarm_actions
   ok_actions                = var.ok_actions
   insufficient_data_actions = var.insufficient_data_actions
-  log_alarm_description     = "[${upper(each.value.priority)}] Number of \"${each.value.log_entry}\" log entries ${each.value.comparison_operator} ${each.value.threshold} in logs of ${each.value.k8s_container_name}  in pod ${pod_name} in namespace ${var.namespace} in cluster ${var.cluster_name} within last ${each.value.evaluation_periods} ${each.value.time_window} second periods"
+  log_alarm_description     = "[${upper(each.value.priority)}] Number of \"${each.value.log_entry}\" log entries ${each.value.comparison_operator} ${each.value.threshold} in logs of ${each.value.k8s_container_name}  in pod ${var.pod_name} in namespace ${var.namespace} in cluster ${var.cluster_name} within last ${each.value.evaluation_periods} ${each.value.time_window} second periods"
   comparison_operator       = each.value.comparison_operator
   k8s_container_name        = each.value.k8s_container_name
   evaluation_periods        = each.value.evaluation_periods
