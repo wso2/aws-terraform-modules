@@ -62,7 +62,7 @@ resource "aws_iam_role_policy_attachment" "amazon_ec2_container_registry_read_on
 resource "aws_iam_role_policy_attachment" "amazon_ssm_managed_instance_core" {
   count      = var.enable_ssm_access == false ? 0 : 1
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-  role       = aws_iam_role.iam_role.name
+  role       = aws_iam_role.iam_role[0].name
 
   depends_on = [
     aws_iam_role.iam_role

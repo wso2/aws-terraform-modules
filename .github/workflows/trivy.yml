@@ -24,5 +24,6 @@ jobs:
         with:
           scan-type: 'config'
           hide-progress: false
+          format: 'sarif'
           exit-code: '1'
           ignore-unfixed: true

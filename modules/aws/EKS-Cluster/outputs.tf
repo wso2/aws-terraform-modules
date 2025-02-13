@@ -77,3 +77,6 @@ output "eks_security_group_id" {
   value      = aws_eks_cluster.eks_cluster.vpc_config[0].cluster_security_group_id
   depends_on = [aws_eks_cluster.eks_cluster]
 }
+output "certificate_authority_data" {
+  value = data.aws_eks_cluster.eks_cluster.certificate_authority[0].data
+}

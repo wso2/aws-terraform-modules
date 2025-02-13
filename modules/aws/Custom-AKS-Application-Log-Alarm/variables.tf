@@ -17,6 +17,11 @@ variable "cluster_name" {
   description = "Name of the cluster"
   type        = string
 }
+variable "pod_name" {
+  description = "Name of the pod"
+  type        = string
+  default     = ""
+}
 variable "error_log_summary" {
   description = "Error log summary"
   type        = string
