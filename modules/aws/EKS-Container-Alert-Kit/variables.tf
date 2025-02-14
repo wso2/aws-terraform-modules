@@ -92,7 +92,7 @@ variable "metric_pod_alerts" {
       priority            = "Critical"
       comparison_operator = "GreaterThanOrEqualToThreshold"
       threshold           = 90
-      metric_name         = "pod_cpu_utilization"
+      metric_name         = "pod_cpu_utilization_over_pod_limit"
       statistic           = "Average"
       evaluation_periods  = 1
       period              = 60
@@ -101,7 +101,7 @@ variable "metric_pod_alerts" {
       priority            = "Warning"
       comparison_operator = "GreaterThanOrEqualToThreshold"
       threshold           = 80
-      metric_name         = "pod_cpu_utilization"
+      metric_name         = "pod_cpu_utilization_over_pod_limit"
       statistic           = "Average"
       evaluation_periods  = 1
       period              = 60
@@ -110,7 +110,7 @@ variable "metric_pod_alerts" {
       priority            = "Critical"
       comparison_operator = "GreaterThanOrEqualToThreshold"
       threshold           = 90
-      metric_name         = "pod_memory_utilization"
+      metric_name         = "pod_memory_utilization_over_pod_limit"
       statistic           = "Average"
       evaluation_periods  = 1
       period              = 60
@@ -119,7 +119,7 @@ variable "metric_pod_alerts" {
       priority            = "Warning"
       comparison_operator = "GreaterThanOrEqualToThreshold"
       threshold           = 80
-      metric_name         = "pod_memory_utilization"
+      metric_name         = "pod_memory_utilization_over_pod_limit"
       statistic           = "Average"
       evaluation_periods  = 1
       period              = 60
@@ -128,7 +128,7 @@ variable "metric_pod_alerts" {
       priority            = "Critical"
       comparison_operator = "GreaterThanOrEqualToThreshold"
       threshold           = 90
-      metric_name         = "pod_cpu_utilization"
+      metric_name         = "pod_cpu_utilization_over_pod_limit"
       statistic           = "Maximum"
       evaluation_periods  = 1
       period              = 60
@@ -137,7 +137,7 @@ variable "metric_pod_alerts" {
       priority            = "Warning"
       comparison_operator = "GreaterThanOrEqualToThreshold"
       threshold           = 80
-      metric_name         = "pod_cpu_utilization"
+      metric_name         = "pod_cpu_utilization_over_pod_limit"
       statistic           = "Maximum"
       evaluation_periods  = 1
       period              = 60
@@ -146,7 +146,7 @@ variable "metric_pod_alerts" {
       priority            = "Critical"
       comparison_operator = "GreaterThanOrEqualToThreshold"
       threshold           = 90
-      metric_name         = "pod_memory_utilization"
+      metric_name         = "pod_memory_utilization_over_pod_limit"
       statistic           = "Maximum"
       evaluation_periods  = 1
       period              = 60
@@ -155,7 +155,7 @@ variable "metric_pod_alerts" {
       priority            = "Warning"
       comparison_operator = "GreaterThanOrEqualToThreshold"
       threshold           = 80
-      metric_name         = "pod_memory_utilization"
+      metric_name         = "pod_memory_utilization_over_pod_limit"
       statistic           = "Maximum"
       evaluation_periods  = 1
       period              = 60
