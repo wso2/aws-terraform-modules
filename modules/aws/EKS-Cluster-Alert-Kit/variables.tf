@@ -26,169 +26,169 @@ variable "region" {
   description = "Code of the region"
 }
 variable "default_tags" {
-    type        = map(string)
-    description = "Default tags to be applied to resources"
+  type        = map(string)
+  description = "Default tags to be applied to resources"
 }
 variable "eks_cluster_name" {
-    type        = string
-    description = "Name of the EKS cluster"
+  type        = string
+  description = "Name of the EKS cluster"
 }
 variable "critical_alarm_actions" {
-    type        = list(string)
-    description = "The ARNs of the actions to take when the alarm changes state to critical"
-    default     = []
+  type        = list(string)
+  description = "The ARNs of the actions to take when the alarm changes state to critical"
+  default     = []
 }
 variable "warning_alarm_actions" {
-    type        = list(string)
-    description = "The ARNs of the actions to take when the alarm changes state to warning"
-    default     = []
+  type        = list(string)
+  description = "The ARNs of the actions to take when the alarm changes state to warning"
+  default     = []
 }
 variable "info_alarm_actions" {
-    type        = list(string)
-    description = "The ARNs of the actions to take when the alarm changes state to info"
-    default     = []
+  type        = list(string)
+  description = "The ARNs of the actions to take when the alarm changes state to info"
+  default     = []
 }
 variable "max_node_count" {
-    type        = number
-    description = "Maximum number of nodes in the EKS cluster"
+  type        = number
+  description = "Maximum number of nodes in the EKS cluster"
 }
 variable "eks_alerts" {
   type = map(object({
-    threshold = number
-    evaluation_periods = number
-    period = number
-    statistic = string
+    threshold           = number
+    evaluation_periods  = number
+    period              = number
+    statistic           = string
     comparison_operator = string
-    metric_name = string
-    priority = string
-    enabled = optional(bool,true)
+    metric_name         = string
+    priority            = string
+    enabled             = optional(bool, true)
   }))
   default = {
     "avg-cpu-utilization-warning" = {
-      threshold = 80
-      evaluation_periods = 1
-      period = 60
-      statistic = "Average"
+      threshold           = 80
+      evaluation_periods  = 1
+      period              = 60
+      statistic           = "Average"
       comparison_operator = "GreaterThanOrEqualToThreshold"
-      metric_name = "node_cpu_utilization"
-      priority = "Warning"
+      metric_name         = "node_cpu_utilization"
+      priority            = "Warning"
     },
     "avg-cpu-utilization-critical" = {
-      threshold = 90
-      evaluation_periods = 1
-      period = 60
-      statistic = "Average"
+      threshold           = 90
+      evaluation_periods  = 1
+      period              = 60
+      statistic           = "Average"
       comparison_operator = "GreaterThanOrEqualToThreshold"
-      metric_name = "node_cpu_utilization"
-      priority = "Critical"
+      metric_name         = "node_cpu_utilization"
+      priority            = "Critical"
     },
     "avg-memory-utilization-warning" = {
-      threshold = 80
-      evaluation_periods = 1
-      period = 60
-      statistic = "Average"
+      threshold           = 80
+      evaluation_periods  = 1
+      period              = 60
+      statistic           = "Average"
       comparison_operator = "GreaterThanOrEqualToThreshold"
-      metric_name = "node_memory_utilization"
-      priority = "Warning"
+      metric_name         = "node_memory_utilization"
+      priority            = "Warning"
     },
     "avg-memory-utilization-critical" = {
-      threshold = 90
-      evaluation_periods = 1
-      period = 60
-      statistic = "Average"
+      threshold           = 90
+      evaluation_periods  = 1
+      period              = 60
+      statistic           = "Average"
       comparison_operator = "GreaterThanOrEqualToThreshold"
-      metric_name = "node_memory_utilization"
-      priority = "Critical"
+      metric_name         = "node_memory_utilization"
+      priority            = "Critical"
     }
     "avg-fs-utilization-warning" = {
-      threshold = 80
-      evaluation_periods = 1
-      period = 60
-      statistic = "Average"
+      threshold           = 80
+      evaluation_periods  = 1
+      period              = 60
+      statistic           = "Average"
       comparison_operator = "GreaterThanOrEqualToThreshold"
-      metric_name = "node_filesystem_utilization"
-      priority = "Warning"
+      metric_name         = "node_filesystem_utilization"
+      priority            = "Warning"
     },
     "avg-fs-utilization-critical" = {
-      threshold = 90
-      evaluation_periods = 1
-      period = 60
-      statistic = "Average"
+      threshold           = 90
+      evaluation_periods  = 1
+      period              = 60
+      statistic           = "Average"
       comparison_operator = "GreaterThanOrEqualToThreshold"
-      metric_name = "node_filesystem_utilization"
-      priority = "Critical"
+      metric_name         = "node_filesystem_utilization"
+      priority            = "Critical"
     },
     "max-cpu-utilization-warning" = {
-      threshold = 80
-      evaluation_periods = 1
-      period = 60
-      statistic = "Maximum"
+      threshold           = 80
+      evaluation_periods  = 1
+      period              = 60
+      statistic           = "Maximum"
       comparison_operator = "GreaterThanOrEqualToThreshold"
-      metric_name = "node_cpu_utilization"
-      priority = "Warning"
+      metric_name         = "node_cpu_utilization"
+      priority            = "Warning"
     },
     "max-cpu-utilization-critical" = {
-      threshold = 90
-      evaluation_periods = 1
-      period = 60
-      statistic = "Maximum"
+      threshold           = 90
+      evaluation_periods  = 1
+      period              = 60
+      statistic           = "Maximum"
       comparison_operator = "GreaterThanOrEqualToThreshold"
-      metric_name = "node_cpu_utilization"
-      priority = "Critical"
+      metric_name         = "node_cpu_utilization"
+      priority            = "Critical"
     },
     "max-memory-utilization-warning" = {
-      threshold = 80
-      evaluation_periods = 1
-      period = 60
-      statistic = "Maximum"
+      threshold           = 80
+      evaluation_periods  = 1
+      period              = 60
+      statistic           = "Maximum"
       comparison_operator = "GreaterThanOrEqualToThreshold"
-      metric_name = "node_memory_utilization"
-      priority = "Warning"
+      metric_name         = "node_memory_utilization"
+      priority            = "Warning"
     },
     "max-memory-utilization-critical" = {
-      threshold = 90
-      evaluation_periods = 1
-      period = 60
-      statistic = "Maximum"
+      threshold           = 90
+      evaluation_periods  = 1
+      period              = 60
+      statistic           = "Maximum"
       comparison_operator = "GreaterThanOrEqualToThreshold"
-      metric_name = "node_memory_utilization"
-      priority = "Critical"
+      metric_name         = "node_memory_utilization"
+      priority            = "Critical"
     },
     "max-fs-utilization-warning" = {
-      threshold = 80
-      evaluation_periods = 1
-      period = 60
-      statistic = "Maximum"
+      threshold           = 80
+      evaluation_periods  = 1
+      period              = 60
+      statistic           = "Maximum"
       comparison_operator = "GreaterThanOrEqualToThreshold"
-      metric_name = "node_filesystem_utilization"
-      priority = "Warning"
+      metric_name         = "node_filesystem_utilization"
+      priority            = "Warning"
     },
     "max-fs-utilization-critical" = {
-      threshold = 90
-      evaluation_periods = 1
-      period = 60
-      statistic = "Maximum"
+      threshold           = 90
+      evaluation_periods  = 1
+      period              = 60
+      statistic           = "Maximum"
       comparison_operator = "GreaterThanOrEqualToThreshold"
-      metric_name = "node_filesystem_utilization"
-      priority = "Critical"
+      metric_name         = "node_filesystem_utilization"
+      priority            = "Critical"
     },
     "node-failed-count-warning" = {
-      threshold = 1
-      evaluation_periods = 1
-      period = 60
-      statistic = "Sum"
+      threshold           = 1
+      evaluation_periods  = 1
+      period              = 60
+      statistic           = "Sum"
       comparison_operator = "GreaterThanOrEqualToThreshold"
-      metric_name = "node_failed_count"
-      priority = "Warning"
+      metric_name         = "node_failed_count"
+      priority            = "Warning"
     },
     "node-failed-count-critical" = {
-      threshold = 2
-      evaluation_periods = 1
-      period = 60
-      statistic = "Sum"
+      threshold           = 2
+      evaluation_periods  = 1
+      period              = 60
+      statistic           = "Sum"
       comparison_operator = "GreaterThanOrEqualToThreshold"
-      metric_name = "node_failed_count"
-      priority = "Critical"
+      metric_name         = "node_failed_count"
+      priority            = "Critical"
     },
   }
 }

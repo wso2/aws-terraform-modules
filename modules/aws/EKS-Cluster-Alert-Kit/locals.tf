@@ -11,4 +11,26 @@
 
 locals {
   eks_container_insights_metrics_namespace = "ContainerInsights"
+  eks_alerts = merge(var.eks_alerts, {
+    "max_node_count_warning" = {
+      threshold           = var.max_node_count - 1
+      evaluation_periods  = 1
+      period              = 60
+      statistic           = "Average"
+      comparison_operator = "GreaterThanOrEqualToThreshold"
+      metric_name         = "cluster_node_count"
+      priority            = "Warning"
+      enabled             = var.max_node_count != null ? true : false
+    }
+    "max_node_count_critical" = {
+      threshold           = var.max_node_count
+      evaluation_periods  = 1
+      period              = 60
+      statistic           = "Average"
+      comparison_operator = "GreaterThanOrEqualToThreshold"
+      metric_name         = "cluster_node_count"
+      priority            = "Critical"
+      enabled             = var.max_node_count != null ? true : false
+    }
+  })
 }
