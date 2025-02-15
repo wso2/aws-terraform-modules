@@ -31,7 +31,7 @@ module "container-log-alerts" {
   time_window               = each.value.time_window
   enabled                   = each.value.enabled
   log_entry                 = each.value.log_entry
-  error_log_summary         = join("-", [var.namespace, var.pod_name, each.value.k8s_container_name, each.value.log_summary])
+  error_log_summary         = join("-", [var.namespace, var.pod_name, each.value.k8s_container_name, each.value.log_summary, (lower(each.value.priority))])
   threshold                 = each.value.threshold
 
   tags = var.default_tags
@@ -98,5 +98,3 @@ module "container-service-metric-alerts" {
     Namespace   = var.namespace
   }
 }
-
-
