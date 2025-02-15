@@ -11,7 +11,7 @@
 
 module "eks-metric-alert" {
   source              = "../Metric-Alarm"
-  for_each            = var.eks_alerts
+  for_each            = local.eks_alerts
   enabled             = each.value.enabled
   tags                = var.default_tags
   metric_namespace    = local.eks_container_insights_metrics_namespace
@@ -24,11 +24,11 @@ module "eks-metric-alert" {
   dimensions = {
     ClusterName = var.eks_cluster_name
   }
-  period      = each.value.period
+  period             = each.value.period
   evaluation_periods = each.value.evaluation_periods
-  statistic   = each.value.statistic
-  project     = var.project
-  environment = var.environment
-  region      = var.region
-  application = var.application
+  statistic          = each.value.statistic
+  project            = var.project
+  environment        = var.environment
+  region             = var.region
+  application        = var.application
 }
