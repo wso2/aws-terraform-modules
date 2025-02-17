@@ -29,7 +29,7 @@ resource "aws_codebuild_project" "deploy_project" {
   environment {
     compute_type    = var.deploy_compute_type
     image           = var.deploy_image
-    type            = "LINUX_CONTAINER"
+    type            = var.deploy_environment_type
     privileged_mode = var.deploy_privileged_mode
 
     dynamic "environment_variable" {
@@ -52,6 +52,6 @@ resource "aws_codebuild_project" "deploy_project" {
 
   source {
     type      = "CODEPIPELINE"
-    buildspec = "deploy-buildspec.yml"
+    buildspec = "deployspec.yml"
   }
 }

@@ -38,7 +38,6 @@ variable "region" {
   type        = string
 }
 
-## CodeBuild (Build Stage) Variables
 variable "build_compute_type" {
   description = "Compute type for the build stage"
   type        = string
@@ -49,6 +48,12 @@ variable "build_image" {
   description = "Docker image for the build stage"
   type        = string
   default     = "aws/codebuild/amazonlinux-x86_64-standard:5.0"
+}
+
+variable "build_environment_type" {
+  description = "Build environment type"
+  type        = string
+  default     = "LINUX_CONTAINER"
 }
 
 variable "build_privileged_mode" {
@@ -73,7 +78,6 @@ variable "build_vpc_config" {
   default = null
 }
 
-## CodeBuild (Deploy Stage) Variables
 variable "deploy_compute_type" {
   description = "Compute type for the deploy stage"
   type        = string
@@ -84,6 +88,12 @@ variable "deploy_image" {
   description = "Docker image for the deploy stage"
   type        = string
   default     = "aws/codebuild/amazonlinux-x86_64-standard:5.0"
+}
+
+variable "deploy_environment_type" {
+  description = "Deploy environment type"
+  type        = string
+  default     = "LINUX_CONTAINER"
 }
 
 variable "deploy_privileged_mode" {
@@ -108,10 +118,10 @@ variable "deploy_vpc_config" {
   default = null
 }
 
-## Source Stage Variables
 variable "source_provider" {
-  description = "Source provider for CodePipeline (e.g., GitHub, CodeCommit)"
+  description = "Source provider for CodePipeline"
   type        = string
+  default     = "CodeStarSourceConnection"
 }
 
 variable "source_connection_arn" {

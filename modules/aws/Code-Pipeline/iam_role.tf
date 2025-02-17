@@ -23,7 +23,6 @@ resource "aws_iam_role" "codepipeline_role" {
   assume_role_policy = data.aws_iam_policy_document.codepipeline_assume_role.json
 }
 
-# IAM Policy Document for CodePipeline Assume Role
 data "aws_iam_policy_document" "codepipeline_assume_role" {
   statement {
     effect = "Allow"
@@ -37,14 +36,12 @@ data "aws_iam_policy_document" "codepipeline_assume_role" {
   }
 }
 
-# IAM Policy for CodePipeline
 resource "aws_iam_role_policy" "codepipeline_policy" {
   name   = join("-", [var.project, var.application, var.environment, var.region, "pipeline-policy"])
   role   = aws_iam_role.codepipeline_role.id
   policy = data.aws_iam_policy_document.codepipeline_policy.json
 }
 
-# CodePipeline Permissions
 data "aws_iam_policy_document" "codepipeline_policy" {
   statement {
     effect = "Allow"
@@ -85,7 +82,7 @@ data "aws_iam_policy_document" "codepipeline_policy" {
   }
 }
 
-## Code build role
+# Code build role
 resource "aws_iam_role" "codebuild_role" {
   name               = join("-", [var.project, var.application, var.environment, var.region, "codebuild-iam-role"])
   assume_role_policy = data.aws_iam_policy_document.codebuild_assume_role.json
@@ -113,14 +110,12 @@ data "aws_iam_policy_document" "codebuild_assume_role" {
   }
 }
 
-# IAM Policy for CodeBuild Permissions
 resource "aws_iam_role_policy" "codebuild_policy" {
   name   = join("-", [var.project, var.application, var.environment, var.region, "codebuild-policy"])
   role   = aws_iam_role.codebuild_role.id
   policy = data.aws_iam_policy_document.codebuild_policy.json
 }
 
-# CodeBuild Permissions
 data "aws_iam_policy_document" "codebuild_policy" {
   statement {
     effect    = "Allow"
@@ -177,7 +172,6 @@ resource "aws_iam_role" "codedeploy_role" {
   assume_role_policy = data.aws_iam_policy_document.codedeploy_assume_role.json
 }
 
-# Initial assume role policy (without self-reference)
 data "aws_iam_policy_document" "codedeploy_assume_role" {
   statement {
     effect = "Allow"
@@ -198,14 +192,12 @@ data "aws_iam_policy_document" "codedeploy_assume_role" {
   }
 }
 
-# IAM Policy for CodeDeploy
 resource "aws_iam_role_policy" "codedeploy_policy" {
   name   = join("-", [var.project, var.application, var.environment, var.region, "codedeploy-policy"])
   role   = aws_iam_role.codedeploy_role.id
   policy = data.aws_iam_policy_document.codedeploy_policy.json
 }
 
-# CodeDeploy Permissions
 data "aws_iam_policy_document" "codedeploy_policy" {
   statement {
     effect    = "Allow"
@@ -215,8 +207,8 @@ data "aws_iam_policy_document" "codedeploy_policy" {
 
   statement {
     effect    = "Allow"
-    actions   = ["s3:GetObject", "s3:PutObject"]
-    resources = ["${aws_s3_bucket.codepipeline_bucket.arn}/*"]
+    actions   = ["s3:GetObject", "s3:PutObject", "s3:ListBucket"]
+    resources = ["*"]
   }
 
   statement {
