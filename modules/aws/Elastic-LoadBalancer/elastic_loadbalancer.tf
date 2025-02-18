@@ -17,9 +17,24 @@ resource "aws_lb" "lb" {
   internal           = var.internal_usage_flag # Defines the Load balancer network connectivity required by AVD-AWS-0053
   load_balancer_type = var.load_balancer_type
   security_groups    = var.security_group_ids
-  subnets            = var.subnet_ids
 
   enable_deletion_protection = var.deletion_protection_flag
+
+  tags = var.tags
+
+  dynamic "subnet_mapping" {
+    for_each = var.subnet_ids
+    content {
+      subnet_id            = subnet_mapping.value.id
+      allocation_id        = var.internal_usage_flag == false ? aws_eip.eip[subnet_mapping.key].id : null
+      private_ipv4_address = var.internal_usage_flag == true ? var.private_ip_addresses[subnet_mapping.key] : null
+    }
+  }
+}
+
+resource "aws_eip" "eip" {
+  for_each = var.internal_usage_flag == true ? {} : var.subnet_ids
+  domain   = "vpc"
 
   tags = var.tags
 }
