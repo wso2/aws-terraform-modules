@@ -84,6 +84,7 @@ data "aws_iam_policy_document" "codepipeline_policy" {
 
 # Code build role
 resource "aws_iam_role" "codebuild_role" {
+  count              = var.custom_codebuild_role_arn == null ? 1 : 0
   name               = join("-", [var.project, var.application, var.environment, var.region, "codebuild-iam-role"])
   assume_role_policy = data.aws_iam_policy_document.codebuild_assume_role.json
 }
@@ -99,20 +100,12 @@ data "aws_iam_policy_document" "codebuild_assume_role" {
     }
     actions = ["sts:AssumeRole"]
   }
-
-  statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "AWS"
-      identifiers = ["*"]
-    }
-  }
 }
 
 resource "aws_iam_role_policy" "codebuild_policy" {
+  count  = var.custom_codebuild_role_arn == null ? 1 : 0
   name   = join("-", [var.project, var.application, var.environment, var.region, "codebuild-policy"])
-  role   = aws_iam_role.codebuild_role.id
+  role   = aws_iam_role.codebuild_role[count.index].id
   policy = data.aws_iam_policy_document.codebuild_policy.json
 }
 
@@ -145,21 +138,6 @@ data "aws_iam_policy_document" "codebuild_policy" {
   }
 
   statement {
-    effect = "Allow"
-    actions = [
-      "eks:DescribeCluster",
-      "eks:ListClusters",
-      "eks:DescribeNodegroup",
-      "eks:ListNodegroups",
-      "eks:DescribeFargateProfile",
-      "eks:ListFargateProfiles",
-      "eks:DescribeAddonVersions",
-      "eks:AccessKubernetesApi"
-    ]
-    resources = ["*"]
-  }
-
-  statement {
     effect    = "Allow"
     actions   = ["sts:AssumeRole"]
     resources = ["*"]
@@ -168,6 +146,7 @@ data "aws_iam_policy_document" "codebuild_policy" {
 
 # IAM Role for CodeDeploy
 resource "aws_iam_role" "codedeploy_role" {
+  count              = var.custom_codedeploy_role_arn == null ? 1 : 0
   name               = join("-", [var.project, var.application, var.environment, var.region, "codedeploy-iam-role"])
   assume_role_policy = data.aws_iam_policy_document.codedeploy_assume_role.json
 }
@@ -181,20 +160,12 @@ data "aws_iam_policy_document" "codedeploy_assume_role" {
     }
     actions = ["sts:AssumeRole"]
   }
-
-  statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "AWS"
-      identifiers = ["*"]
-    }
-  }
 }
 
 resource "aws_iam_role_policy" "codedeploy_policy" {
+  count  = var.custom_codedeploy_role_arn == null ? 1 : 0
   name   = join("-", [var.project, var.application, var.environment, var.region, "codedeploy-policy"])
-  role   = aws_iam_role.codedeploy_role.id
+  role   = aws_iam_role.codedeploy_role[count.index].id
   policy = data.aws_iam_policy_document.codedeploy_policy.json
 }
 
@@ -222,21 +193,6 @@ data "aws_iam_policy_document" "codedeploy_policy" {
       "ec2:DescribeSecurityGroups",
       "ec2:DescribeVpcs",
       "ec2:CreateNetworkInterfacePermission"
-    ]
-    resources = ["*"]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "eks:DescribeCluster",
-      "eks:ListClusters",
-      "eks:DescribeNodegroup",
-      "eks:ListNodegroups",
-      "eks:DescribeFargateProfile",
-      "eks:ListFargateProfiles",
-      "eks:DescribeAddonVersions",
-      "eks:AccessKubernetesApi"
     ]
     resources = ["*"]
   }

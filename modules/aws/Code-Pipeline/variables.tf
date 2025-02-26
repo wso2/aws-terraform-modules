@@ -38,6 +38,12 @@ variable "region" {
   type        = string
 }
 
+variable "custom_codebuild_role_arn" {
+  description = "Custom IAM role ARN for CodeBuild Build service role"
+  type        = string
+  default     = null
+}
+
 variable "build_compute_type" {
   description = "Compute type for the build stage"
   type        = string
@@ -76,6 +82,18 @@ variable "build_vpc_config" {
     security_group_ids = list(string)
   })
   default = null
+}
+
+variable "buildspec_file" {
+  description = "Buildspec file for the build stage"
+  type        = string
+  default     = "buildspec.yml"
+}
+
+variable "custom_codedeploy_role_arn" {
+  description = "Custom IAM role ARN for CodeBuild Deploy service role"
+  type        = string
+  default     = null
 }
 
 variable "deploy_compute_type" {
@@ -118,6 +136,12 @@ variable "deploy_vpc_config" {
   default = null
 }
 
+variable "deployspec_file" {
+  description = "Buildspec file for the deploy stage"
+  type        = string
+  default     = "deployspec.yml"
+}
+
 variable "source_provider" {
   description = "Source provider for CodePipeline"
   type        = string
@@ -138,4 +162,3 @@ variable "source_branch" {
   description = "Branch to build from"
   type        = string
 }
-

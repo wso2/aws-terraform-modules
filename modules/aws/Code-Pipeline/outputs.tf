@@ -23,9 +23,9 @@ output "codepipeline_name" {
 }
 
 output "codebuild_role_arn" {
-  value = aws_iam_role.codebuild_role.arn
+  value = var.custom_codebuild_role_arn != null ? var.custom_codebuild_role_arn : aws_iam_role.codebuild_role[0].arn
 }
 
 output "codedeploy_role_arn" {
-  value = aws_iam_role.codedeploy_role.arn
+  value = var.custom_codedeploy_role_arn != null ? var.custom_codedeploy_role_arn : aws_iam_role.codedeploy_role[0].arn
 }

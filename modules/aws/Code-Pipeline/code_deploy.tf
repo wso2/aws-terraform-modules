@@ -20,7 +20,7 @@
 
 resource "aws_codebuild_project" "deploy_project" {
   name         = join("-", [var.project, var.application, var.environment, var.region, "codedeploy"])
-  service_role = aws_iam_role.codedeploy_role.arn
+  service_role = var.custom_codedeploy_role_arn != null ? var.custom_codedeploy_role_arn : aws_iam_role.codedeploy_role[0].arn
 
   artifacts {
     type = "CODEPIPELINE"
@@ -52,6 +52,6 @@ resource "aws_codebuild_project" "deploy_project" {
 
   source {
     type      = "CODEPIPELINE"
-    buildspec = "deployspec.yml"
+    buildspec = var.deployspec_file
   }
 }
