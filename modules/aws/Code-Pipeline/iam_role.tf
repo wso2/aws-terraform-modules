@@ -89,8 +89,6 @@ resource "aws_iam_role" "codebuild_role" {
   assume_role_policy = data.aws_iam_policy_document.codebuild_assume_role.json
 }
 
-data "aws_caller_identity" "current" {}
-
 data "aws_iam_policy_document" "codebuild_assume_role" {
   statement {
     effect = "Allow"
