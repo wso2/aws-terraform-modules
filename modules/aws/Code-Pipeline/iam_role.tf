@@ -52,7 +52,6 @@ data "aws_iam_policy_document" "codepipeline_policy" {
       "s3:GetBucketVersioning",
       "s3:PutObjectAcl",
       "s3:PutObject",
-      "codestar-connections:GetConnectionToken",
       "codestar-connections:GetConnection",
       "codeconnections:GetConnectionToken",
       "codeconnections:GetConnection",
