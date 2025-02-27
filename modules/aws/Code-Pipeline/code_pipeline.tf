@@ -80,4 +80,9 @@ resource "aws_codepipeline" "codepipeline" {
       }
     }
   }
+
+  depends_on = [
+    aws_codebuild_project.build_project,
+    aws_codebuild_project.deploy_project
+  ]
 }

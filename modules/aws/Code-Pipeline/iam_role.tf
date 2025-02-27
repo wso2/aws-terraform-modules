@@ -84,7 +84,7 @@ data "aws_iam_policy_document" "codepipeline_policy" {
 
 # Code build role
 resource "aws_iam_role" "codebuild_role" {
-  count              = var.custom_codebuild_role_arn == null ? 1 : 0
+  count              = var.eks_access == false ? 1 : 0
   name               = join("-", [var.project, var.application, var.environment, var.region, "codebuild-iam-role"])
   assume_role_policy = data.aws_iam_policy_document.codebuild_assume_role.json
 }
@@ -101,7 +101,7 @@ data "aws_iam_policy_document" "codebuild_assume_role" {
 }
 
 resource "aws_iam_role_policy" "codebuild_policy" {
-  count  = var.custom_codebuild_role_arn == null ? 1 : 0
+  count  = var.eks_access == false ? 1 : 0
   name   = join("-", [var.project, var.application, var.environment, var.region, "codebuild-policy"])
   role   = aws_iam_role.codebuild_role[count.index].id
   policy = data.aws_iam_policy_document.codebuild_policy.json
@@ -144,7 +144,7 @@ data "aws_iam_policy_document" "codebuild_policy" {
 
 # IAM Role for CodeDeploy
 resource "aws_iam_role" "codedeploy_role" {
-  count              = var.custom_codedeploy_role_arn == null ? 1 : 0
+  count              = var.eks_access == false ? 1 : 0
   name               = join("-", [var.project, var.application, var.environment, var.region, "codedeploy-iam-role"])
   assume_role_policy = data.aws_iam_policy_document.codedeploy_assume_role.json
 }
@@ -161,7 +161,7 @@ data "aws_iam_policy_document" "codedeploy_assume_role" {
 }
 
 resource "aws_iam_role_policy" "codedeploy_policy" {
-  count  = var.custom_codedeploy_role_arn == null ? 1 : 0
+  count  = var.eks_access == false ? 1 : 0
   name   = join("-", [var.project, var.application, var.environment, var.region, "codedeploy-policy"])
   role   = aws_iam_role.codedeploy_role[count.index].id
   policy = data.aws_iam_policy_document.codedeploy_policy.json

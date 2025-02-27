@@ -20,7 +20,7 @@
 
 resource "aws_codebuild_project" "build_project" {
   name         = join("-", [var.project, var.application, var.environment, var.region, "codebuild"])
-  service_role = var.custom_codebuild_role_arn != null ? var.custom_codebuild_role_arn : aws_iam_role.codebuild_role[0].arn
+  service_role = var.eks_access != false ? var.custom_codebuild_role_arn : aws_iam_role.codebuild_role[0].arn
 
   artifacts {
     type = "CODEPIPELINE"
@@ -54,4 +54,8 @@ resource "aws_codebuild_project" "build_project" {
     type      = "CODEPIPELINE"
     buildspec = var.buildspec_file
   }
+
+  depends_on = [
+    aws_iam_role.codebuild_role[0]
+  ]
 }

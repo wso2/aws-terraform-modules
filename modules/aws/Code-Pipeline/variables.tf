@@ -96,6 +96,12 @@ variable "custom_codedeploy_role_arn" {
   default     = null
 }
 
+variable "eks_access" {
+  description = "Boolean to determine whether the EKS cluster is accessible"
+  type        = bool
+  default     = false
+}
+
 variable "deploy_compute_type" {
   description = "Compute type for the deploy stage"
   type        = string
