@@ -26,6 +26,7 @@ resource "aws_codepipeline" "codepipeline" {
     location = aws_s3_bucket.codepipeline_bucket.bucket
     type     = "S3"
   }
+
   stage {
     name = "Source"
 
@@ -45,44 +46,30 @@ resource "aws_codepipeline" "codepipeline" {
     }
   }
 
-  stage {
-    name = "Build"
+  dynamic "stage" {
+    for_each = var.pipeline_stages
+    content {
+      name = stage.value.name
 
-    action {
-      name             = "Build"
-      category         = "Build"
-      owner            = "AWS"
-      provider         = "CodeBuild"
-      version          = 1
-      input_artifacts  = ["source_output"]
-      output_artifacts = ["build_output"]
+      action {
+        name             = stage.value.name
+        category         = stage.value.category
+        owner            = "AWS"
+        provider         = stage.value.provider
+        version          = "1"
+        input_artifacts  = stage.value.input_artifacts
+        output_artifacts = stage.value.output_artifacts
 
-      configuration = {
-        ProjectName = aws_codebuild_project.build_project.name
-      }
-    }
-  }
-
-  stage {
-    name = "Deploy"
-
-    action {
-      name             = "Deploy"
-      category         = "Build"
-      owner            = "AWS"
-      provider         = "CodeBuild"
-      version          = 1
-      input_artifacts  = ["build_output"]
-      output_artifacts = []
-
-      configuration = {
-        ProjectName = aws_codebuild_project.deploy_project.name
+        configuration = {
+          ProjectName = aws_codebuild_project.build_project[stage.key].name
+        }
       }
     }
   }
 
   depends_on = [
-    aws_codebuild_project.build_project,
-    aws_codebuild_project.deploy_project
+    aws_iam_role.codepipeline_role,
+    aws_s3_bucket.codepipeline_bucket,
+    aws_codebuild_project.build_project
   ]
 }

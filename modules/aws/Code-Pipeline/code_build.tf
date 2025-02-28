@@ -19,21 +19,22 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_codebuild_project" "build_project" {
-  name         = join("-", [var.project, var.application, var.environment, var.region, "codebuild"])
-  service_role = var.eks_access != false ? var.custom_codebuild_role_arn : aws_iam_role.codebuild_role[0].arn
+  count        = length(var.pipeline_stages)
+  name         = join("-", [var.project, var.application, var.environment, var.region, var.pipeline_stages[count.index].name])
+  service_role = var.eks_access != false ? var.pipeline_stages[count.index].custom_codebuild_role_arn : aws_iam_role.codebuild_role[0].arn
 
   artifacts {
     type = "CODEPIPELINE"
   }
 
   environment {
-    compute_type    = var.build_compute_type
-    image           = var.build_image
-    type            = var.build_environment_type
-    privileged_mode = var.build_privileged_mode
+    compute_type    = var.pipeline_stages[count.index].build_compute_type
+    image           = var.pipeline_stages[count.index].build_image
+    type            = var.pipeline_stages[count.index].build_environment_type
+    privileged_mode = var.pipeline_stages[count.index].build_privileged_mode
 
     dynamic "environment_variable" {
-      for_each = var.build_environment_variables
+      for_each = var.pipeline_stages[count.index].build_environment_variables != null ? var.pipeline_stages[count.index].build_environment_variables : []
       content {
         name  = environment_variable.value["name"]
         value = environment_variable.value["value"]
@@ -42,20 +43,20 @@ resource "aws_codebuild_project" "build_project" {
   }
 
   dynamic "vpc_config" {
-    for_each = var.build_vpc_config != null ? [var.build_vpc_config] : []
+    for_each = var.pipeline_stages[count.index].build_vpc_config != null ? [var.pipeline_stages[count.index].build_vpc_config] : []
     content {
-      vpc_id             = vpc_config.value.vpc_id
-      subnets            = vpc_config.value.subnets
-      security_group_ids = vpc_config.value.security_group_ids
+      vpc_id             = var.pipeline_stages[count.index].build_vpc_config.vpc_id
+      subnets            = var.pipeline_stages[count.index].build_vpc_config.subnets
+      security_group_ids = var.pipeline_stages[count.index].build_vpc_config.security_group_ids
     }
   }
 
   source {
     type      = "CODEPIPELINE"
-    buildspec = var.buildspec_file
+    buildspec = var.pipeline_stages[count.index].buildspec
   }
 
   depends_on = [
-    aws_iam_role.codebuild_role[0]
+    aws_iam_role.codebuild_role
   ]
 }

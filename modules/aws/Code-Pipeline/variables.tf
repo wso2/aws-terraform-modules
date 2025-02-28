@@ -38,60 +38,55 @@ variable "region" {
   type        = string
 }
 
+variable "block_public_acls" {
+  description = "Whether Amazon S3 should block public ACLs for this bucket"
+  type        = bool
+  default     = true
+}
+
+variable "block_public_policy" {
+  description = "Whether Amazon S3 should block public bucket policies for this bucket"
+  type        = bool
+  default     = true
+}
+
+variable "ignore_public_acls" {
+  description = "Whether Amazon S3 should ignore public ACLs for this bucket"
+  type        = bool
+  default     = true
+}
+
+variable "restrict_public_buckets" {
+  description = "Whether Amazon S3 should restrict public bucket policies for this bucket"
+  type        = bool
+  default     = true
+}
+
+variable "pipeline_stages" {
+  description = "List of pipeline stages"
+  type = list(object({
+    name                        = string
+    category                    = string
+    provider                    = string
+    input_artifacts             = list(string)
+    output_artifacts            = list(string)
+    buildspec                   = optional(string)
+    custom_codebuild_role_arn   = optional(string)
+    build_compute_type          = optional(string)
+    build_image                 = optional(string)
+    build_environment_type      = optional(string)
+    build_privileged_mode       = optional(bool)
+    build_environment_variables = optional(list(map(string)))
+    build_vpc_config = optional(object({
+      vpc_id             = string
+      subnets            = list(string)
+      security_group_ids = list(string)
+    }))
+  }))
+}
+
 variable "custom_codebuild_role_arn" {
   description = "Custom IAM role ARN for CodeBuild Build service role"
-  type        = string
-  default     = null
-}
-
-variable "build_compute_type" {
-  description = "Compute type for the build stage"
-  type        = string
-  default     = "BUILD_GENERAL1_SMALL"
-}
-
-variable "build_image" {
-  description = "Docker image for the build stage"
-  type        = string
-  default     = "aws/codebuild/amazonlinux-x86_64-standard:5.0"
-}
-
-variable "build_environment_type" {
-  description = "Build environment type"
-  type        = string
-  default     = "LINUX_CONTAINER"
-}
-
-variable "build_privileged_mode" {
-  description = "Whether the build stage should run in privileged mode"
-  type        = bool
-  default     = false
-}
-
-variable "build_environment_variables" {
-  description = "Environment variables for the build stage"
-  type        = list(map(string))
-  default     = []
-}
-
-variable "build_vpc_config" {
-  description = "VPC configuration for the build stage"
-  type = object({
-    vpc_id             = string
-    subnets            = list(string)
-    security_group_ids = list(string)
-  })
-  default = null
-}
-
-variable "buildspec_file" {
-  description = "Buildspec file for the build stage"
-  type        = string
-  default     = "buildspec.yml"
-}
-
-variable "custom_codedeploy_role_arn" {
-  description = "Custom IAM role ARN for CodeBuild Deploy service role"
   type        = string
   default     = null
 }
@@ -100,52 +95,6 @@ variable "eks_access" {
   description = "Boolean to determine whether the EKS cluster is accessible"
   type        = bool
   default     = false
-}
-
-variable "deploy_compute_type" {
-  description = "Compute type for the deploy stage"
-  type        = string
-  default     = "BUILD_GENERAL1_SMALL"
-}
-
-variable "deploy_image" {
-  description = "Docker image for the deploy stage"
-  type        = string
-  default     = "aws/codebuild/amazonlinux-x86_64-standard:5.0"
-}
-
-variable "deploy_environment_type" {
-  description = "Deploy environment type"
-  type        = string
-  default     = "LINUX_CONTAINER"
-}
-
-variable "deploy_privileged_mode" {
-  description = "Whether the deploy stage should run in privileged mode"
-  type        = bool
-  default     = false
-}
-
-variable "deploy_environment_variables" {
-  description = "Environment variables for the deploy stage"
-  type        = list(map(string))
-  default     = []
-}
-
-variable "deploy_vpc_config" {
-  description = "VPC configuration for the deploy stage"
-  type = object({
-    vpc_id             = string
-    subnets            = list(string)
-    security_group_ids = list(string)
-  })
-  default = null
-}
-
-variable "deployspec_file" {
-  description = "Buildspec file for the deploy stage"
-  type        = string
-  default     = "deployspec.yml"
 }
 
 variable "source_provider" {
