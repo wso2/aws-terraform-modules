@@ -25,8 +25,8 @@ resource "aws_eip" "eip" {
 }
 
 resource "aws_shield_protection" "shield_protection" {
-  count = var.enable_shield_protection == true ? 1 : 0
-  name = local.shield_name
+  count        = var.enable_shield_protection == true ? 1 : 0
+  name         = local.shield_name
   resource_arn = aws_eip.eip.id
 
   tags = var.tags

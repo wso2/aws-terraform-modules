@@ -10,6 +10,6 @@
 # --------------------------------------------------------------------------------------
 
 locals {
-  eip_tags = merge(var.default_tags, {"Name": join("-", [var.project, var.application, var.environment, var.region, "eip"])})
+  eip_tags                   = merge(var.default_tags, { "Name" : join("-", [var.project, var.application, var.environment, var.region, "eip"]) })
   eip_shield_protection_name = join("-", [var.project, var.application, var.environment, var.region, "eip-shield-protection"])
 }
