@@ -16,9 +16,9 @@ resource "aws_eip" "public_ip" {
 }
 
 resource "aws_shield_protection" "shield_protection" {
-  count = var.shield_protection_enabled ? 1 : 0
+  count        = var.shield_protection_enabled ? 1 : 0
   resource_arn = aws_eip.public_ip.arn
-  name = local.eip_shield_protection_name
+  name         = local.eip_shield_protection_name
 
   tags = var.default_tags
 }
