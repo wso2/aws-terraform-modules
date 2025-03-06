@@ -19,7 +19,8 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_s3_bucket" "codepipeline_bucket" {
-  bucket = join("-", [var.project, var.application, var.environment, var.region, "pipeline-bucket"])
+  bucket        = join("-", [var.project, var.application, var.environment, var.region, "pipeline-bucket"])
+  force_destroy = var.force_destroy
 }
 
 resource "aws_s3_bucket_public_access_block" "codepipeline_bucket_pab" {

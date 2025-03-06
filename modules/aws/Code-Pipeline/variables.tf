@@ -38,6 +38,12 @@ variable "region" {
   type        = string
 }
 
+variable "force_destroy" {
+  description = "Whether to allow force destroy of the bucket"
+  type        = bool
+  default     = false
+}
+
 variable "block_public_acls" {
   description = "Whether Amazon S3 should block public ACLs for this bucket"
   type        = bool
