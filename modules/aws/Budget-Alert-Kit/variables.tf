@@ -33,7 +33,7 @@ variable "ec2_percentage" {
 
 variable "logs_percentage" {
   type        = number
-  description = "Percentage of total cost allocated for Cloudwatcg"
+  description = "Percentage of total cost allocated for Cloudwatch"
   default     = 20
 }
 
