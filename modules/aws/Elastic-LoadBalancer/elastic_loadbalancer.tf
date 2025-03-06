@@ -38,3 +38,11 @@ resource "aws_eip" "eip" {
 
   tags = var.tags
 }
+
+resource "aws_shield_protection" "shield_protection" {
+  for_each = var.internal_usage_flag == true && var.enable_shield_protection ? {} : var.subnet_ids
+  name = join("-", [var.project, var.application, var.environment, var.region, each.key , "elb-eip-shield-protection"])
+  resource_arn = aws_eip.eip[each.key].id
+
+  tags = var.tags
+}

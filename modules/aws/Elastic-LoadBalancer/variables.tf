@@ -59,3 +59,8 @@ variable "private_ip_addresses" {
   description = "List of private IP addresses"
   default     = {}
 }
+variable "enable_shield_protection" {
+  type        = string
+  description = "Flag to indicate whether the ALB instance is protected by AWS Shield or not"
+  default     = false
+}

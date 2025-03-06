@@ -17,6 +17,7 @@ locals {
   nic_name    = join("-", [local.name_prefix, "ec2-nic"])
   ip_name     = join("-", [local.name_prefix, "ec2-eip"])
   volume_name = join("-", [local.name_prefix, "ec2-volume"])
+  shield_protection_name = join("-", [local.name_prefix, "shield-protection"])
   ec2_tags    = merge(var.tags, { Name : local.ec2_name })
   rt_tags     = merge(var.tags, { Name : local.rt_name })
   subnet_tags = merge(var.tags, { Name : local.subnet_name })

@@ -9,6 +9,19 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_shield_protection_group" {
-  name =
+output "eip_public_ip" {
+  description = "The public IP address of the EIP"
+  value       = aws_eip.public_ip.public_ip
+}
+output "eip_allocation_id" {
+  description = "The allocation ID of the EIP"
+  value       = aws_eip.public_ip.id
+}
+output "eip_domain" {
+  description = "The domain of the EIP"
+  value       = aws_eip.public_ip.domain
+}
+output "eip_arn" {
+  description = "The instance ID that the EIP is associated with"
+  value       = aws_eip.public_ip.arn
 }
