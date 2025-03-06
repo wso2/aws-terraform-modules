@@ -35,3 +35,8 @@ variable "subnet_id" {
   description = "ID of the Subnet to host the NAT Gateway"
   default     = null
 }
+variable "enable_shield_protection" {
+  type        = bool
+  description = "Enable AWS Shield Protection for the NAT Gateway"
+  default     = false
+}
