@@ -11,13 +11,13 @@
 
 # Global Budget for all tagged resources
 resource "aws_budgets_budget" "global" {
-  name          = "Choreo-global-budget"
-  budget_type   = "COST"
-  limit_amount  = var.cost
-  limit_unit    = "USD"
-  time_unit     = "MONTHLY"
+  name         = "Choreo-global-budget"
+  budget_type  = "COST"
+  limit_amount = var.cost
+  limit_unit   = "USD"
+  time_unit    = "MONTHLY"
 
-  
+
   cost_filter {
     name   = "TagKeyValue"
     values = ["${var.tag_key}${"$"}${var.tag_value}"]
@@ -42,11 +42,11 @@ resource "aws_budgets_budget" "global" {
 
 # EC2 Instances Budget (configured percentage)
 resource "aws_budgets_budget" "ec2" {
-  name          = "Choreo-EC2-budget"
-  budget_type   = "COST"
-  limit_amount  = local.ec2_limit
-  limit_unit    = "USD"
-  time_unit     = "MONTHLY"
+  name         = "Choreo-EC2-budget"
+  budget_type  = "COST"
+  limit_amount = local.ec2_limit
+  limit_unit   = "USD"
+  time_unit    = "MONTHLY"
 
 
   cost_filter {
@@ -55,7 +55,7 @@ resource "aws_budgets_budget" "ec2" {
   }
 
   cost_filter {
-    name   = "Service"
+    name = "Service"
     values = [
       "Amazon Elastic Compute Cloud - Compute",
     ]
@@ -80,11 +80,11 @@ resource "aws_budgets_budget" "ec2" {
 
 # Logs Budget (configured percentage, no tag filter)
 resource "aws_budgets_budget" "logs" {
-  name          = "Choreo-Logs-budget"
-  budget_type   = "COST"
-  limit_amount  = local.logs_limit
-  limit_unit    = "USD"
-  time_unit     = "MONTHLY"
+  name         = "Choreo-Logs-budget"
+  budget_type  = "COST"
+  limit_amount = local.logs_limit
+  limit_unit   = "USD"
+  time_unit    = "MONTHLY"
 
   cost_filter {
     name   = "TagKeyValue"
@@ -92,7 +92,7 @@ resource "aws_budgets_budget" "logs" {
   }
 
   cost_filter {
-    name   = "Service"
+    name = "Service"
     values = [
       "AmazonCloudWatch",
     ]
@@ -116,11 +116,11 @@ resource "aws_budgets_budget" "logs" {
 
 # Networking Budget (configured percentage)
 resource "aws_budgets_budget" "networking" {
-  name          = "Choreo-Networking-budget"
-  budget_type   = "COST"
-  limit_amount  = local.networking_limit
-  limit_unit    = "USD"
-  time_unit     = "MONTHLY"
+  name         = "Choreo-Networking-budget"
+  budget_type  = "COST"
+  limit_amount = local.networking_limit
+  limit_unit   = "USD"
+  time_unit    = "MONTHLY"
 
   cost_filter {
     name   = "TagKeyValue"
@@ -128,7 +128,7 @@ resource "aws_budgets_budget" "networking" {
   }
 
   cost_filter {
-    name   = "Service"
+    name = "Service"
     values = [
       "AmazonVPC",
     ]
