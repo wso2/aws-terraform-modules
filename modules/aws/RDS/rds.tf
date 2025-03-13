@@ -33,6 +33,7 @@ resource "aws_db_instance" "rds_instance" {
   password                    = var.master_password
   manage_master_user_password = var.master_password == null ? true : null
 
+  license_model     = var.license_model
   allocated_storage = var.allocated_storage
   engine            = var.engine
   engine_version    = var.engine_version

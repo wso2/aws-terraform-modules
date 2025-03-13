@@ -63,11 +63,6 @@ variable "db_subnet_group_name" {
   type        = string
 }
 
-variable "engine_mode" {
-  description = "Engine mode to be used for the DB Cluster"
-  type        = string
-}
-
 variable "engine" {
   description = "Engine to be used for the DB Cluster"
   type        = string
@@ -94,6 +89,12 @@ variable "network_type" {
   description = "Network type. Can be IPV4 or DUAL"
   type        = string
   default     = "IPV4"
+}
+
+variable "license_model" {
+  description = "License model"
+  type        = string
+  default     = null
 }
 
 variable "database_port" {
