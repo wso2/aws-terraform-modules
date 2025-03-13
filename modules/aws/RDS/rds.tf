@@ -37,6 +37,7 @@ resource "aws_db_instance" "rds_instance" {
   engine            = var.engine
   engine_version    = var.engine_version
   instance_class    = var.instance_class
+  storage_type      = var.storage_type
 
   db_subnet_group_name            = var.db_subnet_group_name
   enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_log_exports

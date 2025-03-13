@@ -119,6 +119,12 @@ variable "instance_class" {
   type        = string
 }
 
+variable "storage_type" {
+  description = "Storage type"
+  type        = string
+  default     = "gp2"
+}
+
 variable "skip_final_snapshot" {
   description = "Flag to skip final snapshot"
   type        = bool
