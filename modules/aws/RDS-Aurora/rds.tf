@@ -61,6 +61,7 @@ resource "aws_rds_cluster" "rds_cluster" {
 
   cluster_identifier = local.cluster_name
 
+  skip_final_snapshot = var.skip_final_snapshot
   storage_encrypted = var.storage_encrypted
   kms_key_id        = var.storage_encrypted == true ? var.kms_key_id : null
 

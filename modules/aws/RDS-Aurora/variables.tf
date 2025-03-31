@@ -204,6 +204,11 @@ variable "vpc_security_group_ids" {
   type        = list(string)
   description = "List of security group ids"
 }
+variable "skip_final_snapshot" {
+  type        = bool
+  description = "Flag to skip final snapshot"
+  default     = false 
+}
 variable "storage_encrypted" {
   type        = bool
   description = "Flag to enable storage encryption"
