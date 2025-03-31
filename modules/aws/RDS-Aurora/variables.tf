@@ -207,7 +207,7 @@ variable "vpc_security_group_ids" {
 variable "skip_final_snapshot" {
   type        = bool
   description = "Flag to skip final snapshot"
-  default     = false 
+  default     = false
 }
 variable "storage_encrypted" {
   type        = bool
