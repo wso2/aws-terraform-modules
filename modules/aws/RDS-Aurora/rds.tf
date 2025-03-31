@@ -61,8 +61,9 @@ resource "aws_rds_cluster" "rds_cluster" {
 
   cluster_identifier = local.cluster_name
 
-  storage_encrypted = var.storage_encrypted
-  kms_key_id        = var.storage_encrypted == true ? var.kms_key_id : null
+  skip_final_snapshot = var.skip_final_snapshot
+  storage_encrypted   = var.storage_encrypted
+  kms_key_id          = var.storage_encrypted == true ? var.kms_key_id : null
 
   dynamic "scaling_configuration" {
     for_each = var.enable_scaling_configuration == true && var.engine_mode == "serverless" ? [1] : []
