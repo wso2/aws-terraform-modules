@@ -212,12 +212,6 @@ variable "create_parameter_group" {
   default     = false
 }
 
-variable "family" {
-  description = "The family of the DB parameter group"
-  type        = string
-  default     = null
-}
-
 variable "parameters" {
   description = "A list of DB parameter maps to apply"
   type        = list(map(string))

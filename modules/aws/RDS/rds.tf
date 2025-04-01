@@ -1,5 +1,4 @@
 locals {
-  # identifier        = var.identifier
   identifier                = lower(join("-", [var.project, var.application, var.environment, var.region, var.engine, "db"]))
   final_snapshot_identifier = "${local.identifier}-final-snapshot-${var.final_snapshot_identifier_suffix}"
   parameter_group_name      = "${local.identifier}-pg"
@@ -33,7 +32,7 @@ resource "aws_db_instance" "database" {
   ca_cert_identifier = var.ca_cert_identifier
 
   allow_major_version_upgrade = var.allow_major_version_upgrade
-  # maintenance_window          = var.maintenance_window
+  maintenance_window          = var.maintenance_window
 
   copy_tags_to_snapshot     = true
   skip_final_snapshot       = var.skip_final_snapshot
@@ -51,7 +50,7 @@ resource "aws_db_instance" "database" {
 
   enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
 
-  # deletion_protection      = var.deletion_protection
+  deletion_protection      = var.deletion_protection
   delete_automated_backups = var.delete_automated_backups
 
   tags = var.tags
