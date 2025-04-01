@@ -9,24 +9,6 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "availability_zone" {
-  type        = string
-  description = "Availability zones of the VPC Subnet"
-  default     = null
-}
-variable "tags" {
-  type        = map(string)
-  description = "Tags to be associated with the resource"
-  default     = {}
-}
-variable "ec2_ami" {
-  type        = string
-  description = "AMI to be used with the EC2 instance"
-}
-variable "ec2_instance_type" {
-  type        = string
-  description = "EC2 instance type"
-}
 variable "project" {
   type        = string
   description = "Name of the project"
@@ -41,39 +23,44 @@ variable "region" {
 }
 variable "application" {
   type        = string
-  description = "Purpose of the EC2 Instance"
+  description = "Purpose of the SSM Endpoint"
+}
+variable "tags" {
+  type        = map(string)
+  description = "Default tags to be associated with the Resource"
+  default     = {}
 }
 
-variable "iam_instance_profile_name" {
+variable "description" {
+  type    = string
+  default = ""
+}
+
+variable "instance_type" {
   type    = string
   default = null
 }
-variable "ssh_key_name" {
-  type    = string
-  default = null
-}
-variable "subnet_id" {
-  type        = string
-  description = "subnet id"
-  default     = null
-}
+
 variable "vpc_security_group_ids" {
-  type    = list(string)
-  default = []
+  type = list(string)
 }
-variable "root_volume_size" {
-  type        = number
-  description = "Type of the volume"
-  default     = 20
+
+variable "instanceProfile_arn" {
+  type    = string
+  default = null
 }
-variable "encrypt_root_volume" {
-  type        = bool
-  description = "Flag to encrypt the root volume"
-  default     = true
+
+variable "disk_size" {
+  type    = number
+  default = 10
+}
+variable "enable_encryption_at_rest" {
+  type    = bool
+  default = false
 }
 variable "kms_key_id" {
   type        = string
-  description = "Customer managed KMS Key ID to be used for encryption"
+  description = "KMS Key ID to be used for encryption"
   default     = null
 }
 variable "imds_enabled" {
@@ -85,4 +72,16 @@ variable "user_data" {
   type        = string
   description = "User data to be passed to the EC2 instance"
   default     = null
+}
+variable "ssh_key_name" {
+  type    = string
+  default = null
+}
+variable "instance_initiated_shutdown_behavior" {
+  type    = string
+  default = null
+}
+variable "image_id" {
+  type    = string
+  default = null
 }

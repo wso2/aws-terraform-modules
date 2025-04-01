@@ -23,33 +23,24 @@ variable "region" {
 }
 variable "application" {
   type        = string
-  description = "Purpose of the Subnet"
-}
-variable "vpc_id" {
-  type        = string
-  description = "ID of the VPC which should contain this subnet"
-}
-variable "enable_dns64" {
-  type        = bool
-  description = "Flag to enable DNS 64 on the subnet"
-  default     = false
-}
-variable "cidr_block" {
-  type        = string
-  description = "CIDR block for the subnet"
+  description = "Purpose of the SSM Endpoint"
 }
 variable "tags" {
   type        = map(string)
-  description = "Default tags for the Subnet resource"
+  description = "Default tags to be associated with the Resource"
   default     = {}
 }
-variable "availability_zone" {
-  type        = string
-  description = "Availability zones for the Subnet"
-  default     = null
+variable "endpoint_security_group_ids" {
+  type        = list(string)
+  description = "Security groups that should be associated with the EP"
+  default     = []
 }
-variable "auto_assign_public_ip" {
+variable "subnet_id" {
+  type        = string
+  description = "Subnet ID where the EC2 connect VPC EP should exist"
+}
+variable "preserve_client_ip" {
   type        = bool
-  description = "Automatically Public IPs for Virtual Machines"
-  default     = false
+  default     = true
+  description = "Indicates whether your client's IP address is preserved as the source."
 }

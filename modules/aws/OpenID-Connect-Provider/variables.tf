@@ -12,6 +12,7 @@
 variable "thumbprint_list" {
   description = "List of thumbprints of the OIDC provider"
   type        = list(string)
+  default = []
 }
 variable "tags" {
   description = "Tags to be added with all resources"

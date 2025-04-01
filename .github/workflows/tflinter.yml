@@ -1,9 +1,9 @@
 name: TF Linter Check
 on:
   push:
-    branches-ignore: [master, main]
+    branches-ignore: [master, main, UnitOfWork]
   pull_request:
-    branches: [master, main]
+    branches: [master, main, UnitOfWork]
 
 jobs:
   build:

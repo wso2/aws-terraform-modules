@@ -23,33 +23,15 @@ variable "region" {
 }
 variable "application" {
   type        = string
-  description = "Purpose of the Subnet"
-}
-variable "vpc_id" {
-  type        = string
-  description = "ID of the VPC which should contain this subnet"
-}
-variable "enable_dns64" {
-  type        = bool
-  description = "Flag to enable DNS 64 on the subnet"
-  default     = false
-}
-variable "cidr_block" {
-  type        = string
-  description = "CIDR block for the subnet"
+  description = "Purpose of the SSM Endpoint"
 }
 variable "tags" {
   type        = map(string)
-  description = "Default tags for the Subnet resource"
+  description = "Default tags to be associated with the Resource"
   default     = {}
 }
-variable "availability_zone" {
+variable "ssh_public_key" {
   type        = string
-  description = "Availability zones for the Subnet"
+  description = "SSH Public key for EC2 Instance"
   default     = null
-}
-variable "auto_assign_public_ip" {
-  type        = bool
-  description = "Automatically Public IPs for Virtual Machines"
-  default     = false
 }
