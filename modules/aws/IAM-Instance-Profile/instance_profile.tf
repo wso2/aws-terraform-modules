@@ -9,7 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_iam_role_policy_attachment" "aws_iam_role_policy_attachment" {
-  policy_arn = var.iam_policy_arn
-  role       = var.iam_role_name
+resource "aws_iam_instance_profile" "iam_instance_profile" {
+  name = join("-", [var.project, var.application, var.environment, var.region, "ec2-instance-profile"])
+  role = var.iam_role_name
 }

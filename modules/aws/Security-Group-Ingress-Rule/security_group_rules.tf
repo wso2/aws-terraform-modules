@@ -9,7 +9,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_iam_role_policy_attachment" "aws_iam_role_policy_attachment" {
-  policy_arn = var.iam_policy_arn
-  role       = var.iam_role_name
+resource "aws_vpc_security_group_ingress_rule" "ingressAllowSsh" {
+  count                        = length(var.ingress-rules)
+  security_group_id            = var.security_group_id
+  ip_protocol                  = var.ingress-rules[count.index].ip_protocol
+  cidr_ipv4                    = var.ingress-rules[count.index].cidr_block
+  to_port                      = var.ingress-rules[count.index].to_port
+  from_port                    = var.ingress-rules[count.index].from_port
+  referenced_security_group_id = var.ingress-rules[count.index].security_group
 }

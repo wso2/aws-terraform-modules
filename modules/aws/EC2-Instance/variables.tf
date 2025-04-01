@@ -13,15 +13,6 @@ variable "ec2_vpc_id" {
   type        = string
   description = "ID of the VPC containing the EC3 instance"
 }
-variable "use_existing_subnet" {
-  type        = bool
-  description = "Flag to use existing subnet"
-}
-variable "vpc_subnet_id" {
-  type        = string
-  description = "VPC Subnet ID, required if using an pre-existing subnet"
-  default     = null
-}
 variable "ec2_subnet_vpc_cidr_block" {
   type        = string
   description = "CIDR of the subnet which should contain the VM"
@@ -61,57 +52,23 @@ variable "application" {
   type        = string
   description = "Purpose of the EC2 Instance"
 }
-variable "custom_routes" {
-  type = list(object({
-    cidr_block = string
-    ep_type    = string
-    ep_id      = string
-  }))
-  description = "Rules to be associated with the EC2 Subnet if provided"
-  default     = []
+
+variable "iam_instance_profile_name" {
+  type    = string
+  default = null
 }
-variable "ip_address_allocation_method" {
-  type        = string
-  description = "How to allocate an IP address, Static, Dynamic"
+variable "ssh_key_name" {
+  type    = string
+  default = null
 }
-variable "ip_type" {
+variable "subnet_id" {
   type        = string
-  description = "IP Type, Public, Private"
-}
-variable "private_ip" {
-  type        = string
-  description = "Private IP for the EC2 instance, required if ip_type is Static"
+  description = "subnet id"
   default     = null
 }
-variable "add_ssh_key" {
-  type        = bool
-  description = "Flag to add SSH key to VM"
-  default     = false
-}
-variable "ssh_public_key" {
-  type        = string
-  description = "SSH Public key for EC2 Instance"
-  default     = null
-}
-variable "security_group_ids" {
-  type        = list(string)
-  description = "List of security groups to be associated with the EC2 instance"
-  default     = []
-}
-variable "enable_session_manager" {
-  type        = bool
-  description = "Flag to enable session manager"
-  default     = true
-}
-variable "enable_instance_connect" {
-  type        = bool
-  description = "Flag to enable instance connect"
-  default     = false
-}
-variable "kms_key_id" {
-  type        = string
-  description = "KMS Key ID to be used for encryption"
-  default     = null
+variable "vpc_security_group_ids" {
+  type    = list(string)
+  default = []
 }
 variable "root_volume_size" {
   type        = number
@@ -123,6 +80,11 @@ variable "encrypt_root_volume" {
   description = "Flag to encrypt the root volume"
   default     = true
 }
+variable "kms_key_id" {
+  type        = string
+  description = "Customer managed KMS Key ID to be used for encryption"
+  default     = null
+}
 variable "imds_enabled" {
   type        = string
   description = "Flag to enable IMDS"
@@ -132,9 +94,4 @@ variable "user_data" {
   type        = string
   description = "User data to be passed to the EC2 instance"
   default     = null
-}
-variable "enable_shield_protection" {
-  type        = bool
-  description = "Flag to enable shield protection"
-  default     = false
 }

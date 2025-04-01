@@ -9,7 +9,6 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_iam_role_policy_attachment" "aws_iam_role_policy_attachment" {
-  policy_arn = var.iam_policy_arn
-  role       = var.iam_role_name
+output "ssk_key_name" {
+  value = aws_key_pair.key_pair.key_name
 }

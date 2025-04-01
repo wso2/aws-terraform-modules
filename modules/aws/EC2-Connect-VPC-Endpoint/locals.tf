@@ -9,7 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_iam_role_policy_attachment" "aws_iam_role_policy_attachment" {
-  policy_arn = var.iam_policy_arn
-  role       = var.iam_role_name
+locals {
+  vpc_ep_name = join("-", [var.project, var.application, var.environment, var.region, "vpc-ep-ec2-connect"])
+  tags        = merge(var.tags, { "Name" : local.vpc_ep_name })
 }

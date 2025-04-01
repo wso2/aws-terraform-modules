@@ -23,18 +23,15 @@ variable "region" {
 }
 variable "application" {
   type        = string
-  description = "Purpose of the Security Group"
-}
-variable "description" {
-  type        = string
-  description = "Description of the security Group"
-}
-variable "vpc_id" {
-  type        = string
-  description = "VPC that Security group should be associated with"
+  description = "Purpose of the SSM Endpoint"
 }
 variable "tags" {
   type        = map(string)
-  description = "Tags to be added to the security group"
+  description = "Default tags to be associated with the Resource"
   default     = {}
+}
+variable "ssh_public_key" {
+  type        = string
+  description = "SSH Public key for EC2 Instance"
+  default     = null
 }

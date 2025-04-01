@@ -9,7 +9,8 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_iam_role_policy_attachment" "aws_iam_role_policy_attachment" {
-  policy_arn = var.iam_policy_arn
-  role       = var.iam_role_name
+resource "aws_key_pair" "key_pair" {
+  key_name   = local.name
+  public_key = var.ssh_public_key
+  tags       = var.tags
 }

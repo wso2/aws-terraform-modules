@@ -23,18 +23,24 @@ variable "region" {
 }
 variable "application" {
   type        = string
-  description = "Purpose of the Security Group"
-}
-variable "description" {
-  type        = string
-  description = "Description of the security Group"
-}
-variable "vpc_id" {
-  type        = string
-  description = "VPC that Security group should be associated with"
+  description = "Purpose of the SSM Endpoint"
 }
 variable "tags" {
   type        = map(string)
-  description = "Tags to be added to the security group"
+  description = "Default tags to be associated with the Resource"
   default     = {}
+}
+variable "endpoint_security_group_ids" {
+  type        = list(string)
+  description = "Security groups that should be associated with the EP"
+  default     = []
+}
+variable "subnet_id" {
+  type        = string
+  description = "Subnet ID where the EC2 connect VPC EP should exist"
+}
+variable "preserve_client_ip" {
+  type        = bool
+  default     = true
+  description = "Indicates whether your client's IP address is preserved as the source."
 }

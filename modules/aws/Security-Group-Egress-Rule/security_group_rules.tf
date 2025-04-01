@@ -9,7 +9,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_iam_role_policy_attachment" "aws_iam_role_policy_attachment" {
-  policy_arn = var.iam_policy_arn
-  role       = var.iam_role_name
+resource "aws_vpc_security_group_egress_rule" "egressAllAllow" {
+  count                        = length(var.egress-rules)
+  security_group_id            = var.security_group_id
+  ip_protocol                  = var.egress-rules[count.index].ip_protocol
+  cidr_ipv4                    = var.egress-rules[count.index].cidr_block
+  to_port                      = var.egress-rules[count.index].to_port
+  from_port                    = var.egress-rules[count.index].from_port
+  referenced_security_group_id = var.egress-rules[count.index].security_group
 }
