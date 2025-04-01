@@ -12,5 +12,5 @@
 resource "aws_key_pair" "key_pair" {
   key_name   = local.name
   public_key = var.ssh_public_key
-  tags       = var.tags
+  tags       = local.tags
 }

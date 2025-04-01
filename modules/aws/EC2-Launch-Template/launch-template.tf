@@ -7,6 +7,7 @@ resource "aws_launch_template" "launch_template" {
   instance_type                        = var.instance_type
   vpc_security_group_ids               = var.vpc_security_group_ids
   user_data                            = var.user_data
+  tags                                 = local.tags
 
   iam_instance_profile {
     arn = var.instanceProfile_arn

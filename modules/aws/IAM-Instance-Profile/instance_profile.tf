@@ -12,4 +12,5 @@
 resource "aws_iam_instance_profile" "iam_instance_profile" {
   name = join("-", [var.project, var.application, var.environment, var.region, "ec2-instance-profile"])
   role = var.iam_role_name
+  tags = var.tags
 }

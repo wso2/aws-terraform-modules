@@ -9,15 +9,6 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "ec2_vpc_id" {
-  type        = string
-  description = "ID of the VPC containing the EC3 instance"
-}
-variable "ec2_subnet_vpc_cidr_block" {
-  type        = string
-  description = "CIDR of the subnet which should contain the VM"
-  default     = null
-}
 variable "availability_zone" {
   type        = string
   description = "Availability zones of the VPC Subnet"
