@@ -10,9 +10,9 @@
 # --------------------------------------------------------------------------------------
 
 locals {
-  name_prefix            = var.availability_zone == null ? join("-", [var.project, var.application, var.environment, var.region]) : join("-", [var.project, var.application, var.environment, var.availability_zone])
-  ec2_name               = join("-", [local.name_prefix, "ec2"])
-  volume_name            = join("-", [local.name_prefix, "ec2-volume"])
-  ec2_tags               = merge(var.tags, { Name : local.ec2_name })
-  volume_tags            = merge(var.tags, { Name : local.volume_name })
+  name_prefix = var.availability_zone == null ? join("-", [var.project, var.application, var.environment, var.region]) : join("-", [var.project, var.application, var.environment, var.availability_zone])
+  ec2_name    = join("-", [local.name_prefix, "ec2"])
+  volume_name = join("-", [local.name_prefix, "ec2-volume"])
+  ec2_tags    = merge(var.tags, { Name : local.ec2_name })
+  volume_tags = merge(var.tags, { Name : local.volume_name })
 }
