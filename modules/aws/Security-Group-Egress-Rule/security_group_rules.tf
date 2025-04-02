@@ -9,7 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_vpc_security_group_egress_rule" "egressAllAllow" {
+resource "aws_vpc_security_group_egress_rule" "egress" {
   count                        = length(var.egress-rules)
   security_group_id            = var.security_group_id
   ip_protocol                  = var.egress-rules[count.index].ip_protocol

@@ -9,7 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_vpc_security_group_ingress_rule" "ingressAllowSsh" {
+resource "aws_vpc_security_group_ingress_rule" "ingress" {
   count                        = length(var.ingress-rules)
   security_group_id            = var.security_group_id
   ip_protocol                  = var.ingress-rules[count.index].ip_protocol
