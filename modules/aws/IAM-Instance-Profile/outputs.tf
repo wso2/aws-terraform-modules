@@ -9,7 +9,10 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_iam_role_policy_attachment" "aws_iam_role_policy_attachment" {
-  policy_arn = var.iam_policy_arn
-  role       = var.iam_role_name
+output "ec2-instance-profile-arn" {
+  value = aws_iam_instance_profile.iam_instance_profile.arn
+}
+
+output "ec2-instance-profile-name" {
+  value = aws_iam_instance_profile.iam_instance_profile.name
 }

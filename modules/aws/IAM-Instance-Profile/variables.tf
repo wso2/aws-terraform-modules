@@ -9,7 +9,28 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_iam_role_policy_attachment" "aws_iam_role_policy_attachment" {
-  policy_arn = var.iam_policy_arn
-  role       = var.iam_role_name
+variable "tags" {
+  type        = map(string)
+  description = "Tags to be associated with the resource"
+  default     = {}
+}
+variable "project" {
+  type        = string
+  description = "Name of the project"
+}
+variable "environment" {
+  type        = string
+  description = "Name of the environment"
+}
+variable "region" {
+  type        = string
+  description = "Code of the region"
+}
+variable "application" {
+  type        = string
+  description = "Purpose of the EC2 Instance"
+}
+variable "iam_role_name" {
+  type    = string
+  default = null
 }

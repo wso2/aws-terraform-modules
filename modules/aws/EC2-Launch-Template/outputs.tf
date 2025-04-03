@@ -9,7 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_iam_role_policy_attachment" "aws_iam_role_policy_attachment" {
-  policy_arn = var.iam_policy_arn
-  role       = var.iam_role_name
+output "launch_template_id" {
+  value = aws_launch_template.launch_template.id
+}
+output "launch_template_version" {
+  value = aws_launch_template.launch_template.latest_version
 }

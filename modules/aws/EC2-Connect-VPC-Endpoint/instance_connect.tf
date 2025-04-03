@@ -9,7 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_iam_role_policy_attachment" "aws_iam_role_policy_attachment" {
-  policy_arn = var.iam_policy_arn
-  role       = var.iam_role_name
+resource "aws_ec2_instance_connect_endpoint" "vpc_endpoint_ec2_connect" {
+  subnet_id          = var.subnet_id
+  security_group_ids = var.endpoint_security_group_ids
+  preserve_client_ip = var.preserve_client_ip
+  tags               = local.tags
 }

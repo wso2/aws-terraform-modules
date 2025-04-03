@@ -9,7 +9,18 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_iam_role_policy_attachment" "aws_iam_role_policy_attachment" {
-  policy_arn = var.iam_policy_arn
-  role       = var.iam_role_name
+variable "security_group_id" {
+  type        = string
+  description = "Security Group to associate rules with"
+}
+
+variable "ingress-rules" {
+  type = list(object({
+    ip_protocol    = string
+    to_port        = optional(number)
+    from_port      = optional(number)
+    cidr_block     = optional(string)
+    security_group = optional(string)
+  }))
+  default = []
 }

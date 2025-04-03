@@ -9,29 +9,14 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_key_pair" "key_pair" {
-  count      = var.add_ssh_key == true ? 1 : 0
-  key_name   = join("-", [local.name_prefix, "ec2-kp"])
-  public_key = var.ssh_public_key
-
-  tags = var.tags
-}
-
 resource "aws_instance" "ec2_instance" {
-  ami               = var.ec2_ami
-  instance_type     = var.ec2_instance_type
-  availability_zone = var.availability_zone
-
-  key_name = var.add_ssh_key == true ? aws_key_pair.key_pair[0].key_name : null
-
-  tags = local.ec2_tags
-
-  iam_instance_profile = aws_iam_instance_profile.iam_instance_profile.name
-
-  network_interface {
-    device_index         = 0
-    network_interface_id = aws_network_interface.ec2_network_interface.id
-  }
+  ami                    = var.ec2_ami
+  instance_type          = var.ec2_instance_type
+  subnet_id              = var.subnet_id
+  vpc_security_group_ids = var.vpc_security_group_ids
+  key_name               = var.ssh_key_name
+  user_data              = var.user_data
+  iam_instance_profile   = var.iam_instance_profile_name
 
   metadata_options {
     http_tokens = var.imds_enabled
@@ -44,5 +29,5 @@ resource "aws_instance" "ec2_instance" {
     tags        = local.volume_tags
   }
 
-  user_data = var.user_data
+  tags = local.ec2_tags
 }

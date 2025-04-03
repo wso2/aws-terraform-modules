@@ -13,10 +13,6 @@ output "subnet_id" {
   value      = aws_subnet.subnet.id
   depends_on = [aws_subnet.subnet]
 }
-output "route_table_id" {
-  value      = aws_route_table.route_table.id
-  depends_on = [aws_route_table.route_table]
-}
 output "subnet_name" {
   value = local.subnet_name
 }

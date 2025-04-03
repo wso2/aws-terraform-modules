@@ -9,7 +9,6 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_iam_role_policy_attachment" "aws_iam_role_policy_attachment" {
-  policy_arn = var.iam_policy_arn
-  role       = var.iam_role_name
+output "vpc_endpoint_arn" {
+  value = aws_ec2_instance_connect_endpoint.vpc_endpoint_ec2_connect.arn
 }

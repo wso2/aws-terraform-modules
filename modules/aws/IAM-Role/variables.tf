@@ -33,3 +33,8 @@ variable "tags" {
   description = "Tags to be associated with the EKS"
   default     = {}
 }
+variable "managed_policy_arns" {
+  type        = list(string)
+  default     = []
+  description = "list of managed policy ARNs to attach"
+}
