@@ -22,3 +22,8 @@ variable "url" {
   description = "URL of the OIDC provider"
   type        = string
 }
+variable "client_id_list" {
+  type        = list(string)
+  description = "List of client IDs (audiences) that identify the application registered with the OpenID Connect provider."
+  default     = ["sts.amazonaws.com"]
+}
