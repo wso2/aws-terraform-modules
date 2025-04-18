@@ -10,9 +10,9 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_nat_gateway" "nat_gateway" {
-  subnet_id                = var.subnet_id
-  connectivity_type        = var.connectivity_type
-  allocation_id            = var.allocation_id
-  secondary_allocation_ids = var.secondary_allocation_ids
-  tags                     = local.tags
+  subnet_id                          = var.subnet_id
+  connectivity_type                  = var.connectivity_type
+  allocation_id                      = var.allocation_id
+  secondary_private_ip_address_count = var.secondary_private_ip_address_count
+  tags                               = local.tags
 }
