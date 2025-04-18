@@ -9,8 +9,8 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_iam_openid_connect_provider" "eks_ca_oidc_provider" {
-  client_id_list  = ["sts.amazonaws.com"]
+resource "aws_iam_openid_connect_provider" "oidc_provider" {
+  client_id_list  = var.client_id_list
   thumbprint_list = var.thumbprint_list
   url             = var.url
 

@@ -30,3 +30,8 @@ variable "tags" {
   description = "Tags to be associated with the IAM User"
   default     = {}
 }
+variable "policy_arns" {
+  type        = list(string)
+  default     = []
+  description = "list of policy ARNs to attach to the IAM User"
+}

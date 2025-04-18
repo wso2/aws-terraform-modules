@@ -13,3 +13,9 @@ resource "aws_iam_user" "iam_user" {
   name = join("-", [var.project, var.application, var.environment, var.region, "iam-user"])
   tags = var.tags
 }
+
+resource "aws_iam_user_policy_attachment" "iam_user_policy_attachment" {
+  count      = length(var.policy_arns)
+  policy_arn = var.policy_arns[count.index]
+  user       = aws_iam_user.iam_user.name
+}

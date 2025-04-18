@@ -12,7 +12,7 @@
 resource "aws_eks_node_group" "eks_node_group" {
   cluster_name    = var.eks_cluster_name
   node_group_name = join("-", [var.eks_cluster_name, var.node_group_name, "node-group"])
-  node_role_arn   = var.node_iam_role_arn == null ? aws_iam_role.iam_role[0].arn : var.node_iam_role_arn
+  node_role_arn   = var.node_role_arn
   subnet_ids      = var.subnet_ids
   version         = var.k8s_version
   labels          = var.labels
@@ -27,8 +27,8 @@ resource "aws_eks_node_group" "eks_node_group" {
   }
 
   launch_template {
-    name    = aws_launch_template.eks_launch_template.name
-    version = "$Latest"
+    id      = var.launch_template_id
+    version = var.launch_template_version
   }
 
   dynamic "taint" {
@@ -49,48 +49,5 @@ resource "aws_eks_node_group" "eks_node_group" {
     max_unavailable = var.max_unavailable
   }
 
-  # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
-  # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
-  depends_on = [
-    aws_iam_role_policy_attachment.amazon_eks_worker_node_policy,
-    aws_iam_role_policy_attachment.amazon_eks_cni_policy,
-    aws_iam_role_policy_attachment.amazon_ec2_container_registry_read_only,
-  ]
-
   tags = local.ng_tags
-
-}
-
-resource "aws_launch_template" "eks_launch_template" {
-  name_prefix = join("-", [var.eks_cluster_name, var.node_group_name, "launch-template"])
-
-  image_id  = var.ami_type == "CUSTOM" ? var.custom_ami_id : null
-  user_data = var.user_data
-
-  block_device_mappings {
-    device_name = "/dev/xvda"
-    ebs {
-      volume_size = var.node_disk_size
-      encrypted   = var.enable_encryption_at_rest
-      kms_key_id  = var.enable_encryption_at_rest == true ? var.kms_key_id : null
-    }
-  }
-
-  tag_specifications {
-    resource_type = "instance"
-    tags          = local.ng_instance_tags
-  }
-
-  tag_specifications {
-    resource_type = "volume"
-    tags          = local.ng_volume_tags
-  }
-
-  metadata_options {
-    http_tokens = var.imds_enabled
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
 }

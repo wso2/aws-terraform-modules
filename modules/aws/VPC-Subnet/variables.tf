@@ -53,12 +53,3 @@ variable "auto_assign_public_ip" {
   description = "Automatically Public IPs for Virtual Machines"
   default     = false
 }
-variable "custom_routes" {
-  type = list(object({
-    cidr_block = string
-    ep_type    = string
-    ep_id      = string
-  }))
-  description = "Rules to be associated with the EC2 Subnet if provided"
-  default     = []
-}
