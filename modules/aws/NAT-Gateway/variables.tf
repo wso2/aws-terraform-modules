@@ -49,6 +49,6 @@ variable "connectivity_type" {
 
 variable "secondary_private_ip_address_count" {
   type        = number
-  default     = 0
+  default     = null
   description = "The number of secondary private IPv4 addresses you want to assign to the Private NAT Gateway"
 }
