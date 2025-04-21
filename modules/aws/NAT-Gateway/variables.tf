@@ -41,12 +41,6 @@ variable "allocation_id" {
   description = "The Allocation ID of the Elastic IP address for the NAT Gateway. Required for connectivity_type of public."
 }
 
-variable "secondary_allocation_ids" {
-  type        = list(string)
-  default     = []
-  description = "A list of secondary allocation EIP IDs for this NAT Gateway."
-}
-
 variable "connectivity_type" {
   type        = string
   default     = "public"

@@ -48,22 +48,6 @@ variable "service_ipv4_cidr" {
   type        = string
   description = "CIDR block for K8S Service"
 }
-variable "eks_vpc_id" {
-  type        = string
-  description = "ID of the VPC to create the subnets"
-}
-variable "subnet_details" {
-  type = list(object({
-    availability_zone = string
-    cidr_block        = string
-    custom_routes = list(object({
-      cidr_block = string
-      ep_type    = string
-      ep_id      = string
-    }))
-  }))
-  default = []
-}
 variable "secret_encryption_cmk" {
   type        = string
   description = "KMS Key ID for encrypting Kubernetes secrets"
