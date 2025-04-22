@@ -36,9 +36,9 @@ variable "security_group_ids" {
   default     = []
 }
 variable "subnet_ids" {
-  type        = list(string)
+  type        = map(string)
   description = "List of subnet IDs"
-  default     = []
+  default     = {}
 }
 variable "deletion_protection_flag" {
   type        = string
@@ -53,4 +53,14 @@ variable "tags" {
 variable "load_balancer_type" {
   type        = string
   description = "Type of the load balancer"
+}
+variable "private_ip_addresses" {
+  type        = map(string)
+  description = "List of private IP addresses"
+  default     = {}
+}
+variable "enable_shield_protection" {
+  type        = string
+  description = "Flag to indicate whether the ALB instance is protected by AWS Shield or not"
+  default     = false
 }

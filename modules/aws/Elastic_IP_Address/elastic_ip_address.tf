@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2023, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+# Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
 #
 # This software is the property of WSO2 LLC. and its suppliers, if any.
 # Dissemination of any information or reproduction of any material contained
@@ -9,12 +9,16 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-  natg_name = join("-", [var.project, var.application, var.environment, var.region, "natg"])
-  natg_tags = merge(var.tags, { Name : local.natg_name })
+resource "aws_eip" "public_ip" {
+  domain = var.eip_domain
 
-  eip_name = join("-", [var.project, var.application, var.environment, var.region, "eip-natg"])
-  eip_tags = merge(var.tags, { Name : local.eip_name })
+  tags = local.eip_tags
+}
 
-  shield_name = join("-", [var.project, var.application, var.environment, var.region, "shield-natg"])
+resource "aws_shield_protection" "shield_protection" {
+  count        = var.shield_protection_enabled ? 1 : 0
+  resource_arn = aws_eip.public_ip.arn
+  name         = local.eip_shield_protection_name
+
+  tags = var.default_tags
 }

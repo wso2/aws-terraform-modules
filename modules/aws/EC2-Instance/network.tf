@@ -61,3 +61,11 @@ resource "aws_eip" "eip" {
   associate_with_private_ip = var.ip_type == "Static" ? var.private_ip : null
   tags                      = local.ip_tags
 }
+
+resource "aws_shield_protection" "shield_protection" {
+  count        = var.enable_shield_protection == true && var.ip_address_allocation_method == "Static" && var.ip_type == "Public" ? 1 : 0
+  name         = local.shield_protection_name
+  resource_arn = aws_eip.eip.id
+
+  tags = var.tags
+}

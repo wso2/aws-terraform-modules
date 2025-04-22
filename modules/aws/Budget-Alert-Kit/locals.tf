@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2023, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+# Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
 #
 # This software is the property of WSO2 LLC. and its suppliers, if any.
 # Dissemination of any information or reproduction of any material contained
@@ -10,11 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 locals {
-  natg_name = join("-", [var.project, var.application, var.environment, var.region, "natg"])
-  natg_tags = merge(var.tags, { Name : local.natg_name })
-
-  eip_name = join("-", [var.project, var.application, var.environment, var.region, "eip-natg"])
-  eip_tags = merge(var.tags, { Name : local.eip_name })
-
-  shield_name = join("-", [var.project, var.application, var.environment, var.region, "shield-natg"])
+  ec2_limit        = var.cost * (var.ec2_percentage / 100)
+  logs_limit       = var.cost * (var.logs_percentage / 100)
+  networking_limit = var.cost * (var.networking_percentage / 100)
 }

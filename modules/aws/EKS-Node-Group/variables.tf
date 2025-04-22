@@ -103,3 +103,7 @@ variable "enable_ssm_access" {
   description = "Flag to enable SSM access"
   default     = false
 }
+variable "user_data" {
+  type        = string
+  description = "Custom userdata script for EKS Nodepool"
+}

@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: Security Scan
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     permissions:
       contents: read
@@ -24,5 +24,6 @@ jobs:
         with:
           scan-type: 'config'
           hide-progress: false
+          format: 'sarif'
           exit-code: '1'
           ignore-unfixed: true

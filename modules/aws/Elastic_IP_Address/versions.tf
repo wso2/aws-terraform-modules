@@ -9,12 +9,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-  natg_name = join("-", [var.project, var.application, var.environment, var.region, "natg"])
-  natg_tags = merge(var.tags, { Name : local.natg_name })
-
-  eip_name = join("-", [var.project, var.application, var.environment, var.region, "eip-natg"])
-  eip_tags = merge(var.tags, { Name : local.eip_name })
-
-  shield_name = join("-", [var.project, var.application, var.environment, var.region, "shield-natg"])
+terraform {
+  required_version = ">= 1.3.8"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
 }

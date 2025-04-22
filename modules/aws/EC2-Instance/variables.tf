@@ -133,3 +133,8 @@ variable "user_data" {
   description = "User data to be passed to the EC2 instance"
   default     = null
 }
+variable "enable_shield_protection" {
+  type        = bool
+  description = "Flag to enable shield protection"
+  default     = false
+}
