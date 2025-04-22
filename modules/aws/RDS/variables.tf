@@ -144,26 +144,6 @@ variable "tags" {
   default     = {}
 }
 
-variable "project" {
-  description = "Name of the project"
-  type        = string
-}
-
-variable "environment" {
-  description = "Name of the environment"
-  type        = string
-}
-
-variable "region" {
-  description = "Code of the region"
-  type        = string
-}
-
-variable "application" {
-  description = "Purpose of the EKS Cluster"
-  type        = string
-}
-
 variable "vpc_security_group_ids" {
   description = "List of security group ids"
   type        = list(string)
