@@ -263,7 +263,7 @@ variable "kms_key_id" {
 }
 
 variable "skip_final_snapshot" {
-  type        = bool
   description = "Flag to skip final snapshot"
+  type        = bool
   default     = false
 }
