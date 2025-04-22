@@ -147,5 +147,4 @@ variable "log_include_cookies" {
 variable "log_prefix" {
   description = "An optional string that you want CloudFront to prefix to the access log filenames for this distribution"
   type        = string
-  default     = null
 }
