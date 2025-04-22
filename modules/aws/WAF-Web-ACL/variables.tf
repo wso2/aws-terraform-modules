@@ -36,19 +36,19 @@ variable "sampled_requests_enabled" {
   description = "Whether AWS WAF should store a sampling of the web requests that match the rules"
 }
 variable "default_action" {
-  type = map(object({
+  type = object({
     type = string
-    insert_header = optional(map(object({
+    insert_header = optional(object({
       name  = string
       value = string
-    })))
+    }))
     custom_response_body_key = optional(string)
-    response_code            = optional(string)
-    response_header = optional(map(object({
+    response_code            = optional(number)
+    response_header = optional(object({
       name  = string
       value = string
-    })))
-  }))
+    }))
+  })
   description = "The action that you want AWS WAF to take when a request doesn't match the criteria specified in any of the rules that are associated with the web ACL"
 }
 variable "custom_response_body" {
@@ -58,7 +58,7 @@ variable "custom_response_body" {
     key          = string
   }))
   description = "The custom response to send (for example, custom page) when a request is blocked"
-  default     = null
+  default     = {}
 }
 variable "rules" {
   type = map(object({
@@ -66,26 +66,27 @@ variable "rules" {
     priority                   = number
     cloudwatch_metrics_enabled = bool
     cloudwatch_metric_name     = string
-    sampled_requests_enabled   = string
-    action = map(object({
+    sampled_requests_enabled   = bool
+    action = object({
       type = string
-      insert_header = optional(map(object({
+      insert_header = optional(object({
         name  = string
         value = string
-      })))
+      }))
       custom_response_body_key = optional(string)
-      response_code            = optional(string)
-      response_header = optional(map(object({
+      response_code            = optional(number)
+      response_header = optional(object({
         name  = string
         value = string
-      })))
-    }))
-    override_action = optional(map(object({
+      }))
+    })
+    override_action = optional(object({
       type = string
-    })))
+    }))
   }))
-
+  description = "The rules to associate with the web ACL"
 }
+
 variable "tags" {
   type        = map(string)
   description = "A map of tags to assign to the resource"

@@ -27,7 +27,7 @@ resource "aws_wafv2_web_acl" "web_acl" {
       for_each = var.default_action.type == "allow" ? [1] : []
       content {
         dynamic "custom_request_handling" {
-          for_each = var.default_action.insert_header == null ? [1] : []
+          for_each = var.default_action.insert_header != null ? [1] : []
           content {
             insert_header {
               name  = var.default_action.insert_header.name
@@ -41,7 +41,7 @@ resource "aws_wafv2_web_acl" "web_acl" {
       for_each = var.default_action.type == "block" ? [1] : []
       content {
         dynamic "custom_response" {
-          for_each = var.default_action.response_header == null ? [1] : []
+          for_each = var.default_action.response_header != null ? [1] : []
           content {
             custom_response_body_key = var.default_action.custom_response_body_key
             response_code            = var.default_action.response_code
@@ -56,12 +56,12 @@ resource "aws_wafv2_web_acl" "web_acl" {
   }
 
   dynamic "custom_response_body" {
-    for_each = var.custom_response_body != null ? var.custom_response_body : {}
+    for_each = var.custom_response_body != null ? tomap(var.custom_response_body) : {}
 
     content {
-      content      = var.custom_response_body.content
-      content_type = var.custom_response_body.content_type
-      key          = var.custom_response_body.key
+      content      = custom_response_body.value.content
+      content_type = custom_response_body.value.content_type
+      key          = custom_response_body.value.key
     }
   }
 
@@ -109,8 +109,8 @@ resource "aws_wafv2_web_acl" "web_acl" {
           for_each = rule.value.override_action.type == "count" ? [1] : []
           content {}
         }
-        dynamic "null" {
-          for_each = rule.value.override_action.type == "null" ? [1] : []
+        dynamic "none" {
+          for_each = rule.value.override_action.type == "none" ? [1] : []
           content {}
         }
       }
