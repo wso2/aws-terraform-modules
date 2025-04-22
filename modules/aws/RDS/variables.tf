@@ -41,6 +41,12 @@ variable "performance_insights_enabled" {
   default     = true
 }
 
+variable "performance_insights_kms_key_id" {
+  description = "The ARN for the KMS key to encrypt Performance Insights data."
+  type        = string
+  default     = null
+}
+
 variable "master_username" {
   description = "Master username"
   type        = string

@@ -25,9 +25,10 @@ resource "aws_db_instance" "rds_instance" {
   network_type      = var.network_type
   port              = var.database_port
 
-  backup_retention_period      = var.backup_retention_period
-  backup_window                = var.backup_window
-  performance_insights_enabled = var.performance_insights_enabled
+  backup_retention_period         = var.backup_retention_period
+  backup_window                   = var.backup_window
+  performance_insights_enabled    = var.performance_insights_enabled
+  performance_insights_kms_key_id = var.performance_insights_kms_key_id
 
   db_name                     = var.database_name
   username                    = var.master_username
