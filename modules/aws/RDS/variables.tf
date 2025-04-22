@@ -32,7 +32,13 @@ variable "availability_zone" {
 variable "backup_retention_period" {
   description = "Backup retention period"
   type        = number
-  default     = 0
+  default     = 7
+}
+
+variable "performance_insights_enabled" {
+  description = "Specifies whether Performance Insights are enabled."
+  type        = bool
+  default     = false
 }
 
 variable "master_username" {
@@ -55,7 +61,7 @@ variable "database_name" {
 variable "deletion_protection" {
   description = "Deletion protection"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "db_subnet_group_name" {
