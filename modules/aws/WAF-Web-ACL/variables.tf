@@ -1,41 +1,57 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2023, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+# Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
 #
-# This software is the property of WSO2 LLC. and its suppliers, if any.
-# Dissemination of any information or reproduction of any material contained
-# herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
-# You may not alter or remove any copyright or other notice from copies of this content.
+# WSO2 LLC. licenses this file to you under the Apache License,
+# Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
 #
 # --------------------------------------------------------------------------------------
 
 variable "name" {
-  type        = string
   description = "Name of the WAF ACL"
+  type        = string
 }
+
 variable "scope" {
-  type        = string
   description = "The scope of the WAF ACL. Valid values are REGIONAL or CLOUDFRONT"
-}
-variable "description" {
   type        = string
-  description = "The description of the WAF ACL"
 }
+
+variable "description" {
+  description = "The description of the WAF ACL"
+  type        = string
+}
+
 variable "cloudwatch_metrics_enabled" {
-  type        = bool
   description = "Whether the associated resource sends metrics to CloudWatch"
+  type        = bool
   default     = true
 }
+
 variable "cloudwatch_metric_name" {
-  type        = string
   description = "The name of the CloudWatch metric"
+  type        = string
   default     = "WAFACL"
 }
+
 variable "sampled_requests_enabled" {
-  type        = string
   description = "Whether AWS WAF should store a sampling of the web requests that match the rules"
+  type        = string
 }
+
 variable "default_action" {
+  description = "The action that you want AWS WAF to take when a request doesn't match the criteria specified in any of the rules that are associated with the web ACL"
   type = object({
     type = string
     insert_header = optional(object({
@@ -49,18 +65,20 @@ variable "default_action" {
       value = string
     }))
   })
-  description = "The action that you want AWS WAF to take when a request doesn't match the criteria specified in any of the rules that are associated with the web ACL"
 }
+
 variable "custom_response_body" {
+  description = "The custom response to send (for example, custom page) when a request is blocked"
   type = map(object({
     content_type = string
     content      = string
     key          = string
   }))
-  description = "The custom response to send (for example, custom page) when a request is blocked"
-  default     = {}
+  default = {}
 }
+
 variable "rules" {
+  description = "The rules to associate with the web ACL"
   type = map(object({
     name                       = string
     priority                   = number
@@ -84,11 +102,10 @@ variable "rules" {
       type = string
     }))
   }))
-  description = "The rules to associate with the web ACL"
 }
 
 variable "tags" {
-  type        = map(string)
   description = "A map of tags to assign to the resource"
+  type        = map(string)
   default     = {}
 }

@@ -35,6 +35,15 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   is_ipv6_enabled = var.is_ipv6_enabled
   comment         = var.comment
 
+  dynamic "logging_config" {
+    for_each = var.log_bucket_name != null ? [1] : []
+    content {
+      bucket          = var.log_bucket_name
+      include_cookies = var.log_include_cookies
+      prefix          = var.log_prefix
+    }
+  }
+
   default_cache_behavior {
     allowed_methods  = var.allowed_methods
     cached_methods   = var.cached_methods

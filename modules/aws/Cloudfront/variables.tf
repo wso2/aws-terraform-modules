@@ -74,7 +74,7 @@ variable "cached_methods" {
 variable "viewer_protocol_policy" {
   description = "Viewer protocol policy for the default cache behavior"
   type        = string
-  default     = "allow-all"
+  default     = "redirect-to-https"
 }
 
 variable "min_ttl" {
@@ -131,4 +131,21 @@ variable "ordered_cache_behaviors" {
     origin_request_policy_id = string
   }))
   default = []
+}
+
+variable "log_bucket_name" {
+  description = "The S3 bucket name for CloudFront access logs (e.g., mybucket.s3.amazonaws.com)"
+  type        = string
+}
+
+variable "log_include_cookies" {
+  description = "Specifies whether you want CloudFront to include cookies in access logs"
+  type        = bool
+  default     = false
+}
+
+variable "log_prefix" {
+  description = "An optional string that you want CloudFront to prefix to the access log filenames for this distribution"
+  type        = string
+  default     = null
 }
