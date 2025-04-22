@@ -10,14 +10,11 @@
 # --------------------------------------------------------------------------------------
 
 output "ecr_id" {
-  value      = aws_ecr_repository.ecr_repository.id
-  depends_on = [aws_ecr_repository.ecr_repository]
+  value = aws_ecr_repository.ecr_repository.id
 }
 output "ecr_arn" {
-  value      = aws_ecr_repository.ecr_repository.arn
-  depends_on = [aws_ecr_repository.ecr_repository]
+  value = aws_ecr_repository.ecr_repository.arn
 }
 output "ecr_repository_url" {
-  value      = aws_ecr_repository.ecr_repository.repository_url
-  depends_on = [aws_ecr_repository.ecr_repository]
+  value = aws_ecr_repository.ecr_repository.repository_url
 }

@@ -35,8 +35,20 @@ variable "subnet_id" {
   description = "ID of the Subnet to host the NAT Gateway"
   default     = null
 }
-variable "enable_shield_protection" {
-  type        = bool
-  description = "Enable AWS Shield Protection for the NAT Gateway"
-  default     = false
+
+variable "allocation_id" {
+  type        = string
+  description = "The Allocation ID of the Elastic IP address for the NAT Gateway. Required for connectivity_type of public."
+}
+
+variable "connectivity_type" {
+  type        = string
+  default     = "public"
+  description = "Connectivity type for the NAT Gateway. Valid values are private and public. Defaults to public."
+}
+
+variable "secondary_private_ip_address_count" {
+  type        = number
+  default     = null
+  description = "The number of secondary private IPv4 addresses you want to assign to the Private NAT Gateway"
 }

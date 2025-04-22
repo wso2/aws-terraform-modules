@@ -1,14 +1,14 @@
 name: Trivy Scan
 on:
   push:
-    branches-ignore: [master, main]
+    branches-ignore: [master, main, UnitOfWork]
   pull_request:
-    branches: [master, main]
+    branches: [master, main, UnitOfWork]
 
 jobs:
   build:
     name: Security Scan
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     permissions:
       contents: read

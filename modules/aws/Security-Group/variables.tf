@@ -9,17 +9,6 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "rules" {
-  type = list(object({
-    direction       = string
-    to_port         = number
-    from_port       = number
-    protocol        = string
-    cidr_blocks     = list(string)
-    security_groups = list(string)
-  }))
-  description = "List of rules to be added to the security group"
-}
 variable "project" {
   type        = string
   description = "Name of the project"

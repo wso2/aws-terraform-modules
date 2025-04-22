@@ -10,6 +10,5 @@
 # --------------------------------------------------------------------------------------
 
 output "nat_gateway_id" {
-  value      = aws_nat_gateway.nat_gateway.id
-  depends_on = [aws_nat_gateway.nat_gateway]
+  value = aws_nat_gateway.nat_gateway.id
 }

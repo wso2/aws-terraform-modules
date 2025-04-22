@@ -60,13 +60,3 @@ variable "generate_name" {
   description = "Whether to generate name for the image repository"
   default     = false
 }
-variable "external_admin_account_ids" {
-  type        = list(string)
-  description = "List of external admin account IDs"
-  default     = []
-}
-variable "external_pull_only_account_ids" {
-  type        = list(string)
-  description = "List of external pull only account IDs"
-  default     = []
-}

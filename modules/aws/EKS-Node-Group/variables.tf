@@ -1,15 +1,15 @@
-# -------------------------------------------------------------------------------------
-#
-# Copyright (c) 2023, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
-#
-# This software is the property of WSO2 LLC. and its suppliers, if any.
-# Dissemination of any information or reproduction of any material contained
-# herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
-# You may not alter or remove any copyright or other notice from copies of this content.
-#
-# --------------------------------------------------------------------------------------
+# # -------------------------------------------------------------------------------------
+# #
+# # Copyright (c) 2023, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+# #
+# # This software is the property of WSO2 LLC. and its suppliers, if any.
+# # Dissemination of any information or reproduction of any material contained
+# # herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
+# # You may not alter or remove any copyright or other notice from copies of this content.
+# #
+# # --------------------------------------------------------------------------------------
 
-variable "node_iam_role_arn" {
+variable "node_role_arn" {
   type        = string
   description = "IAM role ARN to be associated with the node group"
   default     = null
@@ -63,26 +63,6 @@ variable "instance_types" {
   type        = list(string)
   description = "Instance types to be associated with the VM"
 }
-variable "node_disk_size" {
-  type        = number
-  description = "Disk size of the worker nodes"
-  default     = 20
-}
-variable "kms_key_id" {
-  type        = string
-  description = "KMS key ID to be used for encrypting EBS volumes"
-  default     = null
-}
-variable "enable_encryption_at_rest" {
-  type        = bool
-  description = "Enable encryption at rest for EBS volumes"
-  default     = true
-}
-variable "imds_enabled" {
-  type        = string
-  description = "Flag to enable IMDS"
-  default     = "required"
-}
 variable "labels" {
   type        = map(string)
   description = "Labels to be associated with the node group"
@@ -93,17 +73,10 @@ variable "ami_type" {
   description = "AMI type to be used for the node group. Valid values, AL2_x86_64 | AL2_x86_64_GPU | AL2_ARM_64 | CUSTOM | BOTTLEROCKET_ARM_64 | BOTTLEROCKET_x86_64 | BOTTLEROCKET_ARM_64_NVIDIA | BOTTLEROCKET_x86_64_NVIDIA | WINDOWS_CORE_2019_x86_64 | WINDOWS_FULL_2019_x86_64 | WINDOWS_CORE_2022_x86_64 | WINDOWS_FULL_2022_x86_64"
   default     = "AL2_x86_64"
 }
-variable "custom_ami_id" {
-  type        = string
-  description = "Custom AMI ID to be used for the node group"
-  default     = null
+variable "launch_template_id" {
+  type = string
 }
-variable "enable_ssm_access" {
-  type        = bool
-  description = "Flag to enable SSM access"
-  default     = false
-}
-variable "user_data" {
-  type        = string
-  description = "Custom userdata script for EKS Nodepool"
+variable "launch_template_version" {
+  type    = string
+  default = "$Latest"
 }

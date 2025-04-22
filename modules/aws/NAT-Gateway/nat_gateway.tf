@@ -10,24 +10,9 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_nat_gateway" "nat_gateway" {
-  allocation_id = aws_eip.eip.id
-  subnet_id     = var.subnet_id
-
-  tags = local.natg_tags
-
-  depends_on = [
-    aws_eip.eip
-  ]
-}
-
-resource "aws_eip" "eip" {
-  tags = local.eip_tags
-}
-
-resource "aws_shield_protection" "shield_protection" {
-  count        = var.enable_shield_protection == true ? 1 : 0
-  name         = local.shield_name
-  resource_arn = aws_eip.eip.id
-
-  tags = var.tags
+  subnet_id                          = var.subnet_id
+  connectivity_type                  = var.connectivity_type
+  allocation_id                      = var.allocation_id
+  secondary_private_ip_address_count = var.secondary_private_ip_address_count
+  tags                               = local.tags
 }

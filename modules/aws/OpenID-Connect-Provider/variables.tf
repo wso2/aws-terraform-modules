@@ -12,6 +12,7 @@
 variable "thumbprint_list" {
   description = "List of thumbprints of the OIDC provider"
   type        = list(string)
+  default     = []
 }
 variable "tags" {
   description = "Tags to be added with all resources"
@@ -20,4 +21,9 @@ variable "tags" {
 variable "url" {
   description = "URL of the OIDC provider"
   type        = string
+}
+variable "client_id_list" {
+  type        = list(string)
+  description = "List of client IDs (audiences) that identify the application registered with the OpenID Connect provider."
+  default     = ["sts.amazonaws.com"]
 }

@@ -14,3 +14,9 @@ resource "aws_iam_role" "iam_role" {
   tags               = var.tags
   assume_role_policy = var.assume_role_policy
 }
+
+resource "aws_iam_role_policy_attachment" "policy-attachment" {
+  count      = length(var.policy_arns)
+  role       = aws_iam_role.iam_role.name
+  policy_arn = var.policy_arns[count.index]
+}

@@ -48,22 +48,6 @@ variable "service_ipv4_cidr" {
   type        = string
   description = "CIDR block for K8S Service"
 }
-variable "eks_vpc_id" {
-  type        = string
-  description = "ID of the VPC to create the subnets"
-}
-variable "subnet_details" {
-  type = list(object({
-    availability_zone = string
-    cidr_block        = string
-    custom_routes = list(object({
-      cidr_block = string
-      ep_type    = string
-      ep_id      = string
-    }))
-  }))
-  default = []
-}
 variable "secret_encryption_cmk" {
   type        = string
   description = "KMS Key ID for encrypting Kubernetes secrets"
@@ -78,36 +62,6 @@ variable "tags" {
   type        = map(string)
   description = "Tags to be associated with the EKS"
   default     = {}
-}
-variable "enable_ebs_csi_driver" {
-  type        = bool
-  description = "Enable EBS CSI Driver"
-  default     = false
-}
-variable "enable_efs_csi_driver" {
-  type        = bool
-  description = "Enable EFS CSI Driver"
-  default     = false
-}
-variable "enable_autoscaler" {
-  type        = bool
-  description = "Enable Cluster Autoscaler"
-  default     = false
-}
-variable "enable_cluster_loadbalancer" {
-  type        = bool
-  description = "Enable Cluster Load Balancer"
-  default     = false
-}
-variable "enable_fluent_bit" {
-  type        = bool
-  description = "Enable Fluent Bit"
-  default     = false
-}
-variable "enable_cloudwatch_agent" {
-  type        = bool
-  description = "Enable CloudWatch Agent"
-  default     = false
 }
 variable "cluster_iam_role_arn" {
   type        = string

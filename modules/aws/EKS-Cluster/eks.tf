@@ -19,7 +19,7 @@
 # trivy:ignore:AVD-AWS-0039
 resource "aws_eks_cluster" "eks_cluster" {
   name     = join("-", [var.project, var.application, var.environment, var.region, "eks"])
-  role_arn = aws_iam_role.iam_role[0].arn
+  role_arn = var.cluster_iam_role_arn
 
   version = var.kubernetes_version
 
@@ -27,7 +27,7 @@ resource "aws_eks_cluster" "eks_cluster" {
     endpoint_private_access = var.endpoint_private_access
     endpoint_public_access  = var.endpoint_public_access
     public_access_cidrs     = var.public_access_cidrs
-    subnet_ids              = length(var.cluster_subnet_ids) == 0 ? aws_subnet.eks_subnet[*].id : var.cluster_subnet_ids
+    subnet_ids              = var.cluster_subnet_ids
   }
 
   access_config {
@@ -50,12 +50,5 @@ resource "aws_eks_cluster" "eks_cluster" {
   }
 
   enabled_cluster_log_types = var.enabled_cluster_log_types
-
-  # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling.
-  # Otherwise, EKS will not be able to properly delete EKS managed EC2 infrastructure such as Security Groups.
-  depends_on = [
-    aws_iam_role_policy_attachment.amazon_eks_cluster_policy,
-    aws_iam_role_policy_attachment.amazon_eks_pc_resource_controller,
-  ]
-  tags = var.tags
+  tags                      = var.tags
 }
