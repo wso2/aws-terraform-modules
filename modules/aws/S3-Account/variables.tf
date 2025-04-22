@@ -1,57 +1,86 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+# Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
 #
-# This software is the property of WSO2 LLC. and its suppliers, if any.
-# Dissemination of any information or reproduction of any material contained
-# herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
-# You may not alter or remove any copyright or other notice from copies of this content.
+# WSO2 LLC. licenses this file to you under the Apache License,
+# Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
 #
 # --------------------------------------------------------------------------------------
 
 variable "project" {
-  type        = string
   description = "Name of the project"
+  type        = string
 }
+
 variable "environment" {
-  type        = string
   description = "Name of the environment"
+  type        = string
 }
+
 variable "region" {
-  type        = string
   description = "Code of the region"
-}
-variable "application" {
   type        = string
-  description = "Purpose of the EKS Cluster"
 }
+
+variable "application" {
+  description = "Purpose of the EKS Cluster"
+  type        = string
+}
+
 variable "tags" {
-  type        = map(string)
   description = "Tags for the resources"
+  type        = map(string)
   default     = {}
 }
+
 variable "block_public_acls" {
-  type        = bool
   description = "Block public access to the bucket"
-  default     = true
-}
-variable "restrict_public_buckets" {
   type        = bool
-  description = "Restrict public buckets"
   default     = true
 }
+
+variable "restrict_public_buckets" {
+  description = "Restrict public buckets"
+  type        = bool
+  default     = true
+}
+
 variable "server_side_encryption" {
+  description = "Server side encryption to be applied to the bucket"
   type = object({
     algorithm  = string
     kms_key_id = optional(string, null)
   })
-  description = "Server side encryption to be applied to the bucket"
   default = {
     algorithm = "AES256"
   }
 }
+
 variable "versioning_enabled" {
-  type        = bool
   description = "Enable versioning for the bucket"
+  type        = bool
   default     = true
+}
+
+variable "force_destroy" {
+  description = "Force destroy the bucket"
+  type        = bool
+  default     = false
+}
+
+variable "object_ownership" {
+  description = "Object ownership for the bucket"
+  type        = string
+  default     = "BucketOwnerPreferred"
 }

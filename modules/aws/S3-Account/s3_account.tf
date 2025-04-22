@@ -1,11 +1,20 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+# Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
 #
-# This software is the property of WSO2 LLC. and its suppliers, if any.
-# Dissemination of any information or reproduction of any material contained
-# herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
-# You may not alter or remove any copyright or other notice from copies of this content.
+# WSO2 LLC. licenses this file to you under the Apache License,
+# Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
 #
 # --------------------------------------------------------------------------------------
 
@@ -13,9 +22,9 @@
 # Reason: Logging not required as of now for S3 Buckets, if required it will be added as a separate resource
 # trivy:ignore:AVD-AWS-0089
 resource "aws_s3_bucket" "s3_bucket" {
-  bucket = join("-", [var.project, var.application, var.environment, var.region, "bucket"])
-
-  tags = var.tags
+  bucket        = join("-", [var.project, var.application, var.environment, var.region, "bucket"])
+  force_destroy = var.force_destroy
+  tags          = var.tags
 }
 
 # Ignore: AVD-AWS-0090 (https://avd.aquasec.com/misconfig/avd-aws-0090)
@@ -53,5 +62,13 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "s3_bucket_server_
       kms_master_key_id = var.server_side_encryption.kms_key_id
       sse_algorithm     = var.server_side_encryption.algorithm
     }
+  }
+}
+
+resource "aws_s3_bucket_ownership_controls" "s3_bucket_ownership_controls" {
+  bucket = aws_s3_bucket.s3_bucket.id
+
+  rule {
+    object_ownership = var.object_ownership
   }
 }
