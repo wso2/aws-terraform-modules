@@ -32,9 +32,6 @@ variable "availability_zone" {
 variable "backup_retention_period" {
   description = "Backup retention period"
   type        = number
-<<<<<<< HEAD
-  default     = 0
-=======
   default     = 7
 }
 
@@ -48,7 +45,6 @@ variable "performance_insights_kms_key_id" {
   description = "The ARN for the KMS key to encrypt Performance Insights data."
   type        = string
   default     = null
->>>>>>> upstream/main
 }
 
 variable "master_username" {
