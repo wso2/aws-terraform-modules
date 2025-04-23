@@ -18,9 +18,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-<<<<<<< HEAD
-  cluster_name = join("-", [var.project, var.application, var.environment, var.region, "rds"])
-=======
->>>>>>> upstream/main
+output "cloudfront_distribution_dns" {
+  description = "The domain name of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.cloudfront_distribution.domain_name
 }

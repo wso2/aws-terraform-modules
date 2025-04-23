@@ -18,9 +18,6 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-<<<<<<< HEAD
-  cluster_name = join("-", [var.project, var.application, var.environment, var.region, "rds"])
-=======
->>>>>>> upstream/main
+output "node_role_arn" {
+  value = aws_iam_role.iam_role[0].arn
 }

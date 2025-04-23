@@ -32,7 +32,23 @@ variable "availability_zone" {
 variable "backup_retention_period" {
   description = "Backup retention period"
   type        = number
+<<<<<<< HEAD
   default     = 0
+=======
+  default     = 7
+}
+
+variable "performance_insights_enabled" {
+  description = "Specifies whether Performance Insights are enabled."
+  type        = bool
+  default     = true
+}
+
+variable "performance_insights_kms_key_id" {
+  description = "The ARN for the KMS key to encrypt Performance Insights data."
+  type        = string
+  default     = null
+>>>>>>> upstream/main
 }
 
 variable "master_username" {
@@ -55,7 +71,11 @@ variable "database_name" {
 variable "deletion_protection" {
   description = "Deletion protection"
   type        = bool
+<<<<<<< HEAD
   default     = false
+=======
+  default     = true
+>>>>>>> upstream/main
 }
 
 variable "db_subnet_group_name" {
@@ -139,6 +159,7 @@ variable "publicly_accessible" {
 }
 
 variable "tags" {
+<<<<<<< HEAD
   type        = map(string)
   description = "Tags for string"
   default     = {}
@@ -172,11 +193,31 @@ variable "vpc_security_group_ids" {
 variable "storage_encrypted" {
   type        = bool
   description = "Flag to enable storage encryption"
+=======
+  description = "Tags for string"
+  type        = map(string)
+  default     = {}
+}
+
+variable "vpc_security_group_ids" {
+  description = "List of security group ids"
+  type        = list(string)
+}
+
+variable "storage_encrypted" {
+  description = "Flag to enable storage encryption"
+  type        = bool
+>>>>>>> upstream/main
   default     = true
 }
 
 variable "kms_key_id" {
+<<<<<<< HEAD
   type        = string
   description = "KMS key id"
+=======
+  description = "KMS key id"
+  type        = string
+>>>>>>> upstream/main
   default     = null
 }

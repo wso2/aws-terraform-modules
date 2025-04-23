@@ -1,11 +1,20 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2023, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+# Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
 #
-# This software is the property of WSO2 LLC. and its suppliers, if any.
-# Dissemination of any information or reproduction of any material contained
-# herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
-# You may not alter or remove any copyright or other notice from copies of this content.
+# WSO2 LLC. licenses this file to you under the Apache License,
+# Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
 #
 # --------------------------------------------------------------------------------------
 
@@ -207,55 +216,65 @@ variable "cluster_instances" {
     performance_insights_enabled = optional(bool, false)
     preferred_backup_window      = optional(string)
     preferred_maintenance_window = optional(string)
-
   }))
 }
 
 variable "tags" {
-  type        = map(string)
   description = "Tags for string"
+  type        = map(string)
   default     = {}
 }
 
 variable "project" {
-  type        = string
   description = "Name of the project"
+  type        = string
 }
 
 variable "environment" {
-  type        = string
   description = "Name of the environment"
+  type        = string
 }
 
 variable "region" {
-  type        = string
   description = "Code of the region"
+<<<<<<< HEAD
 }
 
 variable "application" {
+=======
+>>>>>>> upstream/main
   type        = string
+}
+
+variable "application" {
   description = "Purpose of the EKS Cluster"
+  type        = string
 }
 
 variable "vpc_security_group_ids" {
-  type        = list(string)
   description = "List of security group ids"
+  type        = list(string)
 }
 
 variable "storage_encrypted" {
-  type        = bool
   description = "Flag to enable storage encryption"
+  type        = bool
   default     = true
 }
 
 variable "kms_key_id" {
-  type        = string
   description = "KMS key id"
+  type        = string
   default     = null
 }
 
 variable "skip_final_snapshot" {
+<<<<<<< HEAD
   type        = bool
   description = "Flag to skip final snapshot"
+=======
+  description = "Flag to skip final snapshot"
+  type        = bool
+>>>>>>> upstream/main
   default     = false
 }

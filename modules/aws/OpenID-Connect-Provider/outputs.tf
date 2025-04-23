@@ -18,9 +18,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-<<<<<<< HEAD
-  cluster_name = join("-", [var.project, var.application, var.environment, var.region, "rds"])
-=======
->>>>>>> upstream/main
+output "oidc_provider_arn" {
+  value      = aws_iam_openid_connect_provider.eks_ca_oidc_provider.arn
+  depends_on = [aws_iam_openid_connect_provider.eks_ca_oidc_provider]
 }

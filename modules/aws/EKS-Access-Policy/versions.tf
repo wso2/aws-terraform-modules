@@ -18,9 +18,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-<<<<<<< HEAD
-  cluster_name = join("-", [var.project, var.application, var.environment, var.region, "rds"])
-=======
->>>>>>> upstream/main
+terraform {
+  required_version = ">= 1.3.8"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
 }
