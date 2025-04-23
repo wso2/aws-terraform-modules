@@ -237,12 +237,6 @@ variable "environment" {
 
 variable "region" {
   description = "Code of the region"
-<<<<<<< HEAD
-}
-
-variable "application" {
-=======
->>>>>>> upstream/main
   type        = string
 }
 

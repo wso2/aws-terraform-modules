@@ -19,8 +19,4 @@
 # --------------------------------------------------------------------------------------
 
 locals {
-<<<<<<< HEAD
-  cluster_name = join("-", [var.project, var.application, var.environment, var.region, "rds"])
-=======
->>>>>>> upstream/main
 }
