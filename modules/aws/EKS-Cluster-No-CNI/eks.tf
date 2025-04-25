@@ -21,7 +21,7 @@ resource "aws_eks_cluster" "eks_cluster" {
   name     = join("-", [var.project, var.application, var.environment, var.region, "eks"])
   role_arn = aws_iam_role.iam_role[0].arn
 
-  version = var.kubernetes_version
+  version                       = var.kubernetes_version
   bootstrap_self_managed_addons = false
 
   vpc_config {
