@@ -57,12 +57,6 @@ resource "aws_iam_openid_connect_provider" "eks_ca_oidc_provider" {
   thumbprint_list = [data.tls_certificate.tls.certificates[0].sha1_fingerprint]
   url             = data.aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
 
-  lifecycle {
-    ignore_changes = [
-      url
-    ]
-  }
-
   tags = var.tags
 
   depends_on = [
