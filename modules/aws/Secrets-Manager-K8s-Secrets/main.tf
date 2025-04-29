@@ -90,8 +90,8 @@ resource "local_file" "secrets_summary_yaml" {
           name    = aws_secretsmanager_secret.this[secret_name].name
           version = aws_secretsmanager_secret_version.this[secret_name].version_id
           serviceAccount = {
-            name        = binding.serviceAccount
-            namespace   = binding.namespace
+            name      = binding.serviceAccount
+            namespace = binding.namespace
             annotations = {
               "eks.amazonaws.com/role-arn" = aws_iam_role.this["${binding.namespace}/${binding.serviceAccount}"].arn
             }
