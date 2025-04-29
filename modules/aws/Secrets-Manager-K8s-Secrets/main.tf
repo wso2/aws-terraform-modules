@@ -51,7 +51,7 @@ data "aws_iam_policy_document" "assume_role" {
 resource "aws_iam_role" "iam_role" {
   for_each = data.aws_iam_policy_document.assume_role
 
-  name               = replace("${each.key}-secret-reader", "/", "-")
+  name_prefix        = replace("${each.key}", "/", "-")
   assume_role_policy = each.value.json
 }
 
@@ -60,7 +60,7 @@ resource "aws_iam_policy" "access" {
     for binding in var.secret_access_bindings : "${binding.namespace}/${binding.serviceAccount}" => binding
   }
 
-  name = replace("${each.key}-secret-access", "/", "-")
+  name_prefix = replace("${each.key}-secret-access", "/", "-")
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
