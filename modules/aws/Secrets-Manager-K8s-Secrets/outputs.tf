@@ -12,7 +12,7 @@
 output "service_account_iam_roles" {
   value = {
     for binding in var.secret_access_bindings :
-    "${binding.namespace}/${binding.serviceAccount}" => aws_iam_role.this["${binding.namespace}/${binding.serviceAccount}"].arn
+    "${binding.namespace}/${binding.serviceAccount}" => aws_iam_role.iam_role["${binding.namespace}/${binding.serviceAccount}"].arn
   }
   description = "IAM role ARNs mapped by namespace/service account"
 }

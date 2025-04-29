@@ -9,7 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_secretsmanager_secret" "this" {
+resource "aws_secretsmanager_secret" "secret" {
   for_each = {
     for s in var.secrets : s.name => s
   }
@@ -18,12 +18,12 @@ resource "aws_secretsmanager_secret" "this" {
   description = lookup(each.value, "description", null)
 }
 
-resource "aws_secretsmanager_secret_version" "this" {
+resource "aws_secretsmanager_secret_version" "secret_version" {
   for_each = {
     for s in var.secrets : s.name => s
   }
 
-  secret_id     = aws_secretsmanager_secret.this[each.key].id
+  secret_id     = aws_secretsmanager_secret.secret[each.key].id
   secret_string = jsonencode({ value = each.value.value })
 }
 
@@ -48,7 +48,7 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
-resource "aws_iam_role" "this" {
+resource "aws_iam_role" "iam_role" {
   for_each = data.aws_iam_policy_document.assume_role
 
   name               = replace("${each.key}-secret-reader", "/", "-")
@@ -67,16 +67,16 @@ resource "aws_iam_policy" "access" {
       for secret_name in each.value.secrets : {
         Effect   = "Allow"
         Action   = ["secretsmanager:GetSecretValue"]
-        Resource = aws_secretsmanager_secret.this[secret_name].arn
+        Resource = aws_secretsmanager_secret.secret[secret_name].arn
       }
     ]
   })
 }
 
-resource "aws_iam_role_policy_attachment" "attach" {
+resource "aws_iam_role_policy_attachment" "policy_attachment" {
   for_each = aws_iam_policy.access
 
-  role       = aws_iam_role.this[each.key].name
+  role       = aws_iam_role.iam_role[each.key].name
   policy_arn = each.value.arn
 }
 
@@ -87,13 +87,13 @@ resource "local_file" "secrets_summary_yaml" {
     secrets = flatten([
       for binding in var.secret_access_bindings : [
         for secret_name in binding.secrets : {
-          name    = aws_secretsmanager_secret.this[secret_name].name
-          version = aws_secretsmanager_secret_version.this[secret_name].version_id
+          name    = aws_secretsmanager_secret.secret[secret_name].name
+          version = aws_secretsmanager_secret_version.secret_version[secret_name].version_id
           serviceAccount = {
             name      = binding.serviceAccount
             namespace = binding.namespace
             annotations = {
-              "eks.amazonaws.com/role-arn" = aws_iam_role.this["${binding.namespace}/${binding.serviceAccount}"].arn
+              "eks.amazonaws.com/role-arn" = aws_iam_role.iam_role["${binding.namespace}/${binding.serviceAccount}"].arn
             }
           }
         }
