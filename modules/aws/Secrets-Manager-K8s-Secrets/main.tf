@@ -87,7 +87,7 @@ resource "local_file" "secrets_summary_yaml" {
     secrets = flatten([
       for binding in var.secret_access_bindings : [
         for secret_name in binding.secrets : {
-          name    = aws_secretsmanager_secret.secret[secret_name].name
+          name    = aws_secretsmanager_secret.secret[secret_name].arn
           version = aws_secretsmanager_secret_version.secret_version[secret_name].version_id
           serviceAccount = {
             name      = binding.serviceAccount
