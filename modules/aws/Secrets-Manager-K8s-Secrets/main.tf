@@ -51,7 +51,7 @@ data "aws_iam_policy_document" "assume_role" {
 resource "aws_iam_role" "iam_role" {
   for_each = data.aws_iam_policy_document.assume_role
 
-  name               = "${var.eks_cluster_name}-${substr(replace(each.key, "/", "-"), 0, 20)}-${substr(md5(each.key), 0, 6)}"
+  name               = "${local.shortened_cluster_name}-${substr(replace(each.key, "/", "-"), 0, 40)}"
   assume_role_policy = each.value.json
 }
 
@@ -61,7 +61,7 @@ resource "aws_iam_policy" "access" {
     if length(binding.secrets) != 0
   }
 
-  name = "${var.eks_cluster_name}-${substr(replace(each.key, "/", "-"), 0, 20)}-${substr(md5(each.key), 0, 6)}-secret-access"
+  name = "${local.shortened_cluster_name}-${substr(replace(each.key, "/", "-"), 0, 40)}"
 
   policy = jsonencode({
     Version = "2012-10-17",

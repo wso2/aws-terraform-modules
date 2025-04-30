@@ -9,6 +9,18 @@
 #
 # --------------------------------------------------------------------------------------
 
+variable "shortened_region_name" {
+  type = string
+}
+variable "shortened_application_name" {
+  type = string
+}
+variable "shortened_environment_name" {
+  type = string
+}
+variable "shortened_project_name" {
+  type = string
+}
 variable "secrets" {
   type = list(object({
     name        = string
@@ -24,11 +36,6 @@ variable "secret_access_bindings" {
     secrets        = list(string)
   }))
 }
-
-variable "eks_cluster_name" {
-  type = string
-}
-
 variable "aws_account_id" {
   type = string
 }
