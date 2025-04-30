@@ -9,10 +9,17 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "service_account_iam_roles" {
+output "service_account_iam_role_arns" {
   value = {
     for binding in var.secret_access_bindings :
     "${binding.namespace}/${binding.serviceAccount}" => aws_iam_role.iam_role["${binding.namespace}/${binding.serviceAccount}"].arn
   }
   description = "IAM role ARNs mapped by namespace/service account"
+}
+output "service_account_iam_role_names" {
+  value = {
+    for binding in var.secret_access_bindings :
+    "${binding.namespace}/${binding.serviceAccount}" => aws_iam_role.iam_role["${binding.namespace}/${binding.serviceAccount}"].name
+  }
+  description = "IAM role Names mapped by namespace/service account"
 }

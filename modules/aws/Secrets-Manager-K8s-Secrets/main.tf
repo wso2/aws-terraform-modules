@@ -51,16 +51,17 @@ data "aws_iam_policy_document" "assume_role" {
 resource "aws_iam_role" "iam_role" {
   for_each = data.aws_iam_policy_document.assume_role
 
-  name               = "${substr(replace(each.key, "/", "-"), 0, 53)}-${substr(md5(each.key), 0, 6)}"
+  name               = "${var.eks_cluster_name}-${substr(replace(each.key, "/", "-"), 0, 20)}-${substr(md5(each.key), 0, 6)}"
   assume_role_policy = each.value.json
 }
 
 resource "aws_iam_policy" "access" {
   for_each = {
     for binding in var.secret_access_bindings : "${binding.namespace}/${binding.serviceAccount}" => binding
+    if length(binding.secrets) != 0
   }
 
-  name = "${substr(replace(each.key, "/", "-"), 0, 40)}-${substr(md5(each.key), 0, 6)}-secret-access"
+  name = "${var.eks_cluster_name}-${substr(replace(each.key, "/", "-"), 0, 20)}-${substr(md5(each.key), 0, 6)}-secret-access"
 
   policy = jsonencode({
     Version = "2012-10-17",
