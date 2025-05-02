@@ -24,7 +24,7 @@ resource "aws_secretsmanager_secret_version" "secret_version" {
   }
 
   secret_id     = aws_secretsmanager_secret.secret[each.key].id
-  secret_string = jsonencode({ value = each.value.value })
+  secret_string = each.value.value
 }
 
 data "aws_iam_policy_document" "assume_role" {
