@@ -106,4 +106,5 @@ variable "enable_ssm_access" {
 variable "user_data" {
   type        = string
   description = "Custom userdata script for EKS Nodepool"
+  default     = null
 }
