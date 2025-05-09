@@ -167,6 +167,12 @@ variable "storage_encrypted" {
   default     = true
 }
 
+variable "engine_lifecycle_support" {
+  description = "The life cycle type for this DB instance."
+  type        = string
+  default     = "open-source-rds-extended-support"
+}
+
 variable "kms_key_id" {
   description = "KMS key id"
   type        = string

@@ -50,6 +50,9 @@ resource "aws_db_instance" "rds_instance" {
   vpc_security_group_ids = var.vpc_security_group_ids
 
   skip_final_snapshot = var.skip_final_snapshot
+
+  engine_lifecycle_support = var.engine_lifecycle_support
+
   deletion_protection = var.deletion_protection
 
   storage_encrypted = var.storage_encrypted
