@@ -198,6 +198,12 @@ variable "cluster_common_performance_insights_enabled" {
   default     = false
 }
 
+variable "engine_lifecycle_support" {
+  description = "The life cycle type for this DB instance."
+  type        = string
+  default     = "open-source-rds-extended-support"
+}
+
 variable "publicly_accessible" {
   description = "Flag to make the DB publicly accessible"
   type        = bool
