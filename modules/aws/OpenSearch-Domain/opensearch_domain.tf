@@ -14,6 +14,10 @@ resource "aws_iam_service_linked_role" "vpc_enabled_service_linked_role" {
   aws_service_name = "opensearchservice.amazonaws.com"
 }
 
+# Ignore: AVD-AWS-0042 (https://avd.aquasec.com/misconfig/aws/eks/avd-aws-0042/)
+# Reason: Domain logging should be enabled for Elastic Search domains
+# Therefore has not been enforced as a requirement
+# trivy:ignore:AVD-AWS-0042
 resource "aws_opensearch_domain" "opensearch_domain" {
   domain_name      = local.domain_name
   engine_version   = var.engine_version
