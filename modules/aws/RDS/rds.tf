@@ -18,6 +18,10 @@
 #
 # --------------------------------------------------------------------------------------
 
+#
+# Ignore: AVD-AWS-0133 (https://avd.aquasec.com/misconfig/aws/rds/avd-aws-0133/)
+# Reason: Performance insights is enabled via a flag.
+# trivy:ignore:AVD-AWS-0133
 resource "aws_db_instance" "rds_instance" {
   allow_major_version_upgrade = var.allow_major_version_upgrade
 
