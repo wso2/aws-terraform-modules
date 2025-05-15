@@ -9,6 +9,16 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-  shortened_cluster_name = "${var.shortened_project_name}-${var.shortened_region_name}-${var.shortened_environment_name}-${var.shortened_application_name}"
+terraform {
+  required_version = ">= 1.3.8"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    local = {
+      source  = "hashicorp/local"
+      version = ">= 2.5"
+    }
+  }
 }
