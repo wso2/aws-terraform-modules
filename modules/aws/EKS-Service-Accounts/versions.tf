@@ -9,7 +9,16 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_eks_addon" "coredns" {
-  cluster_name = aws_eks_cluster.eks_cluster.name
-  addon_name   = "coredns"
+terraform {
+  required_version = ">= 1.3.8"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    local = {
+      source  = "hashicorp/local"
+      version = ">= 2.5"
+    }
+  }
 }

@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+# Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
 #
 # This software is the property of WSO2 LLC. and its suppliers, if any.
 # Dissemination of any information or reproduction of any material contained
@@ -9,11 +9,28 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "key_arn" {
-  value      = aws_kms_key.kms_key.arn
-  depends_on = [aws_kms_key.kms_key]
+variable "shortened_region_name" {
+  type = string
 }
-output "key_id" {
-  value      = aws_kms_key.kms_key.id
-  depends_on = [aws_kms_key.kms_key]
+variable "shortened_application_name" {
+  type = string
 }
+variable "shortened_environment_name" {
+  type = string
+}
+variable "shortened_project_name" {
+  type = string
+}
+variable "aws_account_id" {
+  type = string
+}
+variable "oidc_provider_url" {
+  type = string
+}
+variable "service_accounts" {
+  type = list(string)
+}
+variable "namespace" {
+  type = string
+}
+

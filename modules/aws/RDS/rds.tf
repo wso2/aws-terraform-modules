@@ -30,10 +30,11 @@ resource "aws_db_instance" "rds_instance" {
   performance_insights_enabled    = var.performance_insights_enabled
   performance_insights_kms_key_id = var.performance_insights_kms_key_id
 
-  db_name                     = var.database_name
+  db_name                     = var.engine != "custom-sqlserver-se" ? local.cluster_name : null
   username                    = var.master_username
   password                    = var.master_password
   manage_master_user_password = var.master_password == null ? true : null
+  custom_iam_instance_profile = var.custom_iam_instance_profile
 
   license_model     = var.license_model
   allocated_storage = var.allocated_storage
