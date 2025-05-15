@@ -66,4 +66,6 @@ resource "aws_db_instance" "rds_instance" {
   publicly_accessible = var.publicly_accessible
 
   tags = var.tags
+
+  multi_az = var.multi_az
 }
