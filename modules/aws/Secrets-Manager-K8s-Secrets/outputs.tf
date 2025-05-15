@@ -23,3 +23,10 @@ output "service_account_iam_role_names" {
   }
   description = "IAM role Names mapped by namespace/service account"
 }
+output "secrets_manager_secret_info" {
+  value = {
+    for secret in var.secrets :
+    secret.name => { arn : aws_secretsmanager_secret.secret[secret.name].arn, version : aws_secretsmanager_secret_version.secret_version[secret.name].version_id }
+  }
+  description = "Secrets Manager secret ARNs mapped by secret name"
+}

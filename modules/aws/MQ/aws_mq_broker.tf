@@ -25,7 +25,7 @@ resource "aws_mq_broker" "mq" {
   subnet_ids                 = var.subnet_ids
   publicly_accessible        = var.public_access
   auto_minor_version_upgrade = var.auto_minor_version_upgrade
-
+  deployment_mode            = var.deployment_mode
   dynamic "user" {
     for_each = var.users
     content {

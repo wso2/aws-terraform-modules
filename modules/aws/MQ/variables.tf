@@ -63,3 +63,7 @@ variable "auto_minor_version_upgrade" {
   type    = bool
   default = false
 }
+variable "deployment_mode" {
+  type    = string
+  default = "SINGLE_INSTANCE"
+}

@@ -27,6 +27,13 @@ variable "allow_major_version_upgrade" {
 variable "availability_zone" {
   description = "Availability zone"
   type        = string
+  default     = null
+}
+
+variable "multi_az" {
+  description = "Availability zone"
+  type        = bool
+  default     = true
 }
 
 variable "backup_retention_period" {
@@ -38,7 +45,7 @@ variable "backup_retention_period" {
 variable "performance_insights_enabled" {
   description = "Specifies whether Performance Insights are enabled."
   type        = bool
-  default     = true
+  default     = null
 }
 
 variable "performance_insights_kms_key_id" {
@@ -57,11 +64,6 @@ variable "master_password" {
   type        = string
   sensitive   = true
   default     = null
-}
-
-variable "database_name" {
-  description = "Database name"
-  type        = string
 }
 
 variable "deletion_protection" {
@@ -175,6 +177,32 @@ variable "engine_lifecycle_support" {
 
 variable "kms_key_id" {
   description = "KMS key id"
+  type        = string
+  default     = null
+}
+
+variable "project" {
+  description = "Name of the project"
+  type        = string
+}
+
+variable "environment" {
+  description = "Name of the environment"
+  type        = string
+}
+
+variable "region" {
+  description = "Code of the region"
+  type        = string
+}
+
+variable "application" {
+  description = "Purpose of the EKS Cluster"
+  type        = string
+}
+
+variable "custom_iam_instance_profile" {
+  description = "Custom IAM instance profile"
   type        = string
   default     = null
 }

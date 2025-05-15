@@ -19,4 +19,5 @@
 # --------------------------------------------------------------------------------------
 
 locals {
+  cluster_name = join("", [var.project, var.application, var.environment, var.region, "rdscluster"])
 }

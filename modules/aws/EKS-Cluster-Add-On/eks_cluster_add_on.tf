@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+# Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
 #
 # This software is the property of WSO2 LLC. and its suppliers, if any.
 # Dissemination of any information or reproduction of any material contained
@@ -9,11 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "key_arn" {
-  value      = aws_kms_key.kms_key.arn
-  depends_on = [aws_kms_key.kms_key]
-}
-output "key_id" {
-  value      = aws_kms_key.kms_key.id
-  depends_on = [aws_kms_key.kms_key]
+resource "aws_eks_addon" "addon" {
+  cluster_name = var.cluster_name
+  addon_name   = var.addon_name
 }
