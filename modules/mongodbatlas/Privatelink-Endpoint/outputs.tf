@@ -28,3 +28,7 @@ output "project_id" {
 output "private_link_id" {
   value = mongodbatlas_privatelink_endpoint.privatelink_endpoint.private_link_id
 }
+
+output "endpoint_service_name" {
+  value = mongodbatlas_privatelink_endpoint.privatelink_endpoint.endpoint_service_name
+}
