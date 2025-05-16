@@ -82,12 +82,6 @@ variable "db_instance_parameter_group_name" {
   default     = null
 }
 
-variable "enable_http_endpoint" {
-  description = "Flag to Enable HTTP endpoint"
-  type        = bool
-  default     = false
-}
-
 variable "engine" {
   description = "Engine to be used for the DB Cluster"
   type        = string
@@ -146,58 +140,10 @@ variable "replication_source_identifier" {
   default     = null
 }
 
-variable "enable_scaling_configuration" {
-  description = "Flag to enable scaling configuration"
-  type        = bool
-  default     = false
-}
-
-variable "min_capacity" {
-  description = "Minimum capacity for autoscaling"
-  type        = number
-  default     = null
-}
-
-variable "max_capacity" {
-  description = "Maximum capacity for autoscaling"
-  type        = number
-  default     = null
-}
-
-variable "cluster_custom_iam_instance_profile" {
-  description = "Custom IAM instance profile for all instances"
-  type        = string
-  default     = null
-}
-
-variable "cluster_common_monitoring_interval" {
-  description = "Monitoring interval for all instances"
-  type        = number
-  default     = 0
-}
-
-variable "cluster_common_monitoring_role_arn" {
-  description = "Monitoring role arn for all instances"
-  type        = string
-  default     = null
-}
-
-variable "cluster_common_performance_insights_enabled" {
-  description = "Performance insights enabled for all instances"
-  type        = bool
-  default     = false
-}
-
 variable "engine_lifecycle_support" {
   description = "The life cycle type for this DB instance."
   type        = string
   default     = "open-source-rds-extended-support"
-}
-
-variable "publicly_accessible" {
-  description = "Flag to make the DB publicly accessible"
-  type        = bool
-  default     = false
 }
 
 variable "tags" {
