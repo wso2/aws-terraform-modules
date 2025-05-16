@@ -1,0 +1,80 @@
+# -------------------------------------------------------------------------------------
+#
+# Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
+#
+# WSO2 LLC. licenses this file to you under the Apache License,
+# Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+# --------------------------------------------------------------------------------------
+# Ignore: AVD-AWS-0343 (https://avd.aquasec.com/misconfig/aws/rds/avd-aws-0343/)
+# Ignore: AVD-AWS-0059 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-0079)
+# Ignore: AVD-AWS-0059 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-0077)
+# Reason: Delete protection has been configured as an optional parameter as this will depend on the usage of the RDS
+# Reason: Variable KMS_KEY_ID is defined and can be used for explicit key encryption
+# Reason: Variable backup_retention_period is defined and can be used for explicitlty setting backup retention
+# trivy:ignore:AVD-AWS-0343
+# trivy:ignore:AVD-AWS-0079
+# trivy:ignore:AVD-AWS-0077
+resource "aws_rds_cluster" "rds_cluster" {
+
+  allow_major_version_upgrade = var.allow_major_version_upgrade
+
+  availability_zones = var.availability_zones
+  network_type       = var.network_type
+  port               = var.database_port
+
+  backtrack_window             = var.backtrack_window
+  backup_retention_period      = var.backup_retention_period
+  preferred_backup_window      = var.preferred_backup_window
+  preferred_maintenance_window = var.preferred_maintenance_window
+
+  database_name               = local.cluster_name
+  master_username             = var.master_username
+  master_password             = var.master_password
+  manage_master_user_password = var.master_password == null ? true : null
+
+  db_cluster_parameter_group_name  = var.db_cluster_parameter_group_name
+  db_instance_parameter_group_name = var.allow_major_version_upgrade == true ? var.db_instance_parameter_group_name : null
+
+  engine         = var.engine
+  engine_version = var.engine_version
+
+  db_cluster_instance_class = var.db_cluster_instance_class
+  db_subnet_group_name      = var.db_subnet_group_name
+
+  global_cluster_identifier     = var.global_cluster_identifier
+  replication_source_identifier = var.replication_source_identifier
+
+  enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_log_exports
+
+  iam_database_authentication_enabled = var.iam_database_authentication_enabled
+
+  vpc_security_group_ids = var.vpc_security_group_ids
+
+  deletion_protection = var.deletion_protection
+
+  cluster_identifier = local.cluster_name
+
+  allocated_storage = var.allocated_storage
+  storage_type      = var.storage_type
+
+  storage_encrypted = var.storage_encrypted
+  kms_key_id        = var.storage_encrypted == true ? var.kms_key_id : null
+
+  skip_final_snapshot = var.skip_final_snapshot
+
+  engine_lifecycle_support = var.engine_lifecycle_support
+
+  tags = var.tags
+}
