@@ -34,11 +34,13 @@ resource "aws_db_instance" "rds_instance" {
   performance_insights_enabled    = var.performance_insights_enabled
   performance_insights_kms_key_id = var.performance_insights_kms_key_id
 
-  db_name                     = var.engine != "custom-sqlserver-se" ? local.cluster_name : null
+  db_name                     = var.default_db_name
   username                    = var.master_username
   password                    = var.master_password
   manage_master_user_password = var.master_password == null ? true : null
   custom_iam_instance_profile = var.custom_iam_instance_profile
+
+  identifier_prefix = local.db_name
 
   license_model     = var.license_model
   allocated_storage = var.allocated_storage
@@ -68,4 +70,6 @@ resource "aws_db_instance" "rds_instance" {
   tags = var.tags
 
   multi_az = var.multi_az
+
+  iops = var.storage_iops
 }
