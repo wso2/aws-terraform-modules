@@ -146,6 +146,12 @@ variable "skip_final_snapshot" {
   default     = false
 }
 
+variable "storage_iops" {
+  description = "Storage IOPS"
+  type        = number
+  default     = 3000
+}
+
 variable "publicly_accessible" {
   description = "Flag to make the DB publicly accessible"
   type        = bool
@@ -203,6 +209,12 @@ variable "application" {
 
 variable "custom_iam_instance_profile" {
   description = "Custom IAM instance profile"
+  type        = string
+  default     = null
+}
+
+variable "default_db_name" {
+  description = "Default DB name"
   type        = string
   default     = null
 }

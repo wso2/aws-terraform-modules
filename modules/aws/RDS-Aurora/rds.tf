@@ -75,6 +75,8 @@ resource "aws_rds_cluster" "rds_cluster" {
   skip_final_snapshot = var.skip_final_snapshot
 
   engine_lifecycle_support = var.engine_lifecycle_support
+  storage_type             = var.storage_type
+  iops                     = var.iops
 
   dynamic "scaling_configuration" {
     for_each = var.enable_scaling_configuration == true && var.engine_mode == "serverless" ? [1] : []

@@ -72,6 +72,7 @@ resource "aws_rds_cluster" "rds_cluster" {
   storage_encrypted = var.storage_encrypted
   kms_key_id        = var.storage_encrypted == true ? var.kms_key_id : null
 
+  iops                = var.storage_iops
   skip_final_snapshot = var.skip_final_snapshot
 
   engine_lifecycle_support = var.engine_lifecycle_support

@@ -204,3 +204,8 @@ variable "storage_type" {
   type        = string
   default     = "gp3"
 }
+variable "storage_iops" {
+  description = "Storage IOPS"
+  type        = number
+  default     = 3000
+}
