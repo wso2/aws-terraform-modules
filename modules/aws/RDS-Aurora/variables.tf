@@ -273,15 +273,3 @@ variable "skip_final_snapshot" {
   type        = bool
   default     = false
 }
-
-variable "iops" {
-  description = "IOPS for the DB cluster"
-  type        = number
-  default     = 3000
-}
-
-variable "storage_type" {
-  description = "Storage type for the DB cluster"
-  type        = string
-  default     = "gp3"
-}
