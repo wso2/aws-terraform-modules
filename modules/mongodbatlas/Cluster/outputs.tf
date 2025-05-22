@@ -12,3 +12,9 @@
 output "cluster_name" {
   value = mongodbatlas_cluster.cluster.name
 }
+output "cluster_endpoint" {
+  value = mongodbatlas_cluster.cluster.mongo_uri
+}
+output "cluster_connection_string" {
+  value = mongodbatlas_cluster.cluster.connection_strings[0].standard
+}
