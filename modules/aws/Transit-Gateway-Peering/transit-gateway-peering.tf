@@ -9,6 +9,15 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "username" {
-  value = mongodbatlas_database_user.user.username
+resource "aws_ec2_transit_gateway_peering_attachment" "example" {
+  peer_account_id         = var.peer_account_id
+  peer_region             = var.peer_region
+  peer_transit_gateway_id = var.peer_transit_gateway_id
+  transit_gateway_id      = var.local_transit_gateway_id
+
+  options {
+    dynamic_routing = var.dynamic_routing
+  }
+
+  tags = var.default_tags
 }
