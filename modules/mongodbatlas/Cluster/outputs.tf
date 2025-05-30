@@ -15,6 +15,9 @@ output "cluster_name" {
 output "cluster_endpoint" {
   value = mongodbatlas_cluster.cluster.mongo_uri
 }
-output "cluster_connection_string" {
+output "public_cluster_connection_string" {
   value = mongodbatlas_cluster.cluster.connection_strings[0].standard
+}
+output "private_cluster_connection_string" {
+  value = try(mongodbatlas_cluster.cluster.connection_strings[0].private_endpoint[0].srv_connection_string, null)
 }

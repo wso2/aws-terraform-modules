@@ -9,15 +9,21 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_ec2_transit_gateway_peering_attachment" "example" {
+resource "aws_ec2_transit_gateway_peering_attachment" "transit_gateway_peering_attachment" {
   peer_account_id         = var.peer_account_id
   peer_region             = var.peer_region
   peer_transit_gateway_id = var.peer_transit_gateway_id
   transit_gateway_id      = var.local_transit_gateway_id
-
-  options {
-    dynamic_routing = var.dynamic_routing
+  tags = var.default_tags
+}
+data "aws_ec2_transit_gateway_peering_attachment" "peer_transit_gateway_peering_attachment" {
+  filter {
+    name   = "transit-gateway-id"
+    values = [var.peer_transit_gateway_id]
   }
 
-  tags = var.default_tags
+  depends_on = [aws_ec2_transit_gateway_peering_attachment.transit_gateway_peering_attachment]
+}
+resource "aws_ec2_transit_gateway_peering_attachment_accepter" "transit_gateway_peering_attachment_accepter" {
+  transit_gateway_attachment_id = data.aws_ec2_transit_gateway_peering_attachment.peer_transit_gateway_peering_attachment.id
 }
