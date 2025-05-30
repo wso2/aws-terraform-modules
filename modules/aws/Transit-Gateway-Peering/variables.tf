@@ -30,8 +30,3 @@ variable "default_tags" {
   type        = map(string)
   default     = {}
 }
-variable "dynamic_routing" {
-  description = "Dynamic routing for the transit gateway peering attachment"
-  type        = string
-  default     = "enable"
-}
