@@ -117,3 +117,8 @@ variable "automatic_failover_enabled" {
   description = "Enable automatic failover"
   default     = false
 }
+variable "engine" {
+  type        = string
+  description = "Engine of the Elastic Cache"
+  default     = "redis"
+}

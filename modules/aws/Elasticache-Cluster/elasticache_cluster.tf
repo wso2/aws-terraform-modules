@@ -10,7 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_elasticache_replication_group" "elasticache_replication_group" {
-  engine                     = "redis"
+  engine                     = var.engine
   engine_version             = var.engine_version
   transit_encryption_enabled = var.enable_transit_encryption
   auth_token                 = var.auth_token
