@@ -13,54 +13,39 @@ variable "project" {
   description = "Project name"
   type        = string
 }
-
 variable "description" {
   description = "Description of the CodeBuild project"
   type        = string
   default     = "CodeBuild project for CI/CD integration"
-  
 }
-
 variable "build_name" {
   description = "Build name for the CodeBuild project"
   type        = string
 }
-
 variable "codebuild_role_arn" {
   description = "IAM Role ARN for CodeBuild"
   type        = string
 }
-
-variable "buildspec_path" {
-  description = "Path to the buildspec file in the repository"
-  type        = string
-  default     = "buildspec.yml"
-}
-
 variable "compute_type" {
   description = "Compute type for CodeBuild"
   type        = string
   default     = "BUILD_GENERAL1_SMALL"
 }
-
 variable "image" {
   description = "CodeBuild image"
   type        = string
   default     = "aws/codebuild/standard:7.0"
 }
-
 variable "environment_type" {
   description = "Environment type"
   type        = string
   default     = "LINUX_CONTAINER"
 }
-
 variable "privileged_mode" {
   description = "Enable Docker builds inside CodeBuild"
   type        = bool
   default     = true
 }
-
 variable "environment_variables" {
   description = "List of environment variables"
   type = list(object({
@@ -70,13 +55,11 @@ variable "environment_variables" {
   }))
   default = []
 }
-
 variable "tags" {
   description = "Tags for the project"
   type        = map(string)
   default     = {}
 }
-
 variable "artifacts" {
   description = "Artifact configuration for CodeBuild"
   type = object({
@@ -94,7 +77,6 @@ variable "artifacts" {
     type = "CODEPIPELINE"
   }
 }
-
 variable "codebuild_source" {
   description = "Source configuration for CodeBuild"
   type = object({

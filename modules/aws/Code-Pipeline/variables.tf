@@ -13,27 +13,23 @@ variable "project" {
   description = "Project name"
   type        = string
 }
-
 variable "integration_bucket_name" {
   description = "S3 bucket name for CodePipeline artifact store"
   type        = string
 }
-
 variable "pipeline_role_arn" {
   description = "IAM Role ARN for CodePipeline"
   type        = string
 }
-
 variable "pipeline_name" {
   type        = string
   description = "Name of the CodePipeline"
   default     = "integration-pipeline"
 }
-
 variable "stages" {
   description = "List of stages with actions"
   type = list(object({
-    name    = string
+    name = string
     actions = list(object({
       name             = string
       category         = string
