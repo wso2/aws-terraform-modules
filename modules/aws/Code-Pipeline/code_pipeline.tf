@@ -9,16 +9,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_s3_bucket" "codepipeline_bucket" {
-  bucket = var.integration_bucket_name
-}
-
 resource "aws_codepipeline" "pipeline" {
   name     = "${var.project}-${var.pipeline_name}-pipeline"
   role_arn = var.pipeline_role_arn
 
   artifact_store {
-    location = aws_s3_bucket.integration_codepipeline_bucket.bucket
+    location = var.artifact_bucket_name
     type     = "S3"
   }
 
@@ -42,4 +38,6 @@ resource "aws_codepipeline" "pipeline" {
       }
     }
   }
+
+  tags = var.tags
 }

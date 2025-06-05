@@ -13,8 +13,3 @@ output "pipeline_name" {
   description = "Name of the created CodePipeline"
   value       = aws_codepipeline.integration_pipeline.name
 }
-
-output "artifact_bucket_name" {
-  description = "Name of the artifact S3 bucket"
-  value       = aws_s3_bucket.integration_codepipeline_bucket.bucket
-}

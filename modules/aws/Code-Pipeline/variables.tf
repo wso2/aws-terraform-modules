@@ -13,10 +13,6 @@ variable "project" {
   description = "Project name"
   type        = string
 }
-variable "integration_bucket_name" {
-  description = "S3 bucket name for CodePipeline artifact store"
-  type        = string
-}
 variable "pipeline_role_arn" {
   description = "IAM Role ARN for CodePipeline"
   type        = string
@@ -41,4 +37,13 @@ variable "stages" {
       configuration    = map(string)
     }))
   }))
+}
+variable "artifact_bucket_name" {
+  description = "Name of the S3 bucket for storing artifacts"
+  type        = string
+}
+variable "tags" {
+  description = "Tags for the project"
+  type        = map(string)
+  default     = {}
 }
