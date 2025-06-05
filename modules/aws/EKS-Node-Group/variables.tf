@@ -108,3 +108,8 @@ variable "user_data" {
   description = "Custom userdata script for EKS Nodepool"
   default     = null
 }
+variable "capacity_type" {
+  type        = string
+  description = "Capacity type for the node group. Valid values: ON_DEMAND | SPOT"
+  default     = "ON_DEMAND"
+}
