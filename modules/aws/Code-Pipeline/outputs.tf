@@ -11,5 +11,5 @@
 
 output "pipeline_name" {
   description = "Name of the created CodePipeline"
-  value       = aws_codepipeline.integration_pipeline.name
+  value       = aws_codepipeline.pipeline.name
 }
