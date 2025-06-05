@@ -14,7 +14,7 @@ resource "aws_ec2_transit_gateway_peering_attachment" "transit_gateway_peering_a
   peer_region             = var.peer_region
   peer_transit_gateway_id = var.peer_transit_gateway_id
   transit_gateway_id      = var.local_transit_gateway_id
-  tags = var.default_tags
+  tags                    = var.default_tags
 }
 data "aws_ec2_transit_gateway_peering_attachment" "peer_transit_gateway_peering_attachment" {
   filter {
