@@ -18,6 +18,8 @@ resource "aws_eks_node_group" "eks_node_group" {
   labels          = var.labels
   instance_types  = var.instance_types
 
+  capacity_type = var.capacity_type
+
   ami_type = var.ami_type
 
   lifecycle {
