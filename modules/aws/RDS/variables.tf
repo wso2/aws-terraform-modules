@@ -218,3 +218,15 @@ variable "default_db_name" {
   type        = string
   default     = null
 }
+
+variable "replicate_source_db" {
+  description = "The ARN of the source DB instance or DB cluster if this DB instance is to be created as a Read Replica."
+  type        = string
+  default     = null
+}
+
+variable "manage_master_user_password" {
+  description = "Flag to manage master user password"
+  type        = bool
+  default     = false
+}

@@ -18,12 +18,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-terraform {
-  required_version = ">= 1.3.8"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
+variable "peer_transit_gateway_id" {
+  description = "The ID of the peer transit gateway"
+  type        = string
 }

@@ -42,7 +42,7 @@ resource "aws_rds_cluster" "rds_cluster" {
   database_name               = var.database_name
   master_username             = var.master_username
   master_password             = var.master_password
-  manage_master_user_password = var.master_password == null ? true : null
+  manage_master_user_password = var.manage_master_user_password
 
   db_cluster_parameter_group_name  = var.db_cluster_parameter_group_name
   db_instance_parameter_group_name = var.allow_major_version_upgrade == true ? var.db_instance_parameter_group_name : null

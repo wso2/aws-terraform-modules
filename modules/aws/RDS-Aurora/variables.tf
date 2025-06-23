@@ -273,3 +273,8 @@ variable "skip_final_snapshot" {
   type        = bool
   default     = false
 }
+variable "manage_master_user_password" {
+  description = "Flag to manage master user password"
+  type        = bool
+  default     = false
+}

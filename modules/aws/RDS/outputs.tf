@@ -21,3 +21,9 @@
 output "database_endpoint" {
   value = aws_db_instance.rds_instance.endpoint
 }
+output "database_identifier" {
+  value = aws_db_instance.rds_instance.identifier
+}
+output "database_arn" {
+  value = aws_db_instance.rds_instance.arn
+}

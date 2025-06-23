@@ -29,3 +29,9 @@ output "database_writer_endpoint" {
 output "database_availability_zones" {
   value = aws_rds_cluster.rds_cluster.availability_zones
 }
+output "cluster_identifier" {
+  value = aws_rds_cluster.rds_cluster.cluster_identifier
+}
+output "cluster_arn" {
+  value = aws_rds_cluster.rds_cluster.arn
+}
