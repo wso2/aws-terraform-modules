@@ -18,15 +18,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "cluster_arn" {
-  value = aws_rds_global_cluster.global_cluster.arn
-}
-output "cluster_identifier" {
-  value = aws_rds_global_cluster.global_cluster.global_cluster_identifier
-}
-output "cluster_id" {
-  value = aws_rds_global_cluster.global_cluster.id
-}
-output "database_connection" {
-  value = aws_rds_global_cluster.global_cluster.endpoint
+terraform {
+  required_version = ">= 1.3.8"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
 }
