@@ -34,13 +34,16 @@ resource "aws_db_instance" "rds_instance" {
   performance_insights_enabled    = var.performance_insights_enabled
   performance_insights_kms_key_id = var.performance_insights_kms_key_id
 
+  replicate_source_db = var.replicate_source_db
+
   db_name                     = var.default_db_name
   username                    = var.master_username
   password                    = var.master_password
-  manage_master_user_password = var.master_password == null ? true : null
+  manage_master_user_password = var.manage_master_user_password
   custom_iam_instance_profile = var.custom_iam_instance_profile
 
   identifier_prefix = local.db_name
+
 
   license_model     = var.license_model
   allocated_storage = var.allocated_storage

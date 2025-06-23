@@ -18,12 +18,13 @@
 #
 # --------------------------------------------------------------------------------------
 
-terraform {
-  required_version = ">= 1.3.8"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
+resource "aws_rds_global_cluster" "global_cluster" {
+  global_cluster_identifier    = local.cluster_name
+  engine                       = var.engine
+  engine_version               = var.engine_version
+  database_name                = var.database_name
+  source_db_cluster_identifier = var.source_db_cluster_identifier
+  deletion_protection          = var.deletion_protection
+  tags                         = var.tags
+  force_destroy                = var.source_db_cluster_identifier != null ? false : true
 }

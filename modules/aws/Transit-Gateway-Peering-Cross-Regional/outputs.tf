@@ -18,12 +18,6 @@
 #
 # --------------------------------------------------------------------------------------
 
-terraform {
-  required_version = ">= 1.3.8"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
+output "local_transit_gateway_attachment_id" {
+  value = aws_ec2_transit_gateway_peering_attachment.transit_gateway_peering_attachment.id
 }
