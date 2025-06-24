@@ -73,3 +73,9 @@ variable "application" {
   description = "Purpose of the EKS Cluster"
   type        = string
 }
+
+variable "storage_encrypted" {
+  description = "Enable storage encryption for the DB Cluster"
+  type        = bool
+  default     = true
+}
