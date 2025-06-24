@@ -22,18 +22,6 @@ resource "aws_guardduty_detector" "guardduty_detector" {
   enable = var.enable_guardduty
 }
 
-resource "aws_guardduty_detector_feature" "eks_runtime_monitoring" {
-  count       = var.enable_eks_runtime_monitoring ? 1 : 0
-  detector_id = aws_guardduty_detector.guardduty_detector.id
-  name        = "EKS_RUNTIME_MONITORING"
-  status      = "ENABLED"
-
-  additional_configuration {
-    name   = "EKS_ADDON_MANAGEMENT"
-    status = "ENABLED"
-  }
-}
-
 #EKS_AUDIT_LOGS
 resource "aws_guardduty_detector_feature" "eks_audit_logs" {
   count       = var.enable_eks_audit_logs ? 1 : 0
@@ -43,27 +31,25 @@ resource "aws_guardduty_detector_feature" "eks_audit_logs" {
 }
 
 #RUNTIME_MONITORING
-resource "aws_guardduty_detector_feature" "runtime_eks_monitoring" {
+resource "aws_guardduty_detector_feature" "runtime_monitoring" {
   count       = var.enable_runtime_monitoring ? 1 : 0
   detector_id = aws_guardduty_detector.guardduty_detector.id
   name        = "RUNTIME_MONITORING"
   status      = "ENABLED"
+
+
 
   additional_configuration {
     name   = "EKS_ADDON_MANAGEMENT"
-    status = "ENABLED"
+    status = var.enable_eks_runtime_monitoring
   }
-}
-
-resource "aws_guardduty_detector_feature" "runtime_ec2_monitoring" {
-  count       = var.enable_runtime_monitoring ? 1 : 0
-  detector_id = aws_guardduty_detector.guardduty_detector.id
-  name        = "RUNTIME_MONITORING"
-  status      = "ENABLED"
-
+  additional_configuration {
+    name   = "ECS_FARGATE_AGENT_MANAGEMENT"
+    status = var.enable_fargate_runtime_monitoring
+  }
   additional_configuration {
     name   = "EC2_AGENT_MANAGEMENT"
-    status = "ENABLED"
+    status = var.enable_ec2_runtime_monitoring
   }
 }
 
