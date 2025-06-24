@@ -43,7 +43,7 @@ resource "aws_guardduty_detector_feature" "eks_audit_logs" {
 }
 
 #RUNTIME_MONITORING
-resource "aws_guardduty_detector_feature" "runtime_monitoring" {
+resource "aws_guardduty_detector_feature" "runtime_eks_monitoring" {
   count       = var.enable_runtime_monitoring ? 1 : 0
   detector_id = aws_guardduty_detector.guardduty_detector.id
   name        = "RUNTIME_MONITORING"
@@ -53,6 +53,14 @@ resource "aws_guardduty_detector_feature" "runtime_monitoring" {
     name   = "EKS_ADDON_MANAGEMENT"
     status = "ENABLED"
   }
+}
+
+resource "aws_guardduty_detector_feature" "runtime_ec2_monitoring" {
+  count       = var.enable_runtime_monitoring ? 1 : 0
+  detector_id = aws_guardduty_detector.guardduty_detector.id
+  name        = "RUNTIME_MONITORING"
+  status      = "ENABLED"
+
   additional_configuration {
     name   = "EC2_AGENT_MANAGEMENT"
     status = "ENABLED"
