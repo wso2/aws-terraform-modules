@@ -30,8 +30,8 @@ variable "enable_s3_data_events" {
 }
 variable "enable_eks_runtime_monitoring" {
   description = "Enable EKS runtime monitoring for GuardDuty"
-  type        = bool
-  default     = false
+  type        = string
+  default     = "ENABLED"
 }
 variable "enable_eks_audit_logs" {
   description = "Enable EKS audit logs for GuardDuty"
@@ -57,4 +57,14 @@ variable "enable_rds_login_events" {
   description = "Enable RDS login events for GuardDuty"
   type        = bool
   default     = true
+}
+variable "enable_ec2_runtime_monitoring" {
+  description = "Enable EC2 runtime monitoring for GuardDuty"
+  type        = string
+  default     = "ENABLED"
+}
+variable "enable_fargate_runtime_monitoring" {
+  description = "Enable Fargate runtime monitoring for GuardDuty"
+  type        = string
+  default     = "ENABLED"
 }
