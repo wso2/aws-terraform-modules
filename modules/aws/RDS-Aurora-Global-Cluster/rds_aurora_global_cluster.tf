@@ -27,4 +27,5 @@ resource "aws_rds_global_cluster" "global_cluster" {
   deletion_protection          = var.deletion_protection
   tags                         = var.tags
   force_destroy                = var.source_db_cluster_identifier != null ? false : true
+  storage_encrypted            = var.storage_encrypted
 }
