@@ -36,6 +36,10 @@ resource "aws_elasticache_replication_group" "elasticache_replication_group" {
   apply_immediately          = var.apply_immediately
   auto_minor_version_upgrade = var.auto_minor_version_upgrade
 
+  multi_az_enabled = var.multi_az_enabled
+
+  global_replication_group_id = var.global_replication_group_id
+
   tags = var.tags
 
   description = "Elasticache Replication Group for ${var.project}-${var.application}-${var.environment}-${var.region}"
