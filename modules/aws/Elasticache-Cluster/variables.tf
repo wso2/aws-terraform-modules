@@ -122,3 +122,13 @@ variable "engine" {
   description = "Engine of the Elastic Cache"
   default     = "redis"
 }
+variable "multi_az_enabled" {
+  type        = bool
+  description = "Enable Multi-AZ for the Elastic Cache"
+  default     = false
+}
+variable "global_replication_group_id" {
+  type        = string
+  description = "Global replication group ID for the Elastic Cache"
+  default     = null
+}
