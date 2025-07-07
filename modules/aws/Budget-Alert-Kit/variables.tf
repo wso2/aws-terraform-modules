@@ -17,13 +17,13 @@ variable "cost" {
 variable "tag_key" {
   type        = string
   description = "Tag key used to identify Choreo PDP resources"
-  default     = "Managed-By"
+  default     = null
 }
 
 variable "tag_value" {
   type        = string
   description = "Tag value used to identify Choreo PDP resources"
-  default     = "Choreo-PDP-Terraform-Bot"
+  default     = null
 }
 
 variable "critical_sns_arn" {
@@ -36,20 +36,17 @@ variable "warning_sns_arn" {
   description = "ARN for warning alerts SNS topic"
 }
 
-variable "ec2_percentage" {
-  type        = number
-  description = "Percentage of total cost allocated for EC2 instances"
-  default     = 60
+variable "per_service_budget" {
+  type = map(object({
+    limit          = number
+    service_filter = string
+  }))
+  description = "Map of service names to their budget limits in USD"
+  default     = {}
 }
 
-variable "logs_percentage" {
-  type        = number
-  description = "Percentage of total cost allocated for Cloudwatch"
-  default     = 20
-}
-
-variable "networking_percentage" {
-  type        = number
-  description = "Percentage of total cost allocated for networking"
-  default     = 20
+variable "include_tf_tagged_resources" {
+  type        = bool
+  description = "Whether to include resources tagged by Terraform in the budget calculations"
+  default     = false
 }
