@@ -18,9 +18,12 @@ resource "aws_budgets_budget" "global" {
   time_unit    = "MONTHLY"
 
 
-  cost_filter {
-    name   = "TagKeyValue"
-    values = ["${var.tag_key}${"$"}${var.tag_value}"]
+  dynamic "cost_filter" {
+    for_each = var.include_tf_tagged_resources ? [1] : []
+    content {
+      name   = "TagKeyValue"
+      values = ["user:${var.tag_key}${"$"}${var.tag_value}"]
+    }
   }
 
   notification {
@@ -41,23 +44,27 @@ resource "aws_budgets_budget" "global" {
 }
 
 # EC2 Instances Budget (configured percentage)
-resource "aws_budgets_budget" "ec2" {
-  name         = "Choreo-EC2-budget"
+resource "aws_budgets_budget" "per_service_budget" {
+  for_each     = var.per_service_budget
+  name         = "Choreo-${each.key}-budget"
   budget_type  = "COST"
-  limit_amount = local.ec2_limit
+  limit_amount = each.value.limit
   limit_unit   = "USD"
   time_unit    = "MONTHLY"
 
 
-  cost_filter {
-    name   = "TagKeyValue"
-    values = ["${var.tag_key}${"$"}${var.tag_value}"]
+  dynamic "cost_filter" {
+    for_each = var.include_tf_tagged_resources ? [1] : []
+    content {
+      name   = "TagKeyValue"
+      values = ["user:${var.tag_key}${"$"}${var.tag_value}"]
+    }
   }
 
   cost_filter {
     name = "Service"
     values = [
-      "Amazon Elastic Compute Cloud - Compute",
+      "${each.value.service_filter}",
     ]
   }
 
@@ -76,77 +83,5 @@ resource "aws_budgets_budget" "ec2" {
     notification_type         = "FORECASTED"
     subscriber_sns_topic_arns = [var.warning_sns_arn]
   }
-}
 
-# Logs Budget (configured percentage, no tag filter)
-resource "aws_budgets_budget" "logs" {
-  name         = "Choreo-Logs-budget"
-  budget_type  = "COST"
-  limit_amount = local.logs_limit
-  limit_unit   = "USD"
-  time_unit    = "MONTHLY"
-
-  cost_filter {
-    name   = "TagKeyValue"
-    values = ["${var.tag_key}${"$"}${var.tag_value}"]
-  }
-
-  cost_filter {
-    name = "Service"
-    values = [
-      "AmazonCloudWatch",
-    ]
-  }
-  notification {
-    comparison_operator       = "GREATER_THAN"
-    threshold                 = 100
-    threshold_type            = "PERCENTAGE"
-    notification_type         = "FORECASTED"
-    subscriber_sns_topic_arns = [var.critical_sns_arn]
-  }
-
-  notification {
-    comparison_operator       = "GREATER_THAN"
-    threshold                 = 80
-    threshold_type            = "PERCENTAGE"
-    notification_type         = "FORECASTED"
-    subscriber_sns_topic_arns = [var.warning_sns_arn]
-  }
-}
-
-# Networking Budget (configured percentage)
-resource "aws_budgets_budget" "networking" {
-  name         = "Choreo-Networking-budget"
-  budget_type  = "COST"
-  limit_amount = local.networking_limit
-  limit_unit   = "USD"
-  time_unit    = "MONTHLY"
-
-  cost_filter {
-    name   = "TagKeyValue"
-    values = ["${var.tag_key}${"$"}${var.tag_value}"]
-  }
-
-  cost_filter {
-    name = "Service"
-    values = [
-      "AmazonVPC",
-    ]
-  }
-
-  notification {
-    comparison_operator       = "GREATER_THAN"
-    threshold                 = 100
-    threshold_type            = "PERCENTAGE"
-    notification_type         = "FORECASTED"
-    subscriber_sns_topic_arns = [var.critical_sns_arn]
-  }
-
-  notification {
-    comparison_operator       = "GREATER_THAN"
-    threshold                 = 80
-    threshold_type            = "PERCENTAGE"
-    notification_type         = "FORECASTED"
-    subscriber_sns_topic_arns = [var.warning_sns_arn]
-  }
 }
