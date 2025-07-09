@@ -18,3 +18,8 @@ output "public_ip" {
   value      = aws_nat_gateway.nat_gateway.public_ip
   depends_on = [aws_nat_gateway.nat_gateway]
 }
+
+output "public_ip_allocation_id" {
+  value      = aws_eip.eip.id
+  depends_on = [aws_eip.eip]
+}
