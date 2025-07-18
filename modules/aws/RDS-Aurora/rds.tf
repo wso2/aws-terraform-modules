@@ -73,7 +73,7 @@ resource "aws_rds_cluster" "rds_cluster" {
   kms_key_id        = var.storage_encrypted == true ? var.kms_key_id : null
 
   skip_final_snapshot       = var.skip_final_snapshot
-  final_snapshot_identifier = var.final_snapshot_identifier
+  final_snapshot_identifier = var.skip_final_snapshot ? null : "${local.cluster_name}-${replace(timestamp(), "[:T-]", "")}"
 
   engine_lifecycle_support = var.engine_lifecycle_support
 
