@@ -273,6 +273,18 @@ variable "skip_final_snapshot" {
   type        = bool
   default     = false
 }
+
+variable "final_snapshot_identifier" {
+  description = "Final snapshot identifier"
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.skip_final_snapshot || (var.final_snapshot_identifier != null && var.final_snapshot_identifier != "")
+    error_message = "You must specify final_snapshot_identifier if skip_final_snapshot is false."
+  }
+}
+
 variable "manage_master_user_password" {
   description = "Flag to manage master user password"
   type        = bool
