@@ -60,8 +60,3 @@ variable "kms_master_key_id" {
   description = "The ID of an AWS-managed customer master key (CMK) for Amazon SNS or a custom CMK"
   default     = null
 }
-variable "topic_policy_json" {
-  type        = string
-  description = "The JSON policy to apply to the SNS topic"
-  default     = null
-}
