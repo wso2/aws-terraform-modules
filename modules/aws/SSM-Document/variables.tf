@@ -18,12 +18,23 @@
 #
 # --------------------------------------------------------------------------------------
 
-terraform {
-  required_version = ">= 1.3.8"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
+variable "user_email" {
+  description = "The user that will run the session manager"
+  type        = string
+  default     = "ssm-user"
+}
+variable "session_timeout" {
+  description = "The timeout for the session manager in seconds"
+  type        = number
+  default     = 3600
+}
+variable "max_session_duration" {
+  description = "The maximum session duration in seconds"
+  type        = number
+  default     = 43200
+}
+variable "cloud_watch_group_name" {
+  description = "The name of the CloudWatch log group for session manager logs"
+  type        = string
+  default     = ""
 }
