@@ -31,7 +31,7 @@ resource "aws_sns_topic_policy" "sns_topic_policy" {
   count = var.topic_policy_json == null ? 0 : 1
   arn = aws_sns_topic.sns_topic.arn
 
-  policy = var.topic_policy_json
+  policy = data.aws_iam_policy_document.sns_topic_policy.json
 }
 
 resource "aws_sns_topic_subscription" "subscription" {
