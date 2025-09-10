@@ -21,8 +21,8 @@
 data "aws_caller_identity" "current" {}
 data "aws_iam_policy_document" "sns_topic_policy" {
   statement {
-    sid     = "AlertWebhook SNS Topic Policy"
-    effect  = "Allow"
+    sid    = "AlertWebhook SNS Topic Policy"
+    effect = "Allow"
 
     principals {
       type        = "AWS"
@@ -52,8 +52,8 @@ data "aws_iam_policy_document" "sns_topic_policy" {
   }
 
   statement {
-    sid     = "AWSBudgets-notification-1"
-    effect  = "Allow"
+    sid    = "AWSBudgets-notification-1"
+    effect = "Allow"
 
     principals {
       type        = "Service"

@@ -18,6 +18,23 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-  user_name = split("@", var.user_email)[0]
+output "iam_role_arn" {
+  value       = aws_iam_role.lambda_function_rule.arn
+  description = "The ARN of the IAM role that the Lambda function assumes when it executes."
+  depends_on  = [aws_iam_role.lambda_function_rule]
+}
+output "function_arn" {
+  value       = aws_lambda_function.lambda_function.arn
+  description = "The ARN of the Lambda function."
+  depends_on  = [aws_lambda_function.lambda_function]
+}
+output "function_name" {
+  value       = aws_lambda_function.lambda_function.function_name
+  description = "The name of the Lambda function."
+  depends_on  = [aws_lambda_function.lambda_function]
+}
+output "iam_role_name" {
+  value       = aws_iam_role.lambda_function_rule.name
+  description = "The name of the IAM role that the Lambda function assumes when it executes."
+  depends_on  = [aws_iam_role.lambda_function_rule]
 }

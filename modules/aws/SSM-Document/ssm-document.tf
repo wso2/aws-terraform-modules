@@ -30,15 +30,15 @@ resource "aws_ssm_document" "session_manager_doc" {
     inputs = {
       s3BucketName                = "",
       s3KeyPrefix                 = "",
-      s3EncryptionEnabled        = true,
-      cloudWatchLogGroupName     = var.cloud_watch_group_name,
-      cloudWatchEncryptionEnabled= true,
-      cloudWatchStreamingEnabled = true,
-      idleSessionTimeout         = var.session_timeout,
-      maxSessionDuration         = var.max_session_duration,
-      kmsKeyId                   = "",
-      runAsEnabled               = true,
-      runAsDefaultUser           = var.user_email,
+      s3EncryptionEnabled         = true,
+      cloudWatchLogGroupName      = var.cloud_watch_group_name,
+      cloudWatchEncryptionEnabled = true,
+      cloudWatchStreamingEnabled  = true,
+      idleSessionTimeout          = var.session_timeout,
+      maxSessionDuration          = var.max_session_duration,
+      kmsKeyId                    = "",
+      runAsEnabled                = true,
+      runAsDefaultUser            = var.user_email,
       shellProfile = {
         windows = "",
         linux   = "timestamp=$(date '+%Y-%m-%dT%H:%M:%SZ');user=$(whoami);echo $timestamp && echo \"Welcome $user\"'!';cd /home/$user/"
@@ -47,7 +47,7 @@ resource "aws_ssm_document" "session_manager_doc" {
   })
 
   tags = {
-    Name = "${local.user_name}-session-manager-doc"
+    Name  = "${local.user_name}-session-manager-doc"
     Owner = var.user_email
   }
 }

@@ -18,6 +18,20 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-  user_name = split("@", var.user_email)[0]
+data "aws_iam_policy_document" "assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "lambda_function_role" {
+  name               = join("-", [var.project, var.application, var.environment, var.region, var.lambda_function_name, "lf-iam-role"])
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
