@@ -19,9 +19,9 @@
 # --------------------------------------------------------------------------------------
 
 output "iam_role_arn" {
-  value       = aws_iam_role.lambda_function_rule.arn
+  value       = aws_iam_role.lambda_function_role.arn
   description = "The ARN of the IAM role that the Lambda function assumes when it executes."
-  depends_on  = [aws_iam_role.lambda_function_rule]
+  depends_on  = [aws_iam_role.lambda_function_role]
 }
 output "function_arn" {
   value       = aws_lambda_function.lambda_function.arn
@@ -34,7 +34,7 @@ output "function_name" {
   depends_on  = [aws_lambda_function.lambda_function]
 }
 output "iam_role_name" {
-  value       = aws_iam_role.lambda_function_rule.name
+  value       = aws_iam_role.lambda_function_role.name
   description = "The name of the IAM role that the Lambda function assumes when it executes."
-  depends_on  = [aws_iam_role.lambda_function_rule]
+  depends_on  = [aws_iam_role.lambda_function_role]
 }
