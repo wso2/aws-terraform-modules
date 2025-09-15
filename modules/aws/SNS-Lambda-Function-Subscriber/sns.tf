@@ -20,7 +20,7 @@
 
 # Give SNS permission to invoke the Lambda function
 resource "aws_lambda_permission" "sns_lambda_permission" {
-  statement_id  = "AllowExecutionFromSNS"
+  statement_id  = "${var.function_name}-sns-invoke-permission"
   action        = "lambda:InvokeFunction"
   function_name = var.function_name
   principal     = "sns.amazonaws.com"
