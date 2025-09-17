@@ -18,6 +18,13 @@ resource "aws_secretsmanager_secret" "secretsmanager_secret" {
 
   kms_key_id = var.kms_key_id
 
+  dynamic "replica" {
+    for_each = var.replica_regions
+    content {
+      region = replica.value
+    }
+  }
+
   tags = var.tags
 }
 

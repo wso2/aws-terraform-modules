@@ -42,3 +42,8 @@ variable "kms_key_id" {
   description = "KMS key id for secret"
   default     = null
 }
+variable "replica_regions" {
+  type        = list(string)
+  description = "Replica regions for secret"
+  default     = []
+}
