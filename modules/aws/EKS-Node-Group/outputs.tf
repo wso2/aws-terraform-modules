@@ -21,3 +21,7 @@
 output "node_role_arn" {
   value = aws_iam_role.iam_role[0].arn
 }
+
+output "autoscaling_group_name" {
+  value = aws_eks_node_group.eks_node_group.resources[0].autoscaling_groups[0].name
+}
