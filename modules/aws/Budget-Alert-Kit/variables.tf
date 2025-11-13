@@ -50,3 +50,9 @@ variable "include_tf_tagged_resources" {
   description = "Whether to include resources tagged by Terraform in the budget calculations"
   default     = false
 }
+
+variable "email_addresses" {
+  type        = list(string)
+  description = "List of email addresses to receive budget notifications"
+  default     = []
+}
