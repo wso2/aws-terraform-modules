@@ -32,6 +32,7 @@ resource "aws_budgets_budget" "global" {
     threshold_type            = "PERCENTAGE"
     notification_type         = "FORECASTED"
     subscriber_sns_topic_arns = [var.critical_sns_arn]
+    subscriber_email_addresses = var.email_addresses
   }
 
   notification {
@@ -40,6 +41,7 @@ resource "aws_budgets_budget" "global" {
     threshold_type            = "PERCENTAGE"
     notification_type         = "FORECASTED"
     subscriber_sns_topic_arns = [var.warning_sns_arn]
+    subscriber_email_addresses = var.email_addresses
   }
 }
 
@@ -74,6 +76,7 @@ resource "aws_budgets_budget" "per_service_budget" {
     threshold_type            = "PERCENTAGE"
     notification_type         = "FORECASTED"
     subscriber_sns_topic_arns = [var.critical_sns_arn]
+    subscriber_email_addresses = var.email_addresses
   }
 
   notification {
@@ -82,6 +85,7 @@ resource "aws_budgets_budget" "per_service_budget" {
     threshold_type            = "PERCENTAGE"
     notification_type         = "FORECASTED"
     subscriber_sns_topic_arns = [var.warning_sns_arn]
+    subscriber_email_addresses = var.email_addresses
   }
 
 }
