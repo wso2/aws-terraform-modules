@@ -129,3 +129,8 @@ variable "bootstrap_cluster_creator_admin_permissions" {
   description = "Whether or not to bootstrap the access config values to the cluster"
   default     = false
 }
+variable "oidc_thumbprint_override" {
+  type        = list(string)
+  description = "This is to manually override the default thumbprint setting for the OIDC provider"
+  default     = []
+}
