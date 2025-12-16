@@ -54,7 +54,7 @@ resource "aws_iam_role_policy_attachment" "amazon_eks_pc_resource_controller" {
 
 resource "aws_iam_openid_connect_provider" "eks_ca_oidc_provider" {
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [data.tls_certificate.tls.certificates[0].sha1_fingerprint]
+  thumbprint_list = local.oidc_thumbprint
   url             = data.aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
 
   lifecycle {
