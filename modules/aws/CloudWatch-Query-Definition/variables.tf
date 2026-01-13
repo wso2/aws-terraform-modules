@@ -18,18 +18,17 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_eks_access_policy_association" "eks_access_policy" {
-  cluster_name  = var.eks_cluster_name
-  policy_arn    = var.policy_arn
-  principal_arn = var.principal_arn
-
-  access_scope {
-    type       = var.type
-    namespaces = var.namespaces
-  }
-
-  lifecycle {
-    prevent_destroy = true
-  }
+variable "name" {
+  description = "The name of the query definition"
+  type        = string
 }
 
+variable "log_group_names" {
+  description = "List of CloudWatch Log Group names to query"
+  type        = list(string)
+}
+
+variable "query_string" {
+  description = "The CloudWatch Logs Insights query string"
+  type        = string
+}

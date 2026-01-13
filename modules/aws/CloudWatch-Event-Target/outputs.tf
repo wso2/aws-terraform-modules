@@ -18,18 +18,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_eks_access_policy_association" "eks_access_policy" {
-  cluster_name  = var.eks_cluster_name
-  policy_arn    = var.policy_arn
-  principal_arn = var.principal_arn
-
-  access_scope {
-    type       = var.type
-    namespaces = var.namespaces
-  }
-
-  lifecycle {
-    prevent_destroy = true
-  }
+output "id" {
+  description = "The unique identifier for the target"
+  value       = aws_cloudwatch_event_target.target.id
 }
 
+output "target_id" {
+  description = "The unique target assignment ID"
+  value       = aws_cloudwatch_event_target.target.target_id
+}

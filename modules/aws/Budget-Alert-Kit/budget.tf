@@ -9,20 +9,34 @@
 #
 # --------------------------------------------------------------------------------------
 
-# Global Budget for all tagged resources
+locals {
+  # Build name suffix from environment and region if provided
+  name_suffix = join("-", compact([var.environment, var.region]))
+
+  # Global budget name: use override if provided, otherwise construct from prefix
+  global_budget_name = coalesce(
+    var.global_budget_name_override,
+    local.name_suffix != "" ? "${var.name_prefix}-${local.name_suffix}-global-budget" : "${var.name_prefix}-global-budget"
+  )
+
+  # Per-service budget name prefix
+  per_service_name_prefix = local.name_suffix != "" ? "${var.name_prefix}-${local.name_suffix}" : var.name_prefix
+}
+
 resource "aws_budgets_budget" "global" {
-  name         = "Choreo-global-budget"
+  count = var.create_global_budget ? 1 : 0
+
+  name         = local.global_budget_name
   budget_type  = "COST"
   limit_amount = var.cost
   limit_unit   = "USD"
   time_unit    = "MONTHLY"
 
-
   dynamic "cost_filter" {
-    for_each = var.include_tf_tagged_resources ? [1] : []
+    for_each = var.tag_key != null && var.tag_value != null ? [1] : []
     content {
       name   = "TagKeyValue"
-      values = ["user:${var.tag_key}${"$"}${var.tag_value}"]
+      values = ["user:${var.tag_key}$${var.tag_value}"]
     }
   }
 
@@ -32,42 +46,39 @@ resource "aws_budgets_budget" "global" {
     threshold_type            = "PERCENTAGE"
     notification_type         = "FORECASTED"
     subscriber_sns_topic_arns = [var.critical_sns_arn]
-    subscriber_email_addresses = var.email_addresses
   }
 
   notification {
     comparison_operator       = "GREATER_THAN"
     threshold                 = 80
     threshold_type            = "PERCENTAGE"
-    notification_type         = "FORECASTED"
+    notification_type         = "ACTUAL"
     subscriber_sns_topic_arns = [var.warning_sns_arn]
-    subscriber_email_addresses = var.email_addresses
   }
+
+  tags = var.tags
 }
 
-# EC2 Instances Budget (configured percentage)
 resource "aws_budgets_budget" "per_service_budget" {
-  for_each     = var.per_service_budget
-  name         = "Choreo-${each.key}-budget"
+  for_each = var.per_service_budget
+
+  name         = "${local.per_service_name_prefix}-${each.key}-budget"
   budget_type  = "COST"
   limit_amount = each.value.limit
   limit_unit   = "USD"
   time_unit    = "MONTHLY"
 
-
-  dynamic "cost_filter" {
-    for_each = var.include_tf_tagged_resources ? [1] : []
-    content {
-      name   = "TagKeyValue"
-      values = ["user:${var.tag_key}${"$"}${var.tag_value}"]
-    }
+  cost_filter {
+    name   = "Service"
+    values = [each.value.service_filter]
   }
 
-  cost_filter {
-    name = "Service"
-    values = [
-      "${each.value.service_filter}",
-    ]
+  dynamic "cost_filter" {
+    for_each = var.tag_key != null && var.tag_value != null ? [1] : []
+    content {
+      name   = "TagKeyValue"
+      values = ["user:${var.tag_key}$${var.tag_value}"]
+    }
   }
 
   notification {
@@ -76,16 +87,15 @@ resource "aws_budgets_budget" "per_service_budget" {
     threshold_type            = "PERCENTAGE"
     notification_type         = "FORECASTED"
     subscriber_sns_topic_arns = [var.critical_sns_arn]
-    subscriber_email_addresses = var.email_addresses
   }
 
   notification {
     comparison_operator       = "GREATER_THAN"
     threshold                 = 80
     threshold_type            = "PERCENTAGE"
-    notification_type         = "FORECASTED"
+    notification_type         = "ACTUAL"
     subscriber_sns_topic_arns = [var.warning_sns_arn]
-    subscriber_email_addresses = var.email_addresses
   }
 
+  tags = var.tags
 }

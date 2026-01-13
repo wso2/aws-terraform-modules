@@ -18,18 +18,13 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_eks_access_policy_association" "eks_access_policy" {
-  cluster_name  = var.eks_cluster_name
-  policy_arn    = var.policy_arn
-  principal_arn = var.principal_arn
+terraform {
+  required_version = ">= 1.0"
 
-  access_scope {
-    type       = var.type
-    namespaces = var.namespaces
-  }
-
-  lifecycle {
-    prevent_destroy = true
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 4.0"
+    }
   }
 }
-

@@ -43,3 +43,11 @@ variable "subnet_ids" {
   description = "List of subnets to deploy nodepools"
   type        = list(string)
 }
+
+variable "selectors" {
+  description = "List of selectors for the Fargate profile. Each selector requires a namespace and optional labels."
+  type = list(object({
+    namespace = string
+    labels    = optional(map(string))
+  }))
+}

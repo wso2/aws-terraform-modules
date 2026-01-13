@@ -18,18 +18,17 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_eks_access_policy_association" "eks_access_policy" {
-  cluster_name  = var.eks_cluster_name
-  policy_arn    = var.policy_arn
-  principal_arn = var.principal_arn
-
-  access_scope {
-    type       = var.type
-    namespaces = var.namespaces
-  }
-
-  lifecycle {
-    prevent_destroy = true
-  }
+output "arn" {
+  description = "The Amazon Resource Name (ARN) of the rule"
+  value       = aws_cloudwatch_event_rule.rule.arn
 }
 
+output "id" {
+  description = "The name of the rule"
+  value       = aws_cloudwatch_event_rule.rule.id
+}
+
+output "name" {
+  description = "The name of the rule"
+  value       = aws_cloudwatch_event_rule.rule.name
+}

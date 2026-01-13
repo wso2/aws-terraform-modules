@@ -18,18 +18,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_eks_access_policy_association" "eks_access_policy" {
-  cluster_name  = var.eks_cluster_name
-  policy_arn    = var.policy_arn
-  principal_arn = var.principal_arn
-
-  access_scope {
-    type       = var.type
-    namespaces = var.namespaces
-  }
-
-  lifecycle {
-    prevent_destroy = true
-  }
+resource "aws_cloudwatch_event_rule" "rule" {
+  name                = var.name
+  description         = var.description
+  event_pattern       = var.event_pattern
+  schedule_expression = var.schedule_expression
+  is_enabled          = var.is_enabled
+  role_arn            = var.role_arn
+  tags                = var.tags
 }
-

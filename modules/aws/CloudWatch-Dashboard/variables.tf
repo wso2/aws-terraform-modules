@@ -18,18 +18,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_eks_access_policy_association" "eks_access_policy" {
-  cluster_name  = var.eks_cluster_name
-  policy_arn    = var.policy_arn
-  principal_arn = var.principal_arn
-
-  access_scope {
-    type       = var.type
-    namespaces = var.namespaces
-  }
-
-  lifecycle {
-    prevent_destroy = true
-  }
+variable "dashboard_name" {
+  description = "The name of the dashboard"
+  type        = string
 }
 
+variable "dashboard_body" {
+  description = "The detailed information about the dashboard, including what widgets are included and their layout. This is a JSON string."
+  type        = string
+}

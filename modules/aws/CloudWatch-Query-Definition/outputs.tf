@@ -18,18 +18,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_eks_access_policy_association" "eks_access_policy" {
-  cluster_name  = var.eks_cluster_name
-  policy_arn    = var.policy_arn
-  principal_arn = var.principal_arn
-
-  access_scope {
-    type       = var.type
-    namespaces = var.namespaces
-  }
-
-  lifecycle {
-    prevent_destroy = true
-  }
+output "query_definition_id" {
+  description = "The query definition ID"
+  value       = aws_cloudwatch_query_definition.query.query_definition_id
 }
 
+output "name" {
+  description = "The name of the query definition"
+  value       = aws_cloudwatch_query_definition.query.name
+}

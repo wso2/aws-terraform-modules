@@ -18,29 +18,43 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "eks_cluster_name" {
-  description = "The name of the EKS cluster"
+variable "name" {
+  description = "The name of the rule"
   type        = string
 }
 
-variable "principal_arn" {
-  description = "The ARN of the principal to associate the policy with"
+variable "description" {
+  description = "The description of the rule"
   type        = string
+  default     = null
 }
 
-variable "policy_arn" {
-  description = "The ARN of the access policy (e.g., arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy)"
+variable "event_pattern" {
+  description = "The event pattern described as a JSON string. Either this or schedule_expression must be specified"
   type        = string
+  default     = null
 }
 
-variable "type" {
-  description = "The type of the access scope (cluster or namespace)"
+variable "schedule_expression" {
+  description = "The scheduling expression (e.g., cron(0 20 * * ? *) or rate(5 minutes)). Either this or event_pattern must be specified"
   type        = string
-  default     = "cluster"
+  default     = null
 }
 
-variable "namespaces" {
-  description = "List of namespaces for namespace-scoped policies"
-  type        = list(string)
-  default     = []
+variable "is_enabled" {
+  description = "Whether the rule should be enabled"
+  type        = bool
+  default     = true
+}
+
+variable "role_arn" {
+  description = "The Amazon Resource Name (ARN) associated with the role that is used for target invocation"
+  type        = string
+  default     = null
+}
+
+variable "tags" {
+  description = "A map of tags to assign to the resource"
+  type        = map(string)
+  default     = {}
 }

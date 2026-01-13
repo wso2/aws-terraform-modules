@@ -18,18 +18,22 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_eks_access_policy_association" "eks_access_policy" {
-  cluster_name  = var.eks_cluster_name
-  policy_arn    = var.policy_arn
-  principal_arn = var.principal_arn
-
-  access_scope {
-    type       = var.type
-    namespaces = var.namespaces
-  }
-
-  lifecycle {
-    prevent_destroy = true
-  }
+output "distribution_id" {
+  description = "ID of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.distribution.id
 }
 
+output "distribution_arn" {
+  description = "ARN of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.distribution.arn
+}
+
+output "distribution_domain_name" {
+  description = "Domain name of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.distribution.domain_name
+}
+
+output "distribution_hosted_zone_id" {
+  description = "Hosted zone ID of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.distribution.hosted_zone_id
+}

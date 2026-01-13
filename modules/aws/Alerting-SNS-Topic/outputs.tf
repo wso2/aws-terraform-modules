@@ -20,3 +20,15 @@
 output "topic_arn" {
   value = aws_sns_topic.sns_topic.arn
 }
+
+output "critical_topic_arn" {
+  value = aws_sns_topic.sns_topic.arn
+}
+
+output "warning_topic_arn" {
+  value = aws_sns_topic.sns_topic.arn
+}
+
+output "info_topic_arn" {
+  value = aws_sns_topic.sns_topic.arn
+}

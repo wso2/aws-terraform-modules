@@ -11,7 +11,7 @@
 
 
 locals {
-  rt_name = join("-", [var.project, var.application, var.environment, var.region, "eks-snet-rt"])
-  rt_tags = merge(var.tags, { Name : local.rt_name })
-  oidc_thumbprint = length(var.oidc_thumbprint_override) > 0 ? var.oidc_thumbprint_override: [data.tls_certificate.tls.certificates[0].sha1_fingerprint]
+  rt_name         = join("-", [var.project, var.application, var.environment, var.region, "eks-snet-rt"])
+  rt_tags         = merge(var.tags, { Name : local.rt_name })
+  oidc_thumbprint = length(var.oidc_thumbprint_override) > 0 ? var.oidc_thumbprint_override : [data.tls_certificate.tls.certificates[0].sha1_fingerprint]
 }

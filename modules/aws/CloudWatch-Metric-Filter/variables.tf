@@ -18,36 +18,51 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "eks_cluster_name" {
-  description = "Name of the EKS cluster"
+variable "name" {
+  description = "The name of the metric filter"
   type        = string
 }
 
-variable "principal_arn" {
-  description = "Name of the principal ARN"
+variable "log_group_name" {
+  description = "The name of the log group to create the metric filter on"
   type        = string
 }
 
-variable "kubernetes_groups" {
-  description = "Kubernetes groups"
-  type        = list(string)
+variable "pattern" {
+  description = "A valid CloudWatch Logs filter pattern for extracting metric data"
+  type        = string
+}
+
+variable "metric_name" {
+  description = "The name of the CloudWatch metric"
+  type        = string
+}
+
+variable "metric_namespace" {
+  description = "The destination namespace of the CloudWatch metric"
+  type        = string
+}
+
+variable "metric_value" {
+  description = "The value to publish to the CloudWatch metric"
+  type        = string
+  default     = "1"
+}
+
+variable "metric_unit" {
+  description = "The unit to assign to the metric"
+  type        = string
+  default     = "Count"
+}
+
+variable "metric_default_value" {
+  description = "The value to emit when a filter pattern does not match a log event"
+  type        = number
   default     = null
 }
 
-variable "type" {
-  description = "Access Entry Type"
-  type        = string
-  default     = "STANDARD"
-}
-
-variable "user_name" {
-  description = "The user name to associate with the access entry (optional)"
-  type        = string
-  default     = null
-}
-
-variable "tags" {
-  description = "A map of tags to assign to the resource"
+variable "metric_dimensions" {
+  description = "Map of dimensions for the metric"
   type        = map(string)
   default     = {}
 }

@@ -18,18 +18,17 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_eks_access_policy_association" "eks_access_policy" {
-  cluster_name  = var.eks_cluster_name
-  policy_arn    = var.policy_arn
-  principal_arn = var.principal_arn
+resource "aws_cloudwatch_log_metric_filter" "filter" {
+  name           = var.name
+  log_group_name = var.log_group_name
+  pattern        = var.pattern
 
-  access_scope {
-    type       = var.type
-    namespaces = var.namespaces
-  }
-
-  lifecycle {
-    prevent_destroy = true
+  metric_transformation {
+    name          = var.metric_name
+    namespace     = var.metric_namespace
+    value         = var.metric_value
+    unit          = var.metric_unit
+    default_value = var.metric_default_value
+    dimensions    = var.metric_dimensions
   }
 }
-

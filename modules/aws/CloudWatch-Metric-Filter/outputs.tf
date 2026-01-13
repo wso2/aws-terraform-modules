@@ -18,18 +18,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_eks_access_policy_association" "eks_access_policy" {
-  cluster_name  = var.eks_cluster_name
-  policy_arn    = var.policy_arn
-  principal_arn = var.principal_arn
-
-  access_scope {
-    type       = var.type
-    namespaces = var.namespaces
-  }
-
-  lifecycle {
-    prevent_destroy = true
-  }
+output "id" {
+  description = "The name of the metric filter"
+  value       = aws_cloudwatch_log_metric_filter.filter.id
 }
 
+output "name" {
+  description = "The name of the metric filter"
+  value       = aws_cloudwatch_log_metric_filter.filter.name
+}

@@ -18,18 +18,32 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_eks_access_policy_association" "eks_access_policy" {
-  cluster_name  = var.eks_cluster_name
-  policy_arn    = var.policy_arn
-  principal_arn = var.principal_arn
-
-  access_scope {
-    type       = var.type
-    namespaces = var.namespaces
-  }
-
-  lifecycle {
-    prevent_destroy = true
-  }
+output "backup_plan_id" {
+  description = "The ID of the backup plan"
+  value       = aws_backup_plan.this.id
 }
 
+output "backup_plan_arn" {
+  description = "The ARN of the backup plan"
+  value       = aws_backup_plan.this.arn
+}
+
+output "backup_plan_name" {
+  description = "The name of the backup plan"
+  value       = aws_backup_plan.this.name
+}
+
+output "backup_selection_id" {
+  description = "The ID of the backup selection"
+  value       = aws_backup_selection.this.id
+}
+
+output "backup_selection_name" {
+  description = "The name of the backup selection"
+  value       = aws_backup_selection.this.name
+}
+
+output "rule_count" {
+  description = "Number of backup rules configured"
+  value       = length(var.backup_rules)
+}

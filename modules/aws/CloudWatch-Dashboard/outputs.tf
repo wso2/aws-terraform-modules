@@ -18,18 +18,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_eks_access_policy_association" "eks_access_policy" {
-  cluster_name  = var.eks_cluster_name
-  policy_arn    = var.policy_arn
-  principal_arn = var.principal_arn
-
-  access_scope {
-    type       = var.type
-    namespaces = var.namespaces
-  }
-
-  lifecycle {
-    prevent_destroy = true
-  }
+output "dashboard_arn" {
+  description = "The Amazon Resource Name (ARN) of the dashboard"
+  value       = aws_cloudwatch_dashboard.dashboard.dashboard_arn
 }
 
+output "dashboard_name" {
+  description = "The name of the dashboard"
+  value       = aws_cloudwatch_dashboard.dashboard.dashboard_name
+}
