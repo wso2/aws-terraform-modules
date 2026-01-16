@@ -9,22 +9,17 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "project" {
+variable "iam_role_name" {
   type        = string
-  description = "Name of the project"
+  description = "The name for the IAM role"
 }
-variable "environment" {
+
+variable "iam_role_abbreviation" {
   type        = string
-  description = "Name of the environment"
+  description = "The abbreviation for the IAM role resource name"
+  default     = "ir"
 }
-variable "region" {
-  type        = string
-  description = "Code of the region"
-}
-variable "application" {
-  type        = string
-  description = "Purpose of the ECR"
-}
+
 variable "assume_role_policy" {
   type = string
 }

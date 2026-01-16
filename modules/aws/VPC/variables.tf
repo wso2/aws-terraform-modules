@@ -9,22 +9,22 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "project" {
-  type        = string
-  description = "Name of the project"
-}
-variable "environment" {
-  type        = string
-  description = "Name of the environment"
-}
-variable "region" {
-  type        = string
-  description = "Code of the region"
-}
-variable "application" {
-  type        = string
-  description = "Purpose of the Subnet"
-}
+# variable "project" {
+#   type        = string
+#   description = "Name of the project"
+# }
+# variable "environment" {
+#   type        = string
+#   description = "Name of the environment"
+# }
+# variable "region" {
+#   type        = string
+#   description = "Code of the region"
+# }
+# variable "application" {
+#   type        = string
+#   description = "Purpose of the Subnet"
+# }
 variable "vpc_cidr_block" {
   type        = string
   description = "CIDR block to be used for the VPC"
@@ -43,4 +43,13 @@ variable "enable_dns_hostnames" {
   type        = bool
   description = "Flag to enable DNS host names"
   default     = false
+}
+variable "vpc_name" {
+  description = "The name of the virtual network."
+  type        = string
+}
+variable "vpc_abbreviation" {
+  description = "The abbreviation of the resource name."
+  type        = string
+  default     = "vpc"
 }

@@ -9,21 +9,14 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "project" {
+variable "elb_abbreviation" {
+  description = "Abbreviation for the Elastic Load Balancer"
   type        = string
-  description = "Name of the project"
+  default     = "elb"
 }
-variable "environment" {
+variable "elb_name" {
+  description = "Name of the Elastic Load Balancer"
   type        = string
-  description = "Name of the environment"
-}
-variable "region" {
-  type        = string
-  description = "Code of the region"
-}
-variable "application" {
-  type        = string
-  description = "Purpose of the EC2 Instance"
 }
 variable "internal_usage_flag" {
   type        = string
@@ -63,4 +56,9 @@ variable "enable_shield_protection" {
   type        = string
   description = "Flag to indicate whether the ALB instance is protected by AWS Shield or not"
   default     = false
+}
+variable "shield_protection_abbreviation" {
+  description = "Abbreviation for the Shield Protection"
+  type        = string
+  default     = "elb-eip-shield-protection"
 }

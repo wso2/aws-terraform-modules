@@ -19,25 +19,38 @@
 # --------------------------------------------------------------------------------------
 
 variable "lambda_function_name" {
-  description = "The name of the Lambda function"
+  type        = string
+  description = "The name for the Lambda Function"
+}
+
+variable "lambda_function_abbreviation" {
+  type        = string
+  description = "The abbreviation for the Lambda Function resource name"
+  default     = "lf"
+}
+
+variable "iam_role_abbreviation" {
+  type        = string
+  description = "The abbreviation for the IAM Role resource name"
+  default     = "ir"
+}
+
+variable "iam_role_name" {
+  description = "The name for the IAM Role"
   type        = string
 }
-variable "project" {
-  description = "Name of the project"
+
+variable "iam_policy_abbreviation" {
+  type        = string
+  description = "The abbreviation for the IAM Policy resource name"
+  default     = "ip"
+}
+
+variable "iam_policy_name" {
+  description = "The name for the IAM Policy"
   type        = string
 }
-variable "environment" {
-  description = "Name of the environment"
-  type        = string
-}
-variable "application" {
-  description = "Name of the application"
-  type        = string
-}
-variable "region" {
-  description = "AWS region to deploy the Lambda function"
-  type        = string
-}
+
 variable "lambda_function_source_dir" {
   description = "Directory containing the Lambda function source code"
   type        = string

@@ -9,22 +9,23 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "project" {
+variable "subnet_name" {
   type        = string
-  description = "Name of the project"
+  description = "The name for the subnet"
 }
-variable "environment" {
+
+variable "subnet_abbreviation" {
   type        = string
-  description = "Name of the environment"
+  description = "The abbreviation for the subnet resource name"
+  default     = "snet"
 }
-variable "region" {
+
+variable "route_table_abbreviation" {
   type        = string
-  description = "Code of the region"
+  description = "The abbreviation for the route table resource name"
+  default     = "rt"
 }
-variable "application" {
-  type        = string
-  description = "Purpose of the Subnet"
-}
+
 variable "vpc_id" {
   type        = string
   description = "ID of the VPC which should contain this subnet"

@@ -9,21 +9,21 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "project" {
+variable "firewall_name" {
   type        = string
-  description = "Name of the project"
+  description = "The name for the Network Firewall"
 }
-variable "environment" {
+
+variable "firewall_abbreviation" {
   type        = string
-  description = "Name of the environment"
+  description = "The abbreviation for the Network Firewall resource name"
+  default     = "nfw"
 }
-variable "region" {
+
+variable "firewall_policy_abbreviation" {
   type        = string
-  description = "Code of the region"
-}
-variable "application" {
-  type        = string
-  description = "Purpose of the Subnet"
+  description = "The abbreviation for the Firewall Policy resource name"
+  default     = "nfwp"
 }
 
 variable "tags" {

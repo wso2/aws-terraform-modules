@@ -10,7 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_cloudwatch_metric_alarm" "metric_alarm" {
-  alarm_name        = join("-", [var.project, var.application, var.environment, var.region, var.metric_usage_prefix, "alarm"])
+  alarm_name        = join("-", [var.alarm_abbreviation, var.alarm_name])
   alarm_description = var.alarm_description
 
   metric_name = var.metric_name

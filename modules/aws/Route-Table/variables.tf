@@ -9,6 +9,17 @@
 #
 # --------------------------------------------------------------------------------------
 
+variable "route_table_name" {
+  type        = string
+  description = "The name for the Route Table"
+}
+
+variable "route_table_abbreviation" {
+  type        = string
+  description = "The abbreviation for the Route Table resource name"
+  default     = "rt"
+}
+
 variable "vpc_id" {
   type        = string
   description = "ID of the VPC containing the route table"
@@ -20,28 +31,6 @@ variable "tags" {
   default     = {}
 }
 
-variable "availability_zone" {
-  type        = string
-  description = "Availability zones of the VPC Subnet"
-  default     = null
-}
-
-variable "project" {
-  type        = string
-  description = "Name of the project"
-}
-variable "environment" {
-  type        = string
-  description = "Name of the environment"
-}
-variable "region" {
-  type        = string
-  description = "Code of the region"
-}
-variable "application" {
-  type        = string
-  description = "Purpose of the route table"
-}
 variable "custom_routes" {
   type = list(object({
     cidr_block = string

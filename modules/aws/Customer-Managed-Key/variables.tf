@@ -9,22 +9,17 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "project" {
+variable "kms_key_name" {
   type        = string
-  description = "The name of the project"
+  description = "The name for the KMS Key"
 }
-variable "environment" {
+
+variable "kms_key_abbreviation" {
   type        = string
-  description = "The name of the environment"
+  description = "The abbreviation for the KMS Key resource name"
+  default     = "cmk"
 }
-variable "region" {
-  type        = string
-  description = "The name of the region"
-}
-variable "application" {
-  type        = string
-  description = "The name of the application"
-}
+
 variable "tags" {
   type        = map(string)
   description = "The tags for the resources"

@@ -18,26 +18,17 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "topic_name" {
+variable "sns_topic_name" {
   type        = string
-  description = "The name of the SNS topic"
+  description = "The name for the SNS Topic"
 }
-variable "project" {
+
+variable "sns_topic_abbreviation" {
   type        = string
-  description = "Name of the project"
+  description = "The abbreviation for the SNS Topic resource name"
+  default     = "sns"
 }
-variable "environment" {
-  type        = string
-  description = "Name of the environment"
-}
-variable "region" {
-  type        = string
-  description = "Code of the region"
-}
-variable "application" {
-  type        = string
-  description = "Purpose of the Subnet"
-}
+
 variable "subscribers" {
   description = "A list of subscribers for the SNS topic"
   type = list(object({

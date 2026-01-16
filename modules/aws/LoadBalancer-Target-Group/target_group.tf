@@ -10,7 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_lb_target_group" "lb_target_group" {
-  name        = join("-", [var.project, var.application, var.environment, var.region, "lb-tg"])
+  name        = join("-", [var.target_group_abbreviation, var.target_group_name])
   target_type = var.target_type
   port        = var.port
   protocol    = var.protocol

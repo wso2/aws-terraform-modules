@@ -24,14 +24,14 @@ output "iam_role_arn" {
   depends_on  = [aws_iam_role.lambda_function_role]
 }
 output "function_arn" {
-  value       = aws_lambda_function.function.arn
+  value       = aws_lambda_function.lambda_function.arn
   description = "The ARN of the Lambda function."
-  depends_on  = [aws_lambda_function.function]
+  depends_on  = [aws_lambda_function.lambda_function]
 }
 output "function_name" {
-  value       = aws_lambda_function.function.function_name
+  value       = aws_lambda_function.lambda_function.function_name
   description = "The name of the Lambda function."
-  depends_on  = [aws_lambda_function.function]
+  depends_on  = [aws_lambda_function.lambda_function]
 }
 output "iam_role_name" {
   value       = aws_iam_role.lambda_function_role.name

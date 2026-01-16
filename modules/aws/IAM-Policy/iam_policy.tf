@@ -10,8 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_iam_policy" "iam_policy" {
-  name = join("-", [var.project, var.application, var.environment, var.region, "iam-policy"])
-
+  name   = join("-", [var.iam_policy_abbreviation, var.iam_policy_name])
   policy = var.policy
   tags   = var.tags
 }

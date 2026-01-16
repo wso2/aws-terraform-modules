@@ -10,11 +10,9 @@
 # --------------------------------------------------------------------------------------
 
 locals {
-  natg_name = join("-", [var.project, var.application, var.environment, var.region, "natg"])
-  natg_tags = merge(var.tags, { Name : local.natg_name })
-
-  eip_name = join("-", [var.project, var.application, var.environment, var.region, "eip-natg"])
-  eip_tags = merge(var.tags, { Name : local.eip_name })
-
-  shield_name = join("-", [var.project, var.application, var.environment, var.region, "shield-natg"])
+  natg_name   = join("-", [var.nat_gateway_abbreviation, var.nat_gateway_name])
+  natg_tags   = merge(var.tags, { Name : local.natg_name })
+  eip_name    = join("-", [var.eip_abbreviation, var.nat_gateway_name])
+  eip_tags    = merge(var.tags, { Name : local.eip_name })
+  shield_name = join("-", [var.shield_abbreviation, var.nat_gateway_name])
 }

@@ -10,11 +10,6 @@
 # --------------------------------------------------------------------------------------
 
 locals {
-  sg_name = join("-", [var.project, var.application, var.environment, var.region, "sg"])
-  sg_tags = merge(
-    var.tags,
-    {
-      "Name" = local.sg_name
-    }
-  )
+  sg_name = join("-", [var.security_group_abbreviation, var.security_group_name])
+  sg_tags = merge(var.tags, { Name : local.sg_name })
 }

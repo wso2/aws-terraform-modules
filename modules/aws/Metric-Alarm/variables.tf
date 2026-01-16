@@ -78,26 +78,18 @@ variable "extended_statistic" {
   type        = string
   default     = null
 }
-variable "project" {
+
+variable "alarm_name" {
   type        = string
-  description = "Name of the project"
+  description = "The name for the CloudWatch Metric Alarm"
 }
-variable "environment" {
+
+variable "alarm_abbreviation" {
   type        = string
-  description = "Name of the environment"
+  description = "The abbreviation for the Metric Alarm resource name"
+  default     = "cwa"
 }
-variable "region" {
-  type        = string
-  description = "Code of the region"
-}
-variable "application" {
-  type        = string
-  description = "Purpose of the Subnet"
-}
-variable "metric_usage_prefix" {
-  type        = string
-  description = "Prefix for the metric usage"
-}
+
 variable "tags" {
   type        = map(string)
   description = "Tags to be attached to the resource"

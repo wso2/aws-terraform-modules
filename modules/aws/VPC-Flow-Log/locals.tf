@@ -10,6 +10,8 @@
 # --------------------------------------------------------------------------------------
 
 locals {
-  flow_log_name = join("-", [var.project, var.application, var.environment, var.region, "flog-log"])
-  flow_log_tags = merge(var.tags, { Name : local.flow_log_name })
+  flow_log_name   = join("-", [var.vpc_flow_log_abbreviation, var.vpc_flow_log_name])
+  flow_log_tags   = merge(var.tags, { Name : local.flow_log_name })
+  iam_role_name   = join("-", [var.iam_role_abbreviation, var.vpc_flow_log_name])
+  iam_policy_name = join("-", [var.iam_policy_abbreviation, var.vpc_flow_log_name])
 }

@@ -9,22 +9,17 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "project" {
+variable "target_group_name" {
   type        = string
-  description = "Name of the project"
+  description = "The name for the Load Balancer Target Group"
 }
-variable "environment" {
+
+variable "target_group_abbreviation" {
   type        = string
-  description = "Name of the environment"
+  description = "The abbreviation for the Target Group resource name"
+  default     = "tg"
 }
-variable "region" {
-  type        = string
-  description = "Code of the region"
-}
-variable "application" {
-  type        = string
-  description = "Purpose of the EC2 Instance"
-}
+
 variable "target_type" {
   type        = string
   description = "Type of the target"

@@ -15,9 +15,10 @@ variable "rules" {
     to_port         = number
     from_port       = number
     protocol        = string
-    cidr_blocks     = list(string)
-    security_groups = list(string)
-    prefix_list_ids = list(string)
+    cidr_blocks     = optional(list(string), [])
+    security_groups = optional(list(string), [])
+    prefix_list_ids = optional(list(string), [])
+    description     = optional(string, null)
   }))
   description = "List of rules to be added to the security group"
 }

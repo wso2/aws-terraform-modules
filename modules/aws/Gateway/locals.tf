@@ -10,6 +10,6 @@
 # --------------------------------------------------------------------------------------
 
 locals {
-  ig_name = join("-", [var.project, var.application, var.environment, var.region, "ig"])
+  ig_name = join("-", [var.gateway_abbreviation, var.gateway_name])
   ig_tags = merge(var.tags, { Name : local.ig_name })
 }

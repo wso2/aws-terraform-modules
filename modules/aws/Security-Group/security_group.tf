@@ -9,15 +9,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-# Ignore: AVD-AWS-0099 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-0099)
-# Reason: Description is a required variable for the security group
-# trivy:ignore:AVD-AWS-0099
+# trivy:ignore:AVD-AWS-0099 Description is a required variable for the security group
 resource "aws_security_group" "security_group" {
-  name        = join("-", [var.project, var.application, var.environment, var.region, "sg"])
-  description = var.description
+  name        = local.sg_name
+  description = var.security_group_description
   vpc_id      = var.vpc_id
-
-  tags = local.sg_tags
+  tags        = local.sg_tags
 }
 
 resource "aws_security_group_rule" "security_group_rule" {

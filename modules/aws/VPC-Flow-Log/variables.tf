@@ -60,19 +60,25 @@ variable "max_aggregation_interval" {
   description = "The maximum interval of time during which a flow of packets is captured and aggregated into a flow log record. Measured in seconds"
   default     = 600
 }
-variable "project" {
+variable "vpc_flow_log_abbreviation" {
+  description = "The abbreviation for the VPC Flow Log"
   type        = string
-  description = "Name of the project"
 }
-variable "environment" {
+
+variable "vpc_flow_log_name" {
+  description = "The name for the VPC Flow Log"
   type        = string
-  description = "Name of the environment"
+  default     = "flowlog"
 }
-variable "region" {
+
+variable "iam_role_abbreviation" {
+  description = "The abbreviation for the IAM role resource name"
   type        = string
-  description = "Code of the region"
+  default     = "vflir"
 }
-variable "application" {
+
+variable "iam_policy_abbreviation" {
+  description = "The abbreviation for the IAM policy resource name"
   type        = string
-  description = "Purpose of the Subnet"
+  default     = "vflip"
 }

@@ -9,22 +9,35 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "project" {
+variable "eks_cluster_name" {
   type        = string
-  description = "Name of the project"
+  description = "The name for the EKS Cluster"
 }
-variable "environment" {
+
+variable "eks_cluster_abbreviation" {
   type        = string
-  description = "Name of the environment"
+  description = "The abbreviation for the EKS Cluster resource name"
+  default     = "eks"
 }
-variable "region" {
+
+variable "iam_role_abbreviation" {
   type        = string
-  description = "Code of the region"
+  description = "The abbreviation for the IAM Role resource name"
+  default     = "ir"
 }
-variable "application" {
+
+variable "iam_policy_abbreviation" {
   type        = string
-  description = "Purpose of the EKS Cluster"
+  description = "The abbreviation for the IAM Policy resource name"
+  default     = "ip"
 }
+
+variable "route_table_abbreviation" {
+  type        = string
+  description = "The abbreviation for the Route Table resource name"
+  default     = "rt"
+}
+
 variable "kubernetes_version" {
   type        = string
   description = "Kubernetes Version"
