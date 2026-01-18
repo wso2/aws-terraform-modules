@@ -9,3 +9,11 @@
 #
 # --------------------------------------------------------------------------------------
 
+locals {
+  name_suffix = join("-", compact([var.environment, var.region]))
+  global_budget_name = coalesce(
+    var.global_budget_name_override,
+    local.name_suffix != "" ? "${var.name_prefix}-${local.name_suffix}-global-budget" : "${var.name_prefix}-global-budget"
+  )
+  per_service_name_prefix = local.name_suffix != "" ? "${var.name_prefix}-${local.name_suffix}" : var.name_prefix
+}

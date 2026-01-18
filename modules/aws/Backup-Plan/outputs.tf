@@ -20,27 +20,27 @@
 
 output "backup_plan_id" {
   description = "The ID of the backup plan"
-  value       = aws_backup_plan.this.id
+  value       = aws_backup_plan.backup_plan.id
 }
 
 output "backup_plan_arn" {
   description = "The ARN of the backup plan"
-  value       = aws_backup_plan.this.arn
+  value       = aws_backup_plan.backup_plan.arn
 }
 
 output "backup_plan_name" {
   description = "The name of the backup plan"
-  value       = aws_backup_plan.this.name
+  value       = aws_backup_plan.backup_plan.name
 }
 
 output "backup_selection_id" {
   description = "The ID of the backup selection"
-  value       = aws_backup_selection.this.id
+  value       = aws_backup_selection.backup_selection.id
 }
 
 output "backup_selection_name" {
   description = "The name of the backup selection"
-  value       = aws_backup_selection.this.name
+  value       = aws_backup_selection.backup_selection.name
 }
 
 output "rule_count" {

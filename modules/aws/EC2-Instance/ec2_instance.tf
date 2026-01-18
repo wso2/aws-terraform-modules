@@ -11,7 +11,7 @@
 
 resource "aws_key_pair" "key_pair" {
   count      = var.add_ssh_key == true ? 1 : 0
-  key_name   = join("-", [local.name_prefix, "ec2-kp"])
+  key_name   = local.key_pair_name
   public_key = var.ssh_public_key
 
   tags = var.tags

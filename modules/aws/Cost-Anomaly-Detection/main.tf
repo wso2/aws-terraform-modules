@@ -18,15 +18,15 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_ce_anomaly_monitor" "this" {
+resource "aws_ce_anomaly_monitor" "anomaly_monitor" {
   name              = var.monitor_name
   monitor_type      = var.monitor_type
   monitor_dimension = var.monitor_dimension
 }
 
-resource "aws_ce_anomaly_subscription" "this" {
+resource "aws_ce_anomaly_subscription" "anomaly_subscription" {
   name             = var.subscription_name
-  monitor_arn_list = [aws_ce_anomaly_monitor.this.arn]
+  monitor_arn_list = [aws_ce_anomaly_monitor.anomaly_monitor.arn]
   frequency        = var.frequency
 
   threshold_expression {

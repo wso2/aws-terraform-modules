@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
+# Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
 #
 # WSO2 LLC. licenses this file to you under the Apache License,
 # Version 2.0 (the "License"); you may not use this file except
@@ -41,11 +41,13 @@ variable "subscribers" {
     delivery_policy        = optional(string)
   }))
 }
+
 variable "tags" {
   type        = map(string)
   description = "Tags to be added to the security group"
   default     = {}
 }
+
 variable "kms_master_key_id" {
   type        = string
   description = "The ID of an AWS-managed customer master key (CMK) for Amazon SNS or a custom CMK"

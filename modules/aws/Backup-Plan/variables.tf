@@ -18,18 +18,36 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "project" {
-  description = "Project name"
+variable "backup_plan_abbreviation" {
+  description = "Abbreviation for the backup plan name"
+  type        = string
+  default     = "backup-plan"
+}
+
+variable "backup_plan_name" {
+  description = "Name of the backup plan"
   type        = string
 }
 
-variable "environment" {
-  description = "Environment name (e.g., prod, dev, staging)"
+variable "backup_rule_abbreviation" {
+  description = "Abbreviation for the backup rule name"
+  type        = string
+  default     = "backup-rule"
+}
+
+variable "backup_rule_name" {
+  description = "Name of the backup rule"
   type        = string
 }
 
-variable "region" {
-  description = "AWS region"
+variable "backup_selection_abbreviation" {
+  description = "Abbreviation for the backup selection name"
+  type        = string
+  default     = "backup-selection"
+}
+
+variable "backup_selection_name" {
+  description = "Name of the backup selection"
   type        = string
 }
 

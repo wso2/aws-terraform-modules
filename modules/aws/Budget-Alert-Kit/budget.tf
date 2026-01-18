@@ -1,36 +1,13 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
+# Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
 #
-# WSO2 LLC. licenses this file to you under the Apache License,
-# Version 2.0 (the "License"); you may not use this file except
-# in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the License for the
-# specific language governing permissions and limitations
-# under the License.
+# This software is the property of WSO2 LLC. and its suppliers, if any.
+# Dissemination of any information or reproduction of any material contained
+# herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
+# You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-
-locals {
-  # Build name suffix from environment and region if provided
-  name_suffix = join("-", compact([var.environment, var.region]))
-
-  # Global budget name: use override if provided, otherwise construct from prefix
-  global_budget_name = coalesce(
-    var.global_budget_name_override,
-    local.name_suffix != "" ? "${var.name_prefix}-${local.name_suffix}-global-budget" : "${var.name_prefix}-global-budget"
-  )
-
-  # Per-service budget name prefix
-  per_service_name_prefix = local.name_suffix != "" ? "${var.name_prefix}-${local.name_suffix}" : var.name_prefix
-}
 
 resource "aws_budgets_budget" "global" {
   count = var.create_global_budget ? 1 : 0

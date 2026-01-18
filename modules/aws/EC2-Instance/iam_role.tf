@@ -16,7 +16,7 @@
 # trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "session_manager_policy" {
   count = var.enable_session_manager == true ? 1 : 0
-  name  = join("-", [var.project, var.application, var.environment, var.region, "ec2-session-manager-iam-policy"])
+  name  = join("-", [var.ec2_iam_policy_abbreviation, var.ec2_iam_policy_name])
   policy = jsonencode({
     Statement = [{
       Action = [
@@ -34,7 +34,7 @@ resource "aws_iam_policy" "session_manager_policy" {
 }
 
 resource "aws_iam_role" "iam_role" {
-  name = join("-", [var.project, var.application, var.environment, var.region, "ec2-iam-role"])
+  name = join("-", [var.ec2_iam_role_abbreviation, var.ec2_iam_role_name])
 
   assume_role_policy = <<POLICY
 {
@@ -55,7 +55,7 @@ POLICY
 
 
 resource "aws_iam_instance_profile" "iam_instance_profile" {
-  name = join("-", [var.project, var.application, var.environment, var.region, "ec2-instance-profile"])
+  name = join("-", [var.ec2_iam_instance_profile_abbreviation, var.ec2_iam_instance_profile_name])
   role = aws_iam_role.iam_role.name
 
   depends_on = [aws_iam_role.iam_role]

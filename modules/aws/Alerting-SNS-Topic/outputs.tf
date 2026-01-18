@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
+# Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
 #
 # WSO2 LLC. licenses this file to you under the Apache License,
 # Version 2.0 (the "License"); you may not use this file except
@@ -19,17 +19,5 @@
 # --------------------------------------------------------------------------------------
 
 output "topic_arn" {
-  value = aws_sns_topic.sns_topic.arn
-}
-
-output "critical_topic_arn" {
-  value = aws_sns_topic.sns_topic.arn
-}
-
-output "warning_topic_arn" {
-  value = aws_sns_topic.sns_topic.arn
-}
-
-output "info_topic_arn" {
   value = aws_sns_topic.sns_topic.arn
 }

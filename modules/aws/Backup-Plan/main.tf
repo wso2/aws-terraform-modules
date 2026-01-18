@@ -18,13 +18,13 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_backup_plan" "this" {
-  name = "${var.project}-${var.service_name}-backup-${var.environment}-${var.region}-plan"
+resource "aws_backup_plan" "backup_plan" {
+  name = join("-", [var.backup_plan_abbreviation, var.backup_plan_name])
 
   dynamic "rule" {
     for_each = var.backup_rules
     content {
-      rule_name         = "${var.project}-${var.service_name}-${rule.value.name}-${var.environment}-${var.region}"
+      rule_name         = join("-", [var.backup_rule_abbreviation, var.backup_rule_name])
       target_vault_name = var.backup_vault_name
       schedule          = rule.value.schedule
       start_window      = lookup(rule.value, "start_window", 60)
@@ -52,16 +52,16 @@ resource "aws_backup_plan" "this" {
   tags = merge(
     var.tags,
     {
-      Name      = "${var.project}-${var.service_name}-backup-${var.environment}-${var.region}-plan"
+      Name      = join("-", [var.backup_plan_abbreviation, var.backup_plan_name])
       Service   = var.service_name
       ManagedBy = "terraform"
     }
   )
 }
 
-resource "aws_backup_selection" "this" {
-  name         = "${var.project}-${var.service_name}-backup-${var.environment}-${var.region}-selection"
-  plan_id      = aws_backup_plan.this.id
+resource "aws_backup_selection" "backup_selection" {
+  name         = join("-", [var.backup_selection_abbreviation, var.backup_selection_name])
+  plan_id      = aws_backup_plan.backup_plan.id
   iam_role_arn = var.backup_iam_role_arn
 
   selection_tag {
