@@ -9,6 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
+# Global Budget for all tagged resources
 resource "aws_budgets_budget" "global" {
   name         = "Choreo-global-budget"
   budget_type  = "COST"
@@ -16,11 +17,12 @@ resource "aws_budgets_budget" "global" {
   limit_unit   = "USD"
   time_unit    = "MONTHLY"
 
+
   dynamic "cost_filter" {
-    for_each = var.tag_key != null && var.tag_value != null ? [1] : []
+    for_each = var.include_tf_tagged_resources ? [1] : []
     content {
       name   = "TagKeyValue"
-      values = ["user:${var.tag_key}$${var.tag_value}"]
+      values = ["user:${var.tag_key}${"$"}${var.tag_value}"]
     }
   }
 
@@ -30,19 +32,20 @@ resource "aws_budgets_budget" "global" {
     threshold_type            = "PERCENTAGE"
     notification_type         = "FORECASTED"
     subscriber_sns_topic_arns = [var.critical_sns_arn]
+    subscriber_email_addresses = var.email_addresses
   }
 
   notification {
     comparison_operator       = "GREATER_THAN"
     threshold                 = 80
     threshold_type            = "PERCENTAGE"
-    notification_type         = "ACTUAL"
+    notification_type         = "FORECASTED"
     subscriber_sns_topic_arns = [var.warning_sns_arn]
+    subscriber_email_addresses = var.email_addresses
   }
-
-  tags = var.tags
 }
 
+# EC2 Instances Budget (configured percentage)
 resource "aws_budgets_budget" "per_service_budget" {
   for_each     = var.per_service_budget
   name         = "Choreo-${each.key}-budget"
@@ -51,17 +54,20 @@ resource "aws_budgets_budget" "per_service_budget" {
   limit_unit   = "USD"
   time_unit    = "MONTHLY"
 
-  cost_filter {
-    name   = "Service"
-    values = [each.value.service_filter]
-  }
 
   dynamic "cost_filter" {
-    for_each = var.tag_key != null && var.tag_value != null ? [1] : []
+    for_each = var.include_tf_tagged_resources ? [1] : []
     content {
       name   = "TagKeyValue"
-      values = ["user:${var.tag_key}$${var.tag_value}"]
+      values = ["user:${var.tag_key}${"$"}${var.tag_value}"]
     }
+  }
+
+  cost_filter {
+    name = "Service"
+    values = [
+      "${each.value.service_filter}",
+    ]
   }
 
   notification {
@@ -70,15 +76,16 @@ resource "aws_budgets_budget" "per_service_budget" {
     threshold_type            = "PERCENTAGE"
     notification_type         = "FORECASTED"
     subscriber_sns_topic_arns = [var.critical_sns_arn]
+    subscriber_email_addresses = var.email_addresses
   }
 
   notification {
     comparison_operator       = "GREATER_THAN"
     threshold                 = 80
     threshold_type            = "PERCENTAGE"
-    notification_type         = "ACTUAL"
+    notification_type         = "FORECASTED"
     subscriber_sns_topic_arns = [var.warning_sns_arn]
+    subscriber_email_addresses = var.email_addresses
   }
 
-  tags = var.tags
 }
