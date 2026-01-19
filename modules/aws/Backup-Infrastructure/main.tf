@@ -58,7 +58,7 @@ data "aws_iam_policy_document" "backup_kms" {
 }
 
 resource "aws_kms_alias" "alias" {
-  name          = alias/${join("-", [var.alias_name, var.alias_abbreviation])}"  
+  name          = "alias/${join("-", [var.alias_name, var.alias_abbreviation])}"  
   target_key_id = aws_kms_key.key.key_id
 }
 
