@@ -10,9 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_budgets_budget" "global" {
-  count = var.create_global_budget ? 1 : 0
-
-  name         = local.global_budget_name
+  name         = "Choreo-global-budget"
   budget_type  = "COST"
   limit_amount = var.cost
   limit_unit   = "USD"
@@ -46,9 +44,8 @@ resource "aws_budgets_budget" "global" {
 }
 
 resource "aws_budgets_budget" "per_service_budget" {
-  for_each = var.per_service_budget
-
-  name         = "${local.per_service_name_prefix}-${each.key}-budget"
+  for_each     = var.per_service_budget
+  name         = "Choreo-${each.key}-budget"
   budget_type  = "COST"
   limit_amount = each.value.limit
   limit_unit   = "USD"
