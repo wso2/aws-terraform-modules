@@ -23,6 +23,12 @@ variable "name" {
   type        = string
 }
 
+variable "abbreviation" {
+  description = "Abbreviation of the rule name"
+  type        = string
+  default     = "rule"
+}
+
 variable "description" {
   description = "The description of the rule"
   type        = string

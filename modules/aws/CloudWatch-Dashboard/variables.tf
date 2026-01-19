@@ -23,6 +23,12 @@ variable "dashboard_name" {
   type        = string
 }
 
+variable "abbreviation" {
+  description = "Abbreviation of the dashboard name"
+  type        = string
+  default     = "dashboard"
+}
+
 variable "dashboard_body" {
   description = "The detailed information about the dashboard, including what widgets are included and their layout. This is a JSON string."
   type        = string

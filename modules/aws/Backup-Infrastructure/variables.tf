@@ -39,6 +39,11 @@ variable "tags" {
   default     = {}
 }
 
+variable "description" {
+  description = "Description for the KMS key"
+  type        = string
+}
+
 # KMS Configuration
 variable "kms_deletion_window_days" {
   description = "KMS key deletion window in days"

@@ -20,21 +20,21 @@
 
 # KMS Key for Backup Vault Encryption
 resource "aws_kms_key" "backup" {
-  description             = "${var.project}-backup-${var.environment}-${var.region}-kms"
+  description             = var.description
   deletion_window_in_days = var.kms_deletion_window_days
   enable_key_rotation     = var.enable_kms_rotation
 
   tags = merge(
     var.tags,
     {
-      Name    = "${var.project}-backup-${var.environment}-${var.region}-kms"
+      Name    = "${var.project}-backup-${var.environment}-${var.region}-key"
       Purpose = "Backup vault encryption"
     }
   )
 }
 
 resource "aws_kms_alias" "backup" {
-  name          = "alias/${var.project}-backup-${var.environment}-${var.region}"
+  name          = "alias/${var.project}-backup-${var.environment}-${var.region}-alias"
   target_key_id = aws_kms_key.backup.key_id
 }
 

@@ -10,7 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 variable "rules" {
-  type  = list(object({
+  type = list(object({
     direction       = string
     to_port         = number
     from_port       = number

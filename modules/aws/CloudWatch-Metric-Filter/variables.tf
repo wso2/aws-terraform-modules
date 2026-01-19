@@ -18,12 +18,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "cw_log_metric_filter_name" {
+variable "name" {
   description = "The name of the cloudwatch metric filter"
   type        = string
 }
 
-variable "cw_log_metric_filter_abbreviation" {
+variable "abbreviation" {
   description = "Abbreviation of the cloudwatch metric filter name"
   type        = string
   default     = "filter"
