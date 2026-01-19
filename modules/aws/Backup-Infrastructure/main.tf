@@ -47,10 +47,10 @@ resource "aws_backup_vault" "vault" {
 }
 
 # Backup Vault Lock (optional)
-resource "aws_backup_vault_lock_configuration" "main" {
+resource "aws_backup_vault_lock_configuration" "vault" {
   count = var.enable_backup_vault_lock ? 1 : 0
 
-  backup_vault_name   = aws_backup_vault.main.name
+  backup_vault_name   = aws_backup_vault.vault.name
   min_retention_days  = var.vault_lock_min_retention_days
   max_retention_days  = var.vault_lock_max_retention_days
   changeable_for_days = var.vault_lock_changeable_days
@@ -90,12 +90,12 @@ resource "aws_iam_role" "role" {
 }
 
 resource "aws_iam_role_policy_attachment" "backup" {
-  role       = aws_iam_role.backup.name
+  role       = aws_iam_role.role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup"
 }
 
 resource "aws_iam_role_policy_attachment" "restore" {
-  role       = aws_iam_role.backup.name
+  role       = aws_iam_role.role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForRestores"
 }
 
@@ -113,10 +113,10 @@ resource "aws_cloudwatch_metric_alarm" "backup_job_failed" {
   threshold           = 0
   alarm_description   = "Alert when backup jobs fail"
   treat_missing_data  = "notBreaching"
-  alarm_actions       = [aws_sns_topic.backup_notifications.arn]
+  alarm_actions       = [aws_sns_topic.topic.arn]
 
   dimensions = {
-    BackupVaultName = aws_backup_vault.main.name
+    BackupVaultName = aws_backup_vault.vault.name
   }
 
   tags = var.tags
@@ -135,10 +135,10 @@ resource "aws_cloudwatch_metric_alarm" "restore_job_failed" {
   threshold           = 0
   alarm_description   = "Alert when restore jobs fail"
   treat_missing_data  = "notBreaching"
-  alarm_actions       = [aws_sns_topic.backup_notifications.arn]
+  alarm_actions       = [aws_sns_topic.topic.arn]
 
   dimensions = {
-    BackupVaultName = aws_backup_vault.main.name
+    BackupVaultName = aws_backup_vault.vault.name
   }
 
   tags = var.tags

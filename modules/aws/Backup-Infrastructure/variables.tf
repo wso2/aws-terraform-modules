@@ -74,7 +74,7 @@ variable "role_abbreviation" {
 }
 
 variable "backup_failed_alarm_name" {
-  description = ""
+  description = "Name of the backup failed alarm"
   type        = string
 }
 
