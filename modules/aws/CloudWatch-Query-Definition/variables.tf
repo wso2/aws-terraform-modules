@@ -18,9 +18,15 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "name" {
-  description = "The name of the query definition"
+variable "cw_query_definition_name" {
+  description = "The name of the cloudwatch query definition"
   type        = string
+}
+
+variable "cw_query_definition_abbreviation" {
+  description = "Abbrevation of the cloudwatch query definition name"
+  type        = string
+  default     = "query"
 }
 
 variable "log_group_names" {

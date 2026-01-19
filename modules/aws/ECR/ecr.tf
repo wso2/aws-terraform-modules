@@ -17,7 +17,7 @@
 # trivy:ignore:AVD-AWS-0030
 # trivy:ignore:AVD-AWS-0033
 resource "aws_ecr_repository" "ecr_repository" {
-  name = join("-", [var.ecr_repository_abbreviation, var.ecr_repository_name])
+  name = var.generate_name == true ? join("-", [local.name_prefix, "ecr"]) : var.image_repo_name
   tags = var.tags
 
   image_tag_mutability = var.image_tag_mutability
@@ -33,8 +33,6 @@ resource "aws_ecr_repository" "ecr_repository" {
 }
 
 data "aws_iam_policy_document" "admin_policy" {
-  count = length(var.external_admin_account_ids) > 0 ? 1 : 0
-
   statement {
     sid    = "External Admin policy"
     effect = "Allow"
@@ -64,7 +62,7 @@ data "aws_iam_policy_document" "admin_policy" {
 }
 
 resource "aws_ecr_repository_policy" "admin_policy" {
-    repository = aws_ecr_repository.ecr_repository.name
+  repository = aws_ecr_repository.ecr_repository.name
   policy     = data.aws_iam_policy_document.admin_policy.json
 }
 

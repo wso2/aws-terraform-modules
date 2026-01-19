@@ -23,6 +23,12 @@ variable "monitor_name" {
   type        = string
 }
 
+variable "monitor_abbreviation" {
+  description = "Abbreviation of the anomaly monitor"
+  type        = string
+  default     = "monitor"
+}
+
 variable "monitor_type" {
   description = "Type of anomaly monitor (e.g., DIMENSIONAL, CUSTOM)."
   type        = string
@@ -35,15 +41,33 @@ variable "monitor_dimension" {
   default     = "SERVICE"
 }
 
-variable "subscription_name" {
+variable "monitor_subscription_name" {
   description = "Name for the anomaly subscription."
   type        = string
+}
+
+variable "monitor_subscription_abbreviation" {
+  description = "Abbreviation of the cost anomaly monitor subscription"
+  type        = string
+  default     = "sub"
 }
 
 variable "threshold" {
   description = "Threshold for anomaly alerts."
   type        = number
   default     = 100
+}
+
+variable "threshold_key" {
+  description = "Thershold key for anomaly alerts"
+  type        = string
+  default     = "ANOMALY_TOTAL_IMPACT_ABSOLUTE"
+}
+
+variable "threshold_match_options" {
+  description = "Threshold match options for alerts"
+  type        = list(string)
+  default     = ["GREATER_THAN_OR_EQUAL"]
 }
 
 variable "frequency" {

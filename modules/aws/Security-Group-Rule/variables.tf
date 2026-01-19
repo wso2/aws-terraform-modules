@@ -10,7 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 variable "rules" {
-    type = list(object({
+  type  = list(object({
     direction       = string
     to_port         = number
     from_port       = number
@@ -19,7 +19,7 @@ variable "rules" {
     security_groups = list(string)
     prefix_list_ids = list(string)
   }))
-    description = "List of rules to be added to the security group"
+  description = "List of rules to be added to the security group"
 }
 variable "security_group_id" {
   type        = string

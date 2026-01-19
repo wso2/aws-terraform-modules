@@ -19,7 +19,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_cloudwatch_log_metric_filter" "filter" {
-  name           = var.name
+  name           = join("-", [var.cw_log_metric_filter_name, var.cw_log_metric_filter_abbreviation])
   log_group_name = var.log_group_name
   pattern        = var.pattern
 
