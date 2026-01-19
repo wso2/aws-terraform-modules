@@ -85,7 +85,7 @@ variable "create_global_budget" {
 variable "global_budget_name_override" {
   type        = string
   description = "Override the auto-generated global budget name. If provided, this will be used as the exact budget name."
-  default     = null
+  default     = Choreo
 }
 
 variable "tags" {

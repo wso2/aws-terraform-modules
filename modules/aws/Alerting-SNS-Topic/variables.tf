@@ -18,15 +18,29 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "sns_topic_name" {
+variable "project" {
   type        = string
-  description = "The name for the SNS Topic"
+  description = "Name of the project"
 }
 
-variable "sns_topic_abbreviation" {
+variable "environment" {
   type        = string
-  description = "The abbreviation for the SNS Topic resource name"
-  default     = "sns"
+  description = "Name of the environment"
+}
+
+variable "region" {
+  type        = string
+  description = "Code of the region"
+}
+
+variable "application" {
+  type = string
+  description = "Name of the application"
+}
+
+variable "topic_name" {
+  type = string
+  description = "The name for the SNS Topic"
 }
 
 variable "subscribers" {
@@ -44,7 +58,7 @@ variable "subscribers" {
 
 variable "tags" {
   type        = map(string)
-  description = "Tags to be added to the security group"
+  description = "Tags to be added to the SNS Topic"
   default     = {}
 }
 

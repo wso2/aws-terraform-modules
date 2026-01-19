@@ -9,59 +9,57 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "kms_key_name" {
+variable "project" {
   type        = string
-  description = "The name for the KMS Key"
+  description = "Name of the project"
 }
-
-variable "kms_key_abbreviation" {
+variable "environment" {
   type        = string
-  description = "The abbreviation for the KMS Key resource name"
-  default     = "cmk"
+  description = "The name of the environment"
 }
-
+variable "region" {
+  type        = string
+  description = "The name of the region"
+}
+variable "application" {
+  type        = string
+  description = "The name of the application"
+}
 variable "tags" {
   type        = map(string)
   description = "The tags for the resources"
   default     = {}
 }
-
 variable "key_usage" {
   type        = string
   description = "The intended use of the key. Valid values: ENCRYPT_DECRYPT or SIGN_VERIFY"
   default     = "ENCRYPT_DECRYPT"
 }
-
 variable "deletion_window_in_days" {
   type        = number
   description = "Duration in days after which the key is deleted after destruction of the resource, must be between 7 and 30 days"
   default     = 30
 }
-
 variable "description" {
   type        = string
   description = "The description of the key as viewed in AWS console"
   default     = "KMS key for WSO2 API Manager"
 }
-
 variable "policy" {
   type        = string
   description = "The policy of the key as viewed in AWS console"
   default     = null
 }
-
 variable "is_enabled" {
   type        = bool
   description = "Specifies whether the key is enabled. Defaults to true."
   default     = true
 }
-
 variable "is_multi_region" {
   type        = bool
   description = "Specifies whether the key is multi-region. Defaults to false."
   default     = false
 }
-
 variable "enable_key_rotation" {
   type        = bool
   description = "Specifies whether key rotation is enabled. Defaults to false."

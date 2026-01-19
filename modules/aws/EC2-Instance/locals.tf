@@ -10,15 +10,14 @@
 # --------------------------------------------------------------------------------------
 
 locals {
-  name_prefix            = var.availability_zone == null ? var.ec2_instance_abbreviation : join("-", [var.ec2_instance_abbreviation, var.availability_zone])
-  ec2_name               = join("-", [local.name_prefix, var.ec2_instance_name])
-  rt_name                = join("-", [local.name_prefix, var.ec2_rt_abbreviation, var.ec2_instance_name])
-  subnet_name            = join("-", [local.name_prefix, var.ec2_subnet_abbreviation, var.ec2_instance_name])
-  nic_name               = join("-", [local.name_prefix, var.ec2_nic_abbreviation, var.ec2_instance_name])
-  ip_name                = join("-", [local.name_prefix, var.ec2_eip_abbreviation, var.ec2_instance_name])
-  volume_name            = join("-", [local.name_prefix, var.ec2_volume_abbreviation, var.ec2_instance_name])
-  shield_protection_name = join("-", [local.name_prefix, var.ec2_shield_protection_abbreviation, var.ec2_instance_name])
-  key_pair_name          = join("-", [local.name_prefix, var.ec2_key_pair_abbreviation, var.ec2_instance_name])
+  name_prefix            = var.availability_zone == null ? join("-", [var.project, var.application, var.environment, var.region]) : join("-", [var.project, var.application, var.environment, var.availability_zone])
+  ec2_name               = join("-", [local.name_prefix, "ec2"])
+  rt_name                = join("-", [local.name_prefix, "ec2-snet-rt"])
+  subnet_name            = join("-", [local.name_prefix, "ec2-snet"])
+  nic_name               = join("-", [local.name_prefix, "ec2-nic"])
+  ip_name                = join("-", [local.name_prefix, "ec2-eip"])
+  volume_name            = join("-", [local.name_prefix, "ec2-volume"])
+  shield_protection_name = join("-", [local.name_prefix, "shield-protection"])
   ec2_tags               = merge(var.tags, { Name : local.ec2_name })
   rt_tags                = merge(var.tags, { Name : local.rt_name })
   subnet_tags            = merge(var.tags, { Name : local.subnet_name })

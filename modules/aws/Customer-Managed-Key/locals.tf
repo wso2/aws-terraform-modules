@@ -10,6 +10,11 @@
 # --------------------------------------------------------------------------------------
 
 locals {
-  name = join("-", [var.kms_key_abbreviation, var.kms_key_name])
-  tags = merge(var.tags, { Name : local.name })
+  name = join("-", [var.project, var.application, var.environment, var.region, "cmk"])
+  tags = merge(
+    var.tags,
+    {
+      "Name" = local.name
+    }
+  )
 }
