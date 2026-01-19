@@ -19,7 +19,7 @@
 # --------------------------------------------------------------------------------------
 
 # KMS Key for Backup Vault Encryption
-resource "aws_kms_key" "backup" {
+resource "aws_kms_key" "key" {
   description             = var.description
   deletion_window_in_days = var.kms_deletion_window_days
   enable_key_rotation     = var.enable_kms_rotation
@@ -27,29 +27,23 @@ resource "aws_kms_key" "backup" {
   tags = merge(
     var.tags,
     {
-      Name    = "${var.project}-backup-${var.environment}-${var.region}-key"
+      Name    = join("-", [var.key_name, var.key_abbreviation])
       Purpose = "Backup vault encryption"
     }
   )
 }
 
-resource "aws_kms_alias" "backup" {
-  name          = "alias/${var.project}-backup-${var.environment}-${var.region}-alias"
-  target_key_id = aws_kms_key.backup.key_id
+resource "aws_kms_alias" "alias" {
+  name          = join("-", [var.alias_name, var.alias_abbreviation])
+  target_key_id = aws_kms_key.key.key_id
 }
 
 # Backup Vault
-resource "aws_backup_vault" "main" {
-  name        = "${var.project}-backup-${var.environment}-${var.region}-vault"
-  kms_key_arn = aws_kms_key.backup.arn
+resource "aws_backup_vault" "vault" {
+  name        = join("-", [var.vault_name, var.vault_abbreviation])
+  kms_key_arn = aws_kms_key.key.arn
 
-  tags = merge(
-    var.tags,
-    {
-      Name    = "${var.project}-backup-${var.environment}-${var.region}-vault"
-      Purpose = "Primary backup vault"
-    }
-  )
+  tags = var.tags
 }
 
 # Backup Vault Lock (optional)
@@ -63,29 +57,23 @@ resource "aws_backup_vault_lock_configuration" "main" {
 }
 
 # SNS Topic for Backup Notifications
-resource "aws_sns_topic" "backup_notifications" {
-  name              = "${var.project}-backup-notifications-${var.environment}-${var.region}"
-  kms_master_key_id = aws_kms_key.backup.id
+resource "aws_sns_topic" "topic" {
+  name              = join("-", [var.topic_name, var.topic_abbreviation])
+  kms_master_key_id = aws_kms_key.key.id
 
-  tags = merge(
-    var.tags,
-    {
-      Name    = "${var.project}-backup-notifications-${var.environment}-${var.region}"
-      Purpose = "Backup job notifications"
-    }
-  )
+  tags = var.tags
 }
 
 # Backup Vault Notifications
-resource "aws_backup_vault_notifications" "main" {
-  backup_vault_name   = aws_backup_vault.main.name
-  sns_topic_arn       = aws_sns_topic.backup_notifications.arn
+resource "aws_backup_vault_notifications" "vault" {
+  backup_vault_name   = aws_backup_vault.vault.name
+  sns_topic_arn       = aws_sns_topic.topic.arn
   backup_vault_events = var.backup_vault_events
 }
 
 # IAM Role for AWS Backup
-resource "aws_iam_role" "backup" {
-  name = "${var.project}-backup-${var.environment}-${var.region}-role"
+resource "aws_iam_role" "role" {
+  name = join("-", [var.role_name, var.role_abbreviation])
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -98,13 +86,7 @@ resource "aws_iam_role" "backup" {
     }]
   })
 
-  tags = merge(
-    var.tags,
-    {
-      Name    = "${var.project}-backup-${var.environment}-${var.region}-role"
-      Purpose = "AWS Backup service role"
-    }
-  )
+  tags = var.tags
 }
 
 resource "aws_iam_role_policy_attachment" "backup" {
@@ -121,7 +103,7 @@ resource "aws_iam_role_policy_attachment" "restore" {
 resource "aws_cloudwatch_metric_alarm" "backup_job_failed" {
   count = var.enable_backup_monitoring ? 1 : 0
 
-  alarm_name          = "${var.project}-backup-job-failed-${var.environment}-${var.region}"
+  alarm_name          = join("-", [var.backup_failed_alarm_name, var.backup_failed_alarm_name_abbreviation])
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
   metric_name         = "NumberOfBackupJobsFailed"
@@ -137,18 +119,13 @@ resource "aws_cloudwatch_metric_alarm" "backup_job_failed" {
     BackupVaultName = aws_backup_vault.main.name
   }
 
-  tags = merge(
-    var.tags,
-    {
-      Name = "${var.project}-backup-job-failed-${var.environment}"
-    }
-  )
+  tags = var.tags
 }
 
 resource "aws_cloudwatch_metric_alarm" "restore_job_failed" {
   count = var.enable_backup_monitoring ? 1 : 0
 
-  alarm_name          = "${var.project}-restore-job-failed-${var.environment}-${var.region}"
+  alarm_name          = join("-", [var.restore_failed_alarm_name, var.restore_failed_alarm_name_abbreviation])
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
   metric_name         = "NumberOfRestoreJobsFailed"
@@ -164,27 +141,16 @@ resource "aws_cloudwatch_metric_alarm" "restore_job_failed" {
     BackupVaultName = aws_backup_vault.main.name
   }
 
-  tags = merge(
-    var.tags,
-    {
-      Name = "${var.project}-restore-job-failed-${var.environment}"
-    }
-  )
+  tags = var.tags
 }
 
 # S3 Bucket for Backup Reports (optional)
 resource "aws_s3_bucket" "backup_reports" {
   count = var.enable_backup_reporting ? 1 : 0
 
-  bucket = "${var.project}-backup-reports-${var.environment}-${var.region}"
+  bucket = join("-", [var.bucket_name, var.bucket_abbreviation])
 
-  tags = merge(
-    var.tags,
-    {
-      Name    = "${var.project}-backup-reports-${var.environment}-${var.region}"
-      Purpose = "AWS Backup compliance reports"
-    }
-  )
+  tags = var.tags
 }
 
 resource "aws_s3_bucket_versioning" "backup_reports" {
@@ -222,11 +188,11 @@ resource "aws_s3_bucket_public_access_block" "backup_reports" {
 }
 
 # Backup Report Plan
-resource "aws_backup_report_plan" "compliance" {
+resource "aws_backup_report_plan" "plan" {
   count = var.enable_backup_reporting ? 1 : 0
 
-  name        = replace("${var.project}_backup_compliance_${var.environment}_${var.region}", "-", "_")
-  description = "Backup compliance report for ${var.environment}"
+  name        = join("-", [var.plan_name, var.plan_abbreviation])
+  description = "Backup compliance report for the account"
 
   report_delivery_channel {
     s3_bucket_name = aws_s3_bucket.backup_reports[0].id
@@ -238,11 +204,5 @@ resource "aws_backup_report_plan" "compliance" {
     framework_arns  = var.backup_framework_arns
   }
 
-  tags = merge(
-    var.tags,
-    {
-      Name    = "${var.project}-backup-compliance-${var.environment}-${var.region}"
-      Purpose = "Backup compliance reporting"
-    }
-  )
+  tags = var.tags
 }

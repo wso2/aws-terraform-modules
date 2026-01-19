@@ -9,6 +9,28 @@
 #
 # --------------------------------------------------------------------------------------
 
+variable "global_budget_name" {
+  description = "Name of the global budget"
+  type        = string
+}
+
+variable "global_budget_abbreviation" {
+  description = "Abbreviation for the global budget"
+  type        = string
+  default     = "global-budget"
+}
+
+variable "per_service_budget_name" {
+  description = "Name of the per-service budget"
+  type        = string
+}
+
+variable "per_service_budget_abbreviation" {
+  description = "Abbreviation for the per-service budget"
+  type        = string
+  default     = "service-budget"
+}
+
 variable "cost" {
   type        = number
   description = "Total monthly budget amount in USD"

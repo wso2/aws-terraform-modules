@@ -11,7 +11,7 @@
 
 # Global Budget for all tagged resources
 resource "aws_budgets_budget" "global" {
-  name         = "Choreo-global-budget"
+  name         = join("-", [var.global_budget_name, var.global_budget_abbreviation])
   budget_type  = "COST"
   limit_amount = var.cost
   limit_unit   = "USD"
@@ -27,20 +27,20 @@ resource "aws_budgets_budget" "global" {
   }
 
   notification {
-    comparison_operator       = "GREATER_THAN"
-    threshold                 = 100
-    threshold_type            = "PERCENTAGE"
-    notification_type         = "FORECASTED"
-    subscriber_sns_topic_arns = [var.critical_sns_arn]
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 100
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "FORECASTED"
+    subscriber_sns_topic_arns  = [var.critical_sns_arn]
     subscriber_email_addresses = var.email_addresses
   }
 
   notification {
-    comparison_operator       = "GREATER_THAN"
-    threshold                 = 80
-    threshold_type            = "PERCENTAGE"
-    notification_type         = "FORECASTED"
-    subscriber_sns_topic_arns = [var.warning_sns_arn]
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 80
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "FORECASTED"
+    subscriber_sns_topic_arns  = [var.warning_sns_arn]
     subscriber_email_addresses = var.email_addresses
   }
 }
@@ -48,7 +48,7 @@ resource "aws_budgets_budget" "global" {
 # EC2 Instances Budget (configured percentage)
 resource "aws_budgets_budget" "per_service_budget" {
   for_each     = var.per_service_budget
-  name         = "Choreo-${each.key}-budget"
+  name         = join("-", [var.per_service_budget_name, each.key, var.per_service_budget_abbreviation])
   budget_type  = "COST"
   limit_amount = each.value.limit
   limit_unit   = "USD"
@@ -71,20 +71,20 @@ resource "aws_budgets_budget" "per_service_budget" {
   }
 
   notification {
-    comparison_operator       = "GREATER_THAN"
-    threshold                 = 100
-    threshold_type            = "PERCENTAGE"
-    notification_type         = "FORECASTED"
-    subscriber_sns_topic_arns = [var.critical_sns_arn]
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 100
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "FORECASTED"
+    subscriber_sns_topic_arns  = [var.critical_sns_arn]
     subscriber_email_addresses = var.email_addresses
   }
 
   notification {
-    comparison_operator       = "GREATER_THAN"
-    threshold                 = 80
-    threshold_type            = "PERCENTAGE"
-    notification_type         = "FORECASTED"
-    subscriber_sns_topic_arns = [var.warning_sns_arn]
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 80
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "FORECASTED"
+    subscriber_sns_topic_arns  = [var.warning_sns_arn]
     subscriber_email_addresses = var.email_addresses
   }
 

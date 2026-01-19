@@ -18,19 +18,103 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "project" {
-  description = "Project name for resource naming"
+variable "key_name" {
+  description = "Name of the KMS key"
   type        = string
 }
 
-variable "environment" {
-  description = "Environment name (prod, staging, dev)"
+variable "key_abbreviation" {
+  description = "Abbreviation for the KMS key"
+  type        = string
+  default     = "key"
+}
+
+variable "alias_name" {
+  description = "Name of the KMS alias"
   type        = string
 }
 
-variable "region" {
-  description = "AWS region for resource deployment"
+variable "alias_abbreviation" {
+  description = "Abbreviation for the KMS alias"
   type        = string
+  default     = "alias"
+}
+
+variable "vault_name" {
+  description = "Name of the backup vault"
+  type        = string
+}
+
+variable "vault_abbreviation" {
+  description = "Abbreviation for the backup vault"
+  type        = string
+  default     = "vault"
+}
+
+variable "topic_name" {
+  description = "Name of the SNS topic for backup notifications"
+  type        = string
+}
+
+variable "topic_abbreviation" {
+  description = "Abbreviation for the SNS topic for backup notifications"
+  type        = string
+  default     = "topic"
+}
+
+variable "role_name" {
+  description = "Name of the IAM role for AWS Backup"
+  type        = string
+}
+
+variable "role_abbreviation" {
+  description = "Abbreviation for the IAM role for AWS Backup"
+  type        = string
+  default     = "role"
+}
+
+variable "backup_failed_alarm_name" {
+  description = ""
+  type        = string
+}
+
+variable "backup_failed_alarm_name_abbreviation" {
+  description = "Abbreviation for the backup failed alarm"
+  type        = string
+  default     = "backup-failed-alarm"
+}
+
+variable "restore_failed_alarm_name" {
+  description = "Name of the restore failed alarm"
+  type        = string
+}
+
+variable "restore_failed_alarm_name_abbreviation" {
+  description = "Abbreviation for the restore failed alarm"
+  type        = string
+  default     = "restore-failed-alarm"
+}
+
+variable "bucket_name" {
+  description = "Name of the backup bucket name"
+  type        = string
+}
+
+variable "bucket_abbreviation" {
+  description = "Abbreviation of the backup bucket name"
+  type        = string
+  default     = "bucket"
+}
+
+variable "plan_name" {
+  description = "Name of the backup report plan"
+  type        = string
+}
+
+variable "plan_abbreviation" {
+  description = "Abbreviation for the backup report plan"
+  type        = string
+  default     = "plan"
 }
 
 variable "tags" {
