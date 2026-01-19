@@ -41,10 +41,10 @@ variable "schedule_expression" {
   default     = null
 }
 
-variable "is_enabled" {
-  description = "Whether the rule should be enabled"
-  type        = bool
-  default     = true
+variable "state" {
+  description = "The state of the rule"
+  type        = string
+  default     = "ENABLED"
 }
 
 variable "role_arn" {

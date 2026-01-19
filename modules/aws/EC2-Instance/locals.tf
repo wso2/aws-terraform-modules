@@ -11,7 +11,7 @@
 
 locals {
   name_prefix            = var.availability_zone == null ? var.ec2_instance_abbreviation : join("-", [var.ec2_instance_abbreviation, var.availability_zone])
-  ec2_name               = join("-", [var.local.name_prefix, var.ec2_instance_name])
+  ec2_name               = join("-", [local.name_prefix, var.ec2_instance_name])
   rt_name                = join("-", [local.name_prefix, var.ec2_rt_abbreviation, var.ec2_instance_name])
   subnet_name            = join("-", [local.name_prefix, var.ec2_subnet_abbreviation, var.ec2_instance_name])
   nic_name               = join("-", [local.name_prefix, var.ec2_nic_abbreviation, var.ec2_instance_name])

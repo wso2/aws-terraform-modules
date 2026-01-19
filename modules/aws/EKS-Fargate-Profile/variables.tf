@@ -25,11 +25,6 @@ variable "tags" {
   default     = {}
 }
 
-variable "fargate_namespaces" {
-  description = "Namespaces to be used in Fargate profile"
-  type        = list(string)
-}
-
 variable "subnet_ids" {
   description = "List of subnets to deploy nodepools"
   type        = list(string)
@@ -41,4 +36,5 @@ variable "selectors" {
     namespace = string
     labels    = optional(map(string))
   }))
+  default = []
 }

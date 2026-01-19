@@ -10,6 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 variable "rules" {
+  description = "List of rules to be added to the security group"
   type = list(object({
     direction       = string
     to_port         = number
@@ -20,10 +21,9 @@ variable "rules" {
     prefix_list_ids = optional(list(string), [])
     description     = optional(string, null)
   }))
-  description = "List of rules to be added to the security group"
 }
 
 variable "security_group_id" {
-  type        = string
   description = "Security Group to associate rules with"
+  type        = string
 }

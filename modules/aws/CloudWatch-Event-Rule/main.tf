@@ -23,7 +23,7 @@ resource "aws_cloudwatch_event_rule" "rule" {
   description         = var.description
   event_pattern       = var.event_pattern
   schedule_expression = var.schedule_expression
-  is_enabled          = var.is_enabled
+  state               = var.state
   role_arn            = var.role_arn
   tags                = var.tags
 }

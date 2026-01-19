@@ -24,7 +24,7 @@ output "arn" {
 }
 
 output "id" {
-  description = "The name of the rule"
+  description = "The ID of the rule"
   value       = aws_cloudwatch_event_rule.rule.id
 }
 

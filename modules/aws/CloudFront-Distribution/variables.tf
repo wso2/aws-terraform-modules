@@ -138,9 +138,3 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
-
-variable "dependencies" {
-  description = "List of resources this distribution depends on"
-  type        = list(any)
-  default     = []
-}

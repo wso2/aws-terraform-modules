@@ -98,12 +98,6 @@ variable "enable_backup_monitoring" {
   default     = true
 }
 
-variable "alarm_actions" {
-  description = "List of ARNs to notify when alarms trigger (SNS topics, etc.)"
-  type        = list(string)
-  default     = []
-}
-
 # Backup Reporting
 variable "enable_backup_reporting" {
   description = "Enable S3 bucket and report plan for backup compliance"
