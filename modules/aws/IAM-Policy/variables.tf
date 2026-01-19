@@ -9,23 +9,27 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "iam_policy_name" {
+variable "project" {
   type        = string
-  description = "The name for the IAM policy"
+  description = "Name of the project"
 }
-
-variable "iam_policy_abbreviation" {
+variable "environment" {
   type        = string
-  description = "The abbreviation for the IAM policy resource name"
-  default     = "ip"
+  description = "Name of the environment"
 }
-
+variable "region" {
+  type        = string
+  description = "Code of the region"
+}
+variable "application" {
+  type        = string
+  description = "Purpose of the ECR"
+}
 variable "tags" {
   type        = map(string)
   description = "Tags to be associated with the EKS"
   default     = {}
 }
-
 variable "policy" {
   type = string
 }

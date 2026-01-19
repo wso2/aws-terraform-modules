@@ -10,6 +10,6 @@
 # --------------------------------------------------------------------------------------
 
 locals {
-  tgw_name = join("-", [var.transit_gateway_abbreviation, var.transit_gateway_name])
+  tgw_name = join("-", [var.project, var.application, var.environment, var.region, "tgw"])
   tgw_tags = merge(var.tags, { Name : local.tgw_name })
 }

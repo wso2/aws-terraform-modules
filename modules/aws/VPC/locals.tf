@@ -10,6 +10,6 @@
 # --------------------------------------------------------------------------------------
 
 locals {
-  vpc_name = join("-", [var.vpc_abbreviation, var.vpc_name])
+  vpc_name = join("-", [var.project, var.application, var.environment, var.region, "vpc"])
   vpc_tags = merge(var.tags, { Name : local.vpc_name })
 }

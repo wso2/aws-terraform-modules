@@ -9,22 +9,6 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "project" {
-  type        = string
-  description = "Name of the project"
-}
-variable "environment" {
-  type        = string
-  description = "Name of the environment"
-}
-variable "region" {
-  type        = string
-  description = "Code of the region"
-}
-variable "application" {
-  type        = string
-  description = "Purpose of the EC2 Instance"
-}
 variable "ec2_vpc_id" {
   type        = string
   description = "ID of the VPC containing the EC3 instance"
@@ -60,6 +44,22 @@ variable "ec2_ami" {
 variable "ec2_instance_type" {
   type        = string
   description = "EC2 instance type"
+}
+variable "project" {
+  type        = string
+  description = "Name of the project"
+}
+variable "environment" {
+  type        = string
+  description = "Name of the environment"
+}
+variable "region" {
+  type        = string
+  description = "Code of the region"
+}
+variable "application" {
+  type        = string
+  description = "Purpose of the EC2 Instance"
 }
 variable "custom_routes" {
   type = list(object({

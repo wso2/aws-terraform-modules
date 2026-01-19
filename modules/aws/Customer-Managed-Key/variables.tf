@@ -11,7 +11,7 @@
 
 variable "project" {
   type        = string
-  description = "Name of the project"
+  description = "The name of the project"
 }
 variable "environment" {
   type        = string

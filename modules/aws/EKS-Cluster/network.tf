@@ -18,7 +18,7 @@ resource "aws_subnet" "eks_subnet" {
 
 
   tags = merge(var.tags, {
-    Name = join("-", [var.subnet_abbreviation, var.subnet_details[count.index].availability_zone, var.subnet_name]),
+    Name = join("-", [var.project, var.application, var.environment, var.subnet_details[count.index].availability_zone, "eks-snet"]),
   })
 }
 

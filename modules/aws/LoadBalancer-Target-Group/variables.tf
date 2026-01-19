@@ -9,37 +9,38 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "target_group_name" {
+variable "project" {
   type        = string
-  description = "The name for the Load Balancer Target Group"
+  description = "Name of the project"
 }
-
-variable "target_group_abbreviation" {
+variable "environment" {
   type        = string
-  description = "The abbreviation for the Target Group resource name"
-  default     = "tg"
+  description = "Name of the environment"
 }
-
+variable "region" {
+  type        = string
+  description = "Code of the region"
+}
+variable "application" {
+  type        = string
+  description = "Purpose of the EC2 Instance"
+}
 variable "target_type" {
   type        = string
   description = "Type of the target"
 }
-
 variable "port" {
   type        = number
   description = "Primary port to be exposed within the Target Group"
 }
-
 variable "protocol" {
   type        = string
   description = "Protocol to be used for the Target Group"
 }
-
 variable "vpc_id" {
   type        = string
   description = "VPC ID"
 }
-
 variable "target_group_attachments" {
   type = map(object({
     target_id         = string
@@ -48,7 +49,6 @@ variable "target_group_attachments" {
   }))
   description = "List of target group attachments"
 }
-
 variable "tags" {
   type        = map(string)
   description = "Tags to be added to the resources"

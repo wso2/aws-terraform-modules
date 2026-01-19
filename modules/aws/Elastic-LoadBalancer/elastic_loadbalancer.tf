@@ -13,7 +13,7 @@
 # Reason: We may need public load balancers. As such this has been configured as a parameter.
 # trivy:ignore:AVD-AWS-0053
 resource "aws_lb" "lb" {
-  name               = join("-", [var.elb_abbreviation, var.elb_name])
+  name               = join("-", [var.project, var.application, var.environment, var.region, "elb"])
   internal           = var.internal_usage_flag # Defines the Load balancer network connectivity required by AVD-AWS-0053
   load_balancer_type = var.load_balancer_type
   security_groups    = var.security_group_ids
@@ -25,7 +25,7 @@ resource "aws_lb" "lb" {
   dynamic "subnet_mapping" {
     for_each = var.subnet_ids
     content {
-      subnet_id            = subnet_mapping.value
+      subnet_id            = subnet_mapping.value.id
       allocation_id        = var.internal_usage_flag == false ? aws_eip.eip[subnet_mapping.key].id : null
       private_ipv4_address = var.internal_usage_flag == true ? var.private_ip_addresses[subnet_mapping.key] : null
     }
@@ -40,9 +40,9 @@ resource "aws_eip" "eip" {
 }
 
 resource "aws_shield_protection" "shield_protection" {
-  for_each     = var.internal_usage_flag == true || !var.enable_shield_protection ? {} : var.subnet_ids
-  name         = join("-", [var.shield_protection_abbreviation, each.key])
-  resource_arn = aws_eip.eip[each.key].arn
+  for_each     = var.internal_usage_flag == true && var.enable_shield_protection ? {} : var.subnet_ids
+  name         = join("-", [var.project, var.application, var.environment, var.region, each.key, "elb-eip-shield-protection"])
+  resource_arn = aws_eip.eip[each.key].id
 
   tags = var.tags
 }

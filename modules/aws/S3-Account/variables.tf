@@ -18,15 +18,24 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "s3_bucket_name" {
+variable "project" {
+  description = "Name of the project"
   type        = string
-  description = "The name for the S3 Bucket"
 }
 
-variable "s3_bucket_abbreviation" {
+variable "environment" {
+  description = "Name of the environment"
   type        = string
-  description = "The abbreviation for the S3 Bucket resource name"
-  default     = "s3"
+}
+
+variable "region" {
+  description = "Code of the region"
+  type        = string
+}
+
+variable "application" {
+  description = "Purpose of the EKS Cluster"
+  type        = string
 }
 
 variable "tags" {

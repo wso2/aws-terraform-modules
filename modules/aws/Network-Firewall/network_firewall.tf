@@ -10,7 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_networkfirewall_firewall" "networkfirewall_firewall" {
-  name                = join("-", [var.firewall_abbreviation, var.firewall_name])
+  name                = join("-", [var.project, var.application, var.environment, var.region, "nfw"])
   description         = var.description
   firewall_policy_arn = aws_networkfirewall_firewall_policy.networkfirewall_firewall_policy.arn
   vpc_id              = var.vpc_id
@@ -30,7 +30,7 @@ resource "aws_networkfirewall_firewall" "networkfirewall_firewall" {
 }
 
 resource "aws_networkfirewall_firewall_policy" "networkfirewall_firewall_policy" {
-  name = join("-", [var.firewall_policy_abbreviation, var.firewall_name])
+  name = join("-", [var.project, var.application, var.environment, var.region, "nfw-policy"])
 
   firewall_policy {
     stateless_default_actions          = ["aws:${var.stateless_default_actions}"]

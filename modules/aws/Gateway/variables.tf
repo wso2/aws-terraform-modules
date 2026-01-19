@@ -9,22 +9,26 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "gateway_name" {
-  type        = string
-  description = "The name for the Internet Gateway"
-}
-
-variable "gateway_abbreviation" {
-  type        = string
-  description = "The abbreviation for the Internet Gateway resource name"
-  default     = "ig"
-}
-
 variable "tags" {
   type        = map(string)
   description = "Default tags to be associated with the resource"
 }
-
+variable "project" {
+  type        = string
+  description = "Name of the project"
+}
+variable "environment" {
+  type        = string
+  description = "Name of the environment"
+}
+variable "region" {
+  type        = string
+  description = "Code of the region"
+}
+variable "application" {
+  type        = string
+  description = "Purpose of the IG Gateway"
+}
 variable "vpc_ids" {
   type        = list(string)
   description = "List of VPC IDs to associate with the Gateway"

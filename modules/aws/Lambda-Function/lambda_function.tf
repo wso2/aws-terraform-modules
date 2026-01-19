@@ -1,14 +1,24 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+# Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
 #
-# This software is the property of WSO2 LLC. and its suppliers, if any.
-# Dissemination of any information or reproduction of any material contained
-# herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
-# You may not alter or remove any copyright or other notice from copies of this content.
+# WSO2 LLC. licenses this file to you under the Apache License,
+# Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
 #
 # --------------------------------------------------------------------------------------
 
+# Lambda function
 data "archive_file" "archive_lambda_function" {
   type        = "zip"
   source_file = "${var.lambda_function_source_dir}/${var.lambda_function_source_file}"
@@ -17,7 +27,7 @@ data "archive_file" "archive_lambda_function" {
 
 resource "aws_lambda_function" "lambda_function" {
   filename         = data.archive_file.archive_lambda_function.output_path
-  function_name    = join("-", [var.lambda_function_abbreviation, var.lambda_function_name])
+  function_name    = join("-", [var.project, var.application, var.environment, var.region, var.lambda_function_name, "lambda-function"])
   role             = aws_iam_role.lambda_function_role.arn
   handler          = var.handler
   source_code_hash = data.archive_file.archive_lambda_function.output_base64sha256
@@ -33,6 +43,7 @@ resource "aws_cloudwatch_log_group" "lambda_function_log_group" {
   depends_on = [aws_lambda_function.lambda_function]
 }
 
+# IAM policy to push to above cloudwatch log group
 data "aws_iam_policy_document" "lambda_function_cloudwatch_role_policy" {
   statement {
     actions = [
@@ -47,13 +58,16 @@ data "aws_iam_policy_document" "lambda_function_cloudwatch_role_policy" {
   }
 }
 
+# IAM Policy
 resource "aws_iam_policy" "lambda_function_policy" {
-  name        = join("-", [var.iam_policy_abbreviation, var.iam_policy_name])
+  name        = join("-", [var.project, var.application, var.environment, var.region, var.lambda_function_name, "lambda-function-cloudwatch-policy"])
   description = "IAM policy for the Lambda function to push logs to CloudWatch"
   policy      = data.aws_iam_policy_document.lambda_function_cloudwatch_role_policy.json
-  tags        = var.tags
+
+  tags = var.tags
 }
 
+# Attachment
 resource "aws_iam_role_policy_attachment" "lambda_function_policy_attachment" {
   role       = aws_iam_role.lambda_function_role.name
   policy_arn = aws_iam_policy.lambda_function_policy.arn

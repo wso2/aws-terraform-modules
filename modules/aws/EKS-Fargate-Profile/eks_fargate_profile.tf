@@ -26,7 +26,7 @@ resource "aws_eks_fargate_profile" "eks_fargate_profile" {
   tags                   = var.tags
 
   dynamic "selector" {
-    for_each = var.selectors
+    for_each = var.fargate_namespaces
     content {
       namespace = selector.value
     }

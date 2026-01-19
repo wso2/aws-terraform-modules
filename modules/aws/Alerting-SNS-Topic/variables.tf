@@ -18,31 +18,26 @@
 #
 # --------------------------------------------------------------------------------------
 
+variable "topic_name" {
+  type        = string
+  description = "The name of the SNS topic"
+}
 variable "project" {
   type        = string
   description = "Name of the project"
 }
-
 variable "environment" {
   type        = string
   description = "Name of the environment"
 }
-
 variable "region" {
   type        = string
   description = "Code of the region"
 }
-
 variable "application" {
-  type = string
-  description = "Name of the application"
+  type        = string
+  description = "Purpose of the Subnet"
 }
-
-variable "topic_name" {
-  type = string
-  description = "The name for the SNS Topic"
-}
-
 variable "subscribers" {
   description = "A list of subscribers for the SNS topic"
   type = list(object({
@@ -55,13 +50,11 @@ variable "subscribers" {
     delivery_policy        = optional(string)
   }))
 }
-
 variable "tags" {
   type        = map(string)
-  description = "Tags to be added to the SNS Topic"
+  description = "Tags to be added to the security group"
   default     = {}
 }
-
 variable "kms_master_key_id" {
   type        = string
   description = "The ID of an AWS-managed customer master key (CMK) for Amazon SNS or a custom CMK"

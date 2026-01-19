@@ -8,52 +8,52 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-variable "transit_gateway_name" {
-  type        = string
-  description = "Name of the Transit Gateway"
-}
 
-variable "transit_gateway_abbreviation" {
+variable "project" {
   type        = string
-  description = "Abbreviation for the Transit Gateway"
-  default     = "tgw"
+  description = "Name of the project"
 }
-
+variable "environment" {
+  type        = string
+  description = "Name of the environment"
+}
+variable "region" {
+  type        = string
+  description = "Code of the region"
+}
+variable "application" {
+  type        = string
+  description = "Purpose of the Subnet"
+}
 variable "description" {
   type        = string
   description = "Description of the Transit Gateway"
 }
-
 variable "tags" {
   type        = map(string)
   description = "Default tags for the Transit Gateway"
   default     = {}
 }
-
 variable "dns_support" {
   type        = string
   description = "Whether DNS support is enabled"
   default     = "enable"
 }
-
 variable "default_route_table_propagation" {
   type        = string
   description = "Whether resource default route table propagation is enabled"
   default     = "enable"
 }
-
 variable "default_route_table_association" {
   type        = string
   description = "Whether resource default route table association is enabled"
   default     = "enable"
 }
-
 variable "auto_accept_shared_attachments" {
   type        = string
   description = "Whether resource auto accept shared attachments is enabled"
   default     = "enable"
 }
-
 variable "multicast_support" {
   type        = string
   description = "Whether multicast support is enabled"

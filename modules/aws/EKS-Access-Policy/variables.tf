@@ -19,28 +19,27 @@
 # --------------------------------------------------------------------------------------
 
 variable "eks_cluster_name" {
-  description = "The name of the EKS cluster"
+  description = "Name of the EKS cluster"
   type        = string
 }
 
 variable "principal_arn" {
-  description = "The ARN of the principal to associate the policy with"
+  description = "Name of the principal ARN"
   type        = string
 }
 
 variable "policy_arn" {
-  description = "The ARN of the access policy (e.g., arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy)"
+  description = "Policy ARN"
   type        = string
 }
 
 variable "type" {
-  description = "The type of the access scope (cluster or namespace)"
+  description = "Access Type"
   type        = string
-  default     = "cluster"
 }
 
-variable "namespaces" {
-  description = "List of namespaces for namespace-scoped policies"
+variable "namespace" {
+  description = "Namespace to be applied"
   type        = list(string)
-  default     = []
+  default     = null
 }

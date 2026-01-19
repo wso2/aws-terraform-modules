@@ -9,57 +9,50 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "subnet_name" {
+variable "project" {
   type        = string
-  description = "The name for the subnet"
+  description = "Name of the project"
 }
-
-variable "subnet_abbreviation" {
+variable "environment" {
   type        = string
-  description = "The abbreviation for the subnet resource name"
-  default     = "snet"
+  description = "Name of the environment"
 }
-
-variable "route_table_abbreviation" {
+variable "region" {
   type        = string
-  description = "The abbreviation for the route table resource name"
-  default     = "rt"
+  description = "Code of the region"
 }
-
+variable "application" {
+  type        = string
+  description = "Purpose of the Subnet"
+}
 variable "vpc_id" {
   type        = string
   description = "ID of the VPC which should contain this subnet"
 }
-
 variable "enable_dns64" {
   type        = bool
   description = "Flag to enable DNS 64 on the subnet"
   default     = false
 }
-
 variable "cidr_block" {
   type        = string
   description = "CIDR block for the subnet"
 }
-
 variable "tags" {
   type        = map(string)
   description = "Default tags for the Subnet resource"
   default     = {}
 }
-
 variable "availability_zone" {
   type        = string
   description = "Availability zones for the Subnet"
   default     = null
 }
-
 variable "auto_assign_public_ip" {
   type        = bool
   description = "Automatically Public IPs for Virtual Machines"
   default     = false
 }
-
 variable "custom_routes" {
   type = list(object({
     cidr_block = string

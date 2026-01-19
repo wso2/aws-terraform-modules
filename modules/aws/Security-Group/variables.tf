@@ -9,22 +9,6 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "security_group_name" {
-  type        = string
-  description = "The name for the Security Group"
-}
-
-variable "security_group_abbreviation" {
-  type        = string
-  description = "The abbreviation for the Security Group resource name"
-  default     = "stg"
-}
-
-variable "security_group_description" {
-  type        = string
-  description = "Description of the Security Group"
-}
-
 variable "rules" {
   type = list(object({
     direction       = string
@@ -36,12 +20,30 @@ variable "rules" {
   }))
   description = "List of rules to be added to the security group"
 }
-
+variable "project" {
+  type        = string
+  description = "Name of the project"
+}
+variable "environment" {
+  type        = string
+  description = "Name of the environment"
+}
+variable "region" {
+  type        = string
+  description = "Code of the region"
+}
+variable "application" {
+  type        = string
+  description = "Purpose of the Security Group"
+}
+variable "description" {
+  type        = string
+  description = "Description of the security Group"
+}
 variable "vpc_id" {
   type        = string
   description = "VPC that Security group should be associated with"
 }
-
 variable "tags" {
   type        = map(string)
   description = "Tags to be added to the security group"

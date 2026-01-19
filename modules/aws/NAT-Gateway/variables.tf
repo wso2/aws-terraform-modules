@@ -9,29 +9,22 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "nat_gateway_name" {
+variable "project" {
   type        = string
-  description = "The name for the NAT Gateway"
+  description = "Name of the project"
 }
-
-variable "nat_gateway_abbreviation" {
+variable "environment" {
   type        = string
-  description = "The abbreviation for the NAT Gateway resource name"
-  default     = "natg"
+  description = "Name of the environment"
 }
-
-variable "eip_abbreviation" {
+variable "region" {
   type        = string
-  description = "The abbreviation for the Elastic IP resource name"
-  default     = "eip"
+  description = "Code of the region"
 }
-
-variable "shield_abbreviation" {
+variable "application" {
   type        = string
-  description = "The abbreviation for the Shield Protection resource name"
-  default     = "shld"
+  description = "Purpose of the Subnet"
 }
-
 variable "tags" {
   type        = map(string)
   description = "Default tags to be associated with the Resource"

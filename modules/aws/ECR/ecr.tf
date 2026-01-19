@@ -64,14 +64,11 @@ data "aws_iam_policy_document" "admin_policy" {
 }
 
 resource "aws_ecr_repository_policy" "admin_policy" {
-  count      = length(var.external_admin_account_ids) > 0 ? 1 : 0
-  repository = aws_ecr_repository.ecr_repository.name
-  policy     = data.aws_iam_policy_document.admin_policy[0].json
+    repository = aws_ecr_repository.ecr_repository.name
+  policy     = data.aws_iam_policy_document.admin_policy.json
 }
 
 data "aws_iam_policy_document" "pull_only_policy" {
-  count = length(var.external_pull_only_account_ids) > 0 ? 1 : 0
-
   statement {
     sid    = "External Pull only policy"
     effect = "Allow"
@@ -90,7 +87,6 @@ data "aws_iam_policy_document" "pull_only_policy" {
 }
 
 resource "aws_ecr_repository_policy" "pull_only_policy" {
-  count      = length(var.external_pull_only_account_ids) > 0 ? 1 : 0
   repository = aws_ecr_repository.ecr_repository.name
-  policy     = data.aws_iam_policy_document.pull_only_policy[0].json
+  policy     = data.aws_iam_policy_document.pull_only_policy.json
 }

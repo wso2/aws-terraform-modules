@@ -9,68 +9,49 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "eks_cluster_name" {
+variable "project" {
   type        = string
-  description = "The name for the EKS Cluster"
+  description = "Name of the project"
 }
-
-variable "eks_cluster_abbreviation" {
+variable "environment" {
   type        = string
-  description = "The abbreviation for the EKS Cluster resource name"
-  default     = "eks"
+  description = "Name of the environment"
 }
-
-variable "iam_role_abbreviation" {
+variable "region" {
   type        = string
-  description = "The abbreviation for the IAM Role resource name"
-  default     = "ir"
+  description = "Code of the region"
 }
-
-variable "iam_policy_abbreviation" {
+variable "application" {
   type        = string
-  description = "The abbreviation for the IAM Policy resource name"
-  default     = "ip"
+  description = "Purpose of the EKS Cluster"
 }
-
-variable "route_table_abbreviation" {
-  type        = string
-  description = "The abbreviation for the Route Table resource name"
-  default     = "rt"
-}
-
 variable "kubernetes_version" {
   type        = string
   description = "Kubernetes Version"
 }
-
 variable "endpoint_private_access" {
   type        = bool
   description = "Enable private access to Cluster"
   default     = true
 }
-
 variable "endpoint_public_access" {
   type        = bool
   description = "Enable public access to Cluster"
   default     = false
 }
-
 variable "public_access_cidrs" {
   type        = list(string)
   description = "Public CIDRs which can access the cluster API Server"
   default     = []
 }
-
 variable "service_ipv4_cidr" {
   type        = string
   description = "CIDR block for K8S Service"
 }
-
 variable "eks_vpc_id" {
   type        = string
   description = "ID of the VPC to create the subnets"
 }
-
 variable "subnet_details" {
   type = list(object({
     availability_zone = string
@@ -83,98 +64,73 @@ variable "subnet_details" {
   }))
   default = []
 }
-
 variable "secret_encryption_cmk" {
   type        = string
   description = "KMS Key ID for encrypting Kubernetes secrets"
   default     = null
 }
-
 variable "enabled_cluster_log_types" {
   type        = list(string)
   description = "List of cluster log types to enable"
   default     = []
 }
-
 variable "tags" {
   type        = map(string)
   description = "Tags to be associated with the EKS"
   default     = {}
 }
-
 variable "enable_ebs_csi_driver" {
   type        = bool
   description = "Enable EBS CSI Driver"
   default     = false
 }
-
 variable "enable_efs_csi_driver" {
   type        = bool
   description = "Enable EFS CSI Driver"
   default     = false
 }
-
 variable "enable_autoscaler" {
   type        = bool
   description = "Enable Cluster Autoscaler"
   default     = false
 }
-
 variable "enable_cluster_loadbalancer" {
   type        = bool
   description = "Enable Cluster Load Balancer"
   default     = false
 }
-
 variable "enable_fluent_bit" {
   type        = bool
   description = "Enable Fluent Bit"
   default     = false
 }
-
 variable "enable_cloudwatch_agent" {
   type        = bool
   description = "Enable CloudWatch Agent"
   default     = false
 }
-
 variable "cluster_iam_role_arn" {
   type        = string
   description = "IAM Role ARN for the EKS Cluster"
   default     = null
 }
-
 variable "cluster_subnet_ids" {
   type        = list(string)
   description = "Subnet IDs for the EKS Cluster"
   default     = []
 }
-
 variable "authentication_mode" {
   type        = string
   description = "EKS Cluster authentication mode"
   default     = "CONFIG_MAP"
 }
-
 variable "bootstrap_cluster_creator_admin_permissions" {
   type        = bool
   description = "Whether or not to bootstrap the access config values to the cluster"
   default     = false
 }
-
 variable "oidc_thumbprint_override" {
   type        = list(string)
   description = "This is to manually override the default thumbprint setting for the OIDC provider"
   default     = []
-}
-
-variable "subnet_abbreviation" {
-  description = "Abbreviation for the subnet resource name"
-  type        = string
-  default     = "snet"
-}
-
-variable "subnet_name" {
-  description = "Name for the subnet resource"
-  type        = string
 }

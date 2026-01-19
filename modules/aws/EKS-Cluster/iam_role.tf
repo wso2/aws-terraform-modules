@@ -11,7 +11,7 @@
 
 resource "aws_iam_role" "iam_role" {
   count = var.cluster_iam_role_arn != null ? 0 : 1
-  name  = join("-", [var.iam_role_abbreviation, var.eks_cluster_name])
+  name  = join("-", [var.project, var.application, var.environment, var.region, "eks-iam-role"])
 
   assume_role_policy = <<POLICY
 {
@@ -71,20 +71,24 @@ resource "aws_iam_openid_connect_provider" "eks_ca_oidc_provider" {
   ]
 }
 
+# IAM Role for IAM Cluster Autoscaler
 resource "aws_iam_role" "cluster_autoscaler_role" {
   count              = var.enable_autoscaler == false ? 0 : 1
   assume_role_policy = data.aws_iam_policy_document.cluster_autoscaler_sts_policy.json
-  name               = join("-", [var.iam_role_abbreviation, var.eks_cluster_name, "autoscaler"])
+  name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-autoscaler-iam-role"])
 
   depends_on = [
     data.aws_iam_policy_document.cluster_autoscaler_sts_policy
   ]
 }
 
-# trivy:ignore:AVD-AWS-0057 Required permissions for cluster autoscaler per AWS docs
+# Ignore: AVD-AWS-0057 (https://avd.aquasec.com/misconfig/aws/iam/avd-aws-0057/)
+# Reason: This policy provides the necessary permissions for configuring the cluster autoscaler
+# AWS Documentation: https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#full-cluster-autoscaler-features-policy-recommended
+# trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "cluster_autoscaler_policy" {
   count = var.enable_autoscaler == false ? 0 : 1
-  name  = join("-", [var.iam_policy_abbreviation, var.eks_cluster_name, "autoscaler"])
+  name  = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-autoscaler-iam-policy"])
   policy = jsonencode({
     Statement = [{
       Action = [
@@ -115,20 +119,23 @@ resource "aws_iam_role_policy_attachment" "eks_ca_iam_policy_attach" {
   ]
 }
 
+# IAM Role for IAM Cluster LoadBalancer
 resource "aws_iam_role" "cluster_loadbalancer_role" {
   count              = var.enable_cluster_loadbalancer == false ? 0 : 1
   assume_role_policy = data.aws_iam_policy_document.cluster_lb_sts_policy.json
-  name               = join("-", [var.iam_role_abbreviation, var.eks_cluster_name, "lb"])
+  name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-lb-iam-role"])
 
   depends_on = [
     data.aws_iam_policy_document.cluster_lb_sts_policy
   ]
 }
-
-# trivy:ignore:AVD-AWS-0057 AWS recommended policy for EKS load balancer controller
+# Ignore: AVD-AWS-0057 (https://avd.aquasec.com/misconfig/aws/iam/avd-aws-0057/)# This however is an AWS Recommended Policy as per https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.5.4/docs/install/iam_policy.json
+# Reason: This policy provides the necessary permissions for the EKS cluster to create AWS Load Balancers
+# AWS Documentation: https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html
+# trivy:ignore:AVD-AWS-0057
 resource "aws_iam_policy" "cluster_loadbalancer_policy" {
   count = var.enable_cluster_loadbalancer == false ? 0 : 1
-  name  = join("-", [var.iam_policy_abbreviation, var.eks_cluster_name, "lb"])
+  name  = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-lb-iam-policy"])
   policy = jsonencode({
     Statement : [
       {
@@ -384,10 +391,11 @@ resource "aws_iam_role_policy_attachment" "cluster_loadbalancer_policy_attach" {
   ]
 }
 
+# IAM Role for CloudWatch Agents
 resource "aws_iam_role" "cluster_container_cloudwatch_fluent_bit_agent_role" {
   count              = var.enable_fluent_bit == false ? 0 : 1
   assume_role_policy = data.aws_iam_policy_document.cluster_container_cloudwatch_fluent_bit_agent_sts_policy.json
-  name               = join("-", [var.iam_role_abbreviation, var.eks_cluster_name, "fluentbit"])
+  name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-ccw-iam-role"])
 
   depends_on = [
     data.aws_iam_policy_document.cluster_container_cloudwatch_fluent_bit_agent_sts_policy
@@ -404,10 +412,11 @@ resource "aws_iam_role_policy_attachment" "cluster_container_cloudwatch_fluent_b
   ]
 }
 
+# IAM Role for EBS CSI Driver
 resource "aws_iam_role" "cluster_ebs_csi_driver_role" {
   count              = var.enable_ebs_csi_driver ? 1 : 0
   assume_role_policy = data.aws_iam_policy_document.cluster_ebs_csi_driver_sts_policy.json
-  name               = join("-", [var.iam_role_abbreviation, var.eks_cluster_name, "ebs-csi"])
+  name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-ebs-csi-driver-iam-role"])
 
   depends_on = [
     data.aws_iam_policy_document.cluster_ebs_csi_driver_sts_policy
@@ -424,10 +433,11 @@ resource "aws_iam_role_policy_attachment" "cluster_ebs_csi_driver_role_policy_at
   ]
 }
 
+# IAM Role for EBS CSI Driver
 resource "aws_iam_role" "cluster_efs_csi_driver_role" {
   count              = var.enable_efs_csi_driver ? 1 : 0
   assume_role_policy = data.aws_iam_policy_document.cluster_efs_csi_driver_sts_policy.json
-  name               = join("-", [var.iam_role_abbreviation, var.eks_cluster_name, "efs-csi"])
+  name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-efs-csi-driver-iam-role"])
 
   depends_on = [
     data.aws_iam_policy_document.cluster_efs_csi_driver_sts_policy
@@ -444,10 +454,11 @@ resource "aws_iam_role_policy_attachment" "cluster_efs_csi_driver_role_policy_at
   ]
 }
 
+# CloudWatch Agent Policy
 resource "aws_iam_role" "cluster_cloudwatch_agent_role" {
   count              = var.enable_cloudwatch_agent == false ? 0 : 1
   assume_role_policy = data.aws_iam_policy_document.cluster_cloudwatch_agent_sts_policy.json
-  name               = join("-", [var.iam_role_abbreviation, var.eks_cluster_name, "cw"])
+  name               = join("-", [var.project, var.application, var.environment, var.region, "eks-cluster-cw-iam-role"])
 
   depends_on = [
     data.aws_iam_policy_document.cluster_efs_csi_driver_sts_policy

@@ -9,7 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
-# trivy:ignore:AVD-AWS-0065 Rotation is configurable via parameter with default true
+# Ignore: AVD-AWS-0065 ( https://avd.aquasec.com/misconfig/avd-aws-0065/)
+# Reason: Rotation has been configured as an optional parameter with a default value of true
+# trivy:ignore:AVD-AWS-0065
 resource "aws_kms_key" "kms_key" {
   description             = var.description
   key_usage               = var.key_usage

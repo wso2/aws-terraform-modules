@@ -9,66 +9,58 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "elb_abbreviation" {
-  description = "Abbreviation for the Elastic Load Balancer"
+variable "project" {
   type        = string
-  default     = "elb"
+  description = "Name of the project"
 }
-
-variable "elb_name" {
-  description = "Name of the Elastic Load Balancer"
+variable "environment" {
   type        = string
+  description = "Name of the environment"
 }
-
+variable "region" {
+  type        = string
+  description = "Code of the region"
+}
+variable "application" {
+  type        = string
+  description = "Purpose of the EC2 Instance"
+}
 variable "internal_usage_flag" {
   type        = string
   description = "Flag to indicate whether the EC2 instance is for internal usage or not"
   default     = false
 }
-
 variable "security_group_ids" {
   type        = list(string)
   description = "List of security group IDs"
   default     = []
 }
-
 variable "subnet_ids" {
   type        = map(string)
   description = "List of subnet IDs"
   default     = {}
 }
-
 variable "deletion_protection_flag" {
   type        = string
   description = "Flag to indicate whether the ALB instance is protected from accidental termination or not"
   default     = true
 }
-
 variable "tags" {
   type        = map(string)
   description = "Default tags to be added to the ALB instance"
   default     = {}
 }
-
 variable "load_balancer_type" {
   type        = string
   description = "Type of the load balancer"
 }
-
 variable "private_ip_addresses" {
   type        = map(string)
   description = "List of private IP addresses"
   default     = {}
 }
-
 variable "enable_shield_protection" {
   type        = string
   description = "Flag to indicate whether the ALB instance is protected by AWS Shield or not"
   default     = false
-}
-
-variable "shield_protection_abbreviation" {
-  description = "Abbreviation for the Shield Protection"
-  type        = string
-  default     = "elb-eip-shield-protection"
 }

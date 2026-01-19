@@ -10,20 +10,18 @@
 # --------------------------------------------------------------------------------------
 
 variable "rules" {
-  description = "List of rules to be added to the security group"
-  type = list(object({
+    type = list(object({
     direction       = string
     to_port         = number
     from_port       = number
     protocol        = string
-    cidr_blocks     = optional(list(string), [])
-    security_groups = optional(list(string), [])
-    prefix_list_ids = optional(list(string), [])
-    description     = optional(string, null)
+    cidr_blocks     = list(string)
+    security_groups = list(string)
+    prefix_list_ids = list(string)
   }))
+    description = "List of rules to be added to the security group"
 }
-
 variable "security_group_id" {
-  description = "Security Group to associate rules with"
   type        = string
+  description = "Security Group to associate rules with"
 }

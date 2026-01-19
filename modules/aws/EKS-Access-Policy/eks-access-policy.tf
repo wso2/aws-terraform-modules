@@ -25,11 +25,7 @@ resource "aws_eks_access_policy_association" "eks_access_policy" {
 
   access_scope {
     type       = var.type
-    namespaces = var.type == "namespace" ? var.namespaces : null
-  }
-
-  lifecycle {
-    prevent_destroy = false
+    namespaces = var.namespace
   }
 }
 
