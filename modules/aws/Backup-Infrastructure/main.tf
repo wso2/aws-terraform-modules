@@ -39,15 +39,21 @@ data "aws_caller_identity" "current" {}
 data "aws_iam_policy_document" "backup_kms" {
   statement {
     sid = "EnableAccountAdmin"
-    principals { type = "AWS"; identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"] }
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+    }
     actions   = ["kms:*"]
     resources = ["*"]
   }
 
   statement {
     sid = "AllowBackupAndSnsUse"
-    principals { type = "Service"; identifiers = ["backup.amazonaws.com", "sns.amazonaws.com"] }
-    actions   = ["kms:Encrypt","kms:Decrypt","kms:GenerateDataKey*","kms:DescribeKey","kms:CreateGrant"]
+    principals {
+      type        = "Service"
+      identifiers = ["backup.amazonaws.com", "sns.amazonaws.com"]
+    }
+    actions   = ["kms:Encrypt", "kms:Decrypt", "kms:GenerateDataKey*", "kms:DescribeKey", "kms:CreateGrant"]
     resources = ["*"]
     condition {
       test     = "StringEquals"
@@ -58,7 +64,7 @@ data "aws_iam_policy_document" "backup_kms" {
 }
 
 resource "aws_kms_alias" "alias" {
-  name          = "alias/${join("-", [var.alias_name, var.alias_abbreviation])}"  
+  name          = "alias/${join("-", [var.alias_name, var.alias_abbreviation])}"
   target_key_id = aws_kms_key.key.key_id
 }
 

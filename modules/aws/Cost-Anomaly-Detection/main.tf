@@ -19,7 +19,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_ce_anomaly_monitor" "anomaly_monitor" {
-  name              = join("-", [var.monitor_name, var.monitor_abbrevaition])
+  name              = join("-", [var.monitor_name, var.monitor_abbreviation])
   monitor_type      = var.monitor_type
   monitor_dimension = var.monitor_dimension
 }
