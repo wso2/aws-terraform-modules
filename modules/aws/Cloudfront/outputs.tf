@@ -22,3 +22,13 @@ output "cloudfront_distribution_dns" {
   description = "The domain name of the CloudFront distribution"
   value       = aws_cloudfront_distribution.cloudfront_distribution.domain_name
 }
+
+output "cloudfront_distribution_id" {
+  description = "The ID of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.cloudfront_distribution.id
+}
+
+output "cloudfront_distribution_arn" {
+  description = "The ARN of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.cloudfront_distribution.arn
+}
