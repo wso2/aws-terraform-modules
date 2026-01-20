@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
+# Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
 #
 # WSO2 LLC. licenses this file to you under the Apache License,
 # Version 2.0 (the "License"); you may not use this file except
@@ -18,17 +18,17 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "cloudfront_distribution_dns" {
-  description = "The domain name of the CloudFront distribution"
-  value       = aws_cloudfront_distribution.cloudfront_distribution.domain_name
-}
+resource "aws_cloudwatch_log_metric_filter" "filter" {
+  name           = join("-", [var.name, var.abbreviation])
+  log_group_name = var.log_group_name
+  pattern        = var.pattern
 
-output "cloudfront_distribution_id" {
-  description = "The ID of the CloudFront distribution"
-  value       = aws_cloudfront_distribution.cloudfront_distribution.id
-}
-
-output "cloudfront_distribution_arn" {
-  description = "The ARN of the CloudFront distribution"
-  value       = aws_cloudfront_distribution.cloudfront_distribution.arn
+  metric_transformation {
+    name          = var.metric_name
+    namespace     = var.metric_namespace
+    value         = var.metric_value
+    unit          = var.metric_unit
+    default_value = var.metric_default_value
+    dimensions    = var.metric_dimensions
+  }
 }

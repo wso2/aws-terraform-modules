@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
+# Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
 #
 # WSO2 LLC. licenses this file to you under the Apache License,
 # Version 2.0 (the "License"); you may not use this file except
@@ -18,30 +18,43 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "eks_cluster_name" {
-  description = "Name of the EKS cluster"
+variable "name" {
+  description = "The name of the rule"
   type        = string
 }
 
-variable "principal_arn" {
-  description = "Name of the principal ARN"
+variable "abbreviation" {
+  description = "Abbreviation of the rule name"
   type        = string
+  default     = "rule"
 }
 
-variable "kubernetes_groups" {
-  description = "Kubernetes groups"
-  type        = list(string)
+variable "description" {
+  description = "The description of the rule"
+  type        = string
   default     = null
 }
 
-variable "type" {
-  description = "Access Entry Type"
+variable "event_pattern" {
+  description = "The event pattern described as a JSON string. Either this or schedule_expression must be specified"
   type        = string
-  default     = "STANDARD"
+  default     = null
 }
 
-variable "user_name" {
-  description = "The user name to associate with the access entry (optional)"
+variable "schedule_expression" {
+  description = "The scheduling expression (e.g., cron(0 20 * * ? *) or rate(5 minutes)). Either this or event_pattern must be specified"
+  type        = string
+  default     = null
+}
+
+variable "state" {
+  description = "The state of the rule"
+  type        = string
+  default     = "ENABLED"
+}
+
+variable "role_arn" {
+  description = "The Amazon Resource Name (ARN) associated with the role that is used for target invocation"
   type        = string
   default     = null
 }

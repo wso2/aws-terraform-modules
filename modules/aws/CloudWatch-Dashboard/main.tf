@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
+# Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
 #
 # WSO2 LLC. licenses this file to you under the Apache License,
 # Version 2.0 (the "License"); you may not use this file except
@@ -18,17 +18,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "cloudfront_distribution_dns" {
-  description = "The domain name of the CloudFront distribution"
-  value       = aws_cloudfront_distribution.cloudfront_distribution.domain_name
-}
-
-output "cloudfront_distribution_id" {
-  description = "The ID of the CloudFront distribution"
-  value       = aws_cloudfront_distribution.cloudfront_distribution.id
-}
-
-output "cloudfront_distribution_arn" {
-  description = "The ARN of the CloudFront distribution"
-  value       = aws_cloudfront_distribution.cloudfront_distribution.arn
+resource "aws_cloudwatch_dashboard" "dashboard" {
+  dashboard_name = join("-", [var.dashboard_name, var.abbreviation])
+  dashboard_body = var.dashboard_body
 }

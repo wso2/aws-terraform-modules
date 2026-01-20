@@ -17,3 +17,23 @@
 # under the License.
 #
 # --------------------------------------------------------------------------------------
+
+output "policy_arn" {
+  description = "The ARN of the associated EKS access policy"
+  value       = aws_eks_access_policy_association.eks_access_policy.policy_arn
+}
+
+output "principal_arn" {
+  description = "The principal ARN"
+  value       = aws_eks_access_policy_association.eks_access_policy.principal_arn
+}
+
+output "cluster_name" {
+  description = "The EKS cluster name"
+  value       = aws_eks_access_policy_association.eks_access_policy.cluster_name
+}
+
+output "associated_at" {
+  description = "Timestamp when the policy association was created"
+  value       = aws_eks_access_policy_association.eks_access_policy.associated_at
+}

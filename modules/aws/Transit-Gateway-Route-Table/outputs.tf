@@ -19,5 +19,11 @@
 # --------------------------------------------------------------------------------------
 
 output "transit_gateway_route_table_id" {
-  value = aws_ec2_transit_gateway_route_table.ec2_transit_gateway_route_table.id
+  description = "The ID of the transit gateway route table"
+  value       = aws_ec2_transit_gateway_route_table.ec2_transit_gateway_route_table.id
+}
+
+output "transit_gateway_route_table_arn" {
+  description = "The ARN of the transit gateway route table"
+  value       = aws_ec2_transit_gateway_route_table.ec2_transit_gateway_route_table.arn
 }

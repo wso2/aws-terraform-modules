@@ -17,3 +17,18 @@
 # under the License.
 #
 # --------------------------------------------------------------------------------------
+
+output "access_entry_arn" {
+  description = "The ARN of the EKS access entry"
+  value       = aws_eks_access_entry.eks_access_entry.access_entry_arn
+}
+
+output "principal_arn" {
+  description = "The principal ARN of the access entry"
+  value       = aws_eks_access_entry.eks_access_entry.principal_arn
+}
+
+output "cluster_name" {
+  description = "The EKS cluster name"
+  value       = aws_eks_access_entry.eks_access_entry.cluster_name
+}

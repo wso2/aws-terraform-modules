@@ -25,7 +25,7 @@ resource "aws_lb" "lb" {
   dynamic "subnet_mapping" {
     for_each = var.subnet_ids
     content {
-      subnet_id            = subnet_mapping.value.id
+      subnet_id            = subnet_mapping.value
       allocation_id        = var.internal_usage_flag == false ? aws_eip.eip[subnet_mapping.key].id : null
       private_ipv4_address = var.internal_usage_flag == true ? var.private_ip_addresses[subnet_mapping.key] : null
     }
@@ -40,9 +40,9 @@ resource "aws_eip" "eip" {
 }
 
 resource "aws_shield_protection" "shield_protection" {
-  for_each     = var.internal_usage_flag == true && var.enable_shield_protection ? {} : var.subnet_ids
+  for_each     = var.internal_usage_flag == false && var.enable_shield_protection ? var.subnet_ids : {}
   name         = join("-", [var.project, var.application, var.environment, var.region, each.key, "elb-eip-shield-protection"])
-  resource_arn = aws_eip.eip[each.key].id
+  resource_arn = replace(aws_eip.eip[each.key].arn, "elastic-ip", "eip-allocation")
 
   tags = var.tags
 }
