@@ -63,3 +63,8 @@ variable "handler" {
   description = "Entrypoint to the function"
   type        = string
 }
+variable "cloudwatch_log_group_kms_key_id" {
+  description = "KMS Key ID for encrypting CloudWatch log group"
+  type        = string
+  default     = null
+}
