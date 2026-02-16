@@ -25,6 +25,9 @@ data "archive_file" "archive_lambda_function" {
   output_path = "${var.lambda_function_source_dir}/${var.lambda_function_output_file}"
 }
 
+# Ignore: AVD-AWS-0066 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-0017)
+# Reason: Tracing logs adds a significant log volume/cost, Will be added on a per case basis or manually
+# trivy:ignore:AVD-AWS-0066
 resource "aws_lambda_function" "lambda_function" {
   filename         = data.archive_file.archive_lambda_function.output_path
   function_name    = join("-", [var.project, var.application, var.environment, var.region, var.lambda_function_name, "lambda-function"])
@@ -35,10 +38,14 @@ resource "aws_lambda_function" "lambda_function" {
   tags             = var.tags
 }
 
+# Ignore: AVD-AWS-0017 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-0017)
+# Reason: Variable KMS_KEY_ID is defined and can be used for explicit key encryption
+# trivy:ignore:AVD-AWS-0017
 resource "aws_cloudwatch_log_group" "lambda_function_log_group" {
   name              = "/aws/lambda/${aws_lambda_function.lambda_function.function_name}"
   retention_in_days = 30
   tags              = var.tags
+  kms_key_id        = var.cloudwatch_log_group_kms_key_id
 
   depends_on = [aws_lambda_function.lambda_function]
 }

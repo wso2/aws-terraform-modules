@@ -9,6 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
+# Ignore:AVD-AWS-0143 (https://avd.aquasec.com/misconfig/aws/ec2/AWS-0143)
+# Reason: IAM Policy attached below
+# trivy:ignore:AVD-AWS-0143
 resource "aws_iam_user" "secrets_manager_user" {
   name = join("-", [var.project, var.application, var.environment, var.region, "secret-manager-iam-user"])
   tags = var.tags

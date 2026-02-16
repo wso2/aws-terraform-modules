@@ -9,6 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
+# Ignore:AVD-AWS-0143 (https://avd.aquasec.com/misconfig/aws/ec2/AWS-0143)
+# Reason: IAM Policy attached below
+# trivy:ignore:AVD-AWS-0143
 resource "aws_iam_user" "cloudwatch_reader_user" {
   name = join("-", [var.project, var.application, var.environment, var.region, "cloudwatch-reader-iam-user"])
   tags = var.tags
