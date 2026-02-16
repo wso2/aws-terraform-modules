@@ -19,3 +19,8 @@ resource "aws_vpc" "vpc" {
 
   tags = local.vpc_tags
 }
+resource "aws_vpc_ipv4_cidr_block_association" "secondary_cidr" {
+  for_each = var.additional_cidrs
+  vpc_id     = aws_vpc.vpc.id
+  cidr_block = each.value
+}

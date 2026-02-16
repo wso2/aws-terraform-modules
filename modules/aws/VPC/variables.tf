@@ -44,3 +44,8 @@ variable "enable_dns_hostnames" {
   description = "Flag to enable DNS host names"
   default     = false
 }
+variable "additional_cidrs" {
+  type        = map(string)
+  description = "List of additional CIDR blocks to be associated with the VPC"
+  default     = {}
+}
