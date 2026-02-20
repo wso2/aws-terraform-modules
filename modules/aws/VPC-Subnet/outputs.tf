@@ -20,3 +20,7 @@ output "route_table_id" {
 output "subnet_name" {
   value = local.subnet_name
 }
+output "subnet_cidr_block" {
+  value      = aws_subnet.subnet.cidr_block
+  depends_on = [aws_subnet.subnet]
+}
