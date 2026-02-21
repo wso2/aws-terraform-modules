@@ -28,6 +28,11 @@ output "eks_subnet_ids" {
   depends_on = [aws_subnet.eks_subnet]
 }
 
+output "eks_subnet_cidr_blocks" {
+  value      = aws_subnet.eks_subnet[*].cidr_block
+  depends_on = [aws_subnet.eks_subnet]
+}
+
 output "eks_security_group_rule_id" {
   value      = aws_eks_cluster.eks_cluster.vpc_config[0].cluster_security_group_id
   depends_on = [aws_subnet.eks_subnet]
