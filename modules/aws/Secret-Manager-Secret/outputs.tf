@@ -21,3 +21,7 @@ output "secret_version" {
   value      = aws_secretsmanager_secret_version.secretsmanager_secret_version.version_id
   depends_on = [aws_secretsmanager_secret.secretsmanager_secret]
 }
+output "secret_name" {
+  value      = aws_secretsmanager_secret.secretsmanager_secret.name
+  depends_on = [aws_secretsmanager_secret.secretsmanager_secret]
+}
