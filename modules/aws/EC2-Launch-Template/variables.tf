@@ -24,11 +24,6 @@ variable "application" {
   type        = string
 }
 
-variable "region" {
-  description = "The AWS region in which to create the launch template"
-  type        = string
-}
-
 variable "name" {
   description = "The name of the launch template"
   type        = string

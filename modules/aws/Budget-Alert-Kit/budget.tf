@@ -66,7 +66,7 @@ resource "aws_budgets_budget" "per_service_budget" {
   cost_filter {
     name = "Service"
     values = [
-      "${each.value.service_filter}",
+      each.value.service_filter,
     ]
   }
 
