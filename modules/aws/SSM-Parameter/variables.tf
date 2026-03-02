@@ -17,6 +17,10 @@ variable "name" {
 variable "type" {
   description = "The type of the parameter. Valid values are String, StringList, and SecureString."
   type        = string
+  validation {
+    condition     = contains(["String", "StringList", "SecureString"], var.type)
+    error_message = "type must be one of: String, StringList, SecureString."
+  }
 }
 
 variable "value" {

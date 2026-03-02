@@ -96,6 +96,10 @@ variable "user_data" {
   description = "User data to provide when launching an instance from the launch template. This should be a base64-encoded string."
   type        = string
   default     = null
+  validation {
+    condition     = var.user_data == null || can(base64decode(var.user_data))
+    error_message = "user_data must be null or a valid base64-encoded string."
+  }
 }
 
 variable "tag_specifications" {
