@@ -60,7 +60,7 @@ variable "iam_instance_profile_name" {
 }
 
 variable "block_device_mappings" {
-  description = "Block device mappings for the launch template. This should be a list of maps, where each map contains the device name and EBS configuration for a block device."
+  description = "Block device mappings for the launch template. Each mapping should include a device name and EBS configuration."
   type = list(object({
     device_name = string
     ebs = object({
@@ -98,7 +98,7 @@ variable "user_data" {
 }
 
 variable "tag_specifications" {
-  description = "Tag specifications for the launch template. The key is the resource type and the value is a map of tags to apply to that resource type."
+  description = "Tag specifications for the launch template. Each specification should include a resource type and a map of tags to apply to that resource type."
   type = list(object({
     resource_type = string
     tags          = map(string)

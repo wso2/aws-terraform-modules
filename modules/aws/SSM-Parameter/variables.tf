@@ -22,6 +22,7 @@ variable "type" {
 variable "value" {
   description = "The value of the parameter."
   type        = string
+  sensitive   = true
 }
 
 variable "tags" {

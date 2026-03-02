@@ -34,7 +34,7 @@ resource "aws_launch_template" "launch_template" {
         delete_on_termination = block_device_mappings.value.ebs.delete_on_termination
         volume_size           = block_device_mappings.value.ebs.volume_size
         volume_type           = block_device_mappings.value.ebs.volume_type
-        encrypted             = true
+        encrypted             = block_device_mappings.value.ebs.encrypted
       }
     }
   }
