@@ -25,15 +25,15 @@ resource "aws_autoscaling_group" "autoscaling_group" {
     version = "$Latest"
   }
 
-  termination_policies = var.termination_policies
+  termination_policies      = var.termination_policies
   wait_for_capacity_timeout = var.wait_for_capacity_timeout
-  protect_from_scale_in = var.protect_from_scale_in
+  protect_from_scale_in     = var.protect_from_scale_in
 
   instance_refresh {
     strategy = "Rolling"
     preferences {
       min_healthy_percentage = var.min_healthy_percentage
-      instance_warmup = 600
+      instance_warmup        = 600
     }
     triggers = ["tag"]
   }
