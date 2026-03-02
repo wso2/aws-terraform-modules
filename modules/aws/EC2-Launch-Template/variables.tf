@@ -89,6 +89,7 @@ variable "metadata_options" {
     instance_metadata_tags      = "disabled"
     http_protocol_ipv6          = "disabled"
   }
+  nullable = false
 }
 
 variable "user_data" {

@@ -40,7 +40,7 @@ resource "aws_launch_template" "launch_template" {
   }
 
   dynamic "metadata_options" {
-    for_each = var.metadata_options != null ? [var.metadata_options] : []
+    for_each = [var.metadata_options]
     content {
       http_endpoint               = metadata_options.value.http_endpoint
       http_tokens                 = metadata_options.value.http_tokens
