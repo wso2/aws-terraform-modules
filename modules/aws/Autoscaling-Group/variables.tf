@@ -93,22 +93,22 @@ variable "wait_for_capacity_timeout" {
 variable "protect_from_scale_in" {
   description = "Indicates whether newly launched instances are protected from termination by Auto Scaling when scaling in"
   type        = bool
-  default = false
+  default     = false
 }
 
 variable "min_healthy_percentage" {
-    description = "The minimum percentage of healthy instances that must be maintained during an instance refresh"
-    type        = number
-    default     = 66
+  description = "The minimum percentage of healthy instances that must be maintained during an instance refresh"
+  type        = number
+  default     = 66
 }
 
 variable "tags" {
-    description = "A map of tags to apply to the Auto Scaling group"
-    type        = list(
-        object({
-            key   = string
-            value = string
-            propagate_at_launch = optional(bool, true)
-        })
-    )
+  description = "A map of tags to apply to the Auto Scaling group"
+  type = list(
+    object({
+      key                 = string
+      value               = string
+      propagate_at_launch = optional(bool, true)
+    })
+  )
 }
