@@ -30,13 +30,9 @@ resource "aws_cloudwatch_metric_alarm" "metric_alarm" {
 
   actions_enabled = var.enabled
 
+  datapoints_to_alarm = var.datapoints_to_alarm
+
   dimensions = var.dimensions
 
   tags = var.tags
-
-  lifecycle {
-    ignore_changes = [
-      datapoints_to_alarm
-    ]
-  }
 }

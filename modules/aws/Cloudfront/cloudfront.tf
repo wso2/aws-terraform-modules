@@ -29,6 +29,11 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
       origin_protocol_policy = var.origin_protocol_policy
       origin_ssl_protocols   = var.origin_ssl_protocols
     }
+
+    origin_shield {
+      enabled              = var.origin_shield_enabled
+      origin_shield_region = var.origin_shield_region
+    }
   }
 
   enabled         = var.enabled
@@ -42,9 +47,11 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   }
 
   default_cache_behavior {
-    allowed_methods  = var.allowed_methods
-    cached_methods   = var.cached_methods
-    target_origin_id = var.origin_id
+    cache_policy_id            = var.cache_policy_id
+    response_headers_policy_id = var.response_headers_policy_id
+    allowed_methods            = var.allowed_methods
+    cached_methods             = var.cached_methods
+    target_origin_id           = var.origin_id
 
     forwarded_values {
       query_string = true
@@ -84,7 +91,10 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   tags = var.tags
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    cloudfront_default_certificate = var.cloudfront_default_certificate
+    acm_certificate_arn            = var.cloudfront_acm_certificate_arn
+    ssl_support_method             = var.cloudfront_acm_certificate_arn != null ? var.cloudfront_ssl_support_method : null
+    minimum_protocol_version       = var.minimum_protocol_version
   }
 
   web_acl_id = var.web_acl_id

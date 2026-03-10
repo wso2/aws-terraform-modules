@@ -22,6 +22,8 @@ resource "aws_lb" "lb" {
 
   tags = var.tags
 
+  enable_cross_zone_load_balancing = var.enable_cross_zone_load_balancing
+
   dynamic "subnet_mapping" {
     for_each = var.subnet_ids
     content {
