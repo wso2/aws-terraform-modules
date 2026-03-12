@@ -60,3 +60,8 @@ variable "kms_master_key_id" {
   description = "The ID of an AWS-managed customer master key (CMK) for Amazon SNS or a custom CMK"
   default     = null
 }
+variable "delivery_policy" {
+  type        = string
+  description = "The SNS delivery policy for HTTP/S endpoints"
+  default     = null
+}
