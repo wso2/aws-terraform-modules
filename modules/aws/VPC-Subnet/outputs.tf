@@ -9,18 +9,35 @@
 #
 # --------------------------------------------------------------------------------------
 
+output "subnet_ids" {
+  value      = { for k, s in aws_subnet.subnet : k => s.id }
+  depends_on = [aws_subnet.subnet]
+}
+output "route_table_ids" {
+  value      = { for k, rt in aws_route_table.route_table : k => rt.id }
+  depends_on = [aws_route_table.route_table]
+}
+output "subnet_names" {
+  value = { for k, v in local.subnet_map : k => join("-", [v.name_prefix, "snet"]) }
+}
+output "subnet_cidr_blocks" {
+  value      = { for k, s in aws_subnet.subnet : k => s.cidr_block }
+  depends_on = [aws_subnet.subnet]
+}
+
+# Single-value aliases (first subnet) retained for backwards compatibility
 output "subnet_id" {
-  value      = aws_subnet.subnet.id
+  value      = values(aws_subnet.subnet)[0].id
   depends_on = [aws_subnet.subnet]
 }
 output "route_table_id" {
-  value      = aws_route_table.route_table.id
+  value      = values(aws_route_table.route_table)[0].id
   depends_on = [aws_route_table.route_table]
 }
 output "subnet_name" {
-  value = local.subnet_name
+  value = values(local.subnet_map)[0].name_prefix
 }
 output "subnet_cidr_block" {
-  value      = aws_subnet.subnet.cidr_block
+  value      = values(aws_subnet.subnet)[0].cidr_block
   depends_on = [aws_subnet.subnet]
 }

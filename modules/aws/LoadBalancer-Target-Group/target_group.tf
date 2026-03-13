@@ -10,12 +10,13 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_lb_target_group" "lb_target_group" {
-  name        = join("-", [var.project, var.application, var.environment, var.region, "lb-tg"])
-  target_type = var.target_type
-  port        = var.port
-  protocol    = var.protocol
-  vpc_id      = var.vpc_id
-  tags        = var.tags
+  name               = join("-", [var.project, var.application, var.environment, var.region, "lb-tg"])
+  target_type        = var.target_type
+  port               = var.port
+  protocol           = var.protocol
+  vpc_id             = var.vpc_id
+  preserve_client_ip = var.preserve_client_ip
+  tags               = var.tags
 }
 
 # Create target group attachments for each

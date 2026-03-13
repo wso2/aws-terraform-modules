@@ -98,6 +98,11 @@ variable "metric_usage_prefix" {
   type        = string
   description = "Prefix for the metric usage"
 }
+variable "datapoints_to_alarm" {
+  description = "The number of datapoints that must be breaching to trigger the alarm. Defaults to evaluation_periods."
+  type        = number
+  default     = null
+}
 variable "tags" {
   type        = map(string)
   description = "Tags to be attached to the resource"

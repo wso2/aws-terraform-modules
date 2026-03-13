@@ -10,18 +10,22 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_subnet" "subnet" {
+  for_each = local.subnet_map
+
   vpc_id                  = var.vpc_id
-  cidr_block              = var.cidr_block
+  cidr_block              = each.value.cidr_block
   enable_dns64            = var.enable_dns64
-  availability_zone       = var.availability_zone
+  availability_zone       = each.value.az
   map_public_ip_on_launch = var.auto_assign_public_ip
 
-  tags = local.subnet_tags
+  tags = merge(var.tags, { Name = join("-", [each.value.name_prefix, "snet"]), availability_zone = each.value.az })
 }
 
 resource "aws_route_table" "route_table" {
+  for_each = local.subnet_map
+
   vpc_id = var.vpc_id
-  tags   = local.rt_tags
+  tags   = merge(var.tags, { Name = join("-", [each.value.name_prefix, "snet-rt"]), availability_zone = each.value.az })
 
   dynamic "route" {
     for_each = var.custom_routes
@@ -42,8 +46,10 @@ resource "aws_route_table" "route_table" {
 }
 
 resource "aws_route_table_association" "route_table_association" {
-  subnet_id      = aws_subnet.subnet.id
-  route_table_id = aws_route_table.route_table.id
+  for_each = local.subnet_map
+
+  subnet_id      = aws_subnet.subnet[each.key].id
+  route_table_id = aws_route_table.route_table[each.key].id
 
   depends_on = [
     aws_subnet.subnet,

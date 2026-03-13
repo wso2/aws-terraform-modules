@@ -136,6 +136,7 @@ variable "ordered_cache_behaviors" {
 variable "log_bucket_name" {
   description = "The S3 bucket name for CloudFront access logs (e.g., mybucket.s3.amazonaws.com)"
   type        = string
+  default     = null
 }
 
 variable "log_include_cookies" {
@@ -147,4 +148,59 @@ variable "log_include_cookies" {
 variable "log_prefix" {
   description = "An optional string that you want CloudFront to prefix to the access log filenames for this distribution"
   type        = string
+  default     = null
+}
+
+variable "aliases" {
+  description = "List of aliases for the CloudFront distribution"
+  type        = list(string)
+  default     = null
+}
+
+variable "cloudfront_default_certificate" {
+  description = "Specifies whether to use the default CloudFront certificate"
+  type        = bool
+  default     = true
+}
+
+variable "cloudfront_acm_certificate_arn" {
+  description = "The ARN of the ACM certificate for the CloudFront distribution"
+  type        = string
+  default     = null
+}
+
+variable "cloudfront_ssl_support_method" {
+  description = "The SSL support method for the CloudFront distribution"
+  type        = string
+  default     = "sni-only"
+}
+
+variable "response_headers_policy_id" {
+  description = "The ID of the response headers policy to associate with the default cache behavior"
+  type        = string
+  default     = null
+}
+
+variable "cache_policy_id" {
+  description = "The ID of the cache policy to associate with the default cache behavior"
+  type        = string
+  default     = null
+}
+
+variable "origin_shield_enabled" {
+  description = "Specifies whether Origin Shield is enabled for the CloudFront distribution"
+  type        = bool
+  default     = false
+}
+
+variable "origin_shield_region" {
+  description = "The AWS region for Origin Shield"
+  type        = string
+  default     = null
+}
+
+variable "minimum_protocol_version" {
+  description = "The minimum SSL/TLS protocol version for the CloudFront distribution"
+  type        = string
+  default     = "TLSv1.2_2021"
 }

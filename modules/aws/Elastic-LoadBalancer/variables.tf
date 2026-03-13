@@ -64,3 +64,8 @@ variable "enable_shield_protection" {
   description = "Flag to indicate whether the ALB instance is protected by AWS Shield or not"
   default     = false
 }
+variable "enable_cross_zone_load_balancing" {
+  type        = string
+  description = "Flag to indicate whether the cross zone load balancing is enabled for the ALB instance or not"
+  default     = false
+}
