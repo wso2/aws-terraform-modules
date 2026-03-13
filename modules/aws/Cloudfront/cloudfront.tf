@@ -40,10 +40,15 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   is_ipv6_enabled = var.is_ipv6_enabled
   comment         = var.comment
 
-  logging_config {
-    bucket          = var.log_bucket_name
-    include_cookies = var.log_include_cookies
-    prefix          = var.log_prefix
+  aliases = var.aliases
+
+  dynamic "logging_config" {
+    for_each = var.log_bucket_name != null ? [1] : []
+    content {
+      bucket          = var.log_bucket_name
+      include_cookies = var.log_include_cookies
+      prefix          = var.log_prefix
+    }
   }
 
   default_cache_behavior {
@@ -53,11 +58,13 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
     cached_methods             = var.cached_methods
     target_origin_id           = var.origin_id
 
-    forwarded_values {
-      query_string = true
-
-      cookies {
-        forward = "none"
+    dynamic "forwarded_values" {
+      for_each = var.cache_policy_id == null ? [1] : []
+      content {
+        query_string = true
+        cookies {
+          forward = "none"
+        }
       }
     }
 

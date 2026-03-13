@@ -41,8 +41,8 @@ resource "aws_rds_cluster" "rds_cluster" {
 
   database_name               = var.database_name
   master_username             = var.master_username
-  master_password             = var.master_password
-  manage_master_user_password = var.manage_master_user_password
+  master_password             = var.manage_master_user_password ? null : var.master_password
+  manage_master_user_password = var.manage_master_user_password ? true : null
 
   db_cluster_parameter_group_name  = var.db_cluster_parameter_group_name
   db_instance_parameter_group_name = var.allow_major_version_upgrade == true ? var.db_instance_parameter_group_name : null
@@ -98,7 +98,7 @@ resource "aws_rds_cluster" "rds_cluster" {
 
 resource "aws_rds_cluster_instance" "cluster_instances" {
   for_each           = var.cluster_instances
-  identifier         = "${local.cluster_name}-${each.value.name}"
+  identifier         = coalesce(each.value.instance_name_override, "${local.cluster_name}-${each.value.name}")
   cluster_identifier = aws_rds_cluster.rds_cluster.id
   instance_class     = var.db_cluster_instance_class == null ? each.value.instance_class : var.db_cluster_instance_class
   engine             = aws_rds_cluster.rds_cluster.engine

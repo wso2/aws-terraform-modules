@@ -136,6 +136,7 @@ variable "ordered_cache_behaviors" {
 variable "log_bucket_name" {
   description = "The S3 bucket name for CloudFront access logs (e.g., mybucket.s3.amazonaws.com)"
   type        = string
+  default     = null
 }
 
 variable "log_include_cookies" {
@@ -147,6 +148,7 @@ variable "log_include_cookies" {
 variable "log_prefix" {
   description = "An optional string that you want CloudFront to prefix to the access log filenames for this distribution"
   type        = string
+  default     = null
 }
 
 variable "aliases" {

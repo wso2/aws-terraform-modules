@@ -215,6 +215,7 @@ variable "cluster_instances" {
   type = map(object({
     name                         = string
     custom_iam_instance_profile  = optional(string)
+    instance_name_override       = optional(string)
     db_parameter_group_name      = optional(string)
     instance_class               = optional(string)
     monitoring_interval          = optional(number, 0)

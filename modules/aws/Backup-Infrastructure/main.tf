@@ -221,7 +221,7 @@ resource "aws_s3_bucket_public_access_block" "backup_reports" {
 resource "aws_backup_report_plan" "plan" {
   count = var.enable_backup_reporting ? 1 : 0
 
-  name        = join("-", [var.plan_name, var.plan_abbreviation])
+  name        = join("_", [var.plan_name, var.plan_abbreviation])
   description = "Backup compliance report for the account"
 
   report_delivery_channel {

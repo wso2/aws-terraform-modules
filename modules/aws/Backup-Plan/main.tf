@@ -19,7 +19,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_backup_plan" "backup_plan" {
-  name = join("-", [var.backup_plan_name, var.backup_plan_abbreviation])
+  name = join("_", [var.backup_plan_name, var.backup_plan_abbreviation])
 
   dynamic "rule" {
     for_each = var.backup_rules
