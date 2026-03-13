@@ -196,6 +196,7 @@ variable "origin_shield_enabled" {
 variable "origin_shield_region" {
   description = "The AWS region for Origin Shield"
   type        = string
+  default     = null
 }
 
 variable "minimum_protocol_version" {

@@ -98,7 +98,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   tags = var.tags
 
   viewer_certificate {
-    cloudfront_default_certificate = var.cloudfront_default_certificate
+    cloudfront_default_certificate = var.cloudfront_default_certificate == null
     acm_certificate_arn            = var.cloudfront_acm_certificate_arn
     ssl_support_method             = var.cloudfront_acm_certificate_arn != null ? var.cloudfront_ssl_support_method : null
     minimum_protocol_version       = var.minimum_protocol_version

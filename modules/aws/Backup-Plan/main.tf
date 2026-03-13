@@ -52,7 +52,7 @@ resource "aws_backup_plan" "backup_plan" {
   tags = merge(
     var.tags,
     {
-      Name      = join("-", [var.backup_plan_name, var.backup_plan_abbreviation])
+      Name      = join("_", [var.backup_plan_name, var.backup_plan_abbreviation])
       Service   = var.service_name
       ManagedBy = "terraform"
     }
