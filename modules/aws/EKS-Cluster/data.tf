@@ -10,7 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 data "aws_eks_cluster" "eks_cluster" {
-  name = aws_eks_cluster.eks_cluster.name
+  name     = join("-", [var.project, var.application, var.environment, var.region, "eks"])
 }
 # Obtain TLS certificate for the OIDC provider
 data "tls_certificate" "tls" {
