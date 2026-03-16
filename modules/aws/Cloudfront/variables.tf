@@ -110,7 +110,7 @@ variable "geo_restriction_locations" {
 variable "tags" {
   description = "Tags for the distribution"
   type        = map(string)
-  default = null
+  default     = null
 }
 
 variable "web_acl_id" {

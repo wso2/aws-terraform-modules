@@ -12,7 +12,7 @@
 variable "tags" {
   type        = map(string)
   description = "Default tags to be associated with the resource"
-  default = null
+  default     = null
 }
 variable "project" {
   type        = string

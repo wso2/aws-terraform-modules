@@ -37,6 +37,7 @@ variable "enable_dns64" {
 variable "cidr_block" {
   type        = string
   description = "Base CIDR block. Automatically sub-divided across availability_zones when multiple are provided."
+  default     = null
 }
 variable "cidr_blocks" {
   type        = list(string)
