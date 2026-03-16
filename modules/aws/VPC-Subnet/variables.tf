@@ -38,11 +38,21 @@ variable "cidr_block" {
   type        = string
   description = "Base CIDR block. Automatically sub-divided across availability_zones when multiple are provided."
   default     = null
+
+  validation {
+    condition     = var.cidr_block == null || can(cidrnetmask(var.cidr_block))
+    error_message = "cidr_block must be a valid CIDR notation (e.g. 10.0.0.0/24)."
+  }
 }
 variable "cidr_blocks" {
   type        = list(string)
   description = "Optional explicit CIDR blocks per availability zone. When provided, overrides automatic cidr_block subdivision. Must match the length of availability_zone."
   default     = []
+
+  validation {
+    condition     = alltrue([for cidr in var.cidr_blocks : can(cidrnetmask(cidr))])
+    error_message = "All entries in cidr_blocks must be valid CIDR notation (e.g. 10.0.0.0/24)."
+  }
 }
 variable "tags" {
   type        = map(string)

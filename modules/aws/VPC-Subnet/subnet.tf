@@ -19,6 +19,13 @@ resource "aws_subnet" "subnet" {
   map_public_ip_on_launch = var.auto_assign_public_ip
 
   tags = merge(var.tags, { Name = join("-", [each.value.name_prefix, "snet"]), availability_zone = each.value.az })
+
+  lifecycle {
+  precondition {
+    condition     = var.cidr_block != null || length(var.cidr_blocks) > 0
+    error_message = "At least one of cidr_block or cidr_blocks must be provided."
+  }
+}
 }
 
 resource "aws_route_table" "route_table" {

@@ -105,4 +105,15 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   }
 
   web_acl_id = var.web_acl_id
+
+  lifecycle {
+    precondition {
+      condition     = var.cloudfront_default_certificate == false ? var.cloudfront_acm_certificate_arn != null : true
+      error_message = "cloudfront_acm_certificate_arn must be provided when cloudfront_default_certificate is false."
+    }
+    precondition {
+      condition     = var.cloudfront_default_certificate == true ? var.cloudfront_acm_certificate_arn == null : true
+      error_message = "cloudfront_acm_certificate_arn must not be set when cloudfront_default_certificate is true."
+    }
+  }
 }
