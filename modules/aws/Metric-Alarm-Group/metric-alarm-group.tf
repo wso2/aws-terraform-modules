@@ -31,7 +31,12 @@ module "warning-metric-alarm" {
   ok_actions                = var.ok_alarm_actions
   insufficient_data_actions = var.insufficient_data_actions
 
-  alarm_description   = "[${upper(each.value.priority)}] ${title(each.value.statistic)} ${each.value.metric_name} of ${var.resource_description} ${local.operation_description[each.value.comparison_operator]} ${each.value.threshold} in the last ${each.value.evaluation_periods} periods of ${each.value.period} seconds"
+  alarm_description = jsonencode({
+    category    = "service_interruption"
+    service     = "Choreo"
+    severity    = title(each.value.priority)
+    environment = var.environment
+  })
   metric_usage_prefix = lower(join("-", [var.project, var.application, var.region, var.environment, var.resource_infix, each.value.statistic, each.value.metric_name, each.value.priority]))
 
   comparison_operator = each.value.comparison_operator
