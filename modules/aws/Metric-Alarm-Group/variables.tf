@@ -94,7 +94,8 @@ variable "resource_infix" {
   type        = string
   description = "Infix to be used in the metric usage prefix"
 }
-variable "resource_description" {
+variable "product" {
   type        = string
-  description = "Description of the resource for which the metrics are being monitored"
+  description = "Product name used in alarm descriptions"
+  default     = "Choreo"
 }
