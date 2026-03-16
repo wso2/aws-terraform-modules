@@ -60,8 +60,13 @@ variable "tags" {
   default     = {}
 }
 variable "availability_zone" {
+  type        = string
+  description = "Availability zone for a single subnet. Deprecated: use availability_zones (list) instead."
+  default     = null
+}
+variable "availability_zones" {
   type        = list(string)
-  description = "Availability zones for the Subnets. Provide multiple values to create one subnet per AZ."
+  description = "Availability zones for the Subnets. Provide multiple values to create one subnet per AZ. Takes precedence over availability_zone when provided."
   default     = []
 }
 variable "auto_assign_public_ip" {
