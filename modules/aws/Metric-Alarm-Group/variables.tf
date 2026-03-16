@@ -98,3 +98,8 @@ variable "resource_description" {
   type        = string
   description = "Description of the resource for which the metrics are being monitored"
 }
+variable "product" {
+  type        = string
+  description = "Product name used in alarm descriptions"
+  default     = "Choreo"
+}
