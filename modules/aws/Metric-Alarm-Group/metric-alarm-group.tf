@@ -33,7 +33,7 @@ module "warning-metric-alarm" {
 
   alarm_description = jsonencode({
     category    = "service_interruption"
-    service     = "Choreo"
+    service     = var.product
     severity    = title(each.value.priority)
     environment = var.environment
   })
