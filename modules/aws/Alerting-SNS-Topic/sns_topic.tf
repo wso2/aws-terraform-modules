@@ -35,7 +35,7 @@ resource "aws_sns_topic_policy" "sns_topic_policy" {
 }
 
 resource "aws_sns_topic_subscription" "subscription" {
-  for_each = { for s in var.subscribers : s.endpoint => s }
+  for_each = { for i, s in var.subscribers : i => s }
 
   topic_arn = aws_sns_topic.sns_topic.arn
   protocol  = each.value.protocol
