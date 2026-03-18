@@ -127,9 +127,9 @@ variable "ordered_cache_behaviors" {
     cached_methods           = list(string)
     target_origin_id         = string
     viewer_protocol_policy   = string
-    compress                 = string
-    cache_policy_id          = string
-    origin_request_policy_id = string
+    compress                 = bool
+    cache_policy_id          = optional(string)
+    origin_request_policy_id = optional(string)
   }))
   default = []
 }
@@ -184,6 +184,12 @@ variable "response_headers_policy_id" {
 
 variable "cache_policy_id" {
   description = "The ID of the cache policy to associate with the default cache behavior"
+  type        = string
+  default     = null
+}
+
+variable "origin_request_policy_id" {
+  description = "The ID of the origin request policy for the default cache behavior"
   type        = string
   default     = null
 }

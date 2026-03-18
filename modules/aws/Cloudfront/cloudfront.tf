@@ -30,9 +30,12 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
       origin_ssl_protocols   = var.origin_ssl_protocols
     }
 
-    origin_shield {
-      enabled              = var.origin_shield_enabled
-      origin_shield_region = var.origin_shield_region
+    dynamic "origin_shield" {
+      for_each = var.origin_shield_enabled ? [1] : []
+      content {
+        enabled              = true
+        origin_shield_region = var.origin_shield_region
+      }
     }
   }
 
@@ -54,6 +57,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   default_cache_behavior {
     cache_policy_id            = var.cache_policy_id
     response_headers_policy_id = var.response_headers_policy_id
+    origin_request_policy_id   = var.origin_request_policy_id
     allowed_methods            = var.allowed_methods
     cached_methods             = var.cached_methods
     target_origin_id           = var.origin_id
@@ -85,6 +89,16 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
       cached_methods           = ordered_cache_behavior.value.cached_methods
       cache_policy_id          = ordered_cache_behavior.value.cache_policy_id
       origin_request_policy_id = ordered_cache_behavior.value.origin_request_policy_id
+
+      dynamic "forwarded_values" {
+        for_each = ordered_cache_behavior.value.cache_policy_id == null ? [1] : []
+        content {
+          query_string = true
+          cookies {
+            forward = "none"
+          }
+        }
+      }
     }
   }
 
