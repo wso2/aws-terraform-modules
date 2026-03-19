@@ -8,9 +8,12 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-
 data "aws_eks_cluster" "eks_cluster" {
-  name = aws_eks_cluster.eks_cluster.name
+  name     = join("-", [var.project, var.application, var.environment, var.region, "eks"])
+
+  depends_on = [
+    aws_eks_cluster.eks_cluster
+  ]
 }
 # Obtain TLS certificate for the OIDC provider
 data "tls_certificate" "tls" {

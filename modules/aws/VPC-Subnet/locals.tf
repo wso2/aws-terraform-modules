@@ -10,9 +10,22 @@
 # --------------------------------------------------------------------------------------
 
 locals {
-  name_prefix = var.availability_zone == null ? join("-", [var.project, var.application, var.environment, var.region]) : join("-", [var.project, var.application, var.environment, var.region, var.availability_zone])
-  rt_name     = join("-", [local.name_prefix, "snet-rt"])
-  subnet_name = join("-", [local.name_prefix, "snet"])
-  rt_tags     = merge(var.tags, { Name : local.rt_name })
-  subnet_tags = merge(var.tags, { Name : local.subnet_name })
+  # Normalise: availability_zones (list) takes precedence over availability_zone (scalar).
+  # Treat empty/null as a single "no-AZ" subnet using the base cidr_block as-is.
+  _azs_resolved = length(var.availability_zones) > 0 ? var.availability_zones : (var.availability_zone != null ? [var.availability_zone] : [])
+  azs           = length(local._azs_resolved) > 0 ? local._azs_resolved : [null]
+  az_count      = length(local.azs)
+
+  # Number of extra bits to evenly subdivide the base CIDR across all AZs (0 when single)
+  newbits = local.az_count > 1 ? ceil(log(local.az_count, 2)) : 0
+
+  # Build the per-subnet map keyed by AZ name (or "default" when no AZ given)
+  subnet_map = {
+    for idx, az in local.azs :
+    (az != null ? az : "default") => {
+      az          = az
+      cidr_block  = length(var.cidr_blocks) > 0 ? var.cidr_blocks[idx] : (local.az_count > 1 ? cidrsubnet(var.cidr_block, local.newbits, idx) : var.cidr_block)
+      name_prefix = az != null ? join("-", [var.project, var.application, var.environment, var.region, az]) : join("-", [var.project, var.application, var.environment, var.region])
+    }
+  }
 }

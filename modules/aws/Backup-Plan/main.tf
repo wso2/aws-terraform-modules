@@ -19,7 +19,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_backup_plan" "backup_plan" {
-  name = join("-", [var.backup_plan_name, var.backup_plan_abbreviation])
+  name = join("_", [var.backup_plan_name, var.backup_plan_abbreviation])
 
   dynamic "rule" {
     for_each = var.backup_rules
@@ -52,7 +52,7 @@ resource "aws_backup_plan" "backup_plan" {
   tags = merge(
     var.tags,
     {
-      Name      = join("-", [var.backup_plan_name, var.backup_plan_abbreviation])
+      Name      = join("_", [var.backup_plan_name, var.backup_plan_abbreviation])
       Service   = var.service_name
       ManagedBy = "terraform"
     }

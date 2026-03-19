@@ -48,6 +48,12 @@ variable "target_group_attachments" {
     port              = optional(number)
   }))
   description = "List of target group attachments"
+  default     = {}
+}
+variable "preserve_client_ip" {
+  type        = bool
+  description = "Whether client IP preservation is enabled for the target group"
+  default     = null
 }
 variable "tags" {
   type        = map(string)

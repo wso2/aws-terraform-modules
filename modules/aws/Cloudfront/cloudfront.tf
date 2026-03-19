@@ -29,28 +29,46 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
       origin_protocol_policy = var.origin_protocol_policy
       origin_ssl_protocols   = var.origin_ssl_protocols
     }
+
+    dynamic "origin_shield" {
+      for_each = var.origin_shield_enabled ? [1] : []
+      content {
+        enabled              = true
+        origin_shield_region = var.origin_shield_region
+      }
+    }
   }
 
   enabled         = var.enabled
   is_ipv6_enabled = var.is_ipv6_enabled
   comment         = var.comment
 
-  logging_config {
-    bucket          = var.log_bucket_name
-    include_cookies = var.log_include_cookies
-    prefix          = var.log_prefix
+  aliases = var.aliases
+
+  dynamic "logging_config" {
+    for_each = var.log_bucket_name != null ? [1] : []
+    content {
+      bucket          = var.log_bucket_name
+      include_cookies = var.log_include_cookies
+      prefix          = var.log_prefix
+    }
   }
 
   default_cache_behavior {
-    allowed_methods  = var.allowed_methods
-    cached_methods   = var.cached_methods
-    target_origin_id = var.origin_id
+    cache_policy_id            = var.cache_policy_id
+    response_headers_policy_id = var.response_headers_policy_id
+    origin_request_policy_id   = var.origin_request_policy_id
+    allowed_methods            = var.allowed_methods
+    cached_methods             = var.cached_methods
+    target_origin_id           = var.origin_id
 
-    forwarded_values {
-      query_string = true
-
-      cookies {
-        forward = "none"
+    dynamic "forwarded_values" {
+      for_each = var.cache_policy_id == null ? [1] : []
+      content {
+        query_string = true
+        cookies {
+          forward = "none"
+        }
       }
     }
 
@@ -71,6 +89,16 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
       cached_methods           = ordered_cache_behavior.value.cached_methods
       cache_policy_id          = ordered_cache_behavior.value.cache_policy_id
       origin_request_policy_id = ordered_cache_behavior.value.origin_request_policy_id
+
+      dynamic "forwarded_values" {
+        for_each = ordered_cache_behavior.value.cache_policy_id == null ? [1] : []
+        content {
+          query_string = true
+          cookies {
+            forward = "none"
+          }
+        }
+      }
     }
   }
 
@@ -84,8 +112,22 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   tags = var.tags
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    cloudfront_default_certificate = var.cloudfront_default_certificate
+    acm_certificate_arn            = var.cloudfront_acm_certificate_arn
+    ssl_support_method             = var.cloudfront_acm_certificate_arn != null ? var.cloudfront_ssl_support_method : null
+    minimum_protocol_version       = var.minimum_protocol_version
   }
 
   web_acl_id = var.web_acl_id
+
+  lifecycle {
+    precondition {
+      condition     = var.cloudfront_default_certificate == false ? var.cloudfront_acm_certificate_arn != null : true
+      error_message = "cloudfront_acm_certificate_arn must be provided when cloudfront_default_certificate is false."
+    }
+    precondition {
+      condition     = var.cloudfront_default_certificate == true ? var.cloudfront_acm_certificate_arn == null : true
+      error_message = "cloudfront_acm_certificate_arn must not be set when cloudfront_default_certificate is true."
+    }
+  }
 }

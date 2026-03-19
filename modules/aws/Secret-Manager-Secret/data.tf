@@ -25,6 +25,4 @@ data "aws_iam_policy_document" "iam_policy_document" {
     actions   = ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"]
     resources = [aws_secretsmanager_secret.secretsmanager_secret.arn]
   }
-
-  depends_on = [aws_secretsmanager_secret.secretsmanager_secret]
 }

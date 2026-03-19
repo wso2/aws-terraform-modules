@@ -36,7 +36,23 @@ variable "enable_dns64" {
 }
 variable "cidr_block" {
   type        = string
-  description = "CIDR block for the subnet"
+  description = "Base CIDR block. Automatically sub-divided across availability_zones when multiple are provided."
+  default     = null
+
+  validation {
+    condition     = var.cidr_block == null || can(cidrnetmask(var.cidr_block))
+    error_message = "cidr_block must be a valid CIDR notation (e.g. 10.0.0.0/24)."
+  }
+}
+variable "cidr_blocks" {
+  type        = list(string)
+  description = "Optional explicit CIDR blocks per availability zone. When provided, overrides automatic cidr_block subdivision. Must match the length of availability_zone."
+  default     = []
+
+  validation {
+    condition     = alltrue([for cidr in var.cidr_blocks : can(cidrnetmask(cidr))])
+    error_message = "All entries in cidr_blocks must be valid CIDR notation (e.g. 10.0.0.0/24)."
+  }
 }
 variable "tags" {
   type        = map(string)
@@ -45,8 +61,13 @@ variable "tags" {
 }
 variable "availability_zone" {
   type        = string
-  description = "Availability zones for the Subnet"
+  description = "Availability zone for a single subnet. Deprecated: use availability_zones (list) instead."
   default     = null
+}
+variable "availability_zones" {
+  type        = list(string)
+  description = "Availability zones for the Subnets. Provide multiple values to create one subnet per AZ. Takes precedence over availability_zone when provided."
+  default     = []
 }
 variable "auto_assign_public_ip" {
   type        = bool
