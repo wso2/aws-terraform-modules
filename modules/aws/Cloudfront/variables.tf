@@ -210,7 +210,7 @@ variable "minimum_protocol_version" {
   description = "The minimum SSL/TLS protocol version for the CloudFront distribution"
   type        = string
   default     = "TLSv1.2_2021"
-  
+
   validation {
     condition = contains([
       "SSLv3",
