@@ -12,6 +12,7 @@
 variable "vpc_id" {
   type        = string
   description = "ID of the VPC the dns should be associated with"
+  default     = null
 }
 variable "tags" {
   type        = map(string)
