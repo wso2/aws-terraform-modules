@@ -13,7 +13,7 @@ resource "aws_route53_zone" "private_route53_zone" {
   name = var.dns_zone_name
 
   dynamic "vpc" {
-    for_each = var.vpc_id != null ? [var.vpc_id] : []
+    for_each = var.vpc_ids
     content {
       vpc_id = vpc.value
     }
