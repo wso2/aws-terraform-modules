@@ -10,8 +10,13 @@
 # --------------------------------------------------------------------------------------
 
 variable "vpc_ids" {
-  type        = list(string)
+  type        = set(string)
   description = "IDs of the VPCs the dns should be associated with"
+
+  validation {
+    condition     = length(var.vpc_ids) > 0
+    error_message = "vpc_ids must include at least one VPC ID for a private hosted zone."
+  }
 }
 variable "tags" {
   type        = map(string)
