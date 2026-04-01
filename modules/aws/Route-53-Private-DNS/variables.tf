@@ -9,10 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "vpc_id" {
-  type        = string
-  description = "ID of the VPC the dns should be associated with"
-  default     = null
+variable "vpc_ids" {
+  type        = list(string)
+  description = "IDs of the VPCs the dns should be associated with"
 }
 variable "tags" {
   type        = map(string)
