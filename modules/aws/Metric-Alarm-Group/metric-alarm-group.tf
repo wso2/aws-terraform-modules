@@ -36,6 +36,7 @@ module "warning-metric-alarm" {
     service     = var.product
     severity    = title(each.value.priority)
     environment = var.environment
+    service_id  = var.service_id
   })
   metric_usage_prefix = lower(join("-", [var.project, var.application, var.region, var.environment, var.resource_infix, each.value.statistic, each.value.metric_name, each.value.priority]))
 

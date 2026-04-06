@@ -99,3 +99,8 @@ variable "product" {
   description = "Product name used in alarm descriptions"
   default     = "Choreo"
 }
+variable "service_id" {
+  type        = string
+  description = "Service ID for Smart Incident routing"
+  default     = null
+}
