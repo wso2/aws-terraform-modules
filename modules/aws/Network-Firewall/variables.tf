@@ -104,3 +104,10 @@ variable "aws_managed_rule_group" {
   type        = list(any)
   default     = []
 }
+
+variable "log_group_name_prefix" {
+  description = "Prefix for the CloudWatch log group names created for Network Firewall logging. Defaults to '/aws/network-firewall'. Override this when deploying multiple firewalls in the same account and region to avoid name collisions."
+  type        = string
+  default     = "/aws/network-firewall"
+}
+

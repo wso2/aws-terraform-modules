@@ -59,7 +59,7 @@ resource "aws_networkfirewall_firewall_policy" "networkfirewall_firewall_policy"
 
 resource "aws_cloudwatch_log_group" "nfw_cloudwatch_log_group" {
   for_each = try(var.logging_config, {})
-  name     = "/aws/network-firewall/${each.key}"
+  name     = "${var.log_group_name_prefix}/${each.key}"
 
   tags = merge(var.tags)
 
