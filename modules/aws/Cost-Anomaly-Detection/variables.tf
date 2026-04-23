@@ -54,7 +54,11 @@ variable "frequency" {
 variable "subscriber_type" {
   description = "Type of subscriber (SNS or EMAIL)."
   type        = string
-  default     = "SNS"
+  default     = "EMAIL"
+  validation {
+    condition     = contains(["SNS", "EMAIL"], var.subscriber_type)
+    error_message = "subscriber_type must be either SNS or EMAIL."
+  }
 }
 variable "subscriber_address" {
   description = "SNS topic ARN or email address for anomaly notifications."
