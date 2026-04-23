@@ -19,16 +19,15 @@
 # --------------------------------------------------------------------------------------
 
 data "aws_caller_identity" "current" {}
+
 data "aws_iam_policy_document" "sns_topic_policy" {
   statement {
     sid    = "AlertWebhook SNS Topic Policy"
     effect = "Allow"
-
     principals {
       type        = "AWS"
       identifiers = ["*"]
     }
-
     actions = [
       "SNS:Publish",
       "SNS:RemovePermission",
@@ -39,43 +38,46 @@ data "aws_iam_policy_document" "sns_topic_policy" {
       "SNS:AddPermission",
       "SNS:Subscribe"
     ]
-
-    resources = [
-      aws_sns_topic.sns_topic.arn
-    ]
-
+    resources = [aws_sns_topic.sns_topic.arn]
     condition {
       test     = "StringEquals"
       variable = "AWS:SourceOwner"
       values   = [data.aws_caller_identity.current.account_id]
     }
   }
-
   statement {
     sid    = "AWSBudgets-notification-1"
     effect = "Allow"
-
     principals {
       type        = "Service"
       identifiers = ["budgets.amazonaws.com"]
     }
-
-    actions = ["SNS:Publish"]
-
-    resources = [
-      aws_sns_topic.sns_topic.arn
-    ]
-
+    actions   = ["SNS:Publish"]
+    resources = [aws_sns_topic.sns_topic.arn]
     condition {
       test     = "StringEquals"
       variable = "aws:SourceAccount"
       values   = [data.aws_caller_identity.current.account_id]
     }
-
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
       values   = ["arn:aws:budgets::${data.aws_caller_identity.current.account_id}:*"]
+    }
+  }
+  statement {
+    sid    = "AWSCostAnomalyDetection-notification-1"
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["costalerts.amazonaws.com"]
+    }
+    actions   = ["SNS:Publish"]
+    resources = [aws_sns_topic.sns_topic.arn]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
     }
   }
 }
