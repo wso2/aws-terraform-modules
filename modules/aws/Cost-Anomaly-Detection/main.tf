@@ -24,16 +24,31 @@ resource "aws_ce_anomaly_monitor" "anomaly_monitor" {
   monitor_dimension = var.monitor_dimension
 }
 
+resource "aws_sns_topic_policy" "anomaly_sns_policy" {
+  count  = var.subscriber_type == "SNS" ? 1 : 0
+  arn    = var.subscriber_address
+  policy = data.aws_iam_policy_document.anomaly_sns_policy[0].json
+}
+
 resource "aws_ce_anomaly_subscription" "anomaly_subscription" {
   name             = join("-", [var.monitor_subscription_name, var.monitor_subscription_abbreviation])
   monitor_arn_list = [aws_ce_anomaly_monitor.anomaly_monitor.arn]
   frequency        = var.frequency
 
   threshold_expression {
-    dimension {
-      key           = var.threshold_key
-      values        = [tostring(var.threshold)]
-      match_options = var.threshold_match_options
+    and {
+      dimension {
+        key           = "ANOMALY_TOTAL_IMPACT_ABSOLUTE"
+        match_options = ["GREATER_THAN_OR_EQUAL"]
+        values        = [tostring(var.absolute_threshold)]
+      }
+    }
+    and {
+      dimension {
+        key           = "ANOMALY_TOTAL_IMPACT_PERCENTAGE"
+        match_options = ["GREATER_THAN_OR_EQUAL"]
+        values        = [tostring(var.percentage_threshold)]
+      }
     }
   }
 
