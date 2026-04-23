@@ -15,5 +15,5 @@ variable "tags" {
 }
 variable "dns_zone_name" {
   type        = string
-  description = "Name of the Private DNS"
+  description = "Name of the Public DNS zone"
 }

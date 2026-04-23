@@ -23,8 +23,3 @@ variable "subject_alternative_names" {
   type        = list(string)
   default     = []
 }
-variable "validation_method" {
-  description = "Validation method for the certificate"
-  type        = string
-  default     = "DNS"
-}
