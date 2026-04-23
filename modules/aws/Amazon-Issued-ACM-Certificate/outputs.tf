@@ -10,11 +10,11 @@
 # --------------------------------------------------------------------------------------
 
 output "certificate_arn" {
-  value = aws_acm_certificate.cert.arn
+  value = aws_acm_certificate.acm_certificate.arn
 }
 output "certificate_id" {
-  value = aws_acm_certificate.cert.id
+  value = aws_acm_certificate.acm_certificate.id
 }
 output "domain_validation_options" {
-  value = aws_acm_certificate.cert.domain_validation_options
+  value = aws_acm_certificate.acm_certificate.domain_validation_options
 }
