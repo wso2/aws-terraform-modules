@@ -26,11 +26,6 @@ variable "environment" {
   type        = string
   description = "Name of the environment"
 }
-variable "default_tags" {
-  type        = map(string)
-  description = "Default tags to be applied to resources"
-  default     = {}
-}
 variable "critical_sns_arn" {
   type        = string
   description = "ARN of the existing critical SNS topic"

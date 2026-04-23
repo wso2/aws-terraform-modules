@@ -19,10 +19,10 @@
 # --------------------------------------------------------------------------------------
 
 module "cost_anomaly_critical" {
-  source   = "../Cost-Anomaly-Monitor"
+  source   = "../Cost-Anomaly-Detection"
   for_each = var.per_service_anomaly_alerts
 
-  monitor_name                      = join("-", [var.project, var.environment, lower(each.key)])
+  monitor_name                      = join("-", [var.project, var.environment, lower(each.key), "critical"])
   monitor_abbreviation              = "anomaly-monitor"
   monitor_type                      = "DIMENSIONAL"
   monitor_dimension                 = "SERVICE"
@@ -36,10 +36,10 @@ module "cost_anomaly_critical" {
 }
 
 module "cost_anomaly_warning" {
-  source   = "../Cost-Anomaly-Monitor"
+  source   = "../Cost-Anomaly-Detection"
   for_each = var.per_service_anomaly_alerts
 
-  monitor_name                      = join("-", [var.project, var.environment, lower(each.key)])
+  monitor_name                      = join("-", [var.project, var.environment, lower(each.key), "warning"])
   monitor_abbreviation              = "anomaly-monitor"
   monitor_type                      = "DIMENSIONAL"
   monitor_dimension                 = "SERVICE"
