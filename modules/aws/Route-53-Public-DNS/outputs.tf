@@ -13,3 +13,13 @@ output "dns_zone_id" {
   value      = aws_route53_zone.public_route53_zone.id
   depends_on = [aws_route53_zone.public_route53_zone]
 }
+
+output "dns_zone_name" {
+  value      = aws_route53_zone.public_route53_zone.name
+  depends_on = [aws_route53_zone.public_route53_zone]
+}
+
+output "name_servers" {
+  value      = aws_route53_zone.public_route53_zone.name_servers
+  depends_on = [aws_route53_zone.public_route53_zone]
+}
