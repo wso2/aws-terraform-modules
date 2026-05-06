@@ -10,12 +10,12 @@
 # --------------------------------------------------------------------------------------
 
 variable "name" {
-  description = "Name of the WAF ACL"
+  description = "Name of the WAF IP Set"
   type        = string
 }
 
 variable "scope" {
-  description = "The scope of the WAF ACL. Valid values are REGIONAL or CLOUDFRONT"
+  description = "The scope of the WAF IP Set. Valid values are REGIONAL or CLOUDFRONT"
   type        = string
   default     = "REGIONAL"
 }
