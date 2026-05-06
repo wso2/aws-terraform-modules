@@ -85,7 +85,7 @@ resource "aws_wafv2_web_acl" "web_acl" {
           for_each = rule.value.action.type == "allow" ? [1] : []
           content {
             dynamic "custom_request_handling" {
-              for_each = rule.value.action.insert_header == null ? [1] : []
+              for_each = rule.value.action.insert_header != null ? [1] : []
               content {
                 insert_header {
                   name  = rule.value.action.insert_header.name
@@ -99,7 +99,7 @@ resource "aws_wafv2_web_acl" "web_acl" {
           for_each = rule.value.action.type == "block" ? [1] : []
           content {
             dynamic "custom_response" {
-              for_each = rule.value.action.response_header == null ? [1] : []
+              for_each = rule.value.action.response_header != null ? [1] : []
               content {
                 custom_response_body_key = rule.value.action.custom_response_body_key
                 response_code            = rule.value.action.response_code
@@ -113,29 +113,29 @@ resource "aws_wafv2_web_acl" "web_acl" {
         }
       }
 
-      override_action {
-        dynamic "count" {
-          for_each = rule.value.override_action.type == "count" ? [1] : []
-          content {}
-        }
-        dynamic "none" {
-          for_each = rule.value.override_action.type == "none" ? [1] : []
-          content {}
+      dynamic "override_action" {
+        for_each = rule.value.override_action != null ? [rule.value.override_action] : []
+        content {
+          dynamic "count" {
+            for_each = override_action.value.type == "count" ? [1] : []
+            content {}
+          }
+          dynamic "none" {
+            for_each = override_action.value.type == "none" ? [1] : []
+            content {}
+          }
         }
       }
 
       statement {
-        dynamic "not_statement" {
+        dynamic "ip_set_reference_statement" {
           for_each = rule.value.ip_set_arn != null ? [1] : []
           content {
-            statement {
-              ip_set_reference_statement {
-                arn = rule.value.ip_set_arn
-              }
-            }
+            arn = rule.value.ip_set_arn
           }
         }
       }
+
       visibility_config {
         cloudwatch_metrics_enabled = rule.value.cloudwatch_metrics_enabled
         metric_name                = rule.value.cloudwatch_metric_name
