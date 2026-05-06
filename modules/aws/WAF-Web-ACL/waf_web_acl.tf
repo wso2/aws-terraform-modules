@@ -125,7 +125,16 @@ resource "aws_wafv2_web_acl" "web_acl" {
       }
 
       statement {
-
+        dynamic "not_statement" {
+          for_each = rule.value.ip_set_arn != null ? [1] : []
+          content {
+            statement {
+              ip_set_reference_statement {
+                arn = rule.value.ip_set_arn
+              }
+            }
+          }
+        }
       }
       visibility_config {
         cloudwatch_metrics_enabled = rule.value.cloudwatch_metrics_enabled
