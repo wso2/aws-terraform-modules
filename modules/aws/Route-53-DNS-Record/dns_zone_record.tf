@@ -13,6 +13,15 @@ resource "aws_route53_record" "route53_record" {
   zone_id = var.zone_id
   name    = var.name
   type    = var.type
-  ttl     = var.ttl
-  records = var.records
+  ttl     = var.alias_dns_name == null ? var.ttl : null
+  records = var.alias_dns_name == null ? var.records : null
+
+  dynamic "alias" {
+    for_each = var.alias_dns_name != null ? [1] : []
+    content {
+      name                   = var.alias_dns_name
+      zone_id                = var.alias_hosted_zone_id
+      evaluate_target_health = var.alias_evaluate_target_health
+    }
+  }
 }
