@@ -9,6 +9,11 @@
 #
 # --------------------------------------------------------------------------------------
 
+output "dns_zone_arn" {
+  value      = aws_route53_zone.public_route53_zone.arn
+  depends_on = [aws_route53_zone.public_route53_zone]
+}
+
 output "dns_zone_id" {
   value      = aws_route53_zone.public_route53_zone.id
   depends_on = [aws_route53_zone.public_route53_zone]
