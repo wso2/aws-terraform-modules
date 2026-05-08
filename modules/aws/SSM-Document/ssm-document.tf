@@ -38,7 +38,7 @@ resource "aws_ssm_document" "session_manager_doc" {
       maxSessionDuration          = var.max_session_duration,
       kmsKeyId                    = "",
       runAsEnabled                = true,
-      runAsDefaultUser            = var.user_email,
+      runAsDefaultUser            = local.user_name,
       shellProfile = {
         windows = "",
         linux   = "timestamp=$(date '+%Y-%m-%dT%H:%M:%SZ');user=$(whoami);echo $timestamp && echo \"Welcome $user\"'!';cd /home/$user/"
