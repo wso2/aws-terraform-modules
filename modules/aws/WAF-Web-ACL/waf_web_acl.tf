@@ -129,14 +129,20 @@ resource "aws_wafv2_web_acl" "web_acl" {
 
       statement {
         dynamic "not_statement" {
-          for_each = rule.value.ip_set_arn != null ? [1] : []
+          for_each = rule.value.allowed_ip_set_arn != null ? [1] : []
           content {
             statement {
               ip_set_reference_statement {
-                arn = rule.value.ip_set_arn
+                arn = rule.value.allowed_ip_set_arn
               }
             }
           }
+        }
+        dynamic "ip_set_reference_statement" {
+           for_each = rule.value.blocked_ip_set_arn != null ? [1] : []
+           content {
+             arn = rule.value.blocked_ip_set_arn
+           }
         }
         dynamic "byte_match_statement" {
           for_each = rule.value.host_header != null ? [1] : []

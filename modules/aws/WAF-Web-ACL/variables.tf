@@ -101,8 +101,9 @@ variable "rules" {
     override_action = optional(object({
       type = string
     }))
-    ip_set_arn  = optional(string)
-    host_header = optional(string)
+    allowed_ip_set_arn = optional(string)
+    blocked_ip_set_arn = optional(string)
+    host_header        = optional(string)
   }))
 }
 
