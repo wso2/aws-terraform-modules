@@ -80,32 +80,36 @@ resource "aws_wafv2_web_acl" "web_acl" {
     content {
       name     = rule.value.name
       priority = rule.value.priority
-      action {
-        dynamic "allow" {
-          for_each = rule.value.action.type == "allow" ? [1] : []
-          content {
-            dynamic "custom_request_handling" {
-              for_each = rule.value.action.insert_header != null ? [1] : []
-              content {
-                insert_header {
-                  name  = rule.value.action.insert_header.name
-                  value = rule.value.action.insert_header.value
+      dynamic "action" {
+        for_each = rule.value.action != null ? [rule.value.action] : []
+
+        content {
+          dynamic "allow" {
+            for_each = action.value.type == "allow" ? [1] : []
+            content {
+              dynamic "custom_request_handling" {
+                for_each = action.value.insert_header != null ? [1] : []
+                content {
+                  insert_header {
+                    name  = action.value.insert_header.name
+                    value = action.value.insert_header.value
+                  }
                 }
               }
             }
           }
-        }
-        dynamic "block" {
-          for_each = rule.value.action.type == "block" ? [1] : []
-          content {
-            dynamic "custom_response" {
-              for_each = rule.value.action.response_header != null ? [1] : []
-              content {
-                custom_response_body_key = rule.value.action.custom_response_body_key
-                response_code            = rule.value.action.response_code
-                response_header {
-                  name  = rule.value.action.response_header.name
-                  value = rule.value.action.response_header.value
+          dynamic "block" {
+            for_each = action.value.type == "block" ? [1] : []
+            content {
+              dynamic "custom_response" {
+                for_each = action.value.response_header != null ? [1] : []
+                content {
+                  custom_response_body_key = action.value.custom_response_body_key
+                  response_code            = action.value.response_code
+                  response_header {
+                    name  = action.value.response_header.name
+                    value = action.value.response_header.value
+                  }
                 }
               }
             }
@@ -158,6 +162,22 @@ resource "aws_wafv2_web_acl" "web_acl" {
               type     = "LOWERCASE"
             }
             positional_constraint = "EXACTLY"
+          }
+        }
+
+        dynamic "managed_rule_group_statement" {
+          for_each = rule.value.managed_rule_group_statement != null ? [rule.value.managed_rule_group_statement] : []
+          content {
+            name        = managed_rule_group_statement.value.name
+            vendor_name = managed_rule_group_statement.value.vendor_name
+          }
+        }
+
+        dynamic "rate_based_statement" {
+          for_each = rule.value.rate_based_statement != null ? [rule.value.rate_based_statement] : []
+          content {
+            limit              = rate_based_statement.value.limit
+            aggregate_key_type = rate_based_statement.value.aggregate_key_type
           }
         }
       }

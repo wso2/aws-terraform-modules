@@ -85,7 +85,8 @@ variable "rules" {
     cloudwatch_metrics_enabled = bool
     cloudwatch_metric_name     = string
     sampled_requests_enabled   = bool
-    action = object({
+
+    action = optional(object({
       type = string
       insert_header = optional(object({
         name  = string
@@ -97,13 +98,22 @@ variable "rules" {
         name  = string
         value = string
       }))
-    })
+    }))
+
     override_action = optional(object({
       type = string
     }))
     allowed_ip_set_arn = optional(string)
     blocked_ip_set_arn = optional(string)
     host_header        = optional(string)
+    managed_rule_group_statement = optional(object({
+      name        = string
+      vendor_name = string
+    }))
+    rate_based_statement = optional(object({
+      limit              = number
+      aggregate_key_type = string
+    }))
   }))
 }
 
