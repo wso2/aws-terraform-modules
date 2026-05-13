@@ -139,10 +139,10 @@ resource "aws_wafv2_web_acl" "web_acl" {
           }
         }
         dynamic "ip_set_reference_statement" {
-           for_each = rule.value.blocked_ip_set_arn != null ? [1] : []
-           content {
-             arn = rule.value.blocked_ip_set_arn
-           }
+          for_each = rule.value.blocked_ip_set_arn != null ? [1] : []
+          content {
+            arn = rule.value.blocked_ip_set_arn
+          }
         }
         dynamic "byte_match_statement" {
           for_each = rule.value.host_header != null ? [1] : []
