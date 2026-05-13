@@ -111,3 +111,8 @@ variable "log_group_name_prefix" {
   default     = "/aws/network-firewall"
 }
 
+variable "enable_strict_order" {
+  description = "Enable STRICT_ORDER rule evaluation for stateful rule groups and the firewall policy. When false, DEFAULT_ACTION_ORDER is used and rule priorities are not enforced."
+  type        = bool
+  default     = true
+}

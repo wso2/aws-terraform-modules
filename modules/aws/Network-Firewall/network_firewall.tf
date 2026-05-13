@@ -46,15 +46,30 @@ resource "aws_networkfirewall_firewall_policy" "networkfirewall_firewall_policy"
       }
     }
 
+    dynamic "stateful_engine_options" {
+      for_each = var.enable_strict_order ? [1] : []
+      content {
+        rule_order = "STRICT_ORDER"
+      }
+    }
+
     #StateFul Rule Group Reference
     dynamic "stateful_rule_group_reference" {
       for_each = local.this_stateful_group_arn
       content {
+        # Priority is sequentially as per index in stateful_group_arn list.
+        # Lower number = evaluated first. Suricata (blocklist) groups come before
+        # fivetuple (pass-all) groups in the concat order defined in locals.tf.
+        priority     = var.enable_strict_order ? index(local.this_stateful_group_arn, stateful_rule_group_reference.value) + 1 : null
         resource_arn = stateful_rule_group_reference.value
       }
     }
   }
   tags = merge(var.tags)
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_cloudwatch_log_group" "nfw_cloudwatch_log_group" {
