@@ -103,9 +103,9 @@ variable "rules" {
     override_action = optional(object({
       type = string
     }))
-    allowed_ip_set_arn           = optional(string)
-    blocked_ip_set_arn           = optional(string)
-    host_header                  = optional(string)
+    allowed_ip_set_arn = optional(string)
+    blocked_ip_set_arn = optional(string)
+    host_header        = optional(string)
     managed_rule_group_statement = optional(object({
       name        = string
       vendor_name = string
