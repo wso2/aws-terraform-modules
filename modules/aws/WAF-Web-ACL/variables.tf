@@ -104,6 +104,15 @@ variable "rules" {
     allowed_ip_set_arn = optional(string)
     blocked_ip_set_arn = optional(string)
     host_header        = optional(string)
+
+    managed_rule_group_statement = optional(object({
+      name        = string
+      vendor_name = string
+    }))
+    rate_based_statement = optional(object({
+      limit              = number
+      aggregate_key_type = string
+    }))
   }))
 }
 

@@ -160,6 +160,22 @@ resource "aws_wafv2_web_acl" "web_acl" {
             positional_constraint = "EXACTLY"
           }
         }
+
+        dynamic "managed_rule_group_statement" {
+          for_each = rule.value.managed_rule_group_statement != null ? [rule.value.managed_rule_group_statement] : []
+          content {
+            name        = managed_rule_group_statement.value.name
+            vendor_name = managed_rule_group_statement.value.vendor_name
+          }
+        }
+
+        dynamic "rate_based_statement" {
+          for_each = rule.value.rate_based_statement != null ? [rule.value.rate_based_statement] : []
+          content {
+            limit              = rate_based_statement.value.limit
+            aggregate_key_type = rate_based_statement.value.aggregate_key_type
+          }
+        }
       }
 
       visibility_config {
