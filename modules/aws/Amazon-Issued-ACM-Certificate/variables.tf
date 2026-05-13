@@ -23,3 +23,12 @@ variable "subject_alternative_names" {
   type        = list(string)
   default     = []
 }
+variable "hosted_zone_id" {
+  description = "The Route53 Hosted Zone ID to automatically create validation records. If omitted, validation is skipped."
+  type        = string
+  default     = null
+  validation {
+    condition     = var.hosted_zone_id == null || length(trimspace(var.hosted_zone_id)) > 0
+    error_message = "hosted_zone_id must be null or a non-empty Route53 hosted zone ID."
+  }
+}
