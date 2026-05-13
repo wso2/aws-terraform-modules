@@ -23,3 +23,8 @@ variable "subject_alternative_names" {
   type        = list(string)
   default     = []
 }
+variable "hosted_zone_id" {
+  description = "The Route53 Hosted Zone ID to automatically create validation records. If omitted, validation is skipped."
+  type        = string
+  default     = null
+}

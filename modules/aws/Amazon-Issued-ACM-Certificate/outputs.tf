@@ -10,7 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 output "certificate_arn" {
-  value = aws_acm_certificate.acm_certificate.arn
+  value = var.hosted_zone_id != null ? aws_acm_certificate_validation.validation[0].certificate_arn : aws_acm_certificate.acm_certificate.arn
 }
 output "certificate_id" {
   value = aws_acm_certificate.acm_certificate.id
