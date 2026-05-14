@@ -20,7 +20,8 @@
 
 variable "topic_name" {
   type        = string
-  description = "The name of the SNS topic"
+  description = "Optional suffix appended to the SNS topic name. When omitted the topic is named project-application-environment-region."
+  default     = ""
 }
 variable "project" {
   type        = string
@@ -49,6 +50,12 @@ variable "subscribers" {
     endpoint_auto_confirms = optional(bool, false)
     delivery_policy        = optional(string)
   }))
+  default = []
+}
+variable "publisher_aws_account_ids" {
+  description = "Additional AWS account IDs (beyond the owner account) permitted to publish to this topic via cloudwatch.amazonaws.com. Used for cross-account CloudWatch alarm forwarding."
+  type        = list(string)
+  default     = []
 }
 variable "tags" {
   type        = map(string)

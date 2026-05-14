@@ -20,39 +20,54 @@
 
 data "aws_caller_identity" "current" {}
 data "aws_iam_policy_document" "sns_topic_policy" {
+  # Full management access for the owning account.
   statement {
-    sid    = "AlertWebhook SNS Topic Policy"
+    sid    = "AllowOwnerAccountFullAccess"
     effect = "Allow"
 
     principals {
       type        = "AWS"
-      identifiers = ["*"]
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
     }
 
     actions = [
-      "SNS:Publish",
-      "SNS:RemovePermission",
-      "SNS:SetTopicAttributes",
-      "SNS:DeleteTopic",
-      "SNS:ListSubscriptionsByTopic",
       "SNS:GetTopicAttributes",
+      "SNS:SetTopicAttributes",
       "SNS:AddPermission",
-      "SNS:Subscribe"
+      "SNS:RemovePermission",
+      "SNS:DeleteTopic",
+      "SNS:Subscribe",
+      "SNS:ListSubscriptionsByTopic",
+      "SNS:Publish",
     ]
 
-    resources = [
-      aws_sns_topic.sns_topic.arn
-    ]
+    resources = [aws_sns_topic.sns_topic.arn]
+  }
+
+  # Allow CloudWatch to publish from the owner account and any additional
+  # cross-account publisher accounts supplied via publisher_aws_account_ids.
+  statement {
+    sid    = "AllowCloudWatchPublish"
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["cloudwatch.amazonaws.com"]
+    }
+
+    actions   = ["SNS:Publish"]
+    resources = [aws_sns_topic.sns_topic.arn]
 
     condition {
       test     = "StringEquals"
-      variable = "AWS:SourceOwner"
-      values   = [data.aws_caller_identity.current.account_id]
+      variable = "aws:SourceAccount"
+      values   = concat([data.aws_caller_identity.current.account_id], var.publisher_aws_account_ids)
     }
   }
 
+  # Allow AWS Budgets in the owner account to publish notifications.
   statement {
-    sid    = "AWSBudgets-notification-1"
+    sid    = "AllowBudgetsPublish"
     effect = "Allow"
 
     principals {
@@ -60,11 +75,8 @@ data "aws_iam_policy_document" "sns_topic_policy" {
       identifiers = ["budgets.amazonaws.com"]
     }
 
-    actions = ["SNS:Publish"]
-
-    resources = [
-      aws_sns_topic.sns_topic.arn
-    ]
+    actions   = ["SNS:Publish"]
+    resources = [aws_sns_topic.sns_topic.arn]
 
     condition {
       test     = "StringEquals"
