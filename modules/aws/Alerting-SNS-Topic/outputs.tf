@@ -20,3 +20,8 @@
 output "topic_arn" {
   value = aws_sns_topic.sns_topic.arn
 }
+
+output "topic_name" {
+  description = "Name of the SNS topic."
+  value       = aws_sns_topic.sns_topic.name
+}

@@ -22,7 +22,7 @@
 # Reason: Variable KMS_KEY_ID is defined and can be used for explicit key encryption
 # trivy:ignore:AVD-AWS-0095
 resource "aws_sns_topic" "sns_topic" {
-  name              = join("-", [var.project, var.application, var.environment, var.region, var.topic_name])
+  name              = var.topic_name != "" ? join("-", [var.project, var.application, var.environment, var.region, var.topic_name]) : join("-", [var.project, var.application, var.environment, var.region])
   kms_master_key_id = var.kms_master_key_id
   delivery_policy   = var.delivery_policy
   tags              = var.tags
