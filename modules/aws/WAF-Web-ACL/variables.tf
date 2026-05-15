@@ -146,6 +146,43 @@ variable "rules" {
       }))
     }))
   }))
+
+  # Validation 1: AWS WAF requires an and_statement to have >= 2 nested statements
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      length(v.and_statement.statements) >= 2
+      if try(v.and_statement, null) != null
+    ])
+    error_message = "AWS WAF requires an and_statement to contain at least 2 statements."
+  }
+
+  # Validation 2: Ensure exactly one statement type is used per statement
+  validation {
+    condition = alltrue(flatten([
+      for v in var.rules : [
+        for s in v.and_statement.statements :
+        (try(s.byte_match_statement, null) != null ? 1 : 0) + (try(s.not_statement, null) != null ? 1 : 0) == 1
+      ]
+      if try(v.and_statement, null) != null
+    ]))
+    error_message = "Each nested statement within an and_statement must specify exactly one statement type (byte_match_statement XOR not_statement)."
+  }
+
+  # Validation 3: Ensure exactly one field_to_match selector is set inside byte_match_statements
+  validation {
+    condition = alltrue(flatten([
+      for v in var.rules : [
+        for s in v.and_statement.statements : [
+          for bm in [try(s.byte_match_statement, null), try(s.not_statement.byte_match_statement, null)] :
+          (try(bm.field_to_match.uri_path, false) == true ? 1 : 0) + (try(bm.field_to_match.single_header, null) != null ? 1 : 0) == 1
+          if bm != null
+        ]
+      ]
+      if try(v.and_statement, null) != null
+    ]))
+    error_message = "Inside byte_match_statement.field_to_match, exactly one field selector (uri_path or single_header) must be set."
+  }
 }
 
 variable "tags" {
