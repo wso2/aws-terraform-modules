@@ -180,6 +180,73 @@ resource "aws_wafv2_web_acl" "web_acl" {
             aggregate_key_type = rate_based_statement.value.aggregate_key_type
           }
         }
+        dynamic "and_statement" {
+          for_each = rule.value.and_statement != null ? [rule.value.and_statement] : []
+          content {
+            dynamic "statement" {
+              for_each = and_statement.value.statements
+              content {
+
+                # 1. Handle direct byte_match_statement
+                dynamic "byte_match_statement" {
+                  for_each = statement.value.byte_match_statement != null ? [statement.value.byte_match_statement] : []
+                  content {
+                    search_string         = byte_match_statement.value.search_string
+                    positional_constraint = byte_match_statement.value.positional_constraint
+                    field_to_match {
+                      dynamic "uri_path" {
+                        for_each = byte_match_statement.value.field_to_match.uri_path == true ? [1] : []
+                        content {}
+                      }
+                      dynamic "single_header" {
+                        for_each = byte_match_statement.value.field_to_match.single_header != null ? [byte_match_statement.value.field_to_match.single_header] : []
+                        content {
+                          name = single_header.value
+                        }
+                      }
+                    }
+                    text_transformation {
+                      priority = byte_match_statement.value.text_transformation.priority
+                      type     = byte_match_statement.value.text_transformation.type
+                    }
+                  }
+                }
+
+                # 2. Handle nested not_statement
+                dynamic "not_statement" {
+                  for_each = statement.value.not_statement != null ? [statement.value.not_statement] : []
+                  content {
+                    statement {
+                      dynamic "byte_match_statement" {
+                        for_each = not_statement.value.byte_match_statement != null ? [not_statement.value.byte_match_statement] : []
+                        content {
+                          search_string         = byte_match_statement.value.search_string
+                          positional_constraint = byte_match_statement.value.positional_constraint
+                          field_to_match {
+                            dynamic "uri_path" {
+                              for_each = byte_match_statement.value.field_to_match.uri_path == true ? [1] : []
+                              content {}
+                            }
+                            dynamic "single_header" {
+                              for_each = byte_match_statement.value.field_to_match.single_header != null ? [byte_match_statement.value.field_to_match.single_header] : []
+                              content {
+                                name = single_header.value
+                              }
+                            }
+                          }
+                          text_transformation {
+                            priority = byte_match_statement.value.text_transformation.priority
+                            type     = byte_match_statement.value.text_transformation.type
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
 
       visibility_config {
