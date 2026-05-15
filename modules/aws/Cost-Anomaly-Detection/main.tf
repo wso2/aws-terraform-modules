@@ -17,7 +17,6 @@
 # under the License.
 #
 # --------------------------------------------------------------------------------------
-
 resource "aws_ce_anomaly_monitor" "anomaly_monitor" {
   name              = join("-", [var.monitor_name, var.monitor_abbreviation])
   monitor_type      = var.monitor_type
@@ -42,8 +41,6 @@ resource "aws_ce_anomaly_subscription" "anomaly_subscription" {
         match_options = ["GREATER_THAN_OR_EQUAL"]
         values        = [tostring(var.absolute_threshold)]
       }
-    }
-    and {
       dimension {
         key           = "ANOMALY_TOTAL_IMPACT_PERCENTAGE"
         match_options = ["GREATER_THAN_OR_EQUAL"]
