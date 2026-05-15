@@ -114,6 +114,37 @@ variable "rules" {
       limit              = number
       aggregate_key_type = string
     }))
+
+    and_statement = optional(object({
+      statements = list(object({
+        byte_match_statement = optional(object({
+          search_string         = string
+          positional_constraint = string
+          field_to_match = object({
+            uri_path      = optional(bool)
+            single_header = optional(string)
+          })
+          text_transformation = object({
+            priority = number
+            type     = string
+          })
+        }))
+        not_statement = optional(object({
+          byte_match_statement = optional(object({
+            search_string         = string
+            positional_constraint = string
+            field_to_match = object({
+              uri_path      = optional(bool)
+              single_header = optional(string)
+            })
+            text_transformation = object({
+              priority = number
+              type     = string
+            })
+          }))
+        }))
+      }))
+    }))
   }))
 }
 
