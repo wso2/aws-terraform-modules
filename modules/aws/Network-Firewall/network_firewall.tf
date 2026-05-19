@@ -64,6 +64,21 @@ resource "aws_networkfirewall_firewall_policy" "networkfirewall_firewall_policy"
         resource_arn = stateful_rule_group_reference.value
       }
     }
+
+    # AWS Managed Rule Group References (with optional DROP_TO_ALERT override for logging only mode)
+    dynamic "stateful_rule_group_reference" {
+      for_each = var.aws_managed_rule_group
+      content {
+        priority     = var.enable_strict_order ? length(local.this_stateful_group_arn) + index(var.aws_managed_rule_group, stateful_rule_group_reference.value) + 1 : null
+        resource_arn = stateful_rule_group_reference.value.arn
+        dynamic "override" {
+          for_each = stateful_rule_group_reference.value.override_action != null ? [1] : []
+          content {
+            action = stateful_rule_group_reference.value.override_action
+          }
+        }
+      }
+    }
   }
   tags = merge(var.tags)
 

@@ -100,9 +100,12 @@ variable "logging_config" {
 }
 
 variable "aws_managed_rule_group" {
-  description = "List of AWS managed rule group arn"
-  type        = list(any)
-  default     = []
+  description = "List of AWS managed rule group configurations to attach to the Network Firewall policy"
+  type = list(object({
+    arn             = string
+    override_action = optional(string) # Set to "DROP_TO_ALERT" logging only mode
+  }))
+  default = []
 }
 
 variable "log_group_name_prefix" {
