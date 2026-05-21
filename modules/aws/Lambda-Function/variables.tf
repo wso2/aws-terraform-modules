@@ -73,4 +73,5 @@ variable "environment_variables" {
   type        = map(string)
   description = "Environment variables to set on the Lambda function"
   default     = {}
+  nullable    = false
 }
