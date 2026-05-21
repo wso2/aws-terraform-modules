@@ -36,6 +36,13 @@ resource "aws_lambda_function" "lambda_function" {
   source_code_hash = data.archive_file.archive_lambda_function.output_base64sha256
   runtime          = var.runtime_version
   tags             = var.tags
+
+  dynamic "environment" {
+    for_each = length(var.environment_variables) > 0 ? [1] : []
+    content {
+      variables = var.environment_variables
+    }
+  }
 }
 
 # Ignore: AVD-AWS-0017 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-0017)
