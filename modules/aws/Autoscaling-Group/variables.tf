@@ -1,8 +1,8 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+# Copyright (c) 2026, WSO2 LLC (http://www.wso2.com). All Rights Reserved.
 #
-# This software is the property of WSO2 LLC. and its suppliers, if any.
+# This software is the property of WSO2 LLC and its suppliers, if any.
 # Dissemination of any information or reproduction of any material contained
 # herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
 # You may not alter or remove any copyright or other notice from copies of this content.
@@ -100,6 +100,12 @@ variable "min_healthy_percentage" {
   description = "The minimum percentage of healthy instances that must be maintained during an instance refresh"
   type        = number
   default     = 66
+}
+
+variable "enabled_metrics" {
+  description = "A list of Auto Scaling group metrics to collect. When non-empty, metrics are published at 1-minute granularity."
+  type        = list(string)
+  default     = []
 }
 
 variable "tags" {
