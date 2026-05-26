@@ -190,3 +190,44 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+# ---------------------------------------------------------------------------
+# WAF Logging
+# ---------------------------------------------------------------------------
+
+variable "enable_logging" {
+  description = "When true, enables WAF logging to the specified log_destination_arns. The log destination (e.g. CloudWatch log group) must have a name starting with 'aws-waf-logs-'."
+  type        = bool
+  default     = false
+}
+
+variable "log_destination_arns" {
+  description = "List of ARNs for the WAF log destinations (CloudWatch log group, S3 bucket, or Kinesis Firehose). Required when enable_logging is true. CloudWatch log group names must start with 'aws-waf-logs-'."
+  type        = list(string)
+  default     = []
+}
+
+variable "log_filter_default_behavior" {
+  description = "Default logging filter behaviour for requests that do not match any filter. DROP reduces log volume by discarding normal ALLOW traffic. Valid values: KEEP, DROP."
+  type        = string
+  default     = "DROP"
+
+  validation {
+    condition     = contains(["KEEP", "DROP"], var.log_filter_default_behavior)
+    error_message = "log_filter_default_behavior must be KEEP or DROP."
+  }
+}
+
+variable "log_filter_keep_actions" {
+  description = "List of WAF final actions whose matching requests are kept (logged). EXCLUDED_AS_COUNT captures managed rule group matches in count-override mode. Valid values: ALLOW, BLOCK, COUNT, CAPTCHA, CHALLENGE, EXCLUDED_AS_COUNT."
+  type        = list(string)
+  default     = ["BLOCK", "EXCLUDED_AS_COUNT"]
+
+  validation {
+    condition = alltrue([
+      for a in var.log_filter_keep_actions :
+      contains(["ALLOW", "BLOCK", "COUNT", "CAPTCHA", "CHALLENGE", "EXCLUDED_AS_COUNT"], a)
+    ])
+    error_message = "Each entry in log_filter_keep_actions must be one of: ALLOW, BLOCK, COUNT, CAPTCHA, CHALLENGE, EXCLUDED_AS_COUNT."
+  }
+}
