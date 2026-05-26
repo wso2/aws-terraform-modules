@@ -15,6 +15,8 @@
 # KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations
 # under the License.
+#
+# --------------------------------------------------------------------------------------
 
 resource "aws_wafv2_web_acl" "web_acl" {
   name        = var.name
