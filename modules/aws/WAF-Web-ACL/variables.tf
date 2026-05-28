@@ -146,6 +146,22 @@ variable "rules" {
             })
           }))
         }))
+        or_statement = optional(object({
+          statements = list(object({
+            byte_match_statement = object({
+              search_string         = string
+              positional_constraint = string
+              field_to_match = object({
+                uri_path      = optional(bool)
+                single_header = optional(string)
+              })
+              text_transformation = object({
+                priority = number
+                type     = string
+              })
+            })
+          }))
+        }))
         not_statement = optional(object({
           byte_match_statement = optional(object({
             search_string         = string
@@ -160,6 +176,22 @@ variable "rules" {
             })
           }))
           and_statement = optional(object({
+            statements = list(object({
+              byte_match_statement = object({
+                search_string         = string
+                positional_constraint = string
+                field_to_match = object({
+                  uri_path      = optional(bool)
+                  single_header = optional(string)
+                })
+                text_transformation = object({
+                  priority = number
+                  type     = string
+                })
+              })
+            }))
+          }))
+          or_statement = optional(object({
             statements = list(object({
               byte_match_statement = object({
                 search_string         = string
@@ -264,41 +296,48 @@ variable "rules" {
   }
 
   # Validation 5: managed_rule_group_statement.scope_down_statement must specify exactly one of
-  # byte_match_statement, and_statement, or not_statement.
+  # byte_match_statement, and_statement, or_statement, or not_statement.
   validation {
     condition = alltrue([
       for v in var.rules :
       (try(v.managed_rule_group_statement.scope_down_statement.byte_match_statement, null) != null ? 1 : 0) +
       (try(v.managed_rule_group_statement.scope_down_statement.and_statement, null) != null ? 1 : 0) +
+      (try(v.managed_rule_group_statement.scope_down_statement.or_statement, null) != null ? 1 : 0) +
       (try(v.managed_rule_group_statement.scope_down_statement.not_statement, null) != null ? 1 : 0) == 1
       if try(v.managed_rule_group_statement.scope_down_statement, null) != null
     ])
-    error_message = "managed_rule_group_statement.scope_down_statement must specify exactly one of byte_match_statement, and_statement, or not_statement."
+    error_message = "managed_rule_group_statement.scope_down_statement must specify exactly one of byte_match_statement, and_statement, or_statement, or not_statement."
   }
 
   # Validation 6: When scope_down_statement.not_statement is used, exactly one of
-  # byte_match_statement or and_statement must be set under it.
+  # byte_match_statement, and_statement, or or_statement must be set under it.
   validation {
     condition = alltrue([
       for v in var.rules :
       (try(v.managed_rule_group_statement.scope_down_statement.not_statement.byte_match_statement, null) != null ? 1 : 0) +
-      (try(v.managed_rule_group_statement.scope_down_statement.not_statement.and_statement, null) != null ? 1 : 0) == 1
+      (try(v.managed_rule_group_statement.scope_down_statement.not_statement.and_statement, null) != null ? 1 : 0) +
+      (try(v.managed_rule_group_statement.scope_down_statement.not_statement.or_statement, null) != null ? 1 : 0) == 1
       if try(v.managed_rule_group_statement.scope_down_statement.not_statement, null) != null
     ])
-    error_message = "managed_rule_group_statement.scope_down_statement.not_statement must contain exactly one of byte_match_statement or and_statement."
+    error_message = "managed_rule_group_statement.scope_down_statement.not_statement must contain exactly one of byte_match_statement, and_statement, or or_statement."
   }
 
-  # Validation 7: and_statement inside scope_down_statement (directly or under not_statement)
-  # must contain >= 2 statements.
+  # Validation 7: and_statement / or_statement inside scope_down_statement (directly or under
+  # not_statement) must each contain >= 2 statements.
   validation {
-    condition = alltrue([
-      for v in var.rules :
-      length(try(v.managed_rule_group_statement.scope_down_statement.and_statement.statements,
-        v.managed_rule_group_statement.scope_down_statement.not_statement.and_statement.statements,
-      [])) >= 2
-      if try(v.managed_rule_group_statement.scope_down_statement.and_statement, v.managed_rule_group_statement.scope_down_statement.not_statement.and_statement, null) != null
-    ])
-    error_message = "and_statement inside scope_down_statement must contain at least 2 statements."
+    condition = alltrue(flatten([
+      for v in var.rules : [
+        for stmts in [
+          try(v.managed_rule_group_statement.scope_down_statement.and_statement.statements, null),
+          try(v.managed_rule_group_statement.scope_down_statement.or_statement.statements, null),
+          try(v.managed_rule_group_statement.scope_down_statement.not_statement.and_statement.statements, null),
+          try(v.managed_rule_group_statement.scope_down_statement.not_statement.or_statement.statements, null),
+        ] :
+        length(stmts) >= 2
+        if stmts != null
+      ]
+    ]))
+    error_message = "and_statement / or_statement inside scope_down_statement must contain at least 2 statements."
   }
 }
 
