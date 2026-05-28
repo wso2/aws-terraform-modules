@@ -187,6 +187,18 @@ variable "rules" {
     ]))
     error_message = "Inside byte_match_statement.field_to_match, exactly one field selector (uri_path or single_header) must be set."
   }
+
+  # Validation 4: Ensure managed rule action overrides use supported actions
+  validation {
+    condition = alltrue(flatten([
+      for v in var.rules : [
+        for o in try(v.managed_rule_group_statement.rule_action_overrides, []) :
+        contains(["count", "allow", "block"], lower(trimspace(o.action)))
+      ]
+    ]))
+    error_message = "managed_rule_group_statement.rule_action_overrides[*].action must be one of: count, allow, block."
+  }
+
 }
 
 variable "tags" {
