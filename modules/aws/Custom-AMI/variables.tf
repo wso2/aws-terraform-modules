@@ -50,4 +50,5 @@ variable "ami_imds_support" {
 variable "ami_tags" {
   description = "A map of tags to assign to the resource."
   type        = map(string)
+  default     = {}
 }
