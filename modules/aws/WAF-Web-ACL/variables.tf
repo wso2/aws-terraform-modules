@@ -113,6 +113,70 @@ variable "rules" {
         name   = string
         action = string # count, allow, block
       })), [])
+      # Optional scope-down: restrict the managed rule group to a subset of requests.
+      # Supports a direct byte_match_statement, a direct and_statement, or a not_statement
+      # wrapping either of the above. Use not_statement+and_statement to EXCLUDE a path
+      # (e.g. /oauth2/token) from a managed rule group while keeping the rest protected.
+      scope_down_statement = optional(object({
+        byte_match_statement = optional(object({
+          search_string         = string
+          positional_constraint = string
+          field_to_match = object({
+            uri_path      = optional(bool)
+            single_header = optional(string)
+          })
+          text_transformation = object({
+            priority = number
+            type     = string
+          })
+        }))
+        and_statement = optional(object({
+          statements = list(object({
+            byte_match_statement = object({
+              search_string         = string
+              positional_constraint = string
+              field_to_match = object({
+                uri_path      = optional(bool)
+                single_header = optional(string)
+              })
+              text_transformation = object({
+                priority = number
+                type     = string
+              })
+            })
+          }))
+        }))
+        not_statement = optional(object({
+          byte_match_statement = optional(object({
+            search_string         = string
+            positional_constraint = string
+            field_to_match = object({
+              uri_path      = optional(bool)
+              single_header = optional(string)
+            })
+            text_transformation = object({
+              priority = number
+              type     = string
+            })
+          }))
+          and_statement = optional(object({
+            statements = list(object({
+              byte_match_statement = object({
+                search_string         = string
+                positional_constraint = string
+                field_to_match = object({
+                  uri_path      = optional(bool)
+                  single_header = optional(string)
+                })
+                text_transformation = object({
+                  priority = number
+                  type     = string
+                })
+              })
+            }))
+          }))
+        }))
+      }))
     }))
     rate_based_statement = optional(object({
       limit              = number
@@ -199,6 +263,43 @@ variable "rules" {
     error_message = "managed_rule_group_statement.rule_action_overrides[*].action must be one of: count, allow, block."
   }
 
+  # Validation 5: managed_rule_group_statement.scope_down_statement must specify exactly one of
+  # byte_match_statement, and_statement, or not_statement.
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      (try(v.managed_rule_group_statement.scope_down_statement.byte_match_statement, null) != null ? 1 : 0) +
+      (try(v.managed_rule_group_statement.scope_down_statement.and_statement, null) != null ? 1 : 0) +
+      (try(v.managed_rule_group_statement.scope_down_statement.not_statement, null) != null ? 1 : 0) == 1
+      if try(v.managed_rule_group_statement.scope_down_statement, null) != null
+    ])
+    error_message = "managed_rule_group_statement.scope_down_statement must specify exactly one of byte_match_statement, and_statement, or not_statement."
+  }
+
+  # Validation 6: When scope_down_statement.not_statement is used, exactly one of
+  # byte_match_statement or and_statement must be set under it.
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      (try(v.managed_rule_group_statement.scope_down_statement.not_statement.byte_match_statement, null) != null ? 1 : 0) +
+      (try(v.managed_rule_group_statement.scope_down_statement.not_statement.and_statement, null) != null ? 1 : 0) == 1
+      if try(v.managed_rule_group_statement.scope_down_statement.not_statement, null) != null
+    ])
+    error_message = "managed_rule_group_statement.scope_down_statement.not_statement must contain exactly one of byte_match_statement or and_statement."
+  }
+
+  # Validation 7: and_statement inside scope_down_statement (directly or under not_statement)
+  # must contain >= 2 statements.
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      length(try(v.managed_rule_group_statement.scope_down_statement.and_statement.statements,
+        v.managed_rule_group_statement.scope_down_statement.not_statement.and_statement.statements,
+      [])) >= 2
+      if try(v.managed_rule_group_statement.scope_down_statement.and_statement, v.managed_rule_group_statement.scope_down_statement.not_statement.and_statement, null) != null
+    ])
+    error_message = "and_statement inside scope_down_statement must contain at least 2 statements."
+  }
 }
 
 variable "tags" {
