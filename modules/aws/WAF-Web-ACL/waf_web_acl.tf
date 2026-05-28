@@ -252,7 +252,39 @@ resource "aws_wafv2_web_acl" "web_acl" {
                   }
                 }
 
-                # not_statement wrapping either a byte_match_statement or an and_statement
+                # Direct or_statement at the top of scope_down_statement
+                dynamic "or_statement" {
+                  for_each = scope_down_statement.value.or_statement != null ? [scope_down_statement.value.or_statement] : []
+                  content {
+                    dynamic "statement" {
+                      for_each = or_statement.value.statements
+                      content {
+                        byte_match_statement {
+                          search_string         = statement.value.byte_match_statement.search_string
+                          positional_constraint = statement.value.byte_match_statement.positional_constraint
+                          field_to_match {
+                            dynamic "uri_path" {
+                              for_each = statement.value.byte_match_statement.field_to_match.uri_path == true ? [1] : []
+                              content {}
+                            }
+                            dynamic "single_header" {
+                              for_each = statement.value.byte_match_statement.field_to_match.single_header != null ? [statement.value.byte_match_statement.field_to_match.single_header] : []
+                              content {
+                                name = single_header.value
+                              }
+                            }
+                          }
+                          text_transformation {
+                            priority = statement.value.byte_match_statement.text_transformation.priority
+                            type     = statement.value.byte_match_statement.text_transformation.type
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+
+                # not_statement wrapping a byte_match_statement, and_statement, or or_statement
                 dynamic "not_statement" {
                   for_each = scope_down_statement.value.not_statement != null ? [scope_down_statement.value.not_statement] : []
                   content {
@@ -285,6 +317,36 @@ resource "aws_wafv2_web_acl" "web_acl" {
                         content {
                           dynamic "statement" {
                             for_each = and_statement.value.statements
+                            content {
+                              byte_match_statement {
+                                search_string         = statement.value.byte_match_statement.search_string
+                                positional_constraint = statement.value.byte_match_statement.positional_constraint
+                                field_to_match {
+                                  dynamic "uri_path" {
+                                    for_each = statement.value.byte_match_statement.field_to_match.uri_path == true ? [1] : []
+                                    content {}
+                                  }
+                                  dynamic "single_header" {
+                                    for_each = statement.value.byte_match_statement.field_to_match.single_header != null ? [statement.value.byte_match_statement.field_to_match.single_header] : []
+                                    content {
+                                      name = single_header.value
+                                    }
+                                  }
+                                }
+                                text_transformation {
+                                  priority = statement.value.byte_match_statement.text_transformation.priority
+                                  type     = statement.value.byte_match_statement.text_transformation.type
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                      dynamic "or_statement" {
+                        for_each = not_statement.value.or_statement != null ? [not_statement.value.or_statement] : []
+                        content {
+                          dynamic "statement" {
+                            for_each = or_statement.value.statements
                             content {
                               byte_match_statement {
                                 search_string         = statement.value.byte_match_statement.search_string
