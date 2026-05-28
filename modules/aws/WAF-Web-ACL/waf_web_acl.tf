@@ -170,6 +170,27 @@ resource "aws_wafv2_web_acl" "web_acl" {
           content {
             name        = managed_rule_group_statement.value.name
             vendor_name = managed_rule_group_statement.value.vendor_name
+
+            dynamic "rule_action_override" {
+              for_each = managed_rule_group_statement.value.rule_action_overrides != null ? managed_rule_group_statement.value.rule_action_overrides : []
+              content {
+                name = rule_action_override.value.name
+                action_to_use {
+                  dynamic "count" {
+                    for_each = rule_action_override.value.action == "count" ? [1] : []
+                    content {}
+                  }
+                  dynamic "allow" {
+                    for_each = rule_action_override.value.action == "allow" ? [1] : []
+                    content {}
+                  }
+                  dynamic "block" {
+                    for_each = rule_action_override.value.action == "block" ? [1] : []
+                    content {}
+                  }
+                }
+              }
+            }
           }
         }
 

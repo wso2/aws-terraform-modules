@@ -109,6 +109,10 @@ variable "rules" {
     managed_rule_group_statement = optional(object({
       name        = string
       vendor_name = string
+      rule_action_overrides = optional(list(object({
+        name   = string
+        action = string # count, allow, block
+      })), [])
     }))
     rate_based_statement = optional(object({
       limit              = number
