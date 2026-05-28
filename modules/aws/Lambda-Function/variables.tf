@@ -68,3 +68,9 @@ variable "cloudwatch_log_group_kms_key_id" {
   type        = string
   default     = null
 }
+
+variable "environment_variables" {
+  type        = map(string)
+  description = "Environment variables to set on the Lambda function"
+  default     = {}
+}
