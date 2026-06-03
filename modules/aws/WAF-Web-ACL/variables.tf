@@ -373,8 +373,8 @@ variable "rules" {
           try(v.managed_rule_group_statement.scope_down_statement.or_statement.statements, null),
           try(v.managed_rule_group_statement.scope_down_statement.not_statement.and_statement.statements, null),
           try(v.managed_rule_group_statement.scope_down_statement.not_statement.or_statement.statements, null),
-        ] : [
-          for s in (stmts != null ? stmts : []) :
+          ] : [
+          for s in(stmts != null ? stmts : []) :
           (try(s.byte_match_statement, null) != null ? 1 : 0) +
           (try(s.ip_set_reference_statement, null) != null ? 1 : 0) == 1
         ]
