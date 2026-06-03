@@ -220,6 +220,14 @@ resource "aws_wafv2_web_acl" "web_acl" {
                   }
                 }
 
+                # Direct ip_set_reference_statement at the top of scope_down_statement
+                dynamic "ip_set_reference_statement" {
+                  for_each = scope_down_statement.value.ip_set_reference_statement != null ? [scope_down_statement.value.ip_set_reference_statement] : []
+                  content {
+                    arn = ip_set_reference_statement.value.arn
+                  }
+                }
+
                 # Direct and_statement at the top of scope_down_statement
                 dynamic "and_statement" {
                   for_each = scope_down_statement.value.and_statement != null ? [scope_down_statement.value.and_statement] : []
@@ -227,24 +235,33 @@ resource "aws_wafv2_web_acl" "web_acl" {
                     dynamic "statement" {
                       for_each = and_statement.value.statements
                       content {
-                        byte_match_statement {
-                          search_string         = statement.value.byte_match_statement.search_string
-                          positional_constraint = statement.value.byte_match_statement.positional_constraint
-                          field_to_match {
-                            dynamic "uri_path" {
-                              for_each = statement.value.byte_match_statement.field_to_match.uri_path == true ? [1] : []
-                              content {}
-                            }
-                            dynamic "single_header" {
-                              for_each = statement.value.byte_match_statement.field_to_match.single_header != null ? [statement.value.byte_match_statement.field_to_match.single_header] : []
-                              content {
-                                name = single_header.value
+                        dynamic "byte_match_statement" {
+                          for_each = statement.value.byte_match_statement != null ? [statement.value.byte_match_statement] : []
+                          content {
+                            search_string         = byte_match_statement.value.search_string
+                            positional_constraint = byte_match_statement.value.positional_constraint
+                            field_to_match {
+                              dynamic "uri_path" {
+                                for_each = byte_match_statement.value.field_to_match.uri_path == true ? [1] : []
+                                content {}
+                              }
+                              dynamic "single_header" {
+                                for_each = byte_match_statement.value.field_to_match.single_header != null ? [byte_match_statement.value.field_to_match.single_header] : []
+                                content {
+                                  name = single_header.value
+                                }
                               }
                             }
+                            text_transformation {
+                              priority = byte_match_statement.value.text_transformation.priority
+                              type     = byte_match_statement.value.text_transformation.type
+                            }
                           }
-                          text_transformation {
-                            priority = statement.value.byte_match_statement.text_transformation.priority
-                            type     = statement.value.byte_match_statement.text_transformation.type
+                        }
+                        dynamic "ip_set_reference_statement" {
+                          for_each = statement.value.ip_set_reference_statement != null ? [statement.value.ip_set_reference_statement] : []
+                          content {
+                            arn = ip_set_reference_statement.value.arn
                           }
                         }
                       }
@@ -259,24 +276,33 @@ resource "aws_wafv2_web_acl" "web_acl" {
                     dynamic "statement" {
                       for_each = or_statement.value.statements
                       content {
-                        byte_match_statement {
-                          search_string         = statement.value.byte_match_statement.search_string
-                          positional_constraint = statement.value.byte_match_statement.positional_constraint
-                          field_to_match {
-                            dynamic "uri_path" {
-                              for_each = statement.value.byte_match_statement.field_to_match.uri_path == true ? [1] : []
-                              content {}
-                            }
-                            dynamic "single_header" {
-                              for_each = statement.value.byte_match_statement.field_to_match.single_header != null ? [statement.value.byte_match_statement.field_to_match.single_header] : []
-                              content {
-                                name = single_header.value
+                        dynamic "byte_match_statement" {
+                          for_each = statement.value.byte_match_statement != null ? [statement.value.byte_match_statement] : []
+                          content {
+                            search_string         = byte_match_statement.value.search_string
+                            positional_constraint = byte_match_statement.value.positional_constraint
+                            field_to_match {
+                              dynamic "uri_path" {
+                                for_each = byte_match_statement.value.field_to_match.uri_path == true ? [1] : []
+                                content {}
+                              }
+                              dynamic "single_header" {
+                                for_each = byte_match_statement.value.field_to_match.single_header != null ? [byte_match_statement.value.field_to_match.single_header] : []
+                                content {
+                                  name = single_header.value
+                                }
                               }
                             }
+                            text_transformation {
+                              priority = byte_match_statement.value.text_transformation.priority
+                              type     = byte_match_statement.value.text_transformation.type
+                            }
                           }
-                          text_transformation {
-                            priority = statement.value.byte_match_statement.text_transformation.priority
-                            type     = statement.value.byte_match_statement.text_transformation.type
+                        }
+                        dynamic "ip_set_reference_statement" {
+                          for_each = statement.value.ip_set_reference_statement != null ? [statement.value.ip_set_reference_statement] : []
+                          content {
+                            arn = ip_set_reference_statement.value.arn
                           }
                         }
                       }
@@ -284,7 +310,8 @@ resource "aws_wafv2_web_acl" "web_acl" {
                   }
                 }
 
-                # not_statement wrapping a byte_match_statement, and_statement, or or_statement
+                # not_statement wrapping a byte_match_statement, ip_set_reference_statement,
+                # and_statement, or or_statement
                 dynamic "not_statement" {
                   for_each = scope_down_statement.value.not_statement != null ? [scope_down_statement.value.not_statement] : []
                   content {
@@ -312,30 +339,45 @@ resource "aws_wafv2_web_acl" "web_acl" {
                           }
                         }
                       }
+                      dynamic "ip_set_reference_statement" {
+                        for_each = not_statement.value.ip_set_reference_statement != null ? [not_statement.value.ip_set_reference_statement] : []
+                        content {
+                          arn = ip_set_reference_statement.value.arn
+                        }
+                      }
                       dynamic "and_statement" {
                         for_each = not_statement.value.and_statement != null ? [not_statement.value.and_statement] : []
                         content {
                           dynamic "statement" {
                             for_each = and_statement.value.statements
                             content {
-                              byte_match_statement {
-                                search_string         = statement.value.byte_match_statement.search_string
-                                positional_constraint = statement.value.byte_match_statement.positional_constraint
-                                field_to_match {
-                                  dynamic "uri_path" {
-                                    for_each = statement.value.byte_match_statement.field_to_match.uri_path == true ? [1] : []
-                                    content {}
-                                  }
-                                  dynamic "single_header" {
-                                    for_each = statement.value.byte_match_statement.field_to_match.single_header != null ? [statement.value.byte_match_statement.field_to_match.single_header] : []
-                                    content {
-                                      name = single_header.value
+                              dynamic "byte_match_statement" {
+                                for_each = statement.value.byte_match_statement != null ? [statement.value.byte_match_statement] : []
+                                content {
+                                  search_string         = byte_match_statement.value.search_string
+                                  positional_constraint = byte_match_statement.value.positional_constraint
+                                  field_to_match {
+                                    dynamic "uri_path" {
+                                      for_each = byte_match_statement.value.field_to_match.uri_path == true ? [1] : []
+                                      content {}
+                                    }
+                                    dynamic "single_header" {
+                                      for_each = byte_match_statement.value.field_to_match.single_header != null ? [byte_match_statement.value.field_to_match.single_header] : []
+                                      content {
+                                        name = single_header.value
+                                      }
                                     }
                                   }
+                                  text_transformation {
+                                    priority = byte_match_statement.value.text_transformation.priority
+                                    type     = byte_match_statement.value.text_transformation.type
+                                  }
                                 }
-                                text_transformation {
-                                  priority = statement.value.byte_match_statement.text_transformation.priority
-                                  type     = statement.value.byte_match_statement.text_transformation.type
+                              }
+                              dynamic "ip_set_reference_statement" {
+                                for_each = statement.value.ip_set_reference_statement != null ? [statement.value.ip_set_reference_statement] : []
+                                content {
+                                  arn = ip_set_reference_statement.value.arn
                                 }
                               }
                             }
@@ -348,24 +390,33 @@ resource "aws_wafv2_web_acl" "web_acl" {
                           dynamic "statement" {
                             for_each = or_statement.value.statements
                             content {
-                              byte_match_statement {
-                                search_string         = statement.value.byte_match_statement.search_string
-                                positional_constraint = statement.value.byte_match_statement.positional_constraint
-                                field_to_match {
-                                  dynamic "uri_path" {
-                                    for_each = statement.value.byte_match_statement.field_to_match.uri_path == true ? [1] : []
-                                    content {}
-                                  }
-                                  dynamic "single_header" {
-                                    for_each = statement.value.byte_match_statement.field_to_match.single_header != null ? [statement.value.byte_match_statement.field_to_match.single_header] : []
-                                    content {
-                                      name = single_header.value
+                              dynamic "byte_match_statement" {
+                                for_each = statement.value.byte_match_statement != null ? [statement.value.byte_match_statement] : []
+                                content {
+                                  search_string         = byte_match_statement.value.search_string
+                                  positional_constraint = byte_match_statement.value.positional_constraint
+                                  field_to_match {
+                                    dynamic "uri_path" {
+                                      for_each = byte_match_statement.value.field_to_match.uri_path == true ? [1] : []
+                                      content {}
+                                    }
+                                    dynamic "single_header" {
+                                      for_each = byte_match_statement.value.field_to_match.single_header != null ? [byte_match_statement.value.field_to_match.single_header] : []
+                                      content {
+                                        name = single_header.value
+                                      }
                                     }
                                   }
+                                  text_transformation {
+                                    priority = byte_match_statement.value.text_transformation.priority
+                                    type     = byte_match_statement.value.text_transformation.type
+                                  }
                                 }
-                                text_transformation {
-                                  priority = statement.value.byte_match_statement.text_transformation.priority
-                                  type     = statement.value.byte_match_statement.text_transformation.type
+                              }
+                              dynamic "ip_set_reference_statement" {
+                                for_each = statement.value.ip_set_reference_statement != null ? [statement.value.ip_set_reference_statement] : []
+                                content {
+                                  arn = ip_set_reference_statement.value.arn
                                 }
                               }
                             }
