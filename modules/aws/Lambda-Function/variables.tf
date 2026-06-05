@@ -80,9 +80,3 @@ variable "timeout" {
   type        = number
   default     = 3
 }
-
-variable "memory_size" {
-  description = "Amount of memory available to the Lambda function at runtime, in MB"
-  type        = number
-  default     = 128
-}
