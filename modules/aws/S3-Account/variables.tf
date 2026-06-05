@@ -96,3 +96,9 @@ variable "object_ownership" {
   type        = string
   default     = "BucketOwnerPreferred"
 }
+
+variable "lifecycle_expiration_days" {
+  description = "If set, objects in the bucket are expired (deleted) after this many days. Leave null to disable lifecycle expiration."
+  type        = number
+  default     = null
+}
