@@ -87,3 +87,4 @@ resource "aws_iam_role_policy_attachment" "lambda_function_policy_attachment" {
   role       = aws_iam_role.lambda_function_role.name
   policy_arn = aws_iam_policy.lambda_function_policy.arn
 }
+

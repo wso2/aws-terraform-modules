@@ -38,3 +38,4 @@ output "iam_role_name" {
   description = "The name of the IAM role that the Lambda function assumes when it executes."
   depends_on  = [aws_iam_role.lambda_function_role]
 }
+
