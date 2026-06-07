@@ -1,3 +1,6 @@
 # Ignore
 AVD-AWS-0052
 AVD-AWS-0053
+# CloudFront logging is optional in the Cloudfront module via var.log_bucket_name
+# (dynamic logging_config block); Trivy can't detect it statically.
+AVD-AWS-0010
