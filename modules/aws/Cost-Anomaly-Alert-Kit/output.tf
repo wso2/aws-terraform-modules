@@ -18,19 +18,15 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "critical_monitor_arns" {
-  value       = { for k, v in module.cost_anomaly_critical : k => v.anomaly_monitor_arn }
-  description = "ARNs of all per-service critical anomaly monitors"
+output "monitor_arns" {
+  value       = { for k, v in aws_ce_anomaly_monitor.service_monitor : k => v.arn }
+  description = "ARNs of all per-service anomaly monitors"
 }
 output "critical_subscription_arns" {
-  value       = { for k, v in module.cost_anomaly_critical : k => v.anomaly_subscription_arn }
+  value       = { for k, v in aws_ce_anomaly_subscription.critical : k => v.arn }
   description = "ARNs of all per-service critical anomaly subscriptions"
 }
-output "warning_monitor_arns" {
-  value       = { for k, v in module.cost_anomaly_warning : k => v.anomaly_monitor_arn }
-  description = "ARNs of all per-service warning anomaly monitors"
-}
 output "warning_subscription_arns" {
-  value       = { for k, v in module.cost_anomaly_warning : k => v.anomaly_subscription_arn }
+  value       = { for k, v in aws_ce_anomaly_subscription.warning : k => v.arn }
   description = "ARNs of all per-service warning anomaly subscriptions"
 }

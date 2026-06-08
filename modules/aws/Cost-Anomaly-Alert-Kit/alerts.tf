@@ -18,36 +18,69 @@
 #
 # --------------------------------------------------------------------------------------
 
-module "cost_anomaly_critical" {
-  source   = "../Cost-Anomaly-Detection"
-  for_each = var.per_service_anomaly_alerts
-
-  monitor_name                      = join("-", [var.project, var.environment, lower(each.key), "critical"])
-  monitor_abbreviation              = "anomaly-monitor"
-  monitor_type                      = "DIMENSIONAL"
-  monitor_dimension                 = "SERVICE"
-  monitor_subscription_name         = join("-", [var.project, var.environment, lower(each.key), "critical"])
-  monitor_subscription_abbreviation = "sub"
-  frequency                         = "IMMEDIATE"
-  subscriber_type                   = "SNS"
-  subscriber_address                = var.critical_sns_arn
-  absolute_threshold                = each.value.critical_absolute_threshold
-  percentage_threshold              = each.value.critical_percentage_threshold
+resource "aws_ce_anomaly_monitor" "service_monitor" {
+  for_each          = var.per_service_anomaly_alerts
+  name              = join("-", [var.project, var.environment, lower(each.key), "anomaly-monitor"])
+  monitor_type      = "DIMENSIONAL"
+  monitor_dimension = "SERVICE"
 }
 
-module "cost_anomaly_warning" {
-  source   = "../Cost-Anomaly-Detection"
-  for_each = var.per_service_anomaly_alerts
+resource "aws_ce_anomaly_subscription" "critical" {
+  for_each  = var.per_service_anomaly_alerts
+  name      = join("-", [var.project, var.environment, lower(each.key), "critical-sub"])
+  frequency = "IMMEDIATE"
 
-  monitor_name                      = join("-", [var.project, var.environment, lower(each.key), "warning"])
-  monitor_abbreviation              = "anomaly-monitor"
-  monitor_type                      = "DIMENSIONAL"
-  monitor_dimension                 = "SERVICE"
-  monitor_subscription_name         = join("-", [var.project, var.environment, lower(each.key), "warning"])
-  monitor_subscription_abbreviation = "sub"
-  frequency                         = "DAILY"
-  subscriber_type                   = "SNS"
-  subscriber_address                = var.warning_sns_arn
-  absolute_threshold                = each.value.warning_absolute_threshold
-  percentage_threshold              = each.value.warning_percentage_threshold
+  monitor_arn_list = [aws_ce_anomaly_monitor.service_monitor[each.key].arn]
+
+  subscriber {
+    type    = "SNS"
+    address = var.critical_sns_arn
+  }
+
+  threshold_expression {
+    and {
+      dimension {
+        key           = "ANOMALY_TOTAL_IMPACT_ABSOLUTE"
+        match_options = ["GREATER_THAN_OR_EQUAL"]
+        values        = [tostring(each.value.critical_absolute_threshold)]
+      }
+    }
+    and {
+      dimension {
+        key           = "ANOMALY_TOTAL_IMPACT_PERCENTAGE"
+        match_options = ["GREATER_THAN_OR_EQUAL"]
+        values        = [tostring(each.value.critical_percentage_threshold)]
+      }
+    }
+  }
+}
+
+resource "aws_ce_anomaly_subscription" "warning" {
+  for_each  = var.per_service_anomaly_alerts
+  name      = join("-", [var.project, var.environment, lower(each.key), "warning-sub"])
+  frequency = "IMMEDIATE"
+
+  monitor_arn_list = [aws_ce_anomaly_monitor.service_monitor[each.key].arn]
+
+  subscriber {
+    type    = "SNS"
+    address = var.warning_sns_arn
+  }
+
+  threshold_expression {
+    and {
+      dimension {
+        key           = "ANOMALY_TOTAL_IMPACT_ABSOLUTE"
+        match_options = ["GREATER_THAN_OR_EQUAL"]
+        values        = [tostring(each.value.warning_absolute_threshold)]
+      }
+    }
+    and {
+      dimension {
+        key           = "ANOMALY_TOTAL_IMPACT_PERCENTAGE"
+        match_options = ["GREATER_THAN_OR_EQUAL"]
+        values        = [tostring(each.value.warning_percentage_threshold)]
+      }
+    }
+  }
 }

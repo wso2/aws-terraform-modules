@@ -66,7 +66,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
     }
   }
   statement {
-    sid    = "AWSCostAnomalyDetection-notification-1"
+    sid    = "AWSCostAnomalyDetection-notification"
     effect = "Allow"
     principals {
       type        = "Service"
@@ -78,11 +78,6 @@ data "aws_iam_policy_document" "sns_topic_policy" {
       test     = "StringEquals"
       variable = "aws:SourceAccount"
       values   = [data.aws_caller_identity.current.account_id]
-    }
-    condition {
-      test     = "ArnLike"
-      variable = "aws:SourceArn"
-      values   = ["arn:aws:ce::${data.aws_caller_identity.current.account_id}:*"]
     }
   }
 }
