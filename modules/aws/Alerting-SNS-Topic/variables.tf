@@ -52,11 +52,11 @@ variable "subscribers" {
   }))
   default = []
 }
-variable "publisher_aws_account_ids" {
-  description = "Additional AWS account IDs (beyond the owner account) permitted to publish to this topic via cloudwatch.amazonaws.com. Used for cross-account CloudWatch alarm forwarding."
-  type        = list(string)
-  default     = []
-}
+# variable "publisher_aws_account_ids" {
+#   description = "Additional AWS account IDs (beyond the owner account) permitted to publish to this topic via cloudwatch.amazonaws.com. Used for cross-account CloudWatch alarm forwarding."
+#   type        = list(string)
+#   default     = []
+# }
 variable "tags" {
   type        = map(string)
   description = "Tags to be added to the security group"
