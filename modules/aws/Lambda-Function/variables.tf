@@ -74,3 +74,15 @@ variable "environment_variables" {
   description = "Environment variables to set on the Lambda function"
   default     = {}
 }
+
+variable "timeout" {
+  description = "Amount of time the Lambda function has to run, in seconds"
+  type        = number
+  default     = 3
+}
+
+variable "memory_size" {
+  description = "Amount of memory, in MB, the Lambda function has access to at runtime"
+  type        = number
+  default     = 128
+}

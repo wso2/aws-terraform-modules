@@ -34,6 +34,9 @@ hs_err_pid*
 # Terraform state
 .terraform/
 
+# Terraform provider lock files (modules repo: consumers generate their own)
+.terraform.lock.hcl
+
 # Sensitive data
 *.secrets*tfvars
 
