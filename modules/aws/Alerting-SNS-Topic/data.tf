@@ -66,7 +66,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
     }
   }
   statement {
-    sid    = "AWSCostAnomalyDetection-notification"
+    sid    = "AWSCostAnomalyDetection-notification-1"
     effect = "Allow"
     principals {
       type        = "Service"
