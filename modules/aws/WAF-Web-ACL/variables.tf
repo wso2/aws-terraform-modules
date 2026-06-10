@@ -266,6 +266,17 @@ variable "rules" {
         }))
       }))
     }))
+
+    # Narrow purpose-built rule: blocks requests that carry a specific label
+    # (e.g. a managed-rule-group sub-rule label set to count via
+    # rule_action_overrides) UNLESS the host header ends with the given
+    # suffix. Renders as AND(label_match_statement, NOT(byte_match host
+    # ENDS_WITH suffix)). Useful for host-scoping a managed sub-rule action
+    # without disabling the whole rule group.
+    labeled_host_scoped_block_statement = optional(object({
+      label_name         = string
+      host_header_suffix = string
+    }))
   }))
 
   # Validation 1: AWS WAF requires an and_statement to have >= 2 nested statements
