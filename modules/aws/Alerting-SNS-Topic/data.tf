@@ -46,7 +46,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
     }
   }
   statement {
-    sid    = "AWSBudgets-notification-1"
+    sid    = "AWSBudgets-notification"
     effect = "Allow"
     principals {
       type        = "Service"
@@ -66,7 +66,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
     }
   }
   statement {
-    sid    = "AWSCostAnomalyDetection-notification-1"
+    sid    = "AWSCostAnomalyDetection-notification"
     effect = "Allow"
     principals {
       type        = "Service"
