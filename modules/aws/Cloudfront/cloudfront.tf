@@ -46,7 +46,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   aliases = var.aliases
 
   dynamic "logging_config" {
-    for_each = var.log_bucket_name != null ? [1] : []
+    for_each = var.enable_logging_config ? [1] : []
     content {
       bucket          = var.log_bucket_name
       include_cookies = var.log_include_cookies

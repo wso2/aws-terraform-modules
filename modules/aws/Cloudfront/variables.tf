@@ -134,10 +134,16 @@ variable "ordered_cache_behaviors" {
   default = []
 }
 
+variable "enable_logging_config" {
+  description = "Whether to enable logging configuration for the CloudFront distribution"
+  type        = bool
+  default     = true
+}
+
 variable "log_bucket_name" {
   description = "The S3 bucket name for CloudFront access logs (e.g., mybucket.s3.amazonaws.com)"
   type        = string
-  default     = null
+  default     = "cloudfront-log-bucket"
 }
 
 variable "log_include_cookies" {
