@@ -129,5 +129,9 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
       condition     = var.cloudfront_default_certificate == true ? var.cloudfront_acm_certificate_arn == null : true
       error_message = "cloudfront_acm_certificate_arn must not be set when cloudfront_default_certificate is true."
     }
+    precondition {
+      condition     = var.enable_logging_config ? var.log_bucket_name != null : true
+      error_message = "log_bucket_name must be provided when enable_logging_config is true."
+    }
   }
 }
