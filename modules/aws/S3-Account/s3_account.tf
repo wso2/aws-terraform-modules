@@ -74,3 +74,20 @@ resource "aws_s3_bucket_ownership_controls" "s3_bucket_ownership_controls" {
     object_ownership = var.object_ownership
   }
 }
+
+# Optional: expire (delete) objects after lifecycle_expiration_days. Disabled when null.
+resource "aws_s3_bucket_lifecycle_configuration" "s3_bucket_lifecycle" {
+  count  = var.lifecycle_expiration_days != null ? 1 : 0
+  bucket = aws_s3_bucket.s3_bucket.id
+
+  rule {
+    id     = "expire-objects"
+    status = "Enabled"
+
+    filter {}
+
+    expiration {
+      days = var.lifecycle_expiration_days
+    }
+  }
+}

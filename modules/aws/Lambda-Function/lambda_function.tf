@@ -35,6 +35,8 @@ resource "aws_lambda_function" "lambda_function" {
   handler          = var.handler
   source_code_hash = data.archive_file.archive_lambda_function.output_base64sha256
   runtime          = var.runtime_version
+  timeout          = var.timeout
+  memory_size      = var.memory_size
   tags             = var.tags
 
   dynamic "environment" {
