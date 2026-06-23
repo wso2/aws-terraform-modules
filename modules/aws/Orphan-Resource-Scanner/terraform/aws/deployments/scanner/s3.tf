@@ -21,7 +21,7 @@
 # S3 report bucket - stores the weekly CSV reports written by the scanner Lambda.
 
 resource "aws_s3_bucket" "reports" {
-  bucket        = "${local.name_prefix}-bucket"
+  bucket        = var.report_bucket_name
   force_destroy = var.force_destroy_bucket
   tags          = local.tags
 }
