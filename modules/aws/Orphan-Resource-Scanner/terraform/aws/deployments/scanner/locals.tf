@@ -34,78 +34,78 @@ locals {
   # Read-only actions the scanner needs. Used by the hub's discovery policy and
   # emitted via the target_role_policy_json output for target-account roles.
   discovery_actions = [
-    # EC2 / VPC
-    "ec2:DescribeRegions",
-    "ec2:DescribeVolumes",
-    "ec2:DescribeAddresses",
-    "ec2:DescribeNetworkInterfaces",
-    "ec2:DescribeSecurityGroups",
-    "ec2:DescribeNatGateways",
-    "ec2:DescribeRouteTables",
-    "ec2:DescribeSnapshots",
-    "ec2:DescribeImages",
-    "ec2:DescribeInstances",
-
-    # Elastic Load Balancing
-    "elasticloadbalancing:DescribeTargetGroups",
-    "elasticloadbalancing:DescribeTargetHealth",
-    "elasticloadbalancing:DescribeLoadBalancers",
-    "elasticloadbalancing:DescribeListeners",
-    "elasticloadbalancing:DescribeTags",
-
-    # RDS
-    "rds:DescribeDBInstances",
-    "rds:ListTagsForResource",
-
-    # Lambda
-    "lambda:ListFunctions",
-    "lambda:ListTags",
-
     # CloudWatch (metric statistics only - used by the EC2/Lambda idle checks)
     "cloudwatch:GetMetricStatistics",
 
     # CloudWatch Logs
     "logs:DescribeLogGroups",
 
+    # EC2 / VPC
+    "ec2:DescribeAddresses",
+    "ec2:DescribeImages",
+    "ec2:DescribeInstances",
+    "ec2:DescribeNatGateways",
+    "ec2:DescribeNetworkInterfaces",
+    "ec2:DescribeRegions",
+    "ec2:DescribeRouteTables",
+    "ec2:DescribeSecurityGroups",
+    "ec2:DescribeSnapshots",
+    "ec2:DescribeVolumes",
+
     # ECR
-    "ecr:DescribeRepositories",
     "ecr:DescribeImages",
+    "ecr:DescribeRepositories",
     "ecr:ListTagsForResource",
 
     # ECS
-    "ecs:ListClusters",
     "ecs:DescribeClusters",
-
-    # SNS
-    "sns:ListTopics",
-    "sns:ListSubscriptionsByTopic",
-    "sns:ListTagsForResource",
-
-    # S3
-    "s3:ListAllMyBuckets",
-    "s3:ListBucket",
-    "s3:GetBucketLocation",
-    "s3:GetBucketTagging",
-
-    # Route53
-    "route53:ListHostedZones",
-    "route53:ListResourceRecordSets",
-
-    # EKS
-    "eks:ListClusters",
-    "eks:DescribeCluster",
-    "eks:ListNodegroups",
-    "eks:ListFargateProfiles",
+    "ecs:ListClusters",
 
     # EFS
     "elasticfilesystem:DescribeFileSystems",
     "elasticfilesystem:DescribeMountTargets",
 
+    # EKS
+    "eks:DescribeCluster",
+    "eks:ListClusters",
+    "eks:ListFargateProfiles",
+    "eks:ListNodegroups",
+
+    # Elastic Load Balancing
+    "elasticloadbalancing:DescribeListeners",
+    "elasticloadbalancing:DescribeLoadBalancers",
+    "elasticloadbalancing:DescribeTags",
+    "elasticloadbalancing:DescribeTargetGroups",
+    "elasticloadbalancing:DescribeTargetHealth",
+
     # IAM (global)
+    "iam:GetRole",
     "iam:ListPolicies",
     "iam:ListPolicyTags",
     "iam:ListRoles",
-    "iam:GetRole",
+
+    # Lambda
+    "lambda:ListFunctions",
+    "lambda:ListTags",
+
+    # RDS
+    "rds:DescribeDBInstances",
+    "rds:ListTagsForResource",
+
+    # Route53
+    "route53:ListHostedZones",
+    "route53:ListResourceRecordSets",
+
+    # S3
+    "s3:GetBucketLocation",
+    "s3:GetBucketTagging",
+    "s3:ListAllMyBuckets",
+    "s3:ListBucket",
+
+    # SNS
+    "sns:ListSubscriptionsByTopic",
+    "sns:ListTagsForResource",
+    "sns:ListTopics",
 
     # STS
     "sts:GetCallerIdentity",

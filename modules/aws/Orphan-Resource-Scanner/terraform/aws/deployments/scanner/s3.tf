@@ -70,5 +70,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "reports" {
     expiration {
       days = var.report_retention_days
     }
+
+    # Versioning is enabled, so also expire old (noncurrent) versions; otherwise
+    # they accumulate (and cost) indefinitely behind delete markers.
+    noncurrent_version_expiration {
+      noncurrent_days = var.report_retention_days
+    }
   }
 }

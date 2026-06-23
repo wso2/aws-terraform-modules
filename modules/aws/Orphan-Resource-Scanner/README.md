@@ -22,7 +22,7 @@ an HTML summary to the configured recipients.
 
 | Tool | Minimum version | Check |
 |---|---|---|
-| [Terraform](https://developer.hashicorp.com/terraform/install) | 1.10+ | `terraform -version` |
+| [Terraform](https://developer.hashicorp.com/terraform/install) | 1.3.8+ | `terraform -version` |
 | [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) | v2 | `aws --version` |
 
 You also need an AWS CLI profile (or default credentials) for the **hub** account
@@ -83,7 +83,7 @@ leave it `""` to use your default credentials.
 
 ## Step 3 - Deploy the scanner
 
-Run `env-create.sh` from the `aws-orphan-resources` directory:
+Run `env-create.sh` from the module directory (`modules/aws/Orphan-Resource-Scanner`):
 
 ```bash
 bash env-create.sh -c terraform/aws/conf/rnd/orphan-scanner.rnd.conf.tfvars -l scanner
@@ -215,7 +215,7 @@ that need a reviewed, version-controlled record.
 ## Project Structure
 
 ```
-aws-orphan-resources/
+Orphan-Resource-Scanner/
 ├── env-create.sh                      # Terraform wrapper - use this to deploy
 ├── lambda/
 │   └── scanner/

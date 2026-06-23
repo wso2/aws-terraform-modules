@@ -17,27 +17,24 @@
 # under the License.
 #
 # --------------------------------------------------------------------------------------
-
-
-import urllib.parse
-import html
-import json       
 import csv
+import html
 import io
+import json
 import os
 import re
-from datetime import datetime, timezone, timedelta
+import urllib.parse
+from datetime import datetime, timedelta, timezone
+from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.application import MIMEApplication
-
-import boto3   # Every API call goes through this
+import boto3  # Every API call goes through this
 
 # Configuration - all values come from Lambda environment variables so the
 # same code works across environments without changes.
 
-REPORT_BUCKET    = os.environ["REPORT_BUCKET"]           
-SENDER_EMAIL     = os.environ["SENDER_EMAIL"]           
+REPORT_BUCKET    = os.environ["REPORT_BUCKET"]
+SENDER_EMAIL     = os.environ["SENDER_EMAIL"]
 RECIPIENT_EMAILS = [x.strip() for x in os.environ["RECIPIENT_EMAILS"].split(",") if x.strip()]
 # Explicit region allowlist. When set, only these regions are scanned. When
 # empty/unset, the scanner discovers all enabled regions in each account.
@@ -317,7 +314,7 @@ def find_unused_security_groups(session, account, region):
 
     for sg in security_groups:
         tags = sg.get("Tags", [])
-        if sg.get("GroupName") == "default":  
+        if sg.get("GroupName") == "default":
             continue
         if sg["GroupId"] not in used_sg_ids:
             add_finding(
@@ -439,7 +436,7 @@ def find_old_amis(session, account, region):
 
     ec2      = session.client("ec2", region_name=region)
     findings = []
-    cutoff   = datetime.now(timezone.utc) - timedelta(days=90)  
+    cutoff   = datetime.now(timezone.utc) - timedelta(days=90)
 
     # Collect all ImageIds currently in use by instances
     used_ami_ids  = set()
@@ -608,7 +605,7 @@ def find_idle_lambda_functions(session, account, region):
                     Dimensions=[{"Name": "FunctionName", "Value": fn_name}],
                     StartTime=start,
                     EndTime=now,
-                    Period=86400,    
+                    Period=86400,
                     Statistics=["Sum"],
                 )
                 total = sum(p.get("Sum", 0) for p in metrics.get("Datapoints", []))
@@ -1149,7 +1146,7 @@ def send_email(findings, csv_report, exclusions_error=None, report_s3_key=None):
                 </td>
             </tr>"""
 
-            for idx, (i, f) in enumerate(items):
+            for idx, (_, f) in enumerate(items):
                 is_last_row = (idx == len(items) - 1)
                 connector   = "&#x2514;&#x2500;" if is_last_row else "&#x251C;&#x2500;"
 
@@ -1254,7 +1251,7 @@ def send_email(findings, csv_report, exclusions_error=None, report_s3_key=None):
     <body>
         <h2>AWS Orphan Resource Weekly Report</h2>
 
-        <p>Accounts scanned: <b>{accounts_scanned}</b></p>
+        <p>Accounts with findings: <b>{accounts_scanned}</b></p>
         <p>Total findings: <span class="badge">{total}</span></p>
 
         {exclusions_banner}
@@ -1284,7 +1281,7 @@ def send_email(findings, csv_report, exclusions_error=None, report_s3_key=None):
     </html>
     """
 
-    text_body = f"AWS Orphan Resource Weekly Report - {total} findings across: {accounts_scanned}"
+    text_body = f"AWS Orphan Resource Weekly Report - {total} findings. Accounts with findings: {accounts_scanned}"
 
     # Attaching the downloadable version of the CSV file
     msg = MIMEMultipart("mixed")
