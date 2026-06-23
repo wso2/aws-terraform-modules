@@ -33,10 +33,11 @@ resource "aws_lambda_function" "scanner" {
   role             = aws_iam_role.scanner_lambda.arn
   handler          = "lambda_function.lambda_handler"
   source_code_hash = data.archive_file.scanner_lambda.output_base64sha256
-  runtime          = "python3.12"
-  timeout          = var.lambda_timeout
-  memory_size      = var.lambda_memory_size
-  tags             = local.tags
+  # tflint-ignore: aws_lambda_function_invalid_runtime -- python3.12 is valid; the CI's bundled tflint AWS ruleset is too old to know it
+  runtime     = "python3.12"
+  timeout     = var.lambda_timeout
+  memory_size = var.lambda_memory_size
+  tags        = local.tags
 
   environment {
     variables = {
