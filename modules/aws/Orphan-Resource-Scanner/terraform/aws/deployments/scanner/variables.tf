@@ -84,6 +84,11 @@ variable "excluded_resource_ids" {
   default     = []
 }
 
+variable "lambda_runtime" {
+  description = "Lambda runtime identifier (e.g. python3.12). Set in the conf tfvars."
+  type        = string
+}
+
 variable "lambda_timeout" {
   description = "Lambda timeout in seconds"
   type        = number

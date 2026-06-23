@@ -31,7 +31,8 @@
 project                = "aws-orphan-scanner" # used as a resource-name prefix
 deployment_environment = "rnd"                # e.g. rnd, staging, prod
 
-aws_region = "us-east-1" # where the scanner resources are deployed
+aws_region     = "us-east-1" # where the scanner resources are deployed
+lambda_runtime = "python3.12"
 
 # Friendly label for the hub account (tagging only) and the S3 bucket that stores
 # the CSV reports. report_bucket_name must be globally unique.
