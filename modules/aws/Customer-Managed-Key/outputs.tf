@@ -17,3 +17,9 @@ output "key_id" {
   value      = aws_kms_key.kms_key.id
   depends_on = [aws_kms_key.kms_key]
 }
+output "alias_arn" {
+  value = try(aws_kms_alias.kms_alias[0].arn, null)
+}
+output "alias_name" {
+  value = try(aws_kms_alias.kms_alias[0].name, null)
+}
