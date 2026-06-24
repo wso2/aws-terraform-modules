@@ -30,3 +30,8 @@ variable "function_name" {
   description = "The name of the Lambda function to be invoked."
   type        = string
 }
+variable "statement_id" {
+  description = "Lambda permission statement_id. Must be unique per function — set this explicitly when the same Lambda is subscribed to multiple SNS topics."
+  type        = string
+  default     = null
+}
