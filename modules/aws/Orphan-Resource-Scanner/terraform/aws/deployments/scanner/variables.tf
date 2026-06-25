@@ -136,5 +136,3 @@ variable "force_destroy_bucket" {
   type        = bool
   default     = false
 }
-
-
