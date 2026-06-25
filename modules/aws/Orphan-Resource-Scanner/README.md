@@ -1,255 +1,57 @@
-# AWS Orphan Resource Scanner - Setup Guide
+# AWS Orphan Resource Scanner
 
-A serverless Lambda that scans one or more AWS accounts on a weekly schedule and
-emails a report of orphaned resources (unused EBS volumes, idle NAT Gateways,
-empty S3 buckets, and many other types). All infrastructure is managed with
-Terraform and deployed through the `env-create.sh` wrapper.
-
-## How it works
-
-The scanner is deployed into a single **hub** account. From there it can scan:
-
-- **The hub account itself** - using the Lambda's own execution role (`scan_hub_account = true`).
-- **Any number of other accounts** - by assuming a read-only IAM role you create
-  in each target account and list in `target_role_arns` (the **IAM-ARN approach**).
-
-Each weekly run writes a CSV to the report S3 bucket (under `weekly/`) and emails
-an HTML summary to the configured recipients.
-
----
+A serverless Lambda that scans one or more AWS accounts weekly and emails a report
+of orphaned resources (unused EBS volumes, idle NAT Gateways, empty S3 buckets, and
+more). It scans the **hub** account it's deployed into, and any other accounts via a
+read-only cross-account role.
 
 ## Prerequisites
 
-| Tool | Minimum version | Check |
-|---|---|---|
-| [Terraform](https://developer.hashicorp.com/terraform/install) | 1.3.8+ | `terraform -version` |
-| [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) | v2 | `aws --version` |
+- Terraform **1.3.8+**, AWS CLI **v2**
+- AWS credentials for the **hub** account (Lambda, IAM, S3, SES, EventBridge, SSM)
+- A sender email **verified in SES** (in sandbox mode, verify recipients too)
 
-You also need an AWS CLI profile (or default credentials) for the **hub** account
-with permission to create Lambda, IAM, S3, SES, EventBridge Scheduler, and SSM
-resources.
+## Usage
 
----
-
-## Step 1 - Verify the sender email in SES
-
-The Lambda sends the weekly report from a verified SES email address.
-
-1. Go to **AWS Console → SES → Verified identities** (in the same region as `aws_region`).
-2. **Create identity → Email address**, enter the sender address, and click the
-   verification link that arrives in that inbox.
-
-> If your SES account is in **sandbox mode**, every *recipient* address must also
-> be verified the same way. To send to unverified addresses,
-> [request production access](https://docs.aws.amazon.com/ses/latest/dg/request-production-access.html).
-
----
-
-## Step 2 - Configure the scanner
-
-### 2a. Edit the config file
-
-Open [`terraform/aws/conf/rnd/orphan-scanner.rnd.conf.tfvars`](terraform/aws/conf/rnd/orphan-scanner.rnd.conf.tfvars)
-and set the values:
+**1. Configure** — edit `terraform/aws/conf/rnd/orphan-scanner.rnd.conf.tfvars`:
 
 | Variable | What to put |
 |---|---|
-| `project` | Resource-name prefix (default `aws-orphan-scanner`) |
-| `deployment_environment` | e.g. `rnd`, `staging`, `prod` |
-| `aws_region` | Region where the scanner resources are deployed |
-| `account_name` | Friendly label for the hub account (tagging only) |
-| `report_bucket_name` | Name for the S3 report bucket (**must be globally unique**) |
-| `sender_email` | The SES-verified sender from Step 1 |
-| `recipient_emails` | Comma-separated recipient list |
-| `regions` | `""` to auto-discover all enabled regions (recommended), or a comma-separated list to restrict |
-| `excluded_resource_ids` | Resource IDs to never report (see [Managing Exclusions](#managing-exclusions)) |
+| `account_name` / `hub_account_name` | labels shown in tags / report |
+| `report_bucket_name` | globally-unique, **lowercase** S3 bucket name |
+| `sender_email` / `recipient_emails` | SES-verified sender / comma-separated recipients |
 | `scan_hub_account` | `true` to scan the account the Lambda runs in |
-| `hub_account_name` | Display name for the hub account in the report |
-| `target_role_arns` | Cross-account role ARNs to scan (see [Step 4](#step-4--add-other-accounts-iam-arn-approach)) - leave empty for hub-only |
+| `target_role_arns` | read-only role ARNs in other accounts (leave empty for hub-only) |
 
-### 2b. Create the secrets file
-
+**2. Add the secrets file:**
 ```bash
 cp terraform/aws/conf/rnd/orphan-scanner.rnd.conf.secrets.tfvars.sample \
    terraform/aws/conf/rnd/orphan-scanner.rnd.conf.secrets.tfvars
+# set aws_profile (or leave "" for default credentials)
 ```
 
-Open the new file and set `aws_profile` to your hub-account CLI/SSO profile, or
-leave it `""` to use your default credentials.
-
-> **Never commit the `.secrets.tfvars` file** - it is gitignored.
-
----
-
-## Step 3 - Deploy the scanner
-
-Run `env-create.sh` from the module directory (`modules/aws/Orphan-Resource-Scanner`):
-
+**3. Deploy:**
 ```bash
 bash env-create.sh -c terraform/aws/conf/rnd/orphan-scanner.rnd.conf.tfvars -l scanner
 ```
 
-The script verifies your AWS identity, runs `terraform init`, validates and
-formats, then runs `terraform apply`. State is local by default; the resource
-layer declares no backend, so a consuming module can supply its own.
-
-Terraform creates: the scanner Lambda, an EventBridge weekly schedule, the S3
-report bucket, SES send permission, the SSM exclusions parameter, and the IAM
-execution role.
-
-This first deploy gives you a working **hub-only** scan. To add other accounts,
-continue to Step 4.
-
----
-
-## Step 4 - Add other accounts (IAM-ARN approach)
-
-For each additional account you want to scan, create a read-only role in **that**
-account and hand its ARN to the scanner.
-
-### 4a. Get the two values the role needs
-
-From the scanner deployment directory:
-
+**4. Run it** (the weekly schedule is automatic; to trigger manually):
 ```bash
 cd terraform/aws/deployments/scanner
-terraform output -raw hub_lambda_execution_role_arn   # trusted principal
-terraform output -raw target_role_policy_json         # read-only permissions
+aws lambda invoke --region us-east-1 --cli-read-timeout 900 \
+  --function-name $(terraform output -raw lambda_function_name) /tmp/out.json
 ```
+Reports land in the S3 bucket under `weekly/` and are emailed to the recipients.
 
-### 4b. Create the role in the target account
+## Scanning other accounts
 
-Create an IAM role (e.g. `orphan-scanner-readonly`) in the target account with:
+In each target account, create a read-only IAM role that:
+- **trusts** the hub Lambda role — `terraform output -raw hub_lambda_execution_role_arn`
+- **grants** the read policy — `terraform output -raw target_role_policy_json`
 
-- **Trust policy** - principal = the `hub_lambda_execution_role_arn` above, action `sts:AssumeRole`:
-  ```json
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Effect": "Allow",
-        "Principal": { "AWS": "<hub_lambda_execution_role_arn>" },
-        "Action": "sts:AssumeRole"
-      }
-    ]
-  }
-  ```
-- **Permissions policy** - the JSON from `target_role_policy_json`.
+Then add its ARN to `target_role_arns` and re-deploy.
 
-### 4c. Register the role and re-deploy
+## Exclusions
 
-Add the new role's ARN to `target_role_arns` in the conf file:
-
-```hcl
-target_role_arns = [
-  "arn:aws:iam::<TARGET_ACCOUNT_ID>:role/orphan-scanner-readonly",
-]
-```
-
-Re-run the deploy. Adding an ARN attaches the `assume-target` policy to the
-Lambda so it can assume that role:
-
-```bash
-bash env-create.sh -c terraform/aws/conf/rnd/orphan-scanner.rnd.conf.tfvars -l scanner
-```
-
-Repeat 4b–4c for each additional account.
-
----
-
-## Step 5 - Test the scanner
-
-Trigger a manual run instead of waiting for the weekly schedule. From the
-deployment directory:
-
-```bash
-cd terraform/aws/deployments/scanner
-aws lambda invoke --region <aws_region> --profile <hub-profile> \
-  --function-name $(terraform output -raw lambda_function_name) \
-  /tmp/scan-out.json
-cat /tmp/scan-out.json
-```
-
-Then check:
-
-- **CloudWatch Logs** for the function - scan output and any assume-role errors.
-- **Your inbox** for the HTML report email.
-- **The report bucket** for the CSV:
-  ```bash
-  aws s3 ls "s3://$(terraform output -raw report_bucket_name)/weekly/" --region <aws_region> --profile <hub-profile>
-  ```
-
-If a cross-account scan fails with `AccessDenied`/`AssumeRole`, re-check that the
-target role's trust policy names the exact `hub_lambda_execution_role_arn` and
-that the ARN in `target_role_arns` is correct.
-
----
-
-## Managing Exclusions
-
-Resources the scanner must never report are configured in two ways.
-
-**1. `excluded_resource_ids` in the conf file** (audit-trailed, central):
-
-```hcl
-excluded_resource_ids = [
-  "vol-0abc1234567890def",   # keep - DR snapshot source
-  "eipalloc-0abc1234567890", # keep - reserved for failover
-]
-```
-
-Add an ID and re-apply to exclude it; remove it and re-apply to undo. The list is
-stored in SSM Parameter Store and read by the Lambda at runtime.
-
-**2. Tag the resource directly** (self-service, no Terraform change):
-
-| Tag key | Tag value |
-|---|---|
-| `orphan-scan-ignore` | `true` |
-
-Use the tag for resources you own. Use `excluded_resource_ids` for exceptions
-that need a reviewed, version-controlled record.
-
----
-
-## Project Structure
-
-```
-Orphan-Resource-Scanner/
-├── env-create.sh                      # Terraform wrapper - use this to deploy
-├── lambda/
-│   └── scanner/
-│       └── lambda_function.py         # All scanner logic (single file)
-└── terraform/
-    └── aws/
-        ├── deployments/
-        │   └── scanner/               # The one and only deployment layer
-        │       ├── providers.tf       # AWS provider (hub)
-        │       ├── data.tf            # IAM policy documents
-        │       ├── iam.tf             # Lambda execution role + policies
-        │       ├── lambda.tf          # Lambda function + packaging
-        │       ├── s3.tf              # Report bucket
-        │       ├── scheduler.tf       # EventBridge weekly schedule
-        │       ├── ssm.tf             # Exclusions parameter
-        │       ├── locals.tf          # Naming + discovery actions
-        │       ├── variables.tf
-        │       ├── outputs.tf
-        │       └── versions.tf
-        └── conf/
-            └── rnd/
-                ├── orphan-scanner.rnd.conf.tfvars           # Config - edit and commit
-                ├── orphan-scanner.rnd.conf.secrets.tfvars   # Secrets - never commit
-                └── orphan-scanner.rnd.conf.secrets.tfvars.sample
-```
-
----
-
-## Key Terraform Outputs
-
-| Output | Use |
-|---|---|
-| `lambda_function_name` | Manual invoke / console lookup |
-| `report_bucket_name` | Where CSV reports land (`weekly/` prefix) |
-| `hub_lambda_execution_role_arn` | Trusted principal for target-account roles |
-| `target_role_policy_json` | Read-only policy to attach to target-account roles |
-| `schedule_name` | The EventBridge weekly schedule |
+Skip specific resources via `excluded_resource_ids` in the conf (stored in SSM), or
+tag the resource `orphan-scan-ignore = true`.
