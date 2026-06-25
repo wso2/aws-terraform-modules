@@ -23,8 +23,8 @@
 
 data "archive_file" "scanner_lambda" {
   type        = "zip"
-  source_file = "${path.root}/../../../../lambda/scanner/lambda_function.py"
-  output_path = "${path.root}/../../../../lambda/scanner/scanner_lambda.zip"
+  source_file = "${path.module}/scripts/lambda_function.py"
+  output_path = "${path.module}/scripts/scanner_lambda.zip"
 }
 
 resource "aws_lambda_function" "scanner" {
