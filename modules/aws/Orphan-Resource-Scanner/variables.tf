@@ -17,9 +17,6 @@
 # under the License.
 #
 # --------------------------------------------------------------------------------------
-
-# Script  variables read by env-create.sh and also passed to Terraform
-
 variable "project" {
   description = "Project name"
   type        = string
