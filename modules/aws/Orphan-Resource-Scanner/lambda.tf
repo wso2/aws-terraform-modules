@@ -18,8 +18,19 @@
 #
 # --------------------------------------------------------------------------------------
 
-# Scanner Lambda function, its deployment package, and log group.
-# The execution role and its policies live in iam.tf.
+# Scanner Lambda function, its deployment package, exclusions parameter, and log
+# group. The execution role and its policies live in iam.tf.
+
+# Exclusion list. var.excluded_resource_ids is written here as JSON; the Lambda
+# reads it at runtime and skips matching resources. Edit the conf and re-apply.
+resource "aws_ssm_parameter" "exclusions" {
+  # Name can't start with "aws"/"ssm" (SSM-reserved), so we don't reuse name_prefix.
+  name        = "/orphan-scanner/${local.environment}-${var.aws_region}/exclusions"
+  description = "Resource IDs the orphan scanner should skip (JSON array)."
+  type        = "String"
+  value       = jsonencode(var.excluded_resource_ids)
+  tags        = local.tags
+}
 
 data "archive_file" "scanner_lambda" {
   type        = "zip"

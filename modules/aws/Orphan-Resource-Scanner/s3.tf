@@ -78,3 +78,24 @@ resource "aws_s3_bucket_lifecycle_configuration" "reports" {
     }
   }
 }
+
+# Weekly EventBridge schedule that invokes the scanner Lambda.
+# The scheduler execution role lives in iam.tf.
+resource "aws_scheduler_schedule" "weekly_scan" {
+  name       = "${local.name_prefix}-weekly-scan-schedule"
+  group_name = "default"
+  state      = "ENABLED"
+
+  flexible_time_window {
+    mode = "OFF"
+  }
+
+  schedule_expression          = var.schedule_expression
+  schedule_expression_timezone = "UTC"
+
+  target {
+    arn      = aws_lambda_function.scanner.arn
+    role_arn = aws_iam_role.scheduler.arn
+    input    = "{}"
+  }
+}
