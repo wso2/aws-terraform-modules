@@ -133,3 +133,9 @@ variable "force_destroy_bucket" {
   type        = bool
   default     = false
 }
+
+variable "tags" {
+  description = "Additional tags to apply to all resources. Module-managed tags take precedence on key conflicts."
+  type        = map(string)
+  default     = {}
+}

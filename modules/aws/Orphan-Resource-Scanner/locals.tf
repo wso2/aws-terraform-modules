@@ -131,10 +131,11 @@ locals {
     } : {}
   )
 
-  tags = {
+  # User-supplied tags first; module-managed tags last
+  tags = merge(var.tags, {
     Project     = local.project
     Environment = local.environment
     AccountName = var.account_name
     ManagedBy   = "terraform"
-  }
+  })
 }
