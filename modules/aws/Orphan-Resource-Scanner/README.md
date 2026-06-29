@@ -13,31 +13,37 @@ read-only cross-account role.
 
 ## Usage
 
-**1. Configure** — edit `terraform/aws/conf/rnd/orphan-scanner.rnd.conf.tfvars`:
+**1. Reference the module** and set the inputs:
 
-| Variable | What to put |
-|---|---|
-| `account_name` / `hub_account_name` | labels shown in tags / report |
-| `report_bucket_name` | globally-unique, **lowercase** S3 bucket name |
-| `sender_email` / `recipient_emails` | SES-verified sender / comma-separated recipients |
-| `scan_hub_account` | `true` to scan the account the Lambda runs in |
-| `target_role_arns` | read-only role ARNs in other accounts (leave empty for hub-only) |
+```hcl
+module "orphan_scanner" {
+  source = "github.com/wso2/aws-terraform-modules//modules/aws/Orphan-Resource-Scanner"
 
-**2. Add the secrets file:**
-```bash
-cp terraform/aws/conf/rnd/orphan-scanner.rnd.conf.secrets.tfvars.sample \
-   terraform/aws/conf/rnd/orphan-scanner.rnd.conf.secrets.tfvars
-# set aws_profile (or leave "" for default credentials)
+  project                = "aws-orphan-scanner"
+  deployment_layer       = "scanner"
+  deployment_environment = "rnd"
+  account_name           = "my-hub-account"          # label shown in tags / report
+  report_bucket_name     = "my-org-orphan-reports"   # globally-unique, lowercase S3 bucket
+  sender_email           = "alerts@example.com"      # SES-verified sender
+  recipient_emails       = "team@example.com"        # comma-separated recipients
+
+  scan_hub_account = true   # scan the account the Lambda runs in
+  target_role_arns = []     # read-only role ARNs in other accounts (empty = hub-only)
+}
 ```
 
-**3. Deploy:**
+Credentials come from your standard AWS provider configuration (profile or environment).
+See [variables.tf](variables.tf) for the full list of optional inputs (schedule,
+retention, Lambda sizing, tags, etc.).
+
+**2. Deploy:**
 ```bash
-bash env-create.sh -c terraform/aws/conf/rnd/orphan-scanner.rnd.conf.tfvars -l scanner
+terraform init
+terraform apply
 ```
 
-**4. Run it** (the weekly schedule is automatic; to trigger manually):
+**3. Run it** (the weekly schedule is automatic; to trigger manually):
 ```bash
-cd terraform/aws/deployments/scanner
 aws lambda invoke --region us-east-1 --cli-read-timeout 900 \
   --function-name $(terraform output -raw lambda_function_name) /tmp/out.json
 ```
