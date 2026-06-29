@@ -47,7 +47,7 @@ resource "aws_iam_role_policy_attachment" "scanner_lambda_logging" {
 resource "aws_iam_policy" "lambda" {
   for_each = local.lambda_policies
 
-  name   = "${local.iam_name_head}-${each.key}-${local.iam_name_tail}-iam-policy"
+  name   = "${local.service_id}-${each.key}-${local.location_id}-iam-policy"
   policy = each.value
   tags   = local.tags
 }
@@ -62,13 +62,13 @@ resource "aws_iam_role_policy_attachment" "lambda" {
 # --- EventBridge Scheduler execution role -------------------------------------------
 
 resource "aws_iam_role" "scheduler" {
-  name               = "${local.iam_name_head}-scheduler-${local.iam_name_tail}-iam-role"
+  name               = "${local.service_id}-scheduler-${local.location_id}-iam-role"
   assume_role_policy = data.aws_iam_policy_document.scheduler_assume_role.json
   tags               = local.tags
 }
 
 resource "aws_iam_policy" "scheduler_invoke" {
-  name   = "${local.iam_name_head}-sched-invoke-${local.iam_name_tail}-iam-policy"
+  name   = "${local.service_id}-sched-invoke-${local.location_id}-iam-policy"
   policy = data.aws_iam_policy_document.scheduler_invoke_lambda.json
   tags   = local.tags
 }

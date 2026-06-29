@@ -24,9 +24,9 @@ locals {
   environment = var.deployment_environment
 
   # Resource-name building blocks (project-application-environment-region).
-  iam_name_head = "${local.project}-${local.application}"         # aws-orphan-scanner-scanner
-  iam_name_tail = "${local.environment}-${var.aws_region}"        # rnd-us-east-1
-  name_prefix   = "${local.iam_name_head}-${local.iam_name_tail}" # aws-orphan-scanner-scanner-rnd-us-east-1
+  service_id  = "${local.project}-${local.application}"    # aws-orphan-scanner-scanner
+  location_id = "${local.environment}-${var.aws_region}"   # rnd-us-east-1
+  name_prefix = "${local.service_id}-${local.location_id}" # aws-orphan-scanner-scanner-rnd-us-east-1
 
   # Suffix inserted into the Lambda resource names.
   lambda_function_name = "fn"
