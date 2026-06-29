@@ -149,6 +149,9 @@ def add_finding(findings, account, region, resource_type, resource_id, reason, t
     tags = tags or []
     if resource_id in excluded_ids:
         return
+    # Honor the advertised opt-out tag (see report's "Recommended Next Steps").
+    if str(get_tag_value(tags, "orphan-scan-ignore")).lower() == "true":
+        return
     findings.append({
         "AccountId":         account["AccountId"],
         "AccountName":       account["AccountName"],
