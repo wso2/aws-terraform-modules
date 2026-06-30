@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
+# Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
 #
 # WSO2 LLC. licenses this file to you under the Apache License,
 # Version 2.0 (the "License"); you may not use this file except
@@ -18,20 +18,28 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "sns_arn" {
-  description = "The ARN of the SNS topic to subscribe to."
+variable "project" {
   type        = string
+  description = "Name of the project"
 }
-variable "function_arn" {
-  description = "The ARN of the Lambda function to be invoked."
+variable "environment" {
   type        = string
+  description = "Name of the environment"
 }
-variable "function_name" {
-  description = "The name of the Lambda function to be invoked."
+variable "critical_sns_arn" {
   type        = string
+  description = "ARN of the existing critical SNS topic"
 }
-variable "statement_id" {
-  description = "Lambda permission statement_id. Must be unique per function — set this explicitly when the same Lambda is subscribed to multiple SNS topics."
+variable "warning_sns_arn" {
   type        = string
-  default     = null
+  description = "ARN of the existing warning SNS topic"
+}
+variable "per_service_anomaly_alerts" {
+  type = map(object({
+    critical_absolute_threshold   = number
+    critical_percentage_threshold = number
+    warning_absolute_threshold    = number
+    warning_percentage_threshold  = number
+  }))
+  description = "Per-service anomaly thresholds. Keys are friendly service names."
 }
