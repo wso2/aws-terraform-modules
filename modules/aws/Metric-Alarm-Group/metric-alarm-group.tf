@@ -32,10 +32,12 @@ module "warning-metric-alarm" {
   insufficient_data_actions = var.insufficient_data_actions
 
   alarm_description = jsonencode({
-    category    = "service_interruption"
-    service     = var.product
-    severity    = title(each.value.priority)
-    environment = var.environment
+    category      = "service_interruption"
+    service       = var.product
+    severity      = title(each.value.priority)
+    environment   = var.environment
+    service_id    = var.service_id
+    deployment_id = var.deployment_id
   })
   metric_usage_prefix = lower(join("-", [var.project, var.application, var.region, var.environment, var.resource_infix, each.value.statistic, each.value.metric_name, each.value.priority]))
 
