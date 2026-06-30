@@ -24,14 +24,14 @@
 # --- Lambda execution role -----------------------------------------------------------
 
 resource "aws_iam_role" "scanner_lambda" {
-  name               = "${local.name_prefix}-${local.lambda_function_name}-lf-iam-role"
+  name               = "${local.name_prefix}-lambda-iam-role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
   tags               = local.tags
 }
 
 # CloudWatch Logs write permission for the function.
 resource "aws_iam_policy" "scanner_lambda_logging" {
-  name        = "${local.name_prefix}-${local.lambda_function_name}-lambda-function-cloudwatch-policy"
+  name        = "${local.name_prefix}-lambda-cloudwatch-policy"
   description = "IAM policy for the Lambda function to push logs to CloudWatch"
   policy      = data.aws_iam_policy_document.lambda_logging.json
   tags        = local.tags

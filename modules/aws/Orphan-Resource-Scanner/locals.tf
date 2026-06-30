@@ -28,9 +28,6 @@ locals {
   location_id = "${local.environment}-${var.aws_region}"   # rnd-us-east-1
   name_prefix = "${local.service_id}-${local.location_id}" # aws-orphan-scanner-scanner-rnd-us-east-1
 
-  # Suffix inserted into the Lambda resource names.
-  lambda_function_name = "fn"
-
   # Read-only actions the scanner needs. Used by the hub's discovery policy and
   # emitted via the target_role_policy_json output for target-account roles.
   discovery_actions = [
@@ -111,11 +108,8 @@ locals {
     "sts:GetCallerIdentity",
   ]
 
-  # Cross-account role ARNs the Lambda assumes into.
-  effective_target_role_arns = var.target_role_arns
-
   # True when at least one target exists. Gates the assume-target policy.
-  has_target = length(local.effective_target_role_arns) > 0
+  has_target = length(var.target_role_arns) > 0
 
   # Policies attached to the Lambda role (key -> policy JSON; key becomes the
   # policy sub-name). assume-target is added only when a target is configured.

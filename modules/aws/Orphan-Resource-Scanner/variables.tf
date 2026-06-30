@@ -74,7 +74,6 @@ variable "regions" {
   default     = ""
 }
 
-
 variable "excluded_resource_ids" {
   description = "Resource IDs the scanner should never report (e.g. vol-0abc123, eipalloc-0def456). Edit this list and run terraform apply to change exclusions."
   type        = list(string)
@@ -126,6 +125,12 @@ variable "schedule_expression" {
   description = "EventBridge cron expression for the weekly scan (UTC)"
   type        = string
   default     = "cron(30 3 ? * MON *)"
+}
+
+variable "sse_algorithm" {
+  description = "S3 server-side encryption algorithm for the report bucket"
+  type        = string
+  default     = "AES256"
 }
 
 variable "force_destroy_bucket" {

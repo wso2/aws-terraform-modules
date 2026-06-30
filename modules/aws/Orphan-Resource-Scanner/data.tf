@@ -86,7 +86,7 @@ data "aws_iam_policy_document" "allow_assume_target_role" {
     sid       = "AssumeTargetScannerRoles"
     effect    = "Allow"
     actions   = ["sts:AssumeRole"]
-    resources = local.effective_target_role_arns
+    resources = var.target_role_arns
   }
 }
 

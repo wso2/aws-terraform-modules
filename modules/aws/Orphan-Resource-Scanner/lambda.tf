@@ -40,7 +40,7 @@ data "archive_file" "scanner_lambda" {
 
 resource "aws_lambda_function" "scanner" {
   filename         = data.archive_file.scanner_lambda.output_path
-  function_name    = "${local.name_prefix}-${local.lambda_function_name}-lambda-function"
+  function_name    = "${local.name_prefix}-lambda-function"
   role             = aws_iam_role.scanner_lambda.arn
   handler          = "lambda_function.lambda_handler"
   source_code_hash = data.archive_file.scanner_lambda.output_base64sha256
@@ -58,7 +58,7 @@ resource "aws_lambda_function" "scanner" {
       REGIONS               = var.regions
       SCAN_HUB_ACCOUNT      = tostring(var.scan_hub_account)
       HUB_ACCOUNT_NAME      = coalesce(var.hub_account_name, var.account_name)
-      TARGET_ROLE_ARNS      = join(",", local.effective_target_role_arns)
+      TARGET_ROLE_ARNS      = join(",", var.target_role_arns)
       EXCLUSIONS_PARAM_NAME = aws_ssm_parameter.exclusions.name
     }
   }
