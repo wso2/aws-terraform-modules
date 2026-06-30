@@ -99,3 +99,14 @@ variable "product" {
   description = "Product name used in alarm descriptions"
   default     = "Choreo"
 }
+# Smart incident handler compatibility
+variable "service_id" {
+  type        = string
+  description = "Service ID for Smart Incident routing"
+  default     = null
+}
+variable "deployment_id" {
+  type        = string
+  description = "Deployment ID for Smart Incident creator processing"
+  default     = null
+}
