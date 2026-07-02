@@ -54,19 +54,19 @@ resource "aws_networkfirewall_firewall_policy" "networkfirewall_firewall_policy"
       }
     }
 
-    #StateFul Rule Group Reference
+    # Custom Suricata + domain rule groups — priority 1..N, evaluated FIRST.
+    # Lower number = evaluated first in strict order.
     dynamic "stateful_rule_group_reference" {
       for_each = local.this_stateful_group_arn
       content {
-        # Priority is sequentially as per index in stateful_group_arn list.
-        # Lower number = evaluated first. Suricata (blocklist) groups come before
-        # fivetuple (pass-all) groups in the concat order defined in locals.tf.
         priority     = var.enable_strict_order ? index(local.this_stateful_group_arn, stateful_rule_group_reference.value) + 1 : null
         resource_arn = stateful_rule_group_reference.value
       }
     }
 
-    # AWS Managed Rule Group References (with optional DROP_TO_ALERT override for logging only mode)
+    # AWS Managed Rule Groups — priority N+1..N+M, evaluated after custom
+    # Suricata/domain groups but BEFORE the fivetuple catch-all. Optional
+    # DROP_TO_ALERT override for logging-only mode.
     dynamic "stateful_rule_group_reference" {
       for_each = var.aws_managed_rule_group
       content {
@@ -78,6 +78,19 @@ resource "aws_networkfirewall_firewall_policy" "networkfirewall_firewall_policy"
             action = stateful_rule_group_reference.value.override_action
           }
         }
+      }
+    }
+
+    # 5-tuple catch-all rule groups — priority N+M+1..N+M+K, evaluated LAST.
+    # This is where pass-all catch-alls belong: they only match traffic that
+    # none of the custom or AWS-managed drop groups above claimed. Keeps the
+    # enforced tier effective while still allowing default-deny + drop_strict
+    # to be set as stateful_default_actions without dropping legitimate traffic.
+    dynamic "stateful_rule_group_reference" {
+      for_each = local.this_stateful_group_arn_catchall
+      content {
+        priority     = var.enable_strict_order ? length(local.this_stateful_group_arn) + length(var.aws_managed_rule_group) + index(local.this_stateful_group_arn_catchall, stateful_rule_group_reference.value) + 1 : null
+        resource_arn = stateful_rule_group_reference.value
       }
     }
   }
