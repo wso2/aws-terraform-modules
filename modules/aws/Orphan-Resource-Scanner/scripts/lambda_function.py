@@ -28,7 +28,7 @@ from datetime import datetime, timedelta, timezone
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import boto3  # Every API call goes through this
+import boto3
 
 # Configuration - all values come from Lambda environment variables so the
 # same code works across environments without changes.
@@ -149,7 +149,6 @@ def add_finding(findings, account, region, resource_type, resource_id, reason, t
     tags = tags or []
     if resource_id in excluded_ids:
         return
-    # Honor the advertised opt-out tag (see report's "Recommended Next Steps").
     if str(get_tag_value(tags, "orphan-scan-ignore")).lower() == "true":
         return
     findings.append({

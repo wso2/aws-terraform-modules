@@ -24,7 +24,6 @@
 # Exclusion list. var.excluded_resource_ids is written here as JSON; the Lambda
 # reads it at runtime and skips matching resources. Edit the conf and re-apply.
 resource "aws_ssm_parameter" "exclusions" {
-  # Name can't start with "aws"/"ssm" (SSM-reserved), so we don't reuse name_prefix.
   name        = "/orphan-scanner/${local.environment}-${var.aws_region}/exclusions"
   description = "Resource IDs the orphan scanner should skip (JSON array)."
   type        = "String"

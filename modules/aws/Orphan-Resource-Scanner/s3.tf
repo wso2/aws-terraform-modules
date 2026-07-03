@@ -42,13 +42,6 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "reports" {
   }
 }
 
-resource "aws_s3_bucket_ownership_controls" "reports" {
-  bucket = aws_s3_bucket.reports.id
-  rule {
-    object_ownership = "BucketOwnerEnforced"
-  }
-}
-
 # Expire (delete) old reports after var.report_retention_days.
 resource "aws_s3_bucket_lifecycle_configuration" "reports" {
   bucket = aws_s3_bucket.reports.id
