@@ -9,12 +9,21 @@
 #
 # --------------------------------------------------------------------------------------
 
+locals {
+  # internal_usage_flag is typed string and callers may pass a bool ("true") or string.
+  # Comparing a coerced string ("true") against a bool literal (== true) silently returns
+  # false, so an internal NLB still hit the else-branch and created orphan (unassociated)
+  # EIPs. tobool() normalizes both forms so the branches below are correct.
+  is_internal = tobool(var.internal_usage_flag)
+  is_shielded = tobool(var.enable_shield_protection)
+}
+
 # Ignore: AVD-AWS-0053 (https://avd.aquasec.com/misconfig/aws/elb/avd-aws-0053/)
 # Reason: We may need public load balancers. As such this has been configured as a parameter.
 # trivy:ignore:AVD-AWS-0053
 resource "aws_lb" "lb" {
   name               = join("-", [var.project, var.application, var.environment, var.region, "elb"])
-  internal           = var.internal_usage_flag # Defines the Load balancer network connectivity required by AVD-AWS-0053
+  internal           = local.is_internal # Defines the Load balancer network connectivity required by AVD-AWS-0053
   load_balancer_type = var.load_balancer_type
   security_groups    = var.security_group_ids
 
@@ -27,22 +36,24 @@ resource "aws_lb" "lb" {
   dynamic "subnet_mapping" {
     for_each = var.subnet_ids
     content {
-      subnet_id            = subnet_mapping.value
-      allocation_id        = var.internal_usage_flag == false ? aws_eip.eip[subnet_mapping.key].id : null
-      private_ipv4_address = var.internal_usage_flag == true ? var.private_ip_addresses[subnet_mapping.key] : null
+      subnet_id = subnet_mapping.value
+      # Public NLB: associate an EIP per subnet. Internal NLB: no EIP; use an explicit
+      # private IP only when the caller supplied one (otherwise let AWS auto-assign).
+      allocation_id        = local.is_internal ? null : aws_eip.eip[subnet_mapping.key].id
+      private_ipv4_address = local.is_internal ? lookup(var.private_ip_addresses, subnet_mapping.key, null) : null
     }
   }
 }
 
 resource "aws_eip" "eip" {
-  for_each = var.internal_usage_flag == true ? {} : var.subnet_ids
+  for_each = local.is_internal ? {} : var.subnet_ids
   domain   = "vpc"
 
   tags = var.tags
 }
 
 resource "aws_shield_protection" "shield_protection" {
-  for_each     = var.internal_usage_flag == false && var.enable_shield_protection ? var.subnet_ids : {}
+  for_each     = !local.is_internal && local.is_shielded ? var.subnet_ids : {}
   name         = join("-", [var.project, var.application, var.environment, var.region, each.key, "elb-eip-shield-protection"])
   resource_arn = replace(aws_eip.eip[each.key].arn, "elastic-ip", "eip-allocation")
 

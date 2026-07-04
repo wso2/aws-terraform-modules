@@ -19,8 +19,14 @@
 # --------------------------------------------------------------------------------------
 
 variable "dns_name" {
-  description = "The DNS name of the origin"
+  description = "The DNS name of the origin. For a VPC origin this is not resolved for routing; it is used only as the SNI/Host and for origin-certificate SAN validation, so it must be a host covered by the origin cert."
   type        = string
+}
+
+variable "vpc_origin_id" {
+  description = "ID of an aws_cloudfront_vpc_origin. When set, the origin uses vpc_origin_config (private ALB/NLB/EC2) instead of custom_origin_config. Default null keeps the existing custom-origin behavior."
+  type        = string
+  default     = null
 }
 
 variable "origin_id" {
