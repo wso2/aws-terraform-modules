@@ -45,7 +45,7 @@ output "report_bucket_arn" {
 
 output "schedule_name" {
   description = "Name of the EventBridge Scheduler schedule"
-  value       = aws_scheduler_schedule.weekly_scan.name
+  value       = aws_scheduler_schedule.scan_schedule.name
 }
 
 output "target_role_policy_json" {

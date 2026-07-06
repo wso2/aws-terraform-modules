@@ -29,7 +29,7 @@ resource "aws_s3_bucket" "reports" {
 resource "aws_s3_bucket_versioning" "reports" {
   bucket = aws_s3_bucket.reports.id
   versioning_configuration {
-    status = "Enabled"
+    status = "Suspended"
   }
 }
 
@@ -66,7 +66,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "reports" {
 
 # Weekly EventBridge schedule that invokes the scanner Lambda.
 # The scheduler execution role lives in iam.tf.
-resource "aws_scheduler_schedule" "weekly_scan" {
+resource "aws_scheduler_schedule" "scan_schedule" {
   name       = "${local.name_prefix}-weekly-scan-schedule"
   group_name = "default"
   state      = "ENABLED"

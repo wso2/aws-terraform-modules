@@ -100,7 +100,7 @@ variable "lambda_memory_size" {
 variable "report_retention_days" {
   description = "Days before old reports are automatically deleted by S3 lifecycle rule"
   type        = number
-  default     = 90
+  default     = 30
 }
 
 variable "scan_hub_account" {
