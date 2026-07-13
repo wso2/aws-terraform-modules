@@ -46,7 +46,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   aliases = var.aliases
 
   dynamic "logging_config" {
-    for_each = var.log_bucket_name != null ? [1] : []
+    for_each = var.enable_logging_config ? [1] : []
     content {
       bucket          = var.log_bucket_name
       include_cookies = var.log_include_cookies
@@ -128,6 +128,10 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
     precondition {
       condition     = var.cloudfront_default_certificate == true ? var.cloudfront_acm_certificate_arn == null : true
       error_message = "cloudfront_acm_certificate_arn must not be set when cloudfront_default_certificate is true."
+    }
+    precondition {
+      condition     = var.enable_logging_config ? var.log_bucket_name != null : true
+      error_message = "log_bucket_name must be provided when enable_logging_config is true."
     }
   }
 }

@@ -134,10 +134,21 @@ variable "ordered_cache_behaviors" {
   default = []
 }
 
+variable "enable_logging_config" {
+  description = "Whether to enable logging configuration for the CloudFront distribution"
+  type        = bool
+  default     = true
+}
+
 variable "log_bucket_name" {
-  description = "The S3 bucket name for CloudFront access logs (e.g., mybucket.s3.amazonaws.com)"
+  description = "The S3 bucket domain for CloudFront access logs. Must be in the form '<bucket-name>.s3.amazonaws.com'"
   type        = string
   default     = null
+
+  validation {
+    condition     = var.log_bucket_name == null || can(regex("^[a-z0-9][a-z0-9.-]*\\.s3\\.amazonaws\\.com$", var.log_bucket_name))
+    error_message = "log_bucket_name must be in the form '<bucket-name>.s3.amazonaws.com' (e.g., mybucket.s3.amazonaws.com)."
+  }
 }
 
 variable "log_include_cookies" {
