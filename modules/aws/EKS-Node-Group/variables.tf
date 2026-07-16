@@ -113,3 +113,28 @@ variable "capacity_type" {
   description = "Capacity type for the node group. Valid values: ON_DEMAND | SPOT"
   default     = "ON_DEMAND"
 }
+variable "enable_node_auto_repair" {
+  type        = bool
+  description = "Enable EKS node auto repair so unhealthy (e.g. NotReady) nodes are automatically replaced. Requires AWS provider >= v5.84"
+  default     = false
+}
+variable "node_volume_type" {
+  type        = string
+  description = "EBS volume type for the worker node root volume (e.g. gp3). Defaults to the AMI/EC2 default (gp2) when unset"
+  default     = null
+}
+variable "node_volume_iops" {
+  type        = number
+  description = "Provisioned IOPS for the worker node root volume. Only applicable to gp3/io1/io2 volume types"
+  default     = null
+}
+variable "node_volume_throughput" {
+  type        = number
+  description = "Throughput in MiB/s for the worker node root volume. Only applicable to the gp3 volume type"
+  default     = null
+}
+variable "cpu_credits" {
+  type        = string
+  description = "Credit option for burstable (T-family) instances. Valid values: standard | unlimited. Defaults to the EC2 account/family default when unset"
+  default     = null
+}

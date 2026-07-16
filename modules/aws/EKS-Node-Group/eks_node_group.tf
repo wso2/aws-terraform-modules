@@ -51,6 +51,15 @@ resource "aws_eks_node_group" "eks_node_group" {
     max_unavailable = var.max_unavailable
   }
 
+  # Emitted only when enabled so callers on AWS provider versions older than
+  # v5.84 (which introduced node_repair_config) are unaffected.
+  dynamic "node_repair_config" {
+    for_each = var.enable_node_auto_repair ? [1] : []
+    content {
+      enabled = true
+    }
+  }
+
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
   # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
   depends_on = [
@@ -73,8 +82,18 @@ resource "aws_launch_template" "eks_launch_template" {
     device_name = "/dev/xvda"
     ebs {
       volume_size = var.node_disk_size
+      volume_type = var.node_volume_type
+      iops        = var.node_volume_iops
+      throughput  = var.node_volume_throughput
       encrypted   = var.enable_encryption_at_rest
       kms_key_id  = var.enable_encryption_at_rest == true ? var.kms_key_id : null
+    }
+  }
+
+  dynamic "credit_specification" {
+    for_each = var.cpu_credits == null ? [] : [1]
+    content {
+      cpu_credits = var.cpu_credits
     }
   }
 
