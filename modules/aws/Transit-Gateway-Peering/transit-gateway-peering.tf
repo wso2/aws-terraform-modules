@@ -23,7 +23,7 @@ data "aws_ec2_transit_gateway_peering_attachment" "peer_transit_gateway_peering_
   }
   filter {
     name   = "state"
-    values = ["available", "pending"]
+    values = ["available", "pendingAcceptance", "pending"]
   }
 
   depends_on = [aws_ec2_transit_gateway_peering_attachment.transit_gateway_peering_attachment]
