@@ -29,7 +29,7 @@ resource "aws_lb" "lb" {
     content {
       subnet_id            = subnet_mapping.value
       allocation_id        = var.internal_usage_flag == false ? aws_eip.eip[subnet_mapping.key].id : null
-      private_ipv4_address = var.internal_usage_flag == true ? var.private_ip_addresses[subnet_mapping.key] : null
+      private_ipv4_address = var.internal_usage_flag ? lookup(var.private_ip_addresses, subnet_mapping.key, null) : null
     }
   }
 }
