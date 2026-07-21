@@ -21,6 +21,10 @@ data "aws_ec2_transit_gateway_peering_attachment" "peer_transit_gateway_peering_
     name   = "transit-gateway-id"
     values = [var.peer_transit_gateway_id]
   }
+  filter {
+    name   = "state"
+    values = ["available", "pending"]
+  }
 
   depends_on = [aws_ec2_transit_gateway_peering_attachment.transit_gateway_peering_attachment]
 }
