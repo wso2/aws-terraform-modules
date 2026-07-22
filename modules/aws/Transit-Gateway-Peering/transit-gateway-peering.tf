@@ -16,7 +16,7 @@ resource "aws_ec2_transit_gateway_peering_attachment" "transit_gateway_peering_a
   transit_gateway_id      = var.local_transit_gateway_id
   tags                    = var.default_tags
 }
-# Look up this module's own attachment by its id, so the lookup stays unique even when the TGW hasbmore than one peering.
+# Look up this module's own attachment by its id, so the lookup stays unique even when the TGW has more than one peering.
 data "aws_ec2_transit_gateway_peering_attachment" "peer_transit_gateway_peering_attachment" {
   filter {
     name   = "transit-gateway-id"
