@@ -16,10 +16,7 @@ resource "aws_ec2_transit_gateway_peering_attachment" "transit_gateway_peering_a
   transit_gateway_id      = var.local_transit_gateway_id
   tags                    = var.default_tags
 }
-# Look up this module's own attachment by its attachment id alone. The id is unique, so the
-# lookup stays unambiguous even when the TGW has more than one peering. Filtering on the peer
-# transit-gateway-id (as before) hid same-region peerings while pendingAcceptance, which blocked
-# the accepter from ever running; keying only on the attachment id finds it in every state.
+# Look up the attachment by its id alone; the id is unique and resolves in every state.
 data "aws_ec2_transit_gateway_peering_attachment" "peer_transit_gateway_peering_attachment" {
   filter {
     name   = "transit-gateway-attachment-id"
