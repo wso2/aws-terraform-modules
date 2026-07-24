@@ -16,16 +16,19 @@ resource "aws_ec2_transit_gateway_peering_attachment" "transit_gateway_peering_a
   transit_gateway_id      = var.local_transit_gateway_id
   tags                    = var.default_tags
 }
-# Look up the attachment by its id alone; the id is unique and resolves in every state.
+# Resolve the accepter-side record; only that side can be accepted.
 data "aws_ec2_transit_gateway_peering_attachment" "peer_transit_gateway_peering_attachment" {
   filter {
-    name   = "transit-gateway-attachment-id"
-    values = [aws_ec2_transit_gateway_peering_attachment.transit_gateway_peering_attachment.id]
+    name   = "transit-gateway-id"
+    values = [var.peer_transit_gateway_id]
   }
+  filter {
+    name   = "state"
+    values = ["available", "pendingAcceptance", "pending"]
+  }
+
   depends_on = [aws_ec2_transit_gateway_peering_attachment.transit_gateway_peering_attachment]
 }
-
-# Accept from the peer side via the data source (accepting via the resource id is rejected by AWS).
 resource "aws_ec2_transit_gateway_peering_attachment_accepter" "transit_gateway_peering_attachment_accepter" {
   transit_gateway_attachment_id = data.aws_ec2_transit_gateway_peering_attachment.peer_transit_gateway_peering_attachment.id
 }
