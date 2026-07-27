@@ -16,18 +16,7 @@ resource "aws_ec2_transit_gateway_peering_attachment" "transit_gateway_peering_a
   transit_gateway_id      = var.local_transit_gateway_id
   tags                    = var.default_tags
 }
-data "aws_ec2_transit_gateway_peering_attachment" "peer_transit_gateway_peering_attachment" {
-  filter {
-    name   = "transit-gateway-id"
-    values = [var.peer_transit_gateway_id]
-  }
-  filter {
-    name   = "state"
-    values = ["available", "pendingAcceptance", "pending"]
-  }
-
-  depends_on = [aws_ec2_transit_gateway_peering_attachment.transit_gateway_peering_attachment]
-}
+# Reference the attachment's own id so the lookup stays unique across multiple peerings on one TGW.
 resource "aws_ec2_transit_gateway_peering_attachment_accepter" "transit_gateway_peering_attachment_accepter" {
-  transit_gateway_attachment_id = data.aws_ec2_transit_gateway_peering_attachment.peer_transit_gateway_peering_attachment.id
+  transit_gateway_attachment_id = aws_ec2_transit_gateway_peering_attachment.transit_gateway_peering_attachment.id
 }
