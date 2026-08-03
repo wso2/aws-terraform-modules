@@ -277,6 +277,16 @@ variable "rules" {
       label_name         = string
       host_header_suffix = string
     }))
+
+    # Narrow purpose-built rule: fires on requests whose host header equals
+    # host_header AND whose source IP is NOT in the referenced IP set.
+    # Renders as AND(byte_match host EXACTLY host_header, NOT(ip_set_reference
+    # allowed_ip_set_arn)). Pair with action = block to restrict a specific
+    # host to an IP allowlist without changing the WAF's global filter mode.
+    host_scoped_ip_allowlist_block_statement = optional(object({
+      host_header        = string
+      allowed_ip_set_arn = string
+    }))
   }))
 
   # Validation 1: AWS WAF requires an and_statement to have >= 2 nested statements
