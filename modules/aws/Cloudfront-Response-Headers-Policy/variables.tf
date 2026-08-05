@@ -69,6 +69,20 @@ variable "referrer_policy" {
     override        = optional(bool, true)
   })
   default = null
+
+  validation {
+    condition = var.referrer_policy == null || contains([
+      "no-referrer",
+      "no-referrer-when-downgrade",
+      "origin",
+      "origin-when-cross-origin",
+      "same-origin",
+      "strict-origin",
+      "strict-origin-when-cross-origin",
+      "unsafe-url",
+    ], try(var.referrer_policy.referrer_policy, ""))
+    error_message = "referrer_policy.referrer_policy must be one of: no-referrer, no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url."
+  }
 }
 
 variable "xss_protection" {
@@ -80,6 +94,11 @@ variable "xss_protection" {
     report_uri = optional(string)
   })
   default = null
+
+  validation {
+    condition     = var.xss_protection == null || !(try(var.xss_protection.mode_block, false) && try(var.xss_protection.report_uri, null) != null)
+    error_message = "xss_protection.mode_block and xss_protection.report_uri cannot both be set; CloudFront rejects this combination."
+  }
 }
 
 variable "content_security_policy" {

@@ -512,6 +512,42 @@ variable "rules" {
     error_message = "Each statement inside scope_down_statement.and_statement.statements / or_statement.statements (and their not_statement-nested variants) must specify exactly one of byte_match_statement or ip_set_reference_statement."
   }
 
+  # Validation 7 (rate-based): and_statement / or_statement inside rate_based_statement.scope_down_statement (directly or under not_statement) must each contain >= 2 statements.
+  validation {
+    condition = alltrue(flatten([
+      for v in var.rules : [
+        for stmts in [
+          try(v.rate_based_statement.scope_down_statement.and_statement.statements, null),
+          try(v.rate_based_statement.scope_down_statement.or_statement.statements, null),
+          try(v.rate_based_statement.scope_down_statement.not_statement.and_statement.statements, null),
+          try(v.rate_based_statement.scope_down_statement.not_statement.or_statement.statements, null),
+        ] :
+        length(stmts) >= 2
+        if stmts != null
+      ]
+    ]))
+    error_message = "and_statement / or_statement inside rate_based_statement.scope_down_statement must contain at least 2 statements."
+  }
+
+  # Validation 8 (rate-based): each entry in rate_based_statement.scope_down_statement.and_statement.statements, or_statement.statements, and the same lists under not_statement, must specify exactly one of byte_match_statement or ip_set_reference_statement.
+  validation {
+    condition = alltrue(flatten([
+      for v in var.rules : [
+        for stmts in [
+          try(v.rate_based_statement.scope_down_statement.and_statement.statements, null),
+          try(v.rate_based_statement.scope_down_statement.or_statement.statements, null),
+          try(v.rate_based_statement.scope_down_statement.not_statement.and_statement.statements, null),
+          try(v.rate_based_statement.scope_down_statement.not_statement.or_statement.statements, null),
+          ] : [
+          for s in(stmts != null ? stmts : []) :
+          (try(s.byte_match_statement, null) != null ? 1 : 0) +
+          (try(s.ip_set_reference_statement, null) != null ? 1 : 0) == 1
+        ]
+      ]
+    ]))
+    error_message = "Each statement inside rate_based_statement.scope_down_statement.and_statement.statements / or_statement.statements (and their not_statement-nested variants) must specify exactly one of byte_match_statement or ip_set_reference_statement."
+  }
+
   # Validation 9: rate_based_statement.scope_down_statement must specify exactly one of byte_match_statement, ip_set_reference_statement, and_statement, or_statement, or not_statement.
   validation {
     condition = alltrue([
@@ -536,6 +572,31 @@ variable "rules" {
       if try(v.rate_based_statement.scope_down_statement.not_statement, null) != null
     ])
     error_message = "rate_based_statement.scope_down_statement.not_statement must contain exactly one of byte_match_statement, ip_set_reference_statement, and_statement, or or_statement."
+  }
+
+  # Validation 11: Ensure exactly one field_to_match selector is set inside every byte_match_statement under managed_rule_group_statement.scope_down_statement and rate_based_statement.scope_down_statement (top-level, and/or list entries, not_statement, and not_statement-nested and/or).
+  validation {
+    condition = alltrue(flatten([
+      for v in var.rules : [
+        for sds in [
+          try(v.managed_rule_group_statement.scope_down_statement, null),
+          try(v.rate_based_statement.scope_down_statement, null),
+          ] : [
+          for bm in concat(
+            [try(sds.byte_match_statement, null)],
+            [try(sds.not_statement.byte_match_statement, null)],
+            [for s in try(sds.and_statement.statements, []) : try(s.byte_match_statement, null)],
+            [for s in try(sds.or_statement.statements, []) : try(s.byte_match_statement, null)],
+            [for s in try(sds.not_statement.and_statement.statements, []) : try(s.byte_match_statement, null)],
+            [for s in try(sds.not_statement.or_statement.statements, []) : try(s.byte_match_statement, null)],
+          ) :
+          (try(bm.field_to_match.uri_path, false) == true ? 1 : 0) + (try(bm.field_to_match.single_header, null) != null ? 1 : 0) == 1
+          if bm != null
+        ]
+        if sds != null
+      ]
+    ]))
+    error_message = "Inside every byte_match_statement under managed_rule_group_statement.scope_down_statement and rate_based_statement.scope_down_statement, exactly one field_to_match selector (uri_path or single_header) must be set."
   }
 }
 
