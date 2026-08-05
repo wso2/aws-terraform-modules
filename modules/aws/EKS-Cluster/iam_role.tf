@@ -63,6 +63,10 @@ resource "aws_iam_openid_connect_provider" "eks_ca_oidc_provider" {
     data.tls_certificate.tls,
     data.aws_eks_cluster.eks_cluster
   ]
+
+  lifecycle {
+    ignore_changes = [url, thumbprint_list]
+  }
 }
 
 # IAM Role for IAM Cluster Autoscaler
