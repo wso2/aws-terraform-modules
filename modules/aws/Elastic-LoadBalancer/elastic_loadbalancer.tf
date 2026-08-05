@@ -9,21 +9,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-  # internal_usage_flag is typed string and callers may pass a bool ("true") or string.
-  # Comparing a coerced string ("true") against a bool literal (== true) silently returns
-  # false, so an internal NLB still hit the else-branch and created orphan (unassociated)
-  # EIPs. tobool() normalizes both forms so the branches below are correct.
-  is_internal = tobool(var.internal_usage_flag)
-  is_shielded = tobool(var.enable_shield_protection)
-}
-
 # Ignore: AVD-AWS-0053 (https://avd.aquasec.com/misconfig/aws/elb/avd-aws-0053/)
 # Reason: We may need public load balancers. As such this has been configured as a parameter.
 # trivy:ignore:AVD-AWS-0053
 resource "aws_lb" "lb" {
   name               = join("-", [var.project, var.application, var.environment, var.region, "elb"])
-  internal           = local.is_internal # Defines the Load balancer network connectivity required by AVD-AWS-0053
+  internal           = var.internal_usage_flag # Defines the Load balancer network connectivity required by AVD-AWS-0053
   load_balancer_type = var.load_balancer_type
   security_groups    = var.security_group_ids
 
@@ -44,14 +35,14 @@ resource "aws_lb" "lb" {
 }
 
 resource "aws_eip" "eip" {
-  for_each = local.is_internal ? {} : var.subnet_ids
+  for_each = var.internal_usage_flag ? {} : var.subnet_ids
   domain   = "vpc"
 
   tags = var.tags
 }
 
 resource "aws_shield_protection" "shield_protection" {
-  for_each     = !local.is_internal && local.is_shielded ? var.subnet_ids : {}
+  for_each     = !var.internal_usage_flag && var.enable_shield_protection ? var.subnet_ids : {}
   name         = join("-", [var.project, var.application, var.environment, var.region, each.key, "elb-eip-shield-protection"])
   resource_arn = replace(aws_eip.eip[each.key].arn, "elastic-ip", "eip-allocation")
 
