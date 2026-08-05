@@ -65,3 +65,8 @@ variable "enable_key_rotation" {
   description = "Specifies whether key rotation is enabled. Defaults to false."
   default     = true
 }
+variable "alias_name" {
+  type        = string
+  description = "Optional KMS alias suffix. When set, an aws_kms_alias resource is created with name 'alias/<alias_name>'. When null, no alias is created."
+  default     = null
+}

@@ -30,10 +30,19 @@ resource "aws_ce_anomaly_subscription" "anomaly_subscription" {
   frequency        = var.frequency
 
   threshold_expression {
-    dimension {
-      key           = var.threshold_key
-      values        = [tostring(var.threshold)]
-      match_options = var.threshold_match_options
+    and {
+      dimension {
+        key           = "ANOMALY_TOTAL_IMPACT_ABSOLUTE"
+        match_options = ["GREATER_THAN_OR_EQUAL"]
+        values        = [tostring(var.absolute_threshold)]
+      }
+    }
+    and {
+      dimension {
+        key           = "ANOMALY_TOTAL_IMPACT_PERCENTAGE"
+        match_options = ["GREATER_THAN_OR_EQUAL"]
+        values        = [tostring(var.percentage_threshold)]
+      }
     }
   }
 

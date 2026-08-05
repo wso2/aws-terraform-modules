@@ -103,6 +103,11 @@ variable "datapoints_to_alarm" {
   type        = number
   default     = null
 }
+variable "treat_missing_data" {
+  description = "How the alarm should treat missing data points. Valid values: missing, ignore, breaching, notBreaching."
+  type        = string
+  default     = null
+}
 variable "tags" {
   type        = map(string)
   description = "Tags to be attached to the resource"

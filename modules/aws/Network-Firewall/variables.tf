@@ -119,3 +119,23 @@ variable "enable_strict_order" {
   type        = bool
   default     = false
 }
+
+# Only honored when enable_strict_order = true. AWS rejects this field on
+# DEFAULT_ACTION_ORDER policies, so the network_firewall.tf reference is guarded
+# on enable_strict_order. Leaving this null preserves AWS's implicit behavior
+# for strict-order policies (unmatched packets are passed); set to e.g.
+# ["aws:alert_strict"] to observe unmatched traffic or ["aws:drop_strict"] to
+# enforce a default-deny posture.
+variable "stateful_default_actions" {
+  description = "Default stateful actions for STRICT_ORDER firewall policies, applied to packets that do not match any stateful rule. Ignored when enable_strict_order = false. Valid values: aws:drop_strict, aws:drop_established, aws:alert_strict, aws:alert_established."
+  type        = list(string)
+  default     = null
+
+  validation {
+    condition = var.stateful_default_actions == null || alltrue([
+      for a in coalesce(var.stateful_default_actions, []) :
+      contains(["aws:drop_strict", "aws:drop_established", "aws:alert_strict", "aws:alert_established"], a)
+    ])
+    error_message = "stateful_default_actions must contain only: aws:drop_strict, aws:drop_established, aws:alert_strict, aws:alert_established."
+  }
+}

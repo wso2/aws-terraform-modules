@@ -32,6 +32,8 @@ resource "aws_cloudwatch_metric_alarm" "metric_alarm" {
 
   datapoints_to_alarm = var.datapoints_to_alarm
 
+  treat_missing_data = var.treat_missing_data
+
   dimensions = var.dimensions
 
   tags = var.tags

@@ -23,3 +23,9 @@ resource "aws_kms_key" "kms_key" {
 
   tags = local.tags
 }
+
+resource "aws_kms_alias" "kms_alias" {
+  count         = var.alias_name == null ? 0 : 1
+  name          = "alias/${var.alias_name}"
+  target_key_id = aws_kms_key.kms_key.key_id
+}

@@ -755,6 +755,80 @@ resource "aws_wafv2_web_acl" "web_acl" {
             }
           }
         }
+
+        # labeled_host_scoped_block_statement: renders
+        #   AND(label_match_statement, NOT(byte_match host ENDS_WITH suffix))
+        # so the rule's action only fires on requests carrying the label AND
+        # whose host header does NOT match the suffix. Pairs with a managed
+        # rule group whose sub-rule is overridden to `count` so the label is
+        # emitted but the managed group itself does not block.
+        dynamic "and_statement" {
+          for_each = rule.value.labeled_host_scoped_block_statement != null ? [rule.value.labeled_host_scoped_block_statement] : []
+          content {
+            statement {
+              label_match_statement {
+                scope = "LABEL"
+                key   = and_statement.value.label_name
+              }
+            }
+            statement {
+              not_statement {
+                statement {
+                  byte_match_statement {
+                    search_string         = and_statement.value.host_header_suffix
+                    positional_constraint = "ENDS_WITH"
+                    field_to_match {
+                      single_header {
+                        name = "host"
+                      }
+                    }
+                    text_transformation {
+                      priority = 0
+                      type     = "LOWERCASE"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        # host_scoped_ip_allowlist_block_statement: renders
+        #   AND(byte_match host EXACTLY host_header,
+        #       NOT(ip_set_reference allowed_ip_set_arn))
+        # so the rule's action fires when the request targets a specific host
+        # AND its source IP is NOT in the allowed IP set. Pair with
+        # action = block to enforce a per-host IP allowlist without changing
+        # the WAF's global filter mode.
+        dynamic "and_statement" {
+          for_each = rule.value.host_scoped_ip_allowlist_block_statement != null ? [rule.value.host_scoped_ip_allowlist_block_statement] : []
+          content {
+            statement {
+              byte_match_statement {
+                search_string         = and_statement.value.host_header
+                positional_constraint = "EXACTLY"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+              }
+            }
+            statement {
+              not_statement {
+                statement {
+                  ip_set_reference_statement {
+                    arn = and_statement.value.allowed_ip_set_arn
+                  }
+                }
+              }
+            }
+          }
+        }
       }
 
       visibility_config {

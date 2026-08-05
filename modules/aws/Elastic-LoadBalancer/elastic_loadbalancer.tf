@@ -36,11 +36,9 @@ resource "aws_lb" "lb" {
   dynamic "subnet_mapping" {
     for_each = var.subnet_ids
     content {
-      subnet_id = subnet_mapping.value
-      # Public NLB: associate an EIP per subnet. Internal NLB: no EIP; use an explicit
-      # private IP only when the caller supplied one (otherwise let AWS auto-assign).
-      allocation_id        = local.is_internal ? null : aws_eip.eip[subnet_mapping.key].id
-      private_ipv4_address = local.is_internal ? lookup(var.private_ip_addresses, subnet_mapping.key, null) : null
+      subnet_id            = subnet_mapping.value
+      allocation_id        = var.internal_usage_flag == false ? aws_eip.eip[subnet_mapping.key].id : null
+      private_ipv4_address = var.internal_usage_flag ? lookup(var.private_ip_addresses, subnet_mapping.key, null) : null
     }
   }
 }

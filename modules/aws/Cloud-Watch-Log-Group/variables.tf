@@ -28,3 +28,13 @@ variable "kms_key_id" {
   type        = string
   default     = null
 }
+variable "resource_policy_name" {
+  description = "Optional name for an aws_cloudwatch_log_resource_policy attached at the account level. When set together with resource_policy_document, a policy resource is created."
+  type        = string
+  default     = null
+}
+variable "resource_policy_document" {
+  description = "Optional JSON-encoded IAM policy document for the account-level CloudWatch Logs resource policy. Used to grant services like delivery.logs.amazonaws.com permission to write to this log group."
+  type        = string
+  default     = null
+}

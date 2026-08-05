@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
+# Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
 #
 # WSO2 LLC. licenses this file to you under the Apache License,
 # Version 2.0 (the "License"); you may not use this file except
@@ -18,20 +18,15 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "sns_arn" {
-  description = "The ARN of the SNS topic to subscribe to."
-  type        = string
+output "monitor_arns" {
+  value       = { for k, v in aws_ce_anomaly_monitor.service_monitor : k => v.arn }
+  description = "ARNs of all per-service anomaly monitors"
 }
-variable "function_arn" {
-  description = "The ARN of the Lambda function to be invoked."
-  type        = string
+output "critical_subscription_arns" {
+  value       = { for k, v in aws_ce_anomaly_subscription.critical : k => v.arn }
+  description = "ARNs of all per-service critical anomaly subscriptions"
 }
-variable "function_name" {
-  description = "The name of the Lambda function to be invoked."
-  type        = string
-}
-variable "statement_id" {
-  description = "Lambda permission statement_id. Must be unique per function — set this explicitly when the same Lambda is subscribed to multiple SNS topics."
-  type        = string
-  default     = null
+output "warning_subscription_arns" {
+  value       = { for k, v in aws_ce_anomaly_subscription.warning : k => v.arn }
+  description = "ARNs of all per-service warning anomaly subscriptions"
 }

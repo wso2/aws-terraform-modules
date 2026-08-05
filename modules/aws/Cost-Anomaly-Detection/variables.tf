@@ -22,67 +22,55 @@ variable "monitor_name" {
   description = "Name for the anomaly monitor."
   type        = string
 }
-
 variable "monitor_abbreviation" {
-  description = "Abbreviation of the anomaly monitor"
+  description = "Abbreviation of the anomaly monitor."
   type        = string
   default     = "monitor"
 }
-
 variable "monitor_type" {
-  description = "Type of anomaly monitor (e.g., DIMENSIONAL, CUSTOM)."
+  description = "Type of anomaly monitor (DIMENSIONAL or CUSTOM)."
   type        = string
   default     = "DIMENSIONAL"
 }
-
 variable "monitor_dimension" {
   description = "Dimension for the anomaly monitor (e.g., SERVICE)."
   type        = string
   default     = "SERVICE"
 }
-
 variable "monitor_subscription_name" {
   description = "Name for the anomaly subscription."
   type        = string
 }
-
 variable "monitor_subscription_abbreviation" {
-  description = "Abbreviation of the cost anomaly monitor subscription"
+  description = "Abbreviation of the cost anomaly monitor subscription."
   type        = string
   default     = "sub"
 }
-
-variable "threshold" {
-  description = "Threshold for anomaly alerts."
-  type        = number
-  default     = 100
-}
-
-variable "threshold_key" {
-  description = "Thershold key for anomaly alerts"
-  type        = string
-  default     = "ANOMALY_TOTAL_IMPACT_ABSOLUTE"
-}
-
-variable "threshold_match_options" {
-  description = "Threshold match options for alerts"
-  type        = list(string)
-  default     = ["GREATER_THAN_OR_EQUAL"]
-}
-
 variable "frequency" {
-  description = "Notification frequency (e.g., IMMEDIATE, DAILY)."
+  description = "Notification frequency (IMMEDIATE, DAILY, or WEEKLY)."
   type        = string
   default     = "IMMEDIATE"
 }
-
 variable "subscriber_type" {
-  description = "Type of subscriber (e.g., EMAIL)."
+  description = "Type of subscriber (SNS or EMAIL)."
   type        = string
   default     = "EMAIL"
+  validation {
+    condition     = contains(["SNS", "EMAIL"], var.subscriber_type)
+    error_message = "subscriber_type must be either SNS or EMAIL."
+  }
 }
-
 variable "subscriber_address" {
-  description = "Address for anomaly notifications."
+  description = "SNS topic ARN or email address for anomaly notifications."
   type        = string
+}
+variable "absolute_threshold" {
+  description = "Minimum absolute $ impact the anomaly must reach to trigger an alert."
+  type        = number
+  default     = 20
+}
+variable "percentage_threshold" {
+  description = "Minimum % above expected spend the anomaly must reach to trigger an alert."
+  type        = number
+  default     = 15
 }

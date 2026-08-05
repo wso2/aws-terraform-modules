@@ -26,7 +26,7 @@ variable "application" {
   description = "Purpose of the EC2 Instance"
 }
 variable "internal_usage_flag" {
-  type        = string
+  type        = bool
   description = "Flag to indicate whether the EC2 instance is for internal usage or not"
   default     = false
 }

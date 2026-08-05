@@ -19,75 +19,65 @@
 # --------------------------------------------------------------------------------------
 
 data "aws_caller_identity" "current" {}
-data "aws_iam_policy_document" "sns_topic_policy" {
-  # Full management access for the owning account.
-  statement {
-    sid    = "AllowOwnerAccountFullAccess"
-    effect = "Allow"
 
+data "aws_iam_policy_document" "sns_topic_policy" {
+  statement {
+    sid    = "AlertWebhook SNS Topic Policy"
+    effect = "Allow"
     principals {
       type        = "AWS"
-      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
+      identifiers = ["*"]
     }
-
     actions = [
-      "SNS:GetTopicAttributes",
-      "SNS:SetTopicAttributes",
-      "SNS:AddPermission",
-      "SNS:RemovePermission",
-      "SNS:DeleteTopic",
-      "SNS:Subscribe",
-      "SNS:ListSubscriptionsByTopic",
       "SNS:Publish",
+      "SNS:RemovePermission",
+      "SNS:SetTopicAttributes",
+      "SNS:DeleteTopic",
+      "SNS:ListSubscriptionsByTopic",
+      "SNS:GetTopicAttributes",
+      "SNS:AddPermission",
+      "SNS:Subscribe"
     ]
-
     resources = [aws_sns_topic.sns_topic.arn]
-  }
-
-  # Allow CloudWatch to publish from the owner account and any additional
-  # cross-account publisher accounts supplied via publisher_aws_account_ids.
-  statement {
-    sid    = "AllowCloudWatchPublish"
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["cloudwatch.amazonaws.com"]
-    }
-
-    actions   = ["SNS:Publish"]
-    resources = [aws_sns_topic.sns_topic.arn]
-
     condition {
       test     = "StringEquals"
-      variable = "aws:SourceAccount"
-      values   = concat([data.aws_caller_identity.current.account_id], var.publisher_aws_account_ids)
+      variable = "AWS:SourceOwner"
+      values   = [data.aws_caller_identity.current.account_id]
     }
   }
-
-  # Allow AWS Budgets in the owner account to publish notifications.
   statement {
-    sid    = "AllowBudgetsPublish"
+    sid    = "AWSBudgets-notification"
     effect = "Allow"
-
     principals {
       type        = "Service"
       identifiers = ["budgets.amazonaws.com"]
     }
-
     actions   = ["SNS:Publish"]
     resources = [aws_sns_topic.sns_topic.arn]
-
     condition {
       test     = "StringEquals"
       variable = "aws:SourceAccount"
       values   = [data.aws_caller_identity.current.account_id]
     }
-
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
       values   = ["arn:aws:budgets::${data.aws_caller_identity.current.account_id}:*"]
+    }
+  }
+  statement {
+    sid    = "AWSCostAnomalyDetection-notification"
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["costalerts.amazonaws.com"]
+    }
+    actions   = ["SNS:Publish"]
+    resources = [aws_sns_topic.sns_topic.arn]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
     }
   }
 }

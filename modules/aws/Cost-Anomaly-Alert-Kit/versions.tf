@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
+# Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
 #
 # WSO2 LLC. licenses this file to you under the Apache License,
 # Version 2.0 (the "License"); you may not use this file except
@@ -18,20 +18,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "sns_arn" {
-  description = "The ARN of the SNS topic to subscribe to."
-  type        = string
-}
-variable "function_arn" {
-  description = "The ARN of the Lambda function to be invoked."
-  type        = string
-}
-variable "function_name" {
-  description = "The name of the Lambda function to be invoked."
-  type        = string
-}
-variable "statement_id" {
-  description = "Lambda permission statement_id. Must be unique per function — set this explicitly when the same Lambda is subscribed to multiple SNS topics."
-  type        = string
-  default     = null
+terraform {
+  required_version = ">= 1.3.8"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
 }

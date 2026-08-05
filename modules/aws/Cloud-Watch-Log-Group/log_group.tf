@@ -18,3 +18,12 @@ resource "aws_cloudwatch_log_group" "log_group" {
   kms_key_id        = var.kms_key_id
   tags              = var.tags
 }
+
+# Account-level resource policy granting external AWS services
+# (e.g. delivery.logs.amazonaws.com for WAF/NetworkFirewall log delivery)
+# permission to write to CloudWatch Logs. Created only when both inputs are set.
+resource "aws_cloudwatch_log_resource_policy" "log_resource_policy" {
+  count           = var.resource_policy_name != null && var.resource_policy_document != null ? 1 : 0
+  policy_name     = var.resource_policy_name
+  policy_document = var.resource_policy_document
+}

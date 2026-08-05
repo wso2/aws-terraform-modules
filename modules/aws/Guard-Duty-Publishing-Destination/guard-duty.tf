@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+# Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
 #
 # This software is the property of WSO2 LLC. and its suppliers, if any.
 # Dissemination of any information or reproduction of any material contained
@@ -9,17 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
-output "key_arn" {
-  value      = aws_kms_key.kms_key.arn
-  depends_on = [aws_kms_key.kms_key]
-}
-output "key_id" {
-  value      = aws_kms_key.kms_key.id
-  depends_on = [aws_kms_key.kms_key]
-}
-output "alias_arn" {
-  value = try(aws_kms_alias.kms_alias[0].arn, null)
-}
-output "alias_name" {
-  value = try(aws_kms_alias.kms_alias[0].name, null)
+resource "aws_guardduty_publishing_destination" "publishing_destination" {
+  detector_id      = var.detector_id
+  destination_arn  = var.destination_arn
+  kms_key_arn      = var.kms_key_arn
+  destination_type = var.destination_type
 }
