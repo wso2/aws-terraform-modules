@@ -20,12 +20,18 @@
 
 # S3 report bucket - stores the weekly CSV reports written by the scanner Lambda.
 
+# Ignore: AVD-AWS-0089 (https://avd.aquasec.com/misconfig/aws-0089)
+# Reason: Access logging not required for this internal reports bucket
+# trivy:ignore:AVD-AWS-0089
 resource "aws_s3_bucket" "reports" {
   bucket        = var.report_bucket_name
   force_destroy = var.force_destroy_bucket
   tags          = local.tags
 }
 
+# Ignore: AVD-AWS-0090 (https://avd.aquasec.com/misconfig/aws-0090)
+# Reason: Reports are regenerated weekly and expired via lifecycle rules, so version history isn't needed
+# trivy:ignore:AVD-AWS-0090
 resource "aws_s3_bucket_versioning" "reports" {
   bucket = aws_s3_bucket.reports.id
   versioning_configuration {
