@@ -90,19 +90,36 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
     min_ttl                = var.min_ttl
     default_ttl            = var.default_ttl
     max_ttl                = var.max_ttl
+
+    dynamic "function_association" {
+      for_each = var.default_function_associations
+      content {
+        event_type   = function_association.value.event_type
+        function_arn = function_association.value.function_arn
+      }
+    }
   }
 
   dynamic "ordered_cache_behavior" {
     for_each = var.ordered_cache_behaviors
     content {
-      path_pattern             = ordered_cache_behavior.value.path_pattern
-      target_origin_id         = ordered_cache_behavior.value.target_origin_id
-      compress                 = ordered_cache_behavior.value.compress
-      viewer_protocol_policy   = ordered_cache_behavior.value.viewer_protocol_policy
-      allowed_methods          = ordered_cache_behavior.value.allowed_methods
-      cached_methods           = ordered_cache_behavior.value.cached_methods
-      cache_policy_id          = ordered_cache_behavior.value.cache_policy_id
-      origin_request_policy_id = ordered_cache_behavior.value.origin_request_policy_id
+      path_pattern               = ordered_cache_behavior.value.path_pattern
+      target_origin_id           = ordered_cache_behavior.value.target_origin_id
+      compress                   = ordered_cache_behavior.value.compress
+      viewer_protocol_policy     = ordered_cache_behavior.value.viewer_protocol_policy
+      allowed_methods            = ordered_cache_behavior.value.allowed_methods
+      cached_methods             = ordered_cache_behavior.value.cached_methods
+      cache_policy_id            = ordered_cache_behavior.value.cache_policy_id
+      origin_request_policy_id   = ordered_cache_behavior.value.origin_request_policy_id
+      response_headers_policy_id = ordered_cache_behavior.value.response_headers_policy_id
+
+      dynamic "function_association" {
+        for_each = ordered_cache_behavior.value.function_associations
+        content {
+          event_type   = function_association.value.event_type
+          function_arn = function_association.value.function_arn
+        }
+      }
 
       dynamic "forwarded_values" {
         for_each = ordered_cache_behavior.value.cache_policy_id == null ? [1] : []
