@@ -165,6 +165,20 @@ resource "aws_wafv2_web_acl" "web_acl" {
           }
         }
 
+        dynamic "geo_match_statement" {
+          for_each = rule.value.geo_match_statement != null ? [rule.value.geo_match_statement] : []
+          content {
+            country_codes = geo_match_statement.value.country_codes
+            dynamic "forwarded_ip_config" {
+              for_each = geo_match_statement.value.forwarded_ip_config != null ? [geo_match_statement.value.forwarded_ip_config] : []
+              content {
+                header_name       = forwarded_ip_config.value.header_name
+                fallback_behavior = forwarded_ip_config.value.fallback_behavior
+              }
+            }
+          }
+        }
+
         dynamic "managed_rule_group_statement" {
           for_each = rule.value.managed_rule_group_statement != null ? [rule.value.managed_rule_group_statement] : []
           content {
@@ -436,6 +450,242 @@ resource "aws_wafv2_web_acl" "web_acl" {
           content {
             limit              = rate_based_statement.value.limit
             aggregate_key_type = rate_based_statement.value.aggregate_key_type
+
+            dynamic "scope_down_statement" {
+              for_each = try(rate_based_statement.value.scope_down_statement, null) != null ? [rate_based_statement.value.scope_down_statement] : []
+              content {
+                # Direct byte_match_statement
+                dynamic "byte_match_statement" {
+                  for_each = scope_down_statement.value.byte_match_statement != null ? [scope_down_statement.value.byte_match_statement] : []
+                  content {
+                    search_string         = byte_match_statement.value.search_string
+                    positional_constraint = byte_match_statement.value.positional_constraint
+                    field_to_match {
+                      dynamic "uri_path" {
+                        for_each = byte_match_statement.value.field_to_match.uri_path == true ? [1] : []
+                        content {}
+                      }
+                      dynamic "single_header" {
+                        for_each = byte_match_statement.value.field_to_match.single_header != null ? [byte_match_statement.value.field_to_match.single_header] : []
+                        content {
+                          name = single_header.value
+                        }
+                      }
+                    }
+                    text_transformation {
+                      priority = byte_match_statement.value.text_transformation.priority
+                      type     = byte_match_statement.value.text_transformation.type
+                    }
+                  }
+                }
+
+                # Direct ip_set_reference_statement
+                dynamic "ip_set_reference_statement" {
+                  for_each = scope_down_statement.value.ip_set_reference_statement != null ? [scope_down_statement.value.ip_set_reference_statement] : []
+                  content {
+                    arn = ip_set_reference_statement.value.arn
+                  }
+                }
+
+                # Direct and_statement
+                dynamic "and_statement" {
+                  for_each = scope_down_statement.value.and_statement != null ? [scope_down_statement.value.and_statement] : []
+                  content {
+                    dynamic "statement" {
+                      for_each = and_statement.value.statements
+                      content {
+                        dynamic "byte_match_statement" {
+                          for_each = statement.value.byte_match_statement != null ? [statement.value.byte_match_statement] : []
+                          content {
+                            search_string         = byte_match_statement.value.search_string
+                            positional_constraint = byte_match_statement.value.positional_constraint
+                            field_to_match {
+                              dynamic "uri_path" {
+                                for_each = byte_match_statement.value.field_to_match.uri_path == true ? [1] : []
+                                content {}
+                              }
+                              dynamic "single_header" {
+                                for_each = byte_match_statement.value.field_to_match.single_header != null ? [byte_match_statement.value.field_to_match.single_header] : []
+                                content {
+                                  name = single_header.value
+                                }
+                              }
+                            }
+                            text_transformation {
+                              priority = byte_match_statement.value.text_transformation.priority
+                              type     = byte_match_statement.value.text_transformation.type
+                            }
+                          }
+                        }
+                        dynamic "ip_set_reference_statement" {
+                          for_each = statement.value.ip_set_reference_statement != null ? [statement.value.ip_set_reference_statement] : []
+                          content {
+                            arn = ip_set_reference_statement.value.arn
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+
+                # Direct or_statement
+                dynamic "or_statement" {
+                  for_each = scope_down_statement.value.or_statement != null ? [scope_down_statement.value.or_statement] : []
+                  content {
+                    dynamic "statement" {
+                      for_each = or_statement.value.statements
+                      content {
+                        dynamic "byte_match_statement" {
+                          for_each = statement.value.byte_match_statement != null ? [statement.value.byte_match_statement] : []
+                          content {
+                            search_string         = byte_match_statement.value.search_string
+                            positional_constraint = byte_match_statement.value.positional_constraint
+                            field_to_match {
+                              dynamic "uri_path" {
+                                for_each = byte_match_statement.value.field_to_match.uri_path == true ? [1] : []
+                                content {}
+                              }
+                              dynamic "single_header" {
+                                for_each = byte_match_statement.value.field_to_match.single_header != null ? [byte_match_statement.value.field_to_match.single_header] : []
+                                content {
+                                  name = single_header.value
+                                }
+                              }
+                            }
+                            text_transformation {
+                              priority = byte_match_statement.value.text_transformation.priority
+                              type     = byte_match_statement.value.text_transformation.type
+                            }
+                          }
+                        }
+                        dynamic "ip_set_reference_statement" {
+                          for_each = statement.value.ip_set_reference_statement != null ? [statement.value.ip_set_reference_statement] : []
+                          content {
+                            arn = ip_set_reference_statement.value.arn
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+
+                # not_statement wrapping byte_match / ip_set / and / or
+                dynamic "not_statement" {
+                  for_each = scope_down_statement.value.not_statement != null ? [scope_down_statement.value.not_statement] : []
+                  content {
+                    statement {
+                      dynamic "byte_match_statement" {
+                        for_each = not_statement.value.byte_match_statement != null ? [not_statement.value.byte_match_statement] : []
+                        content {
+                          search_string         = byte_match_statement.value.search_string
+                          positional_constraint = byte_match_statement.value.positional_constraint
+                          field_to_match {
+                            dynamic "uri_path" {
+                              for_each = byte_match_statement.value.field_to_match.uri_path == true ? [1] : []
+                              content {}
+                            }
+                            dynamic "single_header" {
+                              for_each = byte_match_statement.value.field_to_match.single_header != null ? [byte_match_statement.value.field_to_match.single_header] : []
+                              content {
+                                name = single_header.value
+                              }
+                            }
+                          }
+                          text_transformation {
+                            priority = byte_match_statement.value.text_transformation.priority
+                            type     = byte_match_statement.value.text_transformation.type
+                          }
+                        }
+                      }
+                      dynamic "ip_set_reference_statement" {
+                        for_each = not_statement.value.ip_set_reference_statement != null ? [not_statement.value.ip_set_reference_statement] : []
+                        content {
+                          arn = ip_set_reference_statement.value.arn
+                        }
+                      }
+                      dynamic "and_statement" {
+                        for_each = not_statement.value.and_statement != null ? [not_statement.value.and_statement] : []
+                        content {
+                          dynamic "statement" {
+                            for_each = and_statement.value.statements
+                            content {
+                              dynamic "byte_match_statement" {
+                                for_each = statement.value.byte_match_statement != null ? [statement.value.byte_match_statement] : []
+                                content {
+                                  search_string         = byte_match_statement.value.search_string
+                                  positional_constraint = byte_match_statement.value.positional_constraint
+                                  field_to_match {
+                                    dynamic "uri_path" {
+                                      for_each = byte_match_statement.value.field_to_match.uri_path == true ? [1] : []
+                                      content {}
+                                    }
+                                    dynamic "single_header" {
+                                      for_each = byte_match_statement.value.field_to_match.single_header != null ? [byte_match_statement.value.field_to_match.single_header] : []
+                                      content {
+                                        name = single_header.value
+                                      }
+                                    }
+                                  }
+                                  text_transformation {
+                                    priority = byte_match_statement.value.text_transformation.priority
+                                    type     = byte_match_statement.value.text_transformation.type
+                                  }
+                                }
+                              }
+                              dynamic "ip_set_reference_statement" {
+                                for_each = statement.value.ip_set_reference_statement != null ? [statement.value.ip_set_reference_statement] : []
+                                content {
+                                  arn = ip_set_reference_statement.value.arn
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                      dynamic "or_statement" {
+                        for_each = not_statement.value.or_statement != null ? [not_statement.value.or_statement] : []
+                        content {
+                          dynamic "statement" {
+                            for_each = or_statement.value.statements
+                            content {
+                              dynamic "byte_match_statement" {
+                                for_each = statement.value.byte_match_statement != null ? [statement.value.byte_match_statement] : []
+                                content {
+                                  search_string         = byte_match_statement.value.search_string
+                                  positional_constraint = byte_match_statement.value.positional_constraint
+                                  field_to_match {
+                                    dynamic "uri_path" {
+                                      for_each = byte_match_statement.value.field_to_match.uri_path == true ? [1] : []
+                                      content {}
+                                    }
+                                    dynamic "single_header" {
+                                      for_each = byte_match_statement.value.field_to_match.single_header != null ? [byte_match_statement.value.field_to_match.single_header] : []
+                                      content {
+                                        name = single_header.value
+                                      }
+                                    }
+                                  }
+                                  text_transformation {
+                                    priority = byte_match_statement.value.text_transformation.priority
+                                    type     = byte_match_statement.value.text_transformation.type
+                                  }
+                                }
+                              }
+                              dynamic "ip_set_reference_statement" {
+                                for_each = statement.value.ip_set_reference_statement != null ? [statement.value.ip_set_reference_statement] : []
+                                content {
+                                  arn = ip_set_reference_statement.value.arn
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
         dynamic "and_statement" {
