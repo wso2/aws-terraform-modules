@@ -579,6 +579,59 @@ resource "aws_wafv2_web_acl" "web_acl" {
             }
           }
         }
+
+        # host_and_path_scoped_ip_allowlist_block_statement: renders
+        #   AND(byte_match host EXACTLY host_header,
+        #       byte_match uri STARTS_WITH uri_path_prefix,
+        #       NOT(ip_set_reference allowed_ip_set_arn))
+        # so the rule's action fires when the request targets a specific
+        # host+path prefix AND its source IP is NOT in the allowed IP set.
+        # Use with action = block to enforce a per-host+path IP allowlist
+        # (e.g. lock a single API endpoint to an internal NAT egress range)
+        # without affecting other paths on the same host or changing the
+        # WAF's global filter mode.
+        dynamic "and_statement" {
+          for_each = rule.value.host_and_path_scoped_ip_allowlist_block_statement != null ? [rule.value.host_and_path_scoped_ip_allowlist_block_statement] : []
+          content {
+            statement {
+              byte_match_statement {
+                search_string         = and_statement.value.host_header
+                positional_constraint = "EXACTLY"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+              }
+            }
+            statement {
+              byte_match_statement {
+                search_string         = and_statement.value.uri_path_prefix
+                positional_constraint = "STARTS_WITH"
+                field_to_match {
+                  uri_path {}
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+              }
+            }
+            statement {
+              not_statement {
+                statement {
+                  ip_set_reference_statement {
+                    arn = and_statement.value.allowed_ip_set_arn
+                  }
+                }
+              }
+            }
+          }
+        }
       }
 
       visibility_config {
