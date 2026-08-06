@@ -17,13 +17,24 @@
 # under the License.
 #
 # --------------------------------------------------------------------------------------
+#
+# CloudFront VPC Origin — private connectivity from CloudFront to an internal ALB/NLB/EC2
+# via AWS-managed ENIs (requires aws provider >= 5.82.0).
+# --------------------------------------------------------------------------------------
 
-resource "aws_cloudwatch_event_rule" "rule" {
-  name                = var.abbreviation != null && var.abbreviation != "" ? join("-", [var.name, var.abbreviation]) : var.name
-  description         = var.description
-  event_pattern       = var.event_pattern
-  schedule_expression = var.schedule_expression
-  state               = var.state
-  role_arn            = var.role_arn
-  tags                = var.tags
+resource "aws_cloudfront_vpc_origin" "vpc_origin" {
+  vpc_origin_endpoint_config {
+    name                   = var.name
+    arn                    = var.origin_arn
+    http_port              = var.http_port
+    https_port             = var.https_port
+    origin_protocol_policy = var.origin_protocol_policy
+
+    origin_ssl_protocols {
+      items    = var.origin_ssl_protocols
+      quantity = length(var.origin_ssl_protocols)
+    }
+  }
+
+  tags = var.tags
 }

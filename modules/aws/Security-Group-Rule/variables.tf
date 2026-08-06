@@ -18,6 +18,7 @@ variable "rules" {
     cidr_blocks     = list(string)
     security_groups = list(string)
     prefix_list_ids = list(string)
+    description     = optional(string)
   }))
   description = "List of rules to be added to the security group"
 }

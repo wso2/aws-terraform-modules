@@ -18,12 +18,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_cloudwatch_event_rule" "rule" {
-  name                = var.abbreviation != null && var.abbreviation != "" ? join("-", [var.name, var.abbreviation]) : var.name
-  description         = var.description
-  event_pattern       = var.event_pattern
-  schedule_expression = var.schedule_expression
-  state               = var.state
-  role_arn            = var.role_arn
-  tags                = var.tags
+output "vpc_origin_id" {
+  description = "ID of the CloudFront VPC origin"
+  value       = aws_cloudfront_vpc_origin.vpc_origin.id
+}
+
+output "vpc_origin_arn" {
+  description = "ARN of the CloudFront VPC origin"
+  value       = aws_cloudfront_vpc_origin.vpc_origin.arn
 }

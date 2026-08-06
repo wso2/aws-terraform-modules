@@ -23,11 +23,25 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
     domain_name = var.dns_name
     origin_id   = var.origin_id
 
-    custom_origin_config {
-      http_port              = 80
-      https_port             = 443
-      origin_protocol_policy = var.origin_protocol_policy
-      origin_ssl_protocols   = var.origin_ssl_protocols
+    # VPC-origin path: when vpc_origin_id is set, CloudFront reaches a private ALB/NLB/EC2
+    # via managed ENIs (custom_origin_config must be absent). domain_name is still required
+    # and is used as the SNI/Host + for origin certificate SAN validation.
+    dynamic "vpc_origin_config" {
+      for_each = var.vpc_origin_id != null ? [1] : []
+      content {
+        vpc_origin_id = var.vpc_origin_id
+      }
+    }
+
+    # Public/custom-origin path (default; unchanged when vpc_origin_id is null).
+    dynamic "custom_origin_config" {
+      for_each = var.vpc_origin_id == null ? [1] : []
+      content {
+        http_port              = 80
+        https_port             = 443
+        origin_protocol_policy = var.origin_protocol_policy
+        origin_ssl_protocols   = var.origin_ssl_protocols
+      }
     }
 
     dynamic "origin_shield" {
@@ -76,19 +90,36 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
     min_ttl                = var.min_ttl
     default_ttl            = var.default_ttl
     max_ttl                = var.max_ttl
+
+    dynamic "function_association" {
+      for_each = var.default_function_associations
+      content {
+        event_type   = function_association.value.event_type
+        function_arn = function_association.value.function_arn
+      }
+    }
   }
 
   dynamic "ordered_cache_behavior" {
     for_each = var.ordered_cache_behaviors
     content {
-      path_pattern             = ordered_cache_behavior.value.path_pattern
-      target_origin_id         = ordered_cache_behavior.value.target_origin_id
-      compress                 = ordered_cache_behavior.value.compress
-      viewer_protocol_policy   = ordered_cache_behavior.value.viewer_protocol_policy
-      allowed_methods          = ordered_cache_behavior.value.allowed_methods
-      cached_methods           = ordered_cache_behavior.value.cached_methods
-      cache_policy_id          = ordered_cache_behavior.value.cache_policy_id
-      origin_request_policy_id = ordered_cache_behavior.value.origin_request_policy_id
+      path_pattern               = ordered_cache_behavior.value.path_pattern
+      target_origin_id           = ordered_cache_behavior.value.target_origin_id
+      compress                   = ordered_cache_behavior.value.compress
+      viewer_protocol_policy     = ordered_cache_behavior.value.viewer_protocol_policy
+      allowed_methods            = ordered_cache_behavior.value.allowed_methods
+      cached_methods             = ordered_cache_behavior.value.cached_methods
+      cache_policy_id            = ordered_cache_behavior.value.cache_policy_id
+      origin_request_policy_id   = ordered_cache_behavior.value.origin_request_policy_id
+      response_headers_policy_id = ordered_cache_behavior.value.response_headers_policy_id
+
+      dynamic "function_association" {
+        for_each = ordered_cache_behavior.value.function_associations
+        content {
+          event_type   = function_association.value.event_type
+          function_arn = function_association.value.function_arn
+        }
+      }
 
       dynamic "forwarded_values" {
         for_each = ordered_cache_behavior.value.cache_policy_id == null ? [1] : []

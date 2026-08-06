@@ -35,14 +35,14 @@ resource "aws_lb" "lb" {
 }
 
 resource "aws_eip" "eip" {
-  for_each = var.internal_usage_flag == true ? {} : var.subnet_ids
+  for_each = var.internal_usage_flag ? {} : var.subnet_ids
   domain   = "vpc"
 
   tags = var.tags
 }
 
 resource "aws_shield_protection" "shield_protection" {
-  for_each     = var.internal_usage_flag == false && var.enable_shield_protection ? var.subnet_ids : {}
+  for_each     = !var.internal_usage_flag && var.enable_shield_protection ? var.subnet_ids : {}
   name         = join("-", [var.project, var.application, var.environment, var.region, each.key, "elb-eip-shield-protection"])
   resource_arn = replace(aws_eip.eip[each.key].arn, "elastic-ip", "eip-allocation")
 

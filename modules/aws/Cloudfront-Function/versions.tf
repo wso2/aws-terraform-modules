@@ -18,12 +18,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_cloudwatch_event_rule" "rule" {
-  name                = var.abbreviation != null && var.abbreviation != "" ? join("-", [var.name, var.abbreviation]) : var.name
-  description         = var.description
-  event_pattern       = var.event_pattern
-  schedule_expression = var.schedule_expression
-  state               = var.state
-  role_arn            = var.role_arn
-  tags                = var.tags
+terraform {
+  required_version = ">= 1.3.8"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 5.0.0"
+    }
+  }
 }

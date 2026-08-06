@@ -145,7 +145,7 @@ variable "preferred_maintenance_window" {
 }
 
 variable "global_cluster_identifier" {
-  description = "Global cluster identifier"
+  description = "Global cluster identifier. Only used at create time — the cluster resource ignores subsequent changes to this field (see rds.tf), since an external aws_rds_global_cluster attachment is the field's owner thereafter."
   type        = string
   default     = null
 }
@@ -206,6 +206,12 @@ variable "engine_lifecycle_support" {
 
 variable "publicly_accessible" {
   description = "Flag to make the DB publicly accessible"
+  type        = bool
+  default     = false
+}
+
+variable "apply_immediately" {
+  description = "Whether cluster-instance modifications apply immediately instead of waiting for the next preferred_maintenance_window"
   type        = bool
   default     = false
 }

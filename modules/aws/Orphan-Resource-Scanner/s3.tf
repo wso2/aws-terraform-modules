@@ -20,12 +20,18 @@
 
 # S3 report bucket - stores the weekly CSV reports written by the scanner Lambda.
 
+# Ignore: AVD-AWS-0089 (https://avd.aquasec.com/misconfig/aws-0089)
+# Reason: Access logging not required for this internal reports bucket
+# trivy:ignore:AVD-AWS-0089
 resource "aws_s3_bucket" "reports" {
   bucket        = var.report_bucket_name
   force_destroy = var.force_destroy_bucket
   tags          = local.tags
 }
 
+# Ignore: AVD-AWS-0090 (https://avd.aquasec.com/misconfig/aws-0090)
+# Reason: Reports are regenerated weekly and expired via lifecycle rules, so version history isn't needed
+# trivy:ignore:AVD-AWS-0090
 resource "aws_s3_bucket_versioning" "reports" {
   bucket = aws_s3_bucket.reports.id
   versioning_configuration {
@@ -33,6 +39,17 @@ resource "aws_s3_bucket_versioning" "reports" {
   }
 }
 
+resource "aws_s3_bucket_public_access_block" "reports" {
+  bucket                  = aws_s3_bucket.reports.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# Ignore: AVD-AWS-0132 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-00132)
+# Reason: Report bucket uses SSE-S3 (AES256); no customer-managed KMS key is provisioned for this module
+# trivy:ignore:AVD-AWS-0132
 resource "aws_s3_bucket_server_side_encryption_configuration" "reports" {
   bucket = aws_s3_bucket.reports.id
   rule {

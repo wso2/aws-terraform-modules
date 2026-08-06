@@ -106,6 +106,14 @@ variable "rules" {
     allowed_ip_set_arn = optional(string)
     blocked_ip_set_arn = optional(string)
     host_header        = optional(string)
+    # Geo match statement — match requests by ISO 3166-1 alpha-2 country codes; omit forwarded_ip_config unless a client-supplied header must be honored (spoofable, and unnecessary at CLOUDFRONT scope).
+    geo_match_statement = optional(object({
+      country_codes = list(string)
+      forwarded_ip_config = optional(object({
+        header_name       = string
+        fallback_behavior = string # MATCH | NO_MATCH
+      }))
+    }))
     managed_rule_group_statement = optional(object({
       name        = string
       vendor_name = string
@@ -113,13 +121,7 @@ variable "rules" {
         name   = string
         action = string # count, allow, block
       })), [])
-      # Optional scope-down: restrict the managed rule group to a subset of requests.
-      # Supports byte_match_statement, ip_set_reference_statement, and_statement, or_statement,
-      # and not_statement (wrapping any of the above) at the top level. Inside and_statement /
-      # or_statement statements, each entry must be exactly one of byte_match_statement OR
-      # ip_set_reference_statement. Use not_statement+ip_set_reference to SKIP a managed rule
-      # group for trusted source IPs (e.g. internal NAT egress); use not_statement+or with
-      # mixed byte_match + ip_set_reference entries to combine path-based and IP-based skips.
+      # Optional scope-down restricting the managed rule group to a subset of requests via byte_match/ip_set_reference/and/or/not statements; e.g. not_statement+ip_set_reference skips trusted IPs, not_statement+or combines path- and IP-based skips.
       scope_down_statement = optional(object({
         byte_match_statement = optional(object({
           search_string         = string
@@ -234,6 +236,117 @@ variable "rules" {
     rate_based_statement = optional(object({
       limit              = number
       aggregate_key_type = string
+      # Optional scope-down to count only requests matching this statement (per-URI/per-host rate limits); same shape as managed_rule_group_statement.scope_down_statement.
+      scope_down_statement = optional(object({
+        byte_match_statement = optional(object({
+          search_string         = string
+          positional_constraint = string
+          field_to_match = object({
+            uri_path      = optional(bool)
+            single_header = optional(string)
+          })
+          text_transformation = object({
+            priority = number
+            type     = string
+          })
+        }))
+        ip_set_reference_statement = optional(object({
+          arn = string
+        }))
+        and_statement = optional(object({
+          statements = list(object({
+            byte_match_statement = optional(object({
+              search_string         = string
+              positional_constraint = string
+              field_to_match = object({
+                uri_path      = optional(bool)
+                single_header = optional(string)
+              })
+              text_transformation = object({
+                priority = number
+                type     = string
+              })
+            }))
+            ip_set_reference_statement = optional(object({
+              arn = string
+            }))
+          }))
+        }))
+        or_statement = optional(object({
+          statements = list(object({
+            byte_match_statement = optional(object({
+              search_string         = string
+              positional_constraint = string
+              field_to_match = object({
+                uri_path      = optional(bool)
+                single_header = optional(string)
+              })
+              text_transformation = object({
+                priority = number
+                type     = string
+              })
+            }))
+            ip_set_reference_statement = optional(object({
+              arn = string
+            }))
+          }))
+        }))
+        not_statement = optional(object({
+          byte_match_statement = optional(object({
+            search_string         = string
+            positional_constraint = string
+            field_to_match = object({
+              uri_path      = optional(bool)
+              single_header = optional(string)
+            })
+            text_transformation = object({
+              priority = number
+              type     = string
+            })
+          }))
+          ip_set_reference_statement = optional(object({
+            arn = string
+          }))
+          and_statement = optional(object({
+            statements = list(object({
+              byte_match_statement = optional(object({
+                search_string         = string
+                positional_constraint = string
+                field_to_match = object({
+                  uri_path      = optional(bool)
+                  single_header = optional(string)
+                })
+                text_transformation = object({
+                  priority = number
+                  type     = string
+                })
+              }))
+              ip_set_reference_statement = optional(object({
+                arn = string
+              }))
+            }))
+          }))
+          or_statement = optional(object({
+            statements = list(object({
+              byte_match_statement = optional(object({
+                search_string         = string
+                positional_constraint = string
+                field_to_match = object({
+                  uri_path      = optional(bool)
+                  single_header = optional(string)
+                })
+                text_transformation = object({
+                  priority = number
+                  type     = string
+                })
+              }))
+              ip_set_reference_statement = optional(object({
+                arn = string
+              }))
+            }))
+          }))
+        }))
+      }))
     }))
 
     and_statement = optional(object({
@@ -337,8 +450,7 @@ variable "rules" {
     error_message = "managed_rule_group_statement.rule_action_overrides[*].action must be one of: count, allow, block."
   }
 
-  # Validation 5: managed_rule_group_statement.scope_down_statement must specify exactly one of
-  # byte_match_statement, ip_set_reference_statement, and_statement, or_statement, or not_statement.
+  # Validation 5: managed_rule_group_statement.scope_down_statement must specify exactly one of byte_match_statement, ip_set_reference_statement, and_statement, or_statement, or not_statement.
   validation {
     condition = alltrue([
       for v in var.rules :
@@ -351,8 +463,7 @@ variable "rules" {
     ])
     error_message = "managed_rule_group_statement.scope_down_statement must specify exactly one of byte_match_statement, ip_set_reference_statement, and_statement, or_statement, or not_statement."
   }
-  # Validation 6: When scope_down_statement.not_statement is used, exactly one of
-  # byte_match_statement, ip_set_reference_statement, and_statement, or or_statement must be set under it.
+  # Validation 6: When scope_down_statement.not_statement is used, exactly one of byte_match_statement, ip_set_reference_statement, and_statement, or or_statement must be set under it.
   validation {
     condition = alltrue([
       for v in var.rules :
@@ -365,8 +476,7 @@ variable "rules" {
     error_message = "managed_rule_group_statement.scope_down_statement.not_statement must contain exactly one of byte_match_statement, ip_set_reference_statement, and_statement, or or_statement."
   }
 
-  # Validation 7: and_statement / or_statement inside scope_down_statement (directly or under
-  # not_statement) must each contain >= 2 statements.
+  # Validation 7: and_statement / or_statement inside scope_down_statement (directly or under not_statement) must each contain >= 2 statements.
   validation {
     condition = alltrue(flatten([
       for v in var.rules : [
@@ -383,9 +493,7 @@ variable "rules" {
     error_message = "and_statement / or_statement inside scope_down_statement must contain at least 2 statements."
   }
 
-  # Validation 8: each entry in scope_down_statement.and_statement.statements,
-  # scope_down_statement.or_statement.statements, and the same lists under not_statement,
-  # must specify exactly one of byte_match_statement or ip_set_reference_statement.
+  # Validation 8: each entry in scope_down_statement.and_statement.statements, scope_down_statement.or_statement.statements, and the same lists under not_statement, must specify exactly one of byte_match_statement or ip_set_reference_statement.
   validation {
     condition = alltrue(flatten([
       for v in var.rules : [
@@ -403,6 +511,93 @@ variable "rules" {
     ]))
     error_message = "Each statement inside scope_down_statement.and_statement.statements / or_statement.statements (and their not_statement-nested variants) must specify exactly one of byte_match_statement or ip_set_reference_statement."
   }
+
+  # Validation 7 (rate-based): and_statement / or_statement inside rate_based_statement.scope_down_statement (directly or under not_statement) must each contain >= 2 statements.
+  validation {
+    condition = alltrue(flatten([
+      for v in var.rules : [
+        for stmts in [
+          try(v.rate_based_statement.scope_down_statement.and_statement.statements, null),
+          try(v.rate_based_statement.scope_down_statement.or_statement.statements, null),
+          try(v.rate_based_statement.scope_down_statement.not_statement.and_statement.statements, null),
+          try(v.rate_based_statement.scope_down_statement.not_statement.or_statement.statements, null),
+        ] :
+        length(stmts) >= 2
+        if stmts != null
+      ]
+    ]))
+    error_message = "and_statement / or_statement inside rate_based_statement.scope_down_statement must contain at least 2 statements."
+  }
+
+  # Validation 8 (rate-based): each entry in rate_based_statement.scope_down_statement.and_statement.statements, or_statement.statements, and the same lists under not_statement, must specify exactly one of byte_match_statement or ip_set_reference_statement.
+  validation {
+    condition = alltrue(flatten([
+      for v in var.rules : [
+        for stmts in [
+          try(v.rate_based_statement.scope_down_statement.and_statement.statements, null),
+          try(v.rate_based_statement.scope_down_statement.or_statement.statements, null),
+          try(v.rate_based_statement.scope_down_statement.not_statement.and_statement.statements, null),
+          try(v.rate_based_statement.scope_down_statement.not_statement.or_statement.statements, null),
+          ] : [
+          for s in(stmts != null ? stmts : []) :
+          (try(s.byte_match_statement, null) != null ? 1 : 0) +
+          (try(s.ip_set_reference_statement, null) != null ? 1 : 0) == 1
+        ]
+      ]
+    ]))
+    error_message = "Each statement inside rate_based_statement.scope_down_statement.and_statement.statements / or_statement.statements (and their not_statement-nested variants) must specify exactly one of byte_match_statement or ip_set_reference_statement."
+  }
+
+  # Validation 9: rate_based_statement.scope_down_statement must specify exactly one of byte_match_statement, ip_set_reference_statement, and_statement, or_statement, or not_statement.
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      (try(v.rate_based_statement.scope_down_statement.byte_match_statement, null) != null ? 1 : 0) +
+      (try(v.rate_based_statement.scope_down_statement.ip_set_reference_statement, null) != null ? 1 : 0) +
+      (try(v.rate_based_statement.scope_down_statement.and_statement, null) != null ? 1 : 0) +
+      (try(v.rate_based_statement.scope_down_statement.or_statement, null) != null ? 1 : 0) +
+      (try(v.rate_based_statement.scope_down_statement.not_statement, null) != null ? 1 : 0) == 1
+      if try(v.rate_based_statement.scope_down_statement, null) != null
+    ])
+    error_message = "rate_based_statement.scope_down_statement must specify exactly one of byte_match_statement, ip_set_reference_statement, and_statement, or_statement, or not_statement."
+  }
+  # Validation 10: When rate_based_statement.scope_down_statement.not_statement is used, exactly one of byte_match_statement, ip_set_reference_statement, and_statement, or or_statement must be set under it.
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      (try(v.rate_based_statement.scope_down_statement.not_statement.byte_match_statement, null) != null ? 1 : 0) +
+      (try(v.rate_based_statement.scope_down_statement.not_statement.ip_set_reference_statement, null) != null ? 1 : 0) +
+      (try(v.rate_based_statement.scope_down_statement.not_statement.and_statement, null) != null ? 1 : 0) +
+      (try(v.rate_based_statement.scope_down_statement.not_statement.or_statement, null) != null ? 1 : 0) == 1
+      if try(v.rate_based_statement.scope_down_statement.not_statement, null) != null
+    ])
+    error_message = "rate_based_statement.scope_down_statement.not_statement must contain exactly one of byte_match_statement, ip_set_reference_statement, and_statement, or or_statement."
+  }
+
+  # Validation 11: Ensure exactly one field_to_match selector is set inside every byte_match_statement under managed_rule_group_statement.scope_down_statement and rate_based_statement.scope_down_statement (top-level, and/or list entries, not_statement, and not_statement-nested and/or).
+  validation {
+    condition = alltrue(flatten([
+      for v in var.rules : [
+        for sds in [
+          try(v.managed_rule_group_statement.scope_down_statement, null),
+          try(v.rate_based_statement.scope_down_statement, null),
+          ] : [
+          for bm in concat(
+            [try(sds.byte_match_statement, null)],
+            [try(sds.not_statement.byte_match_statement, null)],
+            [for s in try(sds.and_statement.statements, []) : try(s.byte_match_statement, null)],
+            [for s in try(sds.or_statement.statements, []) : try(s.byte_match_statement, null)],
+            [for s in try(sds.not_statement.and_statement.statements, []) : try(s.byte_match_statement, null)],
+            [for s in try(sds.not_statement.or_statement.statements, []) : try(s.byte_match_statement, null)],
+          ) :
+          (try(bm.field_to_match.uri_path, false) == true ? 1 : 0) + (try(bm.field_to_match.single_header, null) != null ? 1 : 0) == 1
+          if bm != null
+        ]
+        if sds != null
+      ]
+    ]))
+    error_message = "Inside every byte_match_statement under managed_rule_group_statement.scope_down_statement and rate_based_statement.scope_down_statement, exactly one field_to_match selector (uri_path or single_header) must be set."
+  }
 }
 
 variable "tags" {
@@ -411,10 +606,7 @@ variable "tags" {
   default     = {}
 }
 
-# ---------------------------------------------------------------------------
 # WAF Logging
-# ---------------------------------------------------------------------------
-
 variable "enable_logging" {
   description = "When true, enables WAF logging to the specified log_destination_arns. The log destination (e.g. CloudWatch log group) must have a name starting with 'aws-waf-logs-'."
   type        = bool

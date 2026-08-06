@@ -37,6 +37,9 @@ data "archive_file" "scanner_lambda" {
   output_path = "${path.module}/scripts/scanner_lambda.zip"
 }
 
+# Ignore: AVD-AWS-0066 (https://avd.aquasec.com/misconfig/aws-0066)
+# Reason: X-Ray tracing not required for this low-volume weekly scheduled scan
+# trivy:ignore:AVD-AWS-0066
 resource "aws_lambda_function" "scanner" {
   filename         = data.archive_file.scanner_lambda.output_path
   function_name    = "${local.name_prefix}-lambda-function"
@@ -63,6 +66,9 @@ resource "aws_lambda_function" "scanner" {
   }
 }
 
+# Ignore: AVD-AWS-0017 (https://avd.aquasec.com/misconfig/aws-0017)
+# Reason: No customer-managed KMS key is provisioned for this module; default CloudWatch encryption applies
+# trivy:ignore:AVD-AWS-0017
 resource "aws_cloudwatch_log_group" "scanner_lambda" {
   name              = "/aws/lambda/${aws_lambda_function.scanner.function_name}"
   retention_in_days = var.log_retention_days
