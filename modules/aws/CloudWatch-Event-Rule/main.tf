@@ -19,7 +19,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_cloudwatch_event_rule" "rule" {
-  name                = join("-", [var.name, var.abbreviation])
+  name                = var.abbreviation != null && var.abbreviation != "" ? join("-", [var.name, var.abbreviation]) : var.name
   description         = var.description
   event_pattern       = var.event_pattern
   schedule_expression = var.schedule_expression

@@ -96,3 +96,27 @@ variable "object_ownership" {
   type        = string
   default     = "BucketOwnerPreferred"
 }
+
+variable "bucket_name" {
+  description = "Explicit bucket name. Null falls back to the join(project, application, environment, region, \"bucket\") default."
+  type        = string
+  default     = null
+}
+
+variable "acl" {
+  description = "Canned ACL to apply to the bucket, e.g. \"log-delivery-write\". Null skips setting an ACL."
+  type        = string
+  default     = null
+}
+
+variable "lifecycle_expiration_days" {
+  description = "Days after which objects expire. Null skips creating a lifecycle rule."
+  type        = number
+  default     = null
+}
+
+variable "lifecycle_rule_id" {
+  description = "ID of the expiration lifecycle rule, when lifecycle_expiration_days is set"
+  type        = string
+  default     = "expire-objects"
+}

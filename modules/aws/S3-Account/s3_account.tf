@@ -22,7 +22,7 @@
 # Reason: Logging not required as of now for S3 Buckets, if required it will be added as a separate resource
 # trivy:ignore:AVD-AWS-0089
 resource "aws_s3_bucket" "s3_bucket" {
-  bucket        = join("-", [var.project, var.application, var.environment, var.region, "bucket"])
+  bucket        = coalesce(var.bucket_name, join("-", [var.project, var.application, var.environment, var.region, "bucket"]))
   force_destroy = var.force_destroy
   tags          = var.tags
 }
@@ -72,5 +72,27 @@ resource "aws_s3_bucket_ownership_controls" "s3_bucket_ownership_controls" {
 
   rule {
     object_ownership = var.object_ownership
+  }
+}
+
+resource "aws_s3_bucket_acl" "s3_bucket_acl" {
+  count = var.acl != null ? 1 : 0
+
+  bucket     = aws_s3_bucket.s3_bucket.id
+  acl        = var.acl
+  depends_on = [aws_s3_bucket_ownership_controls.s3_bucket_ownership_controls, aws_s3_bucket_public_access_block.s3_bucket_public_access_block]
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "s3_bucket_lifecycle" {
+  count = var.lifecycle_expiration_days != null ? 1 : 0
+
+  bucket = aws_s3_bucket.s3_bucket.id
+  rule {
+    id     = var.lifecycle_rule_id
+    status = "Enabled"
+    filter {}
+    expiration {
+      days = var.lifecycle_expiration_days
+    }
   }
 }
