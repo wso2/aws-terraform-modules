@@ -289,21 +289,32 @@ variable "rules" {
     }))
 
     # Narrow purpose-built rule: fires on requests whose host header equals
-    # host_header AND whose URI path starts with uri_path_prefix AND whose
-    # source IP is NOT in the referenced IP set. Renders as
+    # host_header AND whose URI path starts with uri_path_prefix AND (for
+    # each entry in excluded_uri_path_prefixes) does NOT start with that
+    # excluded prefix AND whose source IP is NOT in the referenced IP set.
+    # Renders as
     #   AND(byte_match host EXACTLY host_header,
     #       byte_match uri STARTS_WITH uri_path_prefix,
+    #       NOT(byte_match uri STARTS_WITH excluded_uri_path_prefixes[0]),
+    #       NOT(byte_match uri STARTS_WITH excluded_uri_path_prefixes[1]),
+    #       ...
     #       NOT(ip_set_reference allowed_ip_set_arn))
     # Pair with action = block to restrict a specific host+path prefix to an
     # IP allowlist (e.g. lock a single API endpoint to an internal NAT egress
     # range) without affecting other paths on the same host or changing the
-    # WAF's global filter mode. Both host_header and uri_path_prefix are
-    # matched against a LOWERCASE-transformed field and WAF does not transform
-    # the search_string, so both must be provided lowercase.
+    # WAF's global filter mode. Use excluded_uri_path_prefixes to carve
+    # sub-paths back out of the restriction (e.g. leave admin endpoints
+    # reachable from the front-door allowlist while the rest of the endpoint
+    # is locked to internal NAT). host_header, uri_path_prefix, and every
+    # entry in excluded_uri_path_prefixes are matched against a LOWERCASE-
+    # transformed field and WAF does not transform the search_string, so all
+    # must be provided lowercase; uri_path_prefix and each excluded prefix
+    # must begin with '/'.
     host_and_path_scoped_ip_allowlist_block_statement = optional(object({
-      host_header        = string
-      uri_path_prefix    = string
-      allowed_ip_set_arn = string
+      host_header                = string
+      uri_path_prefix            = string
+      allowed_ip_set_arn         = string
+      excluded_uri_path_prefixes = optional(list(string), [])
     }))
   }))
 
@@ -401,10 +412,12 @@ variable "rules" {
     error_message = "and_statement / or_statement inside scope_down_statement must contain at least 2 statements."
   }
 
-  # Validation: host_and_path_scoped_ip_allowlist_block_statement.host_header
-  # and uri_path_prefix must be lowercase; the request field is matched with a
-  # LOWERCASE text_transformation but WAF does not transform the search_string,
-  # so a mixed-case search string would never match.
+  # Validation: host_and_path_scoped_ip_allowlist_block_statement.host_header,
+  # uri_path_prefix, and every entry in excluded_uri_path_prefixes must be
+  # lowercase; the request field is matched with a LOWERCASE text_transformation
+  # but WAF does not transform the search_string, so a mixed-case search
+  # string would never match. uri_path_prefix and each excluded prefix must
+  # also begin with '/'.
   validation {
     condition = alltrue([
       for v in var.rules :
@@ -412,10 +425,14 @@ variable "rules" {
         v.host_and_path_scoped_ip_allowlist_block_statement.host_header == lower(v.host_and_path_scoped_ip_allowlist_block_statement.host_header)
         && v.host_and_path_scoped_ip_allowlist_block_statement.uri_path_prefix == lower(v.host_and_path_scoped_ip_allowlist_block_statement.uri_path_prefix)
         && startswith(v.host_and_path_scoped_ip_allowlist_block_statement.uri_path_prefix, "/")
+        && alltrue([
+          for p in coalesce(v.host_and_path_scoped_ip_allowlist_block_statement.excluded_uri_path_prefixes, []) :
+          p == lower(p) && startswith(p, "/")
+        ])
       )
       if try(v.host_and_path_scoped_ip_allowlist_block_statement, null) != null
     ])
-    error_message = "host_and_path_scoped_ip_allowlist_block_statement.host_header and uri_path_prefix must be lowercase, and uri_path_prefix must begin with '/' (WAF applies LOWERCASE to the request field but does not transform the search_string; uri_path always begins with '/')."
+    error_message = "host_and_path_scoped_ip_allowlist_block_statement.host_header, uri_path_prefix, and every entry in excluded_uri_path_prefixes must be lowercase, and uri_path_prefix + each excluded prefix must begin with '/' (WAF applies LOWERCASE to the request field but does not transform the search_string; uri_path always begins with '/')."
   }
 
   # Validation 8: each entry in scope_down_statement.and_statement.statements,
