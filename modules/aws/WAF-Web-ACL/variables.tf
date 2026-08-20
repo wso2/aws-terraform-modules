@@ -326,6 +326,19 @@ variable "rules" {
     geo_match_statement = optional(object({
       country_codes = list(string)
     }))
+
+    # Matches requests carrying a WAF label added by an earlier-priority rule
+    # (labels only exist on a request after the rule that emits them has been
+    # evaluated). Example: pair a count-action geo_match_statement rule (which
+    # makes WAF emit awswaf:clientip:geo:region:<ISO-3166-2> labels) with a
+    # block-action label_match_statement rule on a specific region label to
+    # block sub-national regions that geo_match_statement alone cannot target.
+    # scope LABEL matches one label key exactly; NAMESPACE matches a label
+    # prefix.
+    label_match_statement = optional(object({
+      scope = optional(string, "LABEL")
+      key   = string
+    }))
   }))
 
   # Validation 0: geo_match_statement.country_codes must be non-empty and each
@@ -341,6 +354,27 @@ variable "rules" {
       if try(v.geo_match_statement, null) != null
     ])
     error_message = "geo_match_statement.country_codes must be a non-empty list of two-letter uppercase ISO 3166-1 alpha-2 country codes (e.g. \"IR\", \"KP\")."
+  }
+
+  # Validation 0b: label_match_statement.scope must be LABEL or NAMESPACE, and
+  # key must be non-empty.
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      contains(["LABEL", "NAMESPACE"], v.label_match_statement.scope) && length(v.label_match_statement.key) > 0
+      if try(v.label_match_statement, null) != null
+    ])
+    error_message = "label_match_statement.scope must be LABEL or NAMESPACE and key must be non-empty."
+  }
+
+  # Validation 0c: action.type must be allow, block, or count.
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      contains(["allow", "block", "count"], v.action.type)
+      if try(v.action, null) != null
+    ])
+    error_message = "action.type must be one of: allow, block, count."
   }
 
   # Validation 1: AWS WAF requires an and_statement to have >= 2 nested statements
