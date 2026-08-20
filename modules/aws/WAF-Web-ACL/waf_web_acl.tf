@@ -438,6 +438,12 @@ resource "aws_wafv2_web_acl" "web_acl" {
             aggregate_key_type = rate_based_statement.value.aggregate_key_type
           }
         }
+        dynamic "geo_match_statement" {
+          for_each = rule.value.geo_match_statement != null ? [rule.value.geo_match_statement] : []
+          content {
+            country_codes = geo_match_statement.value.country_codes
+          }
+        }
         dynamic "and_statement" {
           for_each = rule.value.and_statement != null ? [rule.value.and_statement] : []
           content {
