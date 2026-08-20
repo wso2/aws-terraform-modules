@@ -114,6 +114,15 @@ resource "aws_wafv2_web_acl" "web_acl" {
               }
             }
           }
+          # count is non-terminating: the request is tallied and evaluation
+          # continues. Used for label-generation rules (e.g. a geo_match rule
+          # whose only job is to make WAF emit
+          # awswaf:clientip:geo:region:<ISO-3166-2> labels for later
+          # label_match_statement rules).
+          dynamic "count" {
+            for_each = action.value.type == "count" ? [1] : []
+            content {}
+          }
         }
       }
 
@@ -442,6 +451,13 @@ resource "aws_wafv2_web_acl" "web_acl" {
           for_each = rule.value.geo_match_statement != null ? [rule.value.geo_match_statement] : []
           content {
             country_codes = geo_match_statement.value.country_codes
+          }
+        }
+        dynamic "label_match_statement" {
+          for_each = rule.value.label_match_statement != null ? [rule.value.label_match_statement] : []
+          content {
+            scope = label_match_statement.value.scope
+            key   = label_match_statement.value.key
           }
         }
         dynamic "and_statement" {
