@@ -316,7 +316,32 @@ variable "rules" {
       allowed_ip_set_arn         = string
       excluded_uri_path_prefixes = optional(list(string), [])
     }))
+
+    # Matches requests whose source IP geolocates to one of the given
+    # ISO 3166-1 alpha-2 country codes. Pair with action = block to deny
+    # traffic originating from specific countries (e.g. sanctioned
+    # jurisdictions). Geolocation is resolved by AWS WAF from the request's
+    # source IP; sub-national regions (e.g. Crimea) cannot be targeted by
+    # country code.
+    geo_match_statement = optional(object({
+      country_codes = list(string)
+    }))
   }))
+
+  # Validation 0: geo_match_statement.country_codes must be non-empty and each
+  # entry a two-letter uppercase ISO 3166-1 alpha-2 code (AWS WAF rejects
+  # anything else at apply time; catch it at plan time instead).
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      length(v.geo_match_statement.country_codes) > 0 && alltrue([
+        for c in v.geo_match_statement.country_codes :
+        can(regex("^[A-Z]{2}$", c))
+      ])
+      if try(v.geo_match_statement, null) != null
+    ])
+    error_message = "geo_match_statement.country_codes must be a non-empty list of two-letter uppercase ISO 3166-1 alpha-2 country codes (e.g. \"IR\", \"KP\")."
+  }
 
   # Validation 1: AWS WAF requires an and_statement to have >= 2 nested statements
   validation {
