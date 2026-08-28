@@ -199,6 +199,33 @@ data "kubernetes_secret_v1" "nats_client_certificate" {
   depends_on = [kubectl_manifest.nats_client_certificate]
 }
 
+# The nats chart's JetStream StatefulSet PVCs need a real, bindable
+# StorageClass. EKS ships a "gp2" StorageClass by default, but it uses the
+# deprecated in-tree kubernetes.io/aws-ebs provisioner, which no longer
+# actually binds volumes on modern Kubernetes versions even though the
+# object still exists - confirmed real via nats-0's PVC sitting in
+# FailedBinding ("no persistent volumes available ... and no storage
+# class is set") despite the EBS CSI driver addon itself being ACTIVE.
+# This is the CSI driver's own gp3 class, marked default so this and any
+# future PVC-needing chart just works without per-chart wiring.
+resource "kubernetes_storage_class_v1" "gp3" {
+  metadata {
+    name = "gp3"
+    annotations = {
+      "storageclass.kubernetes.io/is-default-class" = "true"
+    }
+  }
+
+  storage_provisioner    = "ebs.csi.aws.com"
+  reclaim_policy         = "Delete"
+  volume_binding_mode    = "WaitForFirstConsumer"
+  allow_volume_expansion = true
+
+  parameters = {
+    type = "gp3"
+  }
+}
+
 resource "helm_release" "nats" {
   name             = "nats"
   repository       = var.nats_helm_repo
@@ -208,7 +235,7 @@ resource "helm_release" "nats" {
   create_namespace = false
   values           = var.nats_values
 
-  depends_on = [kubernetes_namespace_v1.this, kubectl_manifest.nats_server_certificate]
+  depends_on = [kubernetes_namespace_v1.this, kubectl_manifest.nats_server_certificate, kubernetes_storage_class_v1.gp3]
 }
 
 resource "helm_release" "argo_workflows" {
