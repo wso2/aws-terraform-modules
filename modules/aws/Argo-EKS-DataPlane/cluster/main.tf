@@ -265,6 +265,7 @@ resource "aws_eks_cluster" "this" {
   name     = local.name
   role_arn = aws_iam_role.eks_cluster.arn
   version  = var.kubernetes_version
+  bootstrap_self_managed_addons = false
 
   vpc_config {
     subnet_ids = concat(
