@@ -269,6 +269,23 @@ resource "helm_release" "external_secrets" {
   depends_on = [kubernetes_namespace_v1.external_secrets]
 }
 
+# gateway.yaml (the unified /control|/azure|/aws portal router) targets
+# Traefik-specific CRDs (IngressRoute, Middleware, ServersTransport) -
+# genuinely never installed anywhere in this stack until found missing on
+# this environment's first real end-to-end apply. create_namespace=false
+# since var.traefik_namespace ("gateway") is created by the environment's
+# own extra_namespaces module, not this one.
+resource "helm_release" "traefik" {
+  count = var.install_traefik ? 1 : 0
+
+  name             = "traefik"
+  repository       = var.traefik_helm_repo
+  chart            = "traefik"
+  version          = var.traefik_chart_version
+  namespace        = var.traefik_namespace
+  create_namespace = false
+}
+
 # Several real pipeline manifests are multi-document YAML - yamldecode()
 # only parses a single document, so each file is split on a bare "---"
 # line first (same fix as the data-plane apps modules).
@@ -291,7 +308,7 @@ resource "kubernetes_manifest" "this" {
 
   manifest = each.value
 
-  depends_on = [helm_release.nats, helm_release.argo_workflows, helm_release.argo_events]
+  depends_on = [helm_release.nats, helm_release.argo_workflows, helm_release.argo_events, helm_release.traefik, helm_release.external_secrets]
 }
 
 # CRD-backed manifests (ESO's ClusterSecretStore/ExternalSecret) that need

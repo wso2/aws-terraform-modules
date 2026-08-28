@@ -98,6 +98,27 @@ variable "cert_manager_namespace" {
   default = "cert-manager"
 }
 
+variable "install_traefik" {
+  type        = bool
+  description = "Install the Traefik controller - gateway.yaml (the unified /control|/azure|/aws portal router) targets Traefik-specific CRDs (IngressRoute, Middleware, ServersTransport), which only a running Traefik controller registers. Genuinely never installed anywhere in this stack until found missing on this environment's first real end-to-end apply."
+  default     = true
+}
+
+variable "traefik_chart_version" {
+  type    = string
+  default = null
+}
+
+variable "traefik_helm_repo" {
+  type    = string
+  default = "https://traefik.github.io/charts"
+}
+
+variable "traefik_namespace" {
+  type    = string
+  default = "gateway"
+}
+
 variable "nats_client_identities" {
   type        = list(string)
   description = "commonName for each data-plane NATS client certificate cert-manager issues, e.g. [\"azure-stage\", \"azure-prod\", \"aws-stage\", \"aws-prod\"]. One Certificate per entry; the resulting cert/key end up in a Kubernetes Secret named \"nats-client-<entry>\" in var.namespace, readable via this module's nats_client_cert_pems/nats_client_key_pems outputs for manual, out-of-band distribution to each data plane's own environment - same pattern already used for control_plane_tunnel_host."
