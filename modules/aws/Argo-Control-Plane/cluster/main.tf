@@ -179,6 +179,14 @@ resource "aws_eks_cluster" "this" {
   role_arn = aws_iam_role.eks_cluster.arn
   version  = var.kubernetes_version
 
+  # Pinned explicitly to match the real live cluster's actual value -
+  # this attribute is create-time-only (any change forces full cluster
+  # replacement), and leaving it unset relies on the provider's own
+  # default (true), which drifted from what this cluster actually has
+  # (false), threatening to destroy/recreate the live cluster on a
+  # routine apply that has nothing to do with this setting.
+  bootstrap_self_managed_addons = false
+
   vpc_config {
     subnet_ids              = [for az in var.availability_zones : aws_subnet.private[az].id]
     endpoint_private_access = true
