@@ -59,11 +59,7 @@ resource "helm_release" "cert_manager" {
   depends_on = [kubernetes_namespace_v1.cert_manager]
 }
 
-# Bootstrap: a self-signed Issuer to create the CA's own Certificate, then
-# a ClusterIssuer backed by that CA - this is the standard cert-manager
-# two-step pattern for standing up a private CA (a CA can't sign its own
-# initial cert without something to sign it with, hence the self-signed
-# bootstrap).
+# Standard cert-manager two-step bootstrap: self-signed Issuer → CA Certificate → ClusterIssuer backed by that CA.
 resource "kubectl_manifest" "selfsigned_issuer" {
   count = var.install_cert_manager ? 1 : 0
 
@@ -153,11 +149,7 @@ resource "kubectl_manifest" "nats_server_certificate" {
   depends_on = [kubectl_manifest.nats_ca_issuer]
 }
 
-# Per-data-plane client identities (row 10 of the security review's
-# auth table: mutual TLS, one cert per cloud x env). Issued here because
-# the CA lives here - the resulting cert/key get read back below and
-# exposed as outputs for manual, out-of-band distribution to each data
-# plane's own environment, same as control_plane_tunnel_host already is.
+# Per-data-plane client identities (one cert per cloud x env, e.g. "aws-stage").
 resource "kubectl_manifest" "nats_client_certificate" {
   for_each = var.install_cert_manager ? toset(var.nats_client_identities) : []
 
@@ -185,9 +177,7 @@ resource "kubectl_manifest" "nats_client_certificate" {
   depends_on = [kubectl_manifest.nats_ca_issuer]
 }
 
-# Read back each issued client cert's Secret so its PEM content can be
-# output - cert-manager writes tls.crt/tls.key/ca.crt into the Secret once
-# the Certificate reaches Ready, this just surfaces that content.
+# Read back each issued client cert's Secret so the PEM content can be output.
 data "kubernetes_secret_v1" "nats_client_certificate" {
   for_each = var.install_cert_manager ? toset(var.nats_client_identities) : []
 
@@ -199,15 +189,7 @@ data "kubernetes_secret_v1" "nats_client_certificate" {
   depends_on = [kubectl_manifest.nats_client_certificate]
 }
 
-# The nats chart's JetStream StatefulSet PVCs need a real, bindable
-# StorageClass. EKS ships a "gp2" StorageClass by default, but it uses the
-# deprecated in-tree kubernetes.io/aws-ebs provisioner, which no longer
-# actually binds volumes on modern Kubernetes versions even though the
-# object still exists - confirmed real via nats-0's PVC sitting in
-# FailedBinding ("no persistent volumes available ... and no storage
-# class is set") despite the EBS CSI driver addon itself being ACTIVE.
-# This is the CSI driver's own gp3 class, marked default so this and any
-# future PVC-needing chart just works without per-chart wiring.
+# gp3 StorageClass backed by the EBS CSI driver - required for NATS JetStream PVCs.
 resource "kubernetes_storage_class_v1" "gp3" {
   metadata {
     name = "gp3"
@@ -262,13 +244,8 @@ resource "helm_release" "argo_events" {
   depends_on = [kubernetes_namespace_v1.this]
 }
 
-# --- External Secrets Operator - the doc's stated mechanism for the
-#     oauth2-proxy cookie-signing secret (90-day auto-rotation) and the
-#     SSO client secret, both read from AWS Secrets Manager. No
-#     serviceAccountRef in the resulting ClusterSecretStore - this
-#     annotates ESO's own controller ServiceAccount with the IRSA role
-#     from the cluster module, so it resolves credentials through the
-#     default AWS SDK chain, same as the EBS CSI driver does. ---
+# --- External Secrets Operator - IRSA-annotated controller reads Secrets Manager;
+#     no serviceAccountRef in ClusterSecretStore. ---
 
 resource "kubernetes_namespace_v1" "external_secrets" {
   count = var.install_external_secrets ? 1 : 0
@@ -296,12 +273,7 @@ resource "helm_release" "external_secrets" {
   depends_on = [kubernetes_namespace_v1.external_secrets]
 }
 
-# gateway.yaml (the unified /control|/azure|/aws portal router) targets
-# Traefik-specific CRDs (IngressRoute, Middleware, ServersTransport) -
-# genuinely never installed anywhere in this stack until found missing on
-# this environment's first real end-to-end apply. create_namespace=false
-# since var.traefik_namespace ("gateway") is created by the environment's
-# own extra_namespaces module, not this one.
+# Traefik controller - required for gateway.yaml's IngressRoute/Middleware/ServersTransport CRDs.
 resource "helm_release" "traefik" {
   count = var.install_traefik ? 1 : 0
 
@@ -338,14 +310,8 @@ resource "kubernetes_manifest" "this" {
   depends_on = [helm_release.nats, helm_release.argo_workflows, helm_release.argo_events, helm_release.traefik, helm_release.external_secrets]
 }
 
-# CRD-backed manifests (ESO's ClusterSecretStore/ExternalSecret) that need
-# to apply in the same run that installs their CRDs - kubernetes_manifest
-# validates against the CRD schema at plan time and fails when the CRD
-# doesn't exist yet, same class of problem already solved for
-# cert-manager's Certificate/Issuer above. `content` lets the caller
-# pre-process a real file (e.g. strip a redundant Namespace document)
-# before it's applied; `location` renders a file directly, same as
-# manifest_files.
+# CRD-backed manifests applied via kubectl_manifest (not kubernetes_manifest) -
+# avoids plan-time CRD schema validation that fails when the CRD installs in the same apply.
 locals {
   kubectl_manifest_documents = flatten([
     for idx, m in var.kubectl_manifest_files : [

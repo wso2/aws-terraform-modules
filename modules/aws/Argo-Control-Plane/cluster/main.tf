@@ -164,12 +164,7 @@ resource "aws_eks_cluster" "this" {
   role_arn = aws_iam_role.eks_cluster.arn
   version  = var.kubernetes_version
 
-  # Pinned explicitly to match the real live cluster's actual value -
-  # this attribute is create-time-only (any change forces full cluster
-  # replacement), and leaving it unset relies on the provider's own
-  # default (true), which drifted from what this cluster actually has
-  # (false), threatening to destroy/recreate the live cluster on a
-  # routine apply that has nothing to do with this setting.
+  # create-time-only; pinned to false to match the live cluster and avoid forced replacement.
   bootstrap_self_managed_addons = false
 
   vpc_config {
@@ -229,13 +224,8 @@ resource "aws_iam_role_policy_attachment" "ebs_csi" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
 
-# --- External Secrets Operator IRSA - the doc's stated mechanism for the
-#     oauth2-proxy cookie-signing secret (90-day auto-rotation) and the
-#     SSO client secret, both read from AWS Secrets Manager under
-#     var.eso_secretsmanager_key_prefix ("argo/control-plane/*"). No
-#     serviceAccountRef in the ClusterSecretStore - ESO's own controller
-#     pod, annotated with this role's ARN, resolves credentials via IRSA
-#     through the default AWS SDK chain. ---
+# --- External Secrets Operator IRSA role - ESO controller reads Secrets Manager
+#     via IRSA; no serviceAccountRef in the ClusterSecretStore, annotated SA only. ---
 
 data "aws_iam_policy_document" "eso_assume" {
   statement {

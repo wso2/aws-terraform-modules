@@ -29,12 +29,8 @@ terraform {
       source  = "hashicorp/helm"
       version = "~> 2.17"
     }
-    # kubectl (not kubernetes_manifest) specifically for cert-manager's
-    # Certificate/Issuer CRDs below - kubernetes_manifest validates
-    # against the CRD schema at plan time, which fails on a fresh apply
-    # since those CRDs don't exist until cert-manager's own helm_release
-    # installs them in this same apply. kubectl_manifest applies raw YAML
-    # with no such validation, which is the standard fix for this.
+    # kubectl (not kubernetes_manifest) for cert-manager/ESO CRD-backed resources -
+    # applies raw YAML with no plan-time CRD schema validation.
     kubectl = {
       source  = "alekc/kubectl"
       version = ">= 2.0"
