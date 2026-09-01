@@ -147,6 +147,12 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
+# Ignore: AVD-AWS-0038 (https://avd.aquasec.com/misconfig/aws/eks/avd-aws-0038/)
+# Reason: Requirement to enable logs for EKS cluster will vary based on cluster purpose and requirements
+# Therefore has not been enforced as a requirement
+# Ignore: AVD-AWS-0039 (https://avd.aquasec.com/misconfig/aws/eks/avd-aws-0039/)
+# Reason: Encrypting Secrets will depend on Cluster usage (usage of CSI driver etc) as such
+# This has been configured as an optional parameter
 # trivy:ignore:AVD-AWS-0038
 # trivy:ignore:AVD-AWS-0039
 resource "aws_eks_cluster" "eks_cluster" {
@@ -443,7 +449,6 @@ resource "aws_security_group" "bastion" {
   }
 }
 
-# trivy:ignore:AVD-AWS-0131
 resource "aws_instance" "bastion" {
   count = var.enable_bastion ? 1 : 0
 
@@ -452,6 +457,10 @@ resource "aws_instance" "bastion" {
   subnet_id              = aws_subnet.private[var.availability_zones[0]].id
   vpc_security_group_ids = [aws_security_group.bastion[0].id]
   iam_instance_profile   = aws_iam_instance_profile.bastion[0].name
+
+  root_block_device {
+    encrypted = true
+  }
 
   metadata_options {
     http_tokens = "required"
