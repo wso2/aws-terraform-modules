@@ -9,6 +9,9 @@
 #
 # --------------------------------------------------------------------------------------
 
+# Ignore: AVD-AWS-0178 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-0178)
+# Reason: For more granular control Flow logs are enabled at the subnet level via a separate module at the subnet level (Refer VPC-Flow-Log Module), instead of the VPC level.
+# trivy:ignore:AVD-AWS-0178
 resource "aws_vpc" "vpc" {
   cidr_block           = var.vpc_cidr_block
   enable_dns_support   = true
@@ -173,6 +176,18 @@ resource "aws_eks_cluster" "eks_cluster" {
     authentication_mode                         = "API"
     bootstrap_cluster_creator_admin_permissions = true
   }
+
+  dynamic "encryption_config" {
+    for_each = var.secret_encryption_cmk != null ? [1] : []
+    content {
+      provider {
+        key_arn = var.secret_encryption_cmk
+      }
+      resources = ["secrets"]
+    }
+  }
+
+  enabled_cluster_log_types = var.enabled_cluster_log_types
 
   tags = var.tags
 

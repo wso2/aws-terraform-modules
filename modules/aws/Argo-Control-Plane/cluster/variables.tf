@@ -85,6 +85,18 @@ variable "admin_principal_arns" {
   default     = []
 }
 
+variable "secret_encryption_cmk" {
+  type        = string
+  description = "KMS Key ARN for encrypting Kubernetes secrets"
+  default     = null
+}
+
+variable "enabled_cluster_log_types" {
+  type        = list(string)
+  description = "List of cluster log types to enable"
+  default     = []
+}
+
 variable "eks_addons" {
   type = list(object({
     name    = string
