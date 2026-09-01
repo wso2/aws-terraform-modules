@@ -21,8 +21,6 @@ resource "aws_internet_gateway" "gw" {
   tags   = local.igw_tags
 }
 
-# --- Public subnets (one per AZ, NAT Gateway placement only) ---
-
 resource "aws_subnet" "public" {
   for_each = { for idx, az in var.availability_zones : az => idx }
 
@@ -51,8 +49,6 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public[each.key].id
 }
 
-# --- One NAT Gateway per AZ - no shared outbound path to lose ---
-
 resource "aws_eip" "nat" {
   for_each = { for idx, az in var.availability_zones : az => idx }
 
@@ -69,8 +65,6 @@ resource "aws_nat_gateway" "nat_gateway" {
   tags          = merge(var.tags, { Name = join("-", [local.name_prefix, each.key, "nat"]) })
   depends_on    = [aws_internet_gateway.gw]
 }
-
-# --- Private subnets (nodes live here, each AZ egresses via its own NAT) ---
 
 resource "aws_subnet" "private" {
   for_each = { for idx, az in var.availability_zones : az => idx }
@@ -135,8 +129,6 @@ resource "aws_security_group" "security_group" {
   }
 }
 
-# --- EKS cluster, spanning all AZs ---
-
 resource "aws_iam_role" "eks_cluster" {
   name = local.eks_cluster_role_name
   assume_role_policy = jsonencode({
@@ -155,10 +147,6 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
-# Ignore: AVD-AWS-0038 (https://avd.aquasec.com/misconfig/aws/eks/avd-aws-0038/)
-# Reason: control-plane log types will vary by cluster purpose; not enforced as a requirement.
-# Ignore: AVD-AWS-0039 (https://avd.aquasec.com/misconfig/aws/eks/avd-aws-0039/)
-# Reason: secrets-encryption CMK is optional here, same as the repo's own EKS-Cluster module.
 # trivy:ignore:AVD-AWS-0038
 # trivy:ignore:AVD-AWS-0039
 resource "aws_eks_cluster" "eks_cluster" {
@@ -166,7 +154,6 @@ resource "aws_eks_cluster" "eks_cluster" {
   role_arn = aws_iam_role.eks_cluster.arn
   version  = var.kubernetes_version
 
-  # create-time-only; pinned to false to match the live cluster and avoid forced replacement.
   bootstrap_self_managed_addons = false
 
   vpc_config {
@@ -197,8 +184,6 @@ resource "aws_iam_openid_connect_provider" "eks" {
   tags            = var.tags
 }
 
-# --- EBS CSI driver, for JetStream's persistent volumes ---
-
 data "aws_iam_policy_document" "ebs_csi_assume" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
@@ -225,9 +210,6 @@ resource "aws_iam_role_policy_attachment" "ebs_csi" {
   role       = aws_iam_role.ebs_csi.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
-
-# --- External Secrets Operator IRSA role - ESO controller reads Secrets Manager
-#     via IRSA; no serviceAccountRef in the ClusterSecretStore, annotated SA only. ---
 
 data "aws_iam_policy_document" "eso_assume" {
   statement {
@@ -290,8 +272,6 @@ resource "aws_eks_addon" "ebs_csi_driver" {
   depends_on = [aws_eks_cluster.eks_cluster, aws_eks_node_group.eks_node_group]
 }
 
-# --- Cluster-admin access via native IAM (no unified cross-cloud identity) ---
-
 resource "aws_eks_access_entry" "admin" {
   for_each = toset(var.admin_principal_arns)
 
@@ -313,8 +293,6 @@ resource "aws_eks_access_policy_association" "admin" {
 
   depends_on = [aws_eks_access_entry.admin]
 }
-
-# --- One node group, spread across all AZs ---
 
 resource "aws_iam_role" "node" {
   name = local.node_role_name
@@ -401,10 +379,6 @@ resource "aws_eks_node_group" "eks_node_group" {
   ]
 }
 
-# --- Bastion: native-identity admin access via SSM Session Manager - no
-#     inbound rule, no open port, ever. Reaches the SSM service endpoint
-#     through the first AZ's existing NAT Gateway egress. ---
-
 data "aws_ami" "bastion" {
   count = var.enable_bastion ? 1 : 0
 
@@ -469,9 +443,6 @@ resource "aws_security_group" "bastion" {
   }
 }
 
-# Ignore: AVD-AWS-0131 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-0131/)
-# Reason: no public IP is assigned (private subnet); all access is via SSM
-# Session Manager through the AZ's NAT Gateway, not a public interface.
 # trivy:ignore:AVD-AWS-0131
 resource "aws_instance" "bastion" {
   count = var.enable_bastion ? 1 : 0

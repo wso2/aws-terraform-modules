@@ -17,16 +17,6 @@
 # under the License.
 #
 # --------------------------------------------------------------------------------------
-#
-# Manual, out-of-band distribution: the security review doc itself
-# describes NATS client certs as "distributed to each site out-of-band and
-# never committed to git" - these outputs are that handoff point. Copy the
-# relevant identity's values into that data plane's own environment
-# (terraform.tfvars), same pattern already used for
-# control_plane_tunnel_host. Marked sensitive so `terraform output`
-# doesn't print them by default - use `terraform output -raw` per field.
-#
-# --------------------------------------------------------------------------------------
 
 output "nats_client_cert_pems" {
   value = {

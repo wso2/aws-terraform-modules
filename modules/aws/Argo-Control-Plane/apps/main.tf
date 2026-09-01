@@ -17,21 +17,12 @@
 # under the License.
 #
 # --------------------------------------------------------------------------------------
-#
-# Raw kubernetes/helm resources, no dependency on wso2/common-terraform-modules.
-#
-# --------------------------------------------------------------------------------------
 
 resource "kubernetes_namespace_v1" "namespace" {
   metadata {
     name = var.namespace
   }
 }
-
-# --- cert-manager + private client-CA for NATS mTLS. Real design change,
-#     not a one-time fix: cert-manager renews before expiry on its own,
-#     unlike Terraform's tls provider (common-terraform-modules' tls
-#     module), which only generates once at apply time. ---
 
 resource "kubernetes_namespace_v1" "cert_manager" {
   count = var.install_cert_manager ? 1 : 0
@@ -59,7 +50,6 @@ resource "helm_release" "cert_manager" {
   depends_on = [kubernetes_namespace_v1.cert_manager]
 }
 
-# Standard cert-manager two-step bootstrap: self-signed Issuer → CA Certificate → ClusterIssuer backed by that CA.
 resource "kubectl_manifest" "selfsigned_issuer" {
   count = var.install_cert_manager ? 1 : 0
 
@@ -90,7 +80,7 @@ resource "kubectl_manifest" "nats_ca_certificate" {
       isCA       = true
       commonName = "nats-client-ca"
       secretName = "nats-client-ca-secret"
-      duration   = "8760h" # 1 year
+      duration   = "8760h"
       privateKey = { algorithm = "ECDSA", size = 256 }
       issuerRef = {
         name = "selfsigned-bootstrap"
@@ -119,8 +109,6 @@ resource "kubectl_manifest" "nats_ca_issuer" {
   depends_on = [kubectl_manifest.nats_ca_certificate]
 }
 
-# The control plane's own NATS server certificate - the "wildcard"
-# identity the security review doc describes.
 resource "kubectl_manifest" "nats_server_certificate" {
   count = var.install_cert_manager ? 1 : 0
 
@@ -134,8 +122,8 @@ resource "kubectl_manifest" "nats_server_certificate" {
     spec = {
       commonName  = "nats-server"
       secretName  = "nats-server-cert"
-      duration    = "2160h" # 90 days - rotated automatically well before expiry
-      renewBefore = "360h"  # 15 days
+      duration    = "2160h"
+      renewBefore = "360h"
       privateKey  = { algorithm = "ECDSA", size = 256 }
       usages      = ["server auth", "client auth"]
       dnsNames    = ["nats.${var.namespace}.svc.cluster.local", "nats"]
@@ -149,7 +137,6 @@ resource "kubectl_manifest" "nats_server_certificate" {
   depends_on = [kubectl_manifest.nats_ca_issuer]
 }
 
-# Per-data-plane client identities (one cert per cloud x env, e.g. "aws-stage").
 resource "kubectl_manifest" "nats_client_certificate" {
   for_each = var.install_cert_manager ? toset(var.nats_client_identities) : []
 
@@ -177,7 +164,6 @@ resource "kubectl_manifest" "nats_client_certificate" {
   depends_on = [kubectl_manifest.nats_ca_issuer]
 }
 
-# Read back each issued client cert's Secret so the PEM content can be output.
 data "kubernetes_secret_v1" "nats_client_certificate" {
   for_each = var.install_cert_manager ? toset(var.nats_client_identities) : []
 
@@ -189,7 +175,6 @@ data "kubernetes_secret_v1" "nats_client_certificate" {
   depends_on = [kubectl_manifest.nats_client_certificate]
 }
 
-# gp3 StorageClass backed by the EBS CSI driver - required for NATS JetStream PVCs.
 resource "kubernetes_storage_class_v1" "gp3" {
   metadata {
     name = "gp3"
@@ -244,9 +229,6 @@ resource "helm_release" "argo_events" {
   depends_on = [kubernetes_namespace_v1.namespace]
 }
 
-# --- External Secrets Operator - IRSA-annotated controller reads Secrets Manager;
-#     no serviceAccountRef in ClusterSecretStore. ---
-
 resource "kubernetes_namespace_v1" "external_secrets" {
   count = var.install_external_secrets ? 1 : 0
 
@@ -273,7 +255,6 @@ resource "helm_release" "external_secrets" {
   depends_on = [kubernetes_namespace_v1.external_secrets]
 }
 
-# Traefik controller - required for gateway.yaml's IngressRoute/Middleware/ServersTransport CRDs.
 resource "helm_release" "traefik" {
   count = var.install_traefik ? 1 : 0
 
@@ -285,9 +266,6 @@ resource "helm_release" "traefik" {
   create_namespace = false
 }
 
-# Several real pipeline manifests are multi-document YAML - yamldecode()
-# only parses a single document, so each file is split on a bare "---"
-# line first (same fix as the data-plane apps modules).
 locals {
   manifest_documents = flatten([
     for idx, m in var.manifest_files : [
@@ -310,8 +288,6 @@ resource "kubernetes_manifest" "kubernetes_object" {
   depends_on = [helm_release.nats, helm_release.argo_workflows, helm_release.argo_events, helm_release.traefik, helm_release.external_secrets]
 }
 
-# CRD-backed manifests applied via kubectl_manifest (not kubernetes_manifest) -
-# avoids plan-time CRD schema validation that fails when the CRD installs in the same apply.
 locals {
   kubectl_manifest_documents = flatten([
     for idx, m in var.kubectl_manifest_files : [

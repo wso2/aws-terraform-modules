@@ -17,18 +17,6 @@
 # under the License.
 #
 # --------------------------------------------------------------------------------------
-#
-# The control plane fronts SSO login, dispatch, and NATS for every data
-# plane - the highest blast-radius component in the system - so unlike the
-# per-tier data plane modules, this one is genuinely multi-AZ throughout:
-# N private + N public subnets, one NAT Gateway per AZ (no shared outbound
-# path to lose), one node group spread across all of them. N (the length
-# of availability_zones) is a config choice made at apply time, not fixed
-# by this module - pass 2 AZs for a leaner build or 3+ for full NATS
-# JetStream RAFT quorum tolerance (see the availability_zones description
-# below for that tradeoff).
-#
-# --------------------------------------------------------------------------------------
 
 variable "project" {
   type        = string

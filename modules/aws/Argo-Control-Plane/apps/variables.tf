@@ -17,16 +17,6 @@
 # under the License.
 #
 # --------------------------------------------------------------------------------------
-#
-# Unlike the data plane apps modules, this one installs a single namespaced
-# Argo Workflows/Events release (the control plane isn't per-tier) plus
-# NATS/JetStream, and defaults its Helm values toward the HA topology the
-# control plane needs: workflow-controller with leader election, NATS as a
-# 3-replica StatefulSet. The actual per-AZ pod spread depends on the values
-# passed in - defaults here are conservative starting points, override via
-# the *_values variables for the real chart's exact value paths.
-#
-# --------------------------------------------------------------------------------------
 
 variable "namespace" {
   type        = string

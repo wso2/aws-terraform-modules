@@ -29,8 +29,6 @@ terraform {
       source  = "hashicorp/helm"
       version = "~> 2.17"
     }
-    # kubectl (not kubernetes_manifest) for cert-manager/ESO CRD-backed resources -
-    # applies raw YAML with no plan-time CRD schema validation.
     kubectl = {
       source  = "alekc/kubectl"
       version = ">= 2.0"

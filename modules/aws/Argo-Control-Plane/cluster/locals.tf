@@ -8,16 +8,6 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-#
-# Naming/tagging convention matches the repo's other modules (see VPC,
-# EKS-Cluster, EC2-Instance, Security-Group): a shared name_prefix built
-# via join("-", [project, application, environment, region]), then one
-# named local per singular resource, tagged via merge(var.tags, { Name = ... }).
-# For-each-keyed resources (per-AZ subnets/route tables/NAT/EIP) still build
-# their per-key name inline in main.tf from local.name_prefix, since a
-# static local can't carry a for_each key.
-#
-# --------------------------------------------------------------------------------------
 
 locals {
   name_prefix = join("-", [var.project, var.application, var.environment, var.region])
