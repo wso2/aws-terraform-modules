@@ -9,20 +9,16 @@
 #
 # --------------------------------------------------------------------------------------
 
-locals {
-  name = "${var.project}-${var.application}-${var.environment}"
-}
-
 resource "aws_vpc" "this" {
   cidr_block           = var.vpc_cidr_block
   enable_dns_support   = true
   enable_dns_hostnames = true
-  tags                 = merge(var.tags, { Name = "${local.name}-vpc" })
+  tags                 = local.vpc_tags
 }
 
 resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
-  tags   = merge(var.tags, { Name = "${local.name}-igw" })
+  tags   = local.igw_tags
 }
 
 # --- Public subnets (one per AZ, NAT Gateway placement only) ---
@@ -34,7 +30,7 @@ resource "aws_subnet" "public" {
   cidr_block              = var.public_subnet_cidr_blocks[each.value]
   availability_zone       = each.key
   map_public_ip_on_launch = true
-  tags                    = merge(var.tags, { Name = "${local.name}-public-${each.key}" })
+  tags                    = merge(var.tags, { Name = join("-", [local.name_prefix, "public", each.key]) })
 }
 
 resource "aws_route_table" "public" {
@@ -45,7 +41,7 @@ resource "aws_route_table" "public" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.this.id
   }
-  tags = merge(var.tags, { Name = "${local.name}-public-${each.key}-rt" })
+  tags = merge(var.tags, { Name = join("-", [local.name_prefix, "public", each.key, "rt"]) })
 }
 
 resource "aws_route_table_association" "public" {
@@ -61,7 +57,7 @@ resource "aws_eip" "nat" {
   for_each = { for idx, az in var.availability_zones : az => idx }
 
   domain     = "vpc"
-  tags       = merge(var.tags, { Name = "${local.name}-${each.key}-nat-eip" })
+  tags       = merge(var.tags, { Name = join("-", [local.name_prefix, each.key, "nat-eip"]) })
   depends_on = [aws_internet_gateway.this]
 }
 
@@ -70,7 +66,7 @@ resource "aws_nat_gateway" "this" {
 
   allocation_id = aws_eip.nat[each.key].id
   subnet_id     = aws_subnet.public[each.key].id
-  tags          = merge(var.tags, { Name = "${local.name}-${each.key}-nat" })
+  tags          = merge(var.tags, { Name = join("-", [local.name_prefix, each.key, "nat"]) })
   depends_on    = [aws_internet_gateway.this]
 }
 
@@ -82,7 +78,7 @@ resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.this.id
   cidr_block        = var.private_subnet_cidr_blocks[each.value]
   availability_zone = each.key
-  tags              = merge(var.tags, { Name = "${local.name}-private-${each.key}" })
+  tags              = merge(var.tags, { Name = join("-", [local.name_prefix, "private", each.key]) })
 }
 
 resource "aws_route_table" "private" {
@@ -93,7 +89,7 @@ resource "aws_route_table" "private" {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.this[each.key].id
   }
-  tags = merge(var.tags, { Name = "${local.name}-private-${each.key}-rt" })
+  tags = merge(var.tags, { Name = join("-", [local.name_prefix, "private", each.key, "rt"]) })
 }
 
 resource "aws_route_table_association" "private" {
@@ -104,7 +100,7 @@ resource "aws_route_table_association" "private" {
 }
 
 resource "aws_security_group" "this" {
-  name_prefix = "${local.name}-"
+  name_prefix = "${local.name_prefix}-"
   description = "Control plane nodes"
   vpc_id      = aws_vpc.this.id
 
@@ -132,7 +128,7 @@ resource "aws_security_group" "this" {
     }
   }
 
-  tags = merge(var.tags, { Name = "${local.name}-sg" })
+  tags = local.cluster_sg_tags
 
   lifecycle {
     create_before_destroy = true
@@ -142,7 +138,7 @@ resource "aws_security_group" "this" {
 # --- EKS cluster, spanning all AZs ---
 
 resource "aws_iam_role" "eks_cluster" {
-  name = "${local.name}-eks-cluster-role"
+  name = local.eks_cluster_role_name
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -159,8 +155,14 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
+# Ignore: AVD-AWS-0038 (https://avd.aquasec.com/misconfig/aws/eks/avd-aws-0038/)
+# Reason: control-plane log types will vary by cluster purpose; not enforced as a requirement.
+# Ignore: AVD-AWS-0039 (https://avd.aquasec.com/misconfig/aws/eks/avd-aws-0039/)
+# Reason: secrets-encryption CMK is optional here, same as the repo's own EKS-Cluster module.
+# trivy:ignore:AVD-AWS-0038
+# trivy:ignore:AVD-AWS-0039
 resource "aws_eks_cluster" "this" {
-  name     = local.name
+  name     = local.eks_cluster_name
   role_arn = aws_iam_role.eks_cluster.arn
   version  = var.kubernetes_version
 
@@ -214,7 +216,7 @@ data "aws_iam_policy_document" "ebs_csi_assume" {
 }
 
 resource "aws_iam_role" "ebs_csi" {
-  name               = "${local.name}-ebs-csi-role"
+  name               = local.ebs_csi_role_name
   assume_role_policy = data.aws_iam_policy_document.ebs_csi_assume.json
   tags               = var.tags
 }
@@ -244,13 +246,13 @@ data "aws_iam_policy_document" "eso_assume" {
 }
 
 resource "aws_iam_role" "eso" {
-  name               = "${local.name}-eso-role"
+  name               = local.eso_role_name
   assume_role_policy = data.aws_iam_policy_document.eso_assume.json
   tags               = var.tags
 }
 
 resource "aws_iam_role_policy" "eso" {
-  name = "${local.name}-eso-secretsmanager"
+  name = local.eso_policy_name
   role = aws_iam_role.eso.id
 
   policy = jsonencode({
@@ -315,7 +317,7 @@ resource "aws_eks_access_policy_association" "admin" {
 # --- One node group, spread across all AZs ---
 
 resource "aws_iam_role" "node" {
-  name = "${local.name}-node-role"
+  name = local.node_role_name
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -343,7 +345,7 @@ resource "aws_iam_role_policy_attachment" "node_ecr" {
 }
 
 resource "aws_launch_template" "this" {
-  name_prefix = "${local.name}-"
+  name_prefix = "${local.launch_template_name}-"
   vpc_security_group_ids = [
     aws_eks_cluster.this.vpc_config[0].cluster_security_group_id,
     aws_security_group.this.id,
@@ -355,7 +357,7 @@ resource "aws_launch_template" "this" {
 
   tag_specifications {
     resource_type = "instance"
-    tags          = merge(var.tags, { Name = "${local.name}-node" })
+    tags          = local.launch_template_tags
   }
 
   lifecycle {
@@ -365,7 +367,7 @@ resource "aws_launch_template" "this" {
 
 resource "aws_eks_node_group" "this" {
   cluster_name    = aws_eks_cluster.this.name
-  node_group_name = "${local.name}-system"
+  node_group_name = local.node_group_name
   node_role_arn   = aws_iam_role.node.arn
   subnet_ids      = [for az in var.availability_zones : aws_subnet.private[az].id]
   instance_types  = var.node_instance_types
@@ -418,7 +420,7 @@ data "aws_ami" "bastion" {
 resource "aws_iam_role" "bastion" {
   count = var.enable_bastion ? 1 : 0
 
-  name = "${local.name}-bastion-role"
+  name = local.bastion_role_name
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -440,7 +442,7 @@ resource "aws_iam_role_policy_attachment" "bastion_ssm" {
 resource "aws_iam_instance_profile" "bastion" {
   count = var.enable_bastion ? 1 : 0
 
-  name = "${local.name}-bastion-profile"
+  name = local.bastion_profile_name
   role = aws_iam_role.bastion[0].name
   tags = var.tags
 }
@@ -448,7 +450,7 @@ resource "aws_iam_instance_profile" "bastion" {
 resource "aws_security_group" "bastion" {
   count = var.enable_bastion ? 1 : 0
 
-  name_prefix = "${local.name}-bastion-"
+  name_prefix = "${local.bastion_sg_name}-"
   description = "Bastion instance - zero inbound rules by design, SSM Session Manager only"
   vpc_id      = aws_vpc.this.id
 
@@ -460,13 +462,17 @@ resource "aws_security_group" "bastion" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = merge(var.tags, { Name = "${local.name}-bastion-sg" })
+  tags = local.bastion_sg_tags
 
   lifecycle {
     create_before_destroy = true
   }
 }
 
+# Ignore: AVD-AWS-0131 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-0131/)
+# Reason: no public IP is assigned (private subnet); all access is via SSM
+# Session Manager through the AZ's NAT Gateway, not a public interface.
+# trivy:ignore:AVD-AWS-0131
 resource "aws_instance" "bastion" {
   count = var.enable_bastion ? 1 : 0
 
@@ -480,5 +486,5 @@ resource "aws_instance" "bastion" {
     http_tokens = "required"
   }
 
-  tags = merge(var.tags, { Name = "${local.name}-bastion" })
+  tags = local.bastion_tags
 }
