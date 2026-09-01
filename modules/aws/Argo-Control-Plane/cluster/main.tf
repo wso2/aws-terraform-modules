@@ -9,15 +9,15 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_vpc" "this" {
+resource "aws_vpc" "vpc" {
   cidr_block           = var.vpc_cidr_block
   enable_dns_support   = true
   enable_dns_hostnames = true
   tags                 = local.vpc_tags
 }
 
-resource "aws_internet_gateway" "this" {
-  vpc_id = aws_vpc.this.id
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.vpc.id
   tags   = local.igw_tags
 }
 
@@ -26,7 +26,7 @@ resource "aws_internet_gateway" "this" {
 resource "aws_subnet" "public" {
   for_each = { for idx, az in var.availability_zones : az => idx }
 
-  vpc_id                  = aws_vpc.this.id
+  vpc_id                  = aws_vpc.vpc.id
   cidr_block              = var.public_subnet_cidr_blocks[each.value]
   availability_zone       = each.key
   map_public_ip_on_launch = true
@@ -36,10 +36,10 @@ resource "aws_subnet" "public" {
 resource "aws_route_table" "public" {
   for_each = { for idx, az in var.availability_zones : az => idx }
 
-  vpc_id = aws_vpc.this.id
+  vpc_id = aws_vpc.vpc.id
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.this.id
+    gateway_id = aws_internet_gateway.gw.id
   }
   tags = merge(var.tags, { Name = join("-", [local.name_prefix, "public", each.key, "rt"]) })
 }
@@ -58,16 +58,16 @@ resource "aws_eip" "nat" {
 
   domain     = "vpc"
   tags       = merge(var.tags, { Name = join("-", [local.name_prefix, each.key, "nat-eip"]) })
-  depends_on = [aws_internet_gateway.this]
+  depends_on = [aws_internet_gateway.gw]
 }
 
-resource "aws_nat_gateway" "this" {
+resource "aws_nat_gateway" "nat_gateway" {
   for_each = { for idx, az in var.availability_zones : az => idx }
 
   allocation_id = aws_eip.nat[each.key].id
   subnet_id     = aws_subnet.public[each.key].id
   tags          = merge(var.tags, { Name = join("-", [local.name_prefix, each.key, "nat"]) })
-  depends_on    = [aws_internet_gateway.this]
+  depends_on    = [aws_internet_gateway.gw]
 }
 
 # --- Private subnets (nodes live here, each AZ egresses via its own NAT) ---
@@ -75,7 +75,7 @@ resource "aws_nat_gateway" "this" {
 resource "aws_subnet" "private" {
   for_each = { for idx, az in var.availability_zones : az => idx }
 
-  vpc_id            = aws_vpc.this.id
+  vpc_id            = aws_vpc.vpc.id
   cidr_block        = var.private_subnet_cidr_blocks[each.value]
   availability_zone = each.key
   tags              = merge(var.tags, { Name = join("-", [local.name_prefix, "private", each.key]) })
@@ -84,10 +84,10 @@ resource "aws_subnet" "private" {
 resource "aws_route_table" "private" {
   for_each = { for idx, az in var.availability_zones : az => idx }
 
-  vpc_id = aws_vpc.this.id
+  vpc_id = aws_vpc.vpc.id
   route {
     cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.this[each.key].id
+    nat_gateway_id = aws_nat_gateway.nat_gateway[each.key].id
   }
   tags = merge(var.tags, { Name = join("-", [local.name_prefix, "private", each.key, "rt"]) })
 }
@@ -99,10 +99,10 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private[each.key].id
 }
 
-resource "aws_security_group" "this" {
+resource "aws_security_group" "security_group" {
   name_prefix = "${local.name_prefix}-"
   description = "Control plane nodes"
-  vpc_id      = aws_vpc.this.id
+  vpc_id      = aws_vpc.vpc.id
 
   dynamic "ingress" {
     for_each = [for r in var.security_group_rules : r if r.direction == "ingress"]
@@ -161,7 +161,7 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
 # Reason: secrets-encryption CMK is optional here, same as the repo's own EKS-Cluster module.
 # trivy:ignore:AVD-AWS-0038
 # trivy:ignore:AVD-AWS-0039
-resource "aws_eks_cluster" "this" {
+resource "aws_eks_cluster" "eks_cluster" {
   name     = local.eks_cluster_name
   role_arn = aws_iam_role.eks_cluster.arn
   version  = var.kubernetes_version
@@ -187,13 +187,13 @@ resource "aws_eks_cluster" "this" {
 }
 
 data "tls_certificate" "eks" {
-  url = aws_eks_cluster.this.identity[0].oidc[0].issuer
+  url = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
 }
 
 resource "aws_iam_openid_connect_provider" "eks" {
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
-  url             = aws_eks_cluster.this.identity[0].oidc[0].issuer
+  url             = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
   tags            = var.tags
 }
 
@@ -275,19 +275,19 @@ resource "aws_iam_role_policy" "eso" {
 resource "aws_eks_addon" "core" {
   for_each = { for a in var.eks_addons : a.name => a }
 
-  cluster_name  = aws_eks_cluster.this.name
+  cluster_name  = aws_eks_cluster.eks_cluster.name
   addon_name    = each.value.name
   addon_version = try(each.value.version, null)
 
-  depends_on = [aws_eks_cluster.this, aws_eks_node_group.this]
+  depends_on = [aws_eks_cluster.eks_cluster, aws_eks_node_group.eks_node_group]
 }
 
 resource "aws_eks_addon" "ebs_csi_driver" {
-  cluster_name             = aws_eks_cluster.this.name
+  cluster_name             = aws_eks_cluster.eks_cluster.name
   addon_name               = "aws-ebs-csi-driver"
   service_account_role_arn = aws_iam_role.ebs_csi.arn
 
-  depends_on = [aws_eks_cluster.this, aws_eks_node_group.this]
+  depends_on = [aws_eks_cluster.eks_cluster, aws_eks_node_group.eks_node_group]
 }
 
 # --- Cluster-admin access via native IAM (no unified cross-cloud identity) ---
@@ -295,7 +295,7 @@ resource "aws_eks_addon" "ebs_csi_driver" {
 resource "aws_eks_access_entry" "admin" {
   for_each = toset(var.admin_principal_arns)
 
-  cluster_name  = aws_eks_cluster.this.name
+  cluster_name  = aws_eks_cluster.eks_cluster.name
   principal_arn = each.value
   type          = "STANDARD"
 }
@@ -303,7 +303,7 @@ resource "aws_eks_access_entry" "admin" {
 resource "aws_eks_access_policy_association" "admin" {
   for_each = toset(var.admin_principal_arns)
 
-  cluster_name  = aws_eks_cluster.this.name
+  cluster_name  = aws_eks_cluster.eks_cluster.name
   principal_arn = each.value
   policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
 
@@ -344,11 +344,11 @@ resource "aws_iam_role_policy_attachment" "node_ecr" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
-resource "aws_launch_template" "this" {
+resource "aws_launch_template" "launch_template" {
   name_prefix = "${local.launch_template_name}-"
   vpc_security_group_ids = [
-    aws_eks_cluster.this.vpc_config[0].cluster_security_group_id,
-    aws_security_group.this.id,
+    aws_eks_cluster.eks_cluster.vpc_config[0].cluster_security_group_id,
+    aws_security_group.security_group.id,
   ]
 
   metadata_options {
@@ -365,8 +365,8 @@ resource "aws_launch_template" "this" {
   }
 }
 
-resource "aws_eks_node_group" "this" {
-  cluster_name    = aws_eks_cluster.this.name
+resource "aws_eks_node_group" "eks_node_group" {
+  cluster_name    = aws_eks_cluster.eks_cluster.name
   node_group_name = local.node_group_name
   node_role_arn   = aws_iam_role.node.arn
   subnet_ids      = [for az in var.availability_zones : aws_subnet.private[az].id]
@@ -374,7 +374,7 @@ resource "aws_eks_node_group" "this" {
   capacity_type   = var.node_capacity_type
 
   launch_template {
-    id      = aws_launch_template.this.id
+    id      = aws_launch_template.launch_template.id
     version = "$Latest"
   }
 
@@ -452,7 +452,7 @@ resource "aws_security_group" "bastion" {
 
   name_prefix = "${local.bastion_sg_name}-"
   description = "Bastion instance - zero inbound rules by design, SSM Session Manager only"
-  vpc_id      = aws_vpc.this.id
+  vpc_id      = aws_vpc.vpc.id
 
   egress {
     description = "HTTPS to SSM service endpoints"

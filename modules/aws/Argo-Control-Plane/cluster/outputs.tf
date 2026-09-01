@@ -19,19 +19,19 @@
 # --------------------------------------------------------------------------------------
 
 output "eks_cluster_name" {
-  value = aws_eks_cluster.this.name
+  value = aws_eks_cluster.eks_cluster.name
 }
 
 output "eks_cluster_arn" {
-  value = aws_eks_cluster.this.arn
+  value = aws_eks_cluster.eks_cluster.arn
 }
 
 output "eks_cluster_endpoint" {
-  value = aws_eks_cluster.this.endpoint
+  value = aws_eks_cluster.eks_cluster.endpoint
 }
 
 output "eks_base64_encoded_ca_cert" {
-  value = aws_eks_cluster.this.certificate_authority[0].data
+  value = aws_eks_cluster.eks_cluster.certificate_authority[0].data
 }
 
 output "oidc_provider_arn" {
@@ -43,7 +43,7 @@ output "oidc_provider_url" {
 }
 
 output "vpc_id" {
-  value = aws_vpc.this.id
+  value = aws_vpc.vpc.id
 }
 
 output "private_subnet_ids" {

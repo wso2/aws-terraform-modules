@@ -22,7 +22,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "kubernetes_namespace_v1" "this" {
+resource "kubernetes_namespace_v1" "namespace" {
   metadata {
     name = var.namespace
   }
@@ -217,7 +217,7 @@ resource "helm_release" "nats" {
   create_namespace = false
   values           = var.nats_values
 
-  depends_on = [kubernetes_namespace_v1.this, kubectl_manifest.nats_server_certificate, kubernetes_storage_class_v1.gp3]
+  depends_on = [kubernetes_namespace_v1.namespace, kubectl_manifest.nats_server_certificate, kubernetes_storage_class_v1.gp3]
 }
 
 resource "helm_release" "argo_workflows" {
@@ -229,7 +229,7 @@ resource "helm_release" "argo_workflows" {
   create_namespace = false
   values           = var.argo_workflows_values
 
-  depends_on = [kubernetes_namespace_v1.this]
+  depends_on = [kubernetes_namespace_v1.namespace]
 }
 
 resource "helm_release" "argo_events" {
@@ -241,7 +241,7 @@ resource "helm_release" "argo_events" {
   create_namespace = false
   values           = var.argo_events_values
 
-  depends_on = [kubernetes_namespace_v1.this]
+  depends_on = [kubernetes_namespace_v1.namespace]
 }
 
 # --- External Secrets Operator - IRSA-annotated controller reads Secrets Manager;
@@ -302,7 +302,7 @@ locals {
   ])
 }
 
-resource "kubernetes_manifest" "this" {
+resource "kubernetes_manifest" "kubernetes_object" {
   for_each = { for d in local.manifest_documents : d.key => d.manifest }
 
   manifest = each.value
