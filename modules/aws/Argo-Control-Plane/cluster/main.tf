@@ -9,9 +9,6 @@
 #
 # --------------------------------------------------------------------------------------
 
-# Ignore: AVD-AWS-0178 (https://avd.aquasec.com/misconfig/aws/ec2/avd-aws-0178)
-# Reason: For more granular control Flow logs are enabled at the subnet level via a separate module at the subnet level (Refer VPC-Flow-Log Module), instead of the VPC level.
-# trivy:ignore:AVD-AWS-0178
 resource "aws_vpc" "vpc" {
   cidr_block           = var.vpc_cidr_block
   enable_dns_support   = true
@@ -150,14 +147,6 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
-# Ignore: AVD-AWS-0038 (https://avd.aquasec.com/misconfig/aws/eks/avd-aws-0038/)
-# Reason: Requirement to enable logs for EKS cluster will vary based on cluster purpose and requirements
-# Therefore has not been enforced as a requirement
-# Ignore: AVD-AWS-0039 (https://avd.aquasec.com/misconfig/aws/eks/avd-aws-0039/)
-# Reason: Encrypting Secrets will depend on Cluster usage (usage of CSI driver etc) as such
-# This has been configured as an optional parameter
-# trivy:ignore:AVD-AWS-0038
-# trivy:ignore:AVD-AWS-0039
 resource "aws_eks_cluster" "eks_cluster" {
   name     = local.eks_cluster_name
   role_arn = aws_iam_role.eks_cluster.arn
