@@ -30,6 +30,14 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
       origin_ssl_protocols   = var.origin_ssl_protocols
     }
 
+    dynamic "custom_header" {
+      for_each = var.origin_custom_headers
+      content {
+        name  = custom_header.value.name
+        value = custom_header.value.value
+      }
+    }
+
     dynamic "origin_shield" {
       for_each = var.origin_shield_enabled ? [1] : []
       content {
@@ -69,6 +77,15 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
         cookies {
           forward = "none"
         }
+      }
+    }
+
+    dynamic "lambda_function_association" {
+      for_each = var.lambda_function_associations
+      content {
+        event_type   = lambda_function_association.value.event_type
+        lambda_arn   = lambda_function_association.value.lambda_arn
+        include_body = lambda_function_association.value.include_body
       }
     }
 

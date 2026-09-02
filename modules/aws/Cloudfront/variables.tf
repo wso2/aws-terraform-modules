@@ -237,3 +237,44 @@ variable "minimum_protocol_version" {
     error_message = "minimum_protocol_version must be one of: SSLv3, TLSv1, TLSv1_2016, TLSv1.1_2016, TLSv1.2_2018, TLSv1.2_2019, TLSv1.2_2021, TLSv1.2_2025, TLSv1.3_2025."
   }
 }
+
+variable "origin_custom_headers" {
+  description = <<-EOT
+    Custom headers CloudFront adds to every origin request (Eg: an
+    origin-verify secret the origin requires, so only this distribution can
+    reach it). List of { name, value } objects. Not declared sensitive: the
+    dynamic origin block iterates over it (for_each rejects sensitive
+    values), and the provider stores header values in plain state anyway —
+    callers passing a derived-sensitive value (Eg: random_password.result)
+    must wrap it in nonsensitive().
+  EOT
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = []
+}
+
+variable "lambda_function_associations" {
+  description = <<-EOT
+    Lambda@Edge functions attached to the default cache behavior. List of
+    { event_type, lambda_arn, include_body } objects. event_type is one of
+    viewer-request, origin-request, origin-response, viewer-response (at
+    most one function per event type); lambda_arn must be a published
+    function version ARN (not $LATEST) of a function in us-east-1.
+  EOT
+  type = list(object({
+    event_type   = string
+    lambda_arn   = string
+    include_body = optional(bool, false)
+  }))
+  default = []
+
+  validation {
+    condition = alltrue([
+      for a in var.lambda_function_associations :
+      contains(["viewer-request", "origin-request", "origin-response", "viewer-response"], a.event_type)
+    ])
+    error_message = "event_type must be one of viewer-request, origin-request, origin-response, viewer-response."
+  }
+}
