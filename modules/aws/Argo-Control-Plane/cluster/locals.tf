@@ -29,6 +29,9 @@ locals {
   eso_role_name   = join("-", [local.name_prefix, "eso-role"])
   eso_policy_name = join("-", [local.name_prefix, "eso-secretsmanager"])
 
+  workflow_controller_artifacts_role_name   = join("-", [local.name_prefix, "workflow-artifacts-role"])
+  workflow_controller_artifacts_policy_name = join("-", [local.name_prefix, "workflow-artifacts-s3"])
+
   node_role_name       = join("-", [local.name_prefix, "node-role"])
   node_group_name      = join("-", [local.name_prefix, "system"])
   launch_template_name = join("-", [local.name_prefix, "node"])

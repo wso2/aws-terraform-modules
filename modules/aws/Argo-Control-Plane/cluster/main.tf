@@ -264,6 +264,55 @@ resource "aws_iam_role_policy" "eso" {
   })
 }
 
+data "aws_iam_policy_document" "workflow_controller_artifacts_assume" {
+  count = var.s3_artifact_bucket_arn != null ? 1 : 0
+
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:${var.argo_namespace}:${var.workflow_controller_service_account_name}"]
+    }
+    principals {
+      identifiers = [aws_iam_openid_connect_provider.eks.arn]
+      type        = "Federated"
+    }
+  }
+}
+
+resource "aws_iam_role" "workflow_controller_artifacts" {
+  count = var.s3_artifact_bucket_arn != null ? 1 : 0
+
+  name               = local.workflow_controller_artifacts_role_name
+  assume_role_policy = data.aws_iam_policy_document.workflow_controller_artifacts_assume[0].json
+  tags               = var.tags
+}
+
+resource "aws_iam_role_policy" "workflow_controller_artifacts" {
+  count = var.s3_artifact_bucket_arn != null ? 1 : 0
+
+  name = local.workflow_controller_artifacts_policy_name
+  role = aws_iam_role.workflow_controller_artifacts[0].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["s3:PutObject", "s3:GetObject"]
+        Resource = "${var.s3_artifact_bucket_arn}/*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = var.s3_artifact_bucket_arn
+      }
+    ]
+  })
+}
+
 resource "aws_eks_addon" "core" {
   for_each = { for a in var.eks_addons : a.name => a }
 

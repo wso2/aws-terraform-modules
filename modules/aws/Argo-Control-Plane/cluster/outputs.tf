@@ -54,3 +54,8 @@ output "eso_role_arn" {
   description = "IRSA role ARN for External Secrets Operator's own controller ServiceAccount (external-secrets/external-secrets)"
   value       = aws_iam_role.eso.arn
 }
+
+output "workflow_controller_artifacts_role_arn" {
+  description = "IRSA role ARN for the workflow-controller ServiceAccount to write to s3_artifact_bucket_arn - null when that variable wasn't set"
+  value       = var.s3_artifact_bucket_arn != null ? aws_iam_role.workflow_controller_artifacts[0].arn : null
+}

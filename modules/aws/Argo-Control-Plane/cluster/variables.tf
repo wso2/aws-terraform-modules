@@ -97,6 +97,24 @@ variable "enabled_cluster_log_types" {
   default     = []
 }
 
+variable "s3_artifact_bucket_arn" {
+  type        = string
+  description = "ARN of an S3 bucket Argo Workflows should archive workflow logs/artifacts to. Opt-in: when null (default), no IRSA role is created and the caller must configure their own artifact repository."
+  default     = null
+}
+
+variable "argo_namespace" {
+  type        = string
+  description = "Kubernetes namespace Argo Workflows runs in - only used to scope the workflow-controller's IRSA trust policy when s3_artifact_bucket_arn is set"
+  default     = "argo"
+}
+
+variable "workflow_controller_service_account_name" {
+  type        = string
+  description = "ServiceAccount name the argo-workflows Helm chart creates for workflow-controller - only used to scope the IRSA trust policy when s3_artifact_bucket_arn is set"
+  default     = "argo-workflows-workflow-controller"
+}
+
 variable "eks_addons" {
   type = list(object({
     name    = string
