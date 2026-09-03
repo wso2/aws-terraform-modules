@@ -15,6 +15,12 @@ variable "namespace" {
   default     = "argo"
 }
 
+variable "tunnel_client_identities" {
+  type        = list(string)
+  description = "One reverse-tunnel SSH keypair per data-plane identity (e.g. [\"aws\", \"azure\"]) - the resulting private keys are exposed via the tunnel_client_private_keys output for manual, out-of-band distribution to each data plane's own environment, same pattern as nats_client_identities. Default [] creates no keys and no tunnel-server-authorized-keys Secret at all."
+  default     = []
+}
+
 variable "argo_workflows_chart_version" {
   type    = string
   default = null

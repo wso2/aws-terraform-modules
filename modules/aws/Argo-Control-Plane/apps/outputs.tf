@@ -32,3 +32,9 @@ output "nats_client_ca_pems" {
   }
   sensitive = true
 }
+
+output "tunnel_client_private_keys" {
+  description = "OpenSSH-formatted private key per identity in tunnel_client_identities - copy into that data plane's own terraform.tfvars tunnel_client_private_key."
+  value       = { for identity, key in tls_private_key.tunnel_client : identity => key.private_key_openssh }
+  sensitive   = true
+}

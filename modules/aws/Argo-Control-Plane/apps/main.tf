@@ -15,6 +15,37 @@ resource "kubernetes_namespace_v1" "namespace" {
   }
 }
 
+# Reverse-tunnel SSH keypairs, one per data-plane identity - same
+# per-identity generation pattern as the NATS client certs below, just
+# raw SSH keys (tls provider) instead of cert-manager Certificates,
+# since tunnel-server.yaml speaks plain SSH, not TLS.
+resource "tls_private_key" "tunnel_client" {
+  for_each = toset(var.tunnel_client_identities)
+
+  algorithm = "ED25519"
+}
+
+locals {
+  tunnel_authorized_keys = join("\n", [
+    for identity, key in tls_private_key.tunnel_client :
+    "command=\"/bin/false\",no-pty,no-agent-forwarding,no-x11-forwarding ${trimspace(key.public_key_openssh)} ${identity}-dp-tunnel"
+  ])
+}
+
+resource "kubernetes_secret_v1" "tunnel_server_authorized_keys" {
+  count = length(var.tunnel_client_identities) > 0 ? 1 : 0
+
+  metadata {
+    name      = "tunnel-server-authorized-keys"
+    namespace = var.namespace
+  }
+  data = {
+    "authorized_keys" = local.tunnel_authorized_keys
+  }
+
+  depends_on = [kubernetes_namespace_v1.namespace]
+}
+
 resource "kubernetes_namespace_v1" "cert_manager" {
   count = var.install_cert_manager ? 1 : 0
 
