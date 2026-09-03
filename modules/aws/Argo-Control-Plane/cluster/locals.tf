@@ -29,6 +29,14 @@ locals {
   eso_role_name   = join("-", [local.name_prefix, "eso-role"])
   eso_policy_name = join("-", [local.name_prefix, "eso-secretsmanager"])
 
+  eks_secrets_kms_alias = join("-", [local.name_prefix, "eks-secrets"])
+
+  flow_log_role_name   = join("-", [local.name_prefix, "flow-log-role"])
+  flow_log_policy_name = join("-", [local.name_prefix, "flow-log-policy"])
+  flow_log_tags        = merge(var.tags, { Name = join("-", [local.name_prefix, "flow-log"]) })
+
+  artifact_bucket_name = join("-", [local.name_prefix, "argo-logs"])
+
   workflow_controller_artifacts_role_name   = join("-", [local.name_prefix, "workflow-artifacts-role"])
   workflow_controller_artifacts_policy_name = join("-", [local.name_prefix, "workflow-artifacts-s3"])
 

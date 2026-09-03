@@ -56,6 +56,11 @@ output "eso_role_arn" {
 }
 
 output "workflow_controller_artifacts_role_arn" {
-  description = "IRSA role ARN for the workflow-controller ServiceAccount to write to s3_artifact_bucket_arn - null when that variable wasn't set"
-  value       = var.s3_artifact_bucket_arn != null ? aws_iam_role.workflow_controller_artifacts[0].arn : null
+  description = "IRSA role ARN for the workflow-controller ServiceAccount to write to artifact_bucket_name - null unless enable_artifact_archiving is true"
+  value       = var.enable_artifact_archiving ? aws_iam_role.workflow_controller_artifacts[0].arn : null
+}
+
+output "artifact_bucket_name" {
+  description = "S3 bucket Argo Workflows should archive logs/artifacts to - null unless enable_artifact_archiving is true"
+  value       = var.enable_artifact_archiving ? aws_s3_bucket.argo_logs[0].id : null
 }

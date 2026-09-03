@@ -85,33 +85,45 @@ variable "admin_principal_arns" {
   default     = []
 }
 
-variable "secret_encryption_cmk" {
-  type        = string
-  description = "KMS Key ARN for encrypting Kubernetes secrets"
-  default     = null
+variable "enable_secrets_encryption" {
+  type        = bool
+  description = "Whether to create a dedicated KMS CMK and envelope-encrypt Kubernetes Secrets with it"
+  default     = false
 }
 
 variable "enabled_cluster_log_types" {
   type        = list(string)
-  description = "List of cluster log types to enable"
+  description = "List of cluster log types to enable - when non-empty, a matching CloudWatch Log Group is also created with retention set by log_retention_in_days"
   default     = []
 }
 
-variable "s3_artifact_bucket_arn" {
-  type        = string
-  description = "ARN of an S3 bucket Argo Workflows should archive workflow logs/artifacts to. Opt-in: when null (default), no IRSA role is created and the caller must configure their own artifact repository."
-  default     = null
+variable "log_retention_in_days" {
+  type        = number
+  description = "Retention for any CloudWatch Log Groups this module creates (EKS cluster logs, VPC flow logs) and the S3 artifact bucket's expiration, if enabled"
+  default     = 90
+}
+
+variable "enable_vpc_flow_logs" {
+  type        = bool
+  description = "Whether to create a VPC Flow Log for this module's own VPC, published to a dedicated CloudWatch Log Group"
+  default     = false
+}
+
+variable "enable_artifact_archiving" {
+  type        = bool
+  description = "Whether to create an S3 bucket + IRSA role for Argo Workflows to archive workflow logs/artifacts to (workflow_controller_artifacts_role_arn/artifact_bucket_name outputs). The caller still wires these into argo_workflows_values' artifactRepository Helm config."
+  default     = false
 }
 
 variable "argo_namespace" {
   type        = string
-  description = "Kubernetes namespace Argo Workflows runs in - only used to scope the workflow-controller's IRSA trust policy when s3_artifact_bucket_arn is set"
+  description = "Kubernetes namespace Argo Workflows runs in - only used to scope the workflow-controller's IRSA trust policy when enable_artifact_archiving is true"
   default     = "argo"
 }
 
 variable "workflow_controller_service_account_name" {
   type        = string
-  description = "ServiceAccount name the argo-workflows Helm chart creates for workflow-controller - only used to scope the IRSA trust policy when s3_artifact_bucket_arn is set"
+  description = "ServiceAccount name the argo-workflows Helm chart creates for workflow-controller - only used to scope the IRSA trust policy when enable_artifact_archiving is true"
   default     = "argo-workflows-workflow-controller"
 }
 
