@@ -261,10 +261,25 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
+resource "aws_kms_key" "eks_secrets" {
+  count = var.enable_secrets_encryption ? 1 : 0
+
+  description         = "Encrypts EKS Kubernetes Secrets for ${local.name}"
+  enable_key_rotation = true
+  tags                = var.tags
+}
+
+resource "aws_kms_alias" "eks_secrets" {
+  count = var.enable_secrets_encryption ? 1 : 0
+
+  name          = "alias/${local.name}-eks-secrets"
+  target_key_id = aws_kms_key.eks_secrets[0].key_id
+}
+
 resource "aws_eks_cluster" "this" {
-  name     = local.name
-  role_arn = aws_iam_role.eks_cluster.arn
-  version  = var.kubernetes_version
+  name                          = local.name
+  role_arn                      = aws_iam_role.eks_cluster.arn
+  version                       = var.kubernetes_version
   bootstrap_self_managed_addons = false
 
   vpc_config {
@@ -282,9 +297,198 @@ resource "aws_eks_cluster" "this" {
     bootstrap_cluster_creator_admin_permissions = true
   }
 
+  dynamic "encryption_config" {
+    for_each = var.enable_secrets_encryption ? [1] : []
+    content {
+      provider {
+        key_arn = aws_kms_key.eks_secrets[0].arn
+      }
+      resources = ["secrets"]
+    }
+  }
+
+  enabled_cluster_log_types = var.enabled_cluster_log_types
+
   tags = var.tags
 
   depends_on = [aws_iam_role_policy_attachment.eks_cluster_policy]
+}
+
+resource "aws_cloudwatch_log_group" "eks_cluster" {
+  count = length(var.enabled_cluster_log_types) > 0 ? 1 : 0
+
+  name              = "/aws/eks/${local.name}/cluster"
+  retention_in_days = var.log_retention_in_days
+  tags              = var.tags
+
+  depends_on = [aws_eks_cluster.this]
+}
+
+# Duplicates the repo's own VPC-Flow-Log module inline, same reason its
+# own vpc.tf leaves flow logs out of itself (see that module's
+# AVD-AWS-0178 ignore) - kept opt-in rather than always-on.
+resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
+  count = var.enable_vpc_flow_logs ? 1 : 0
+
+  name              = "/aws/vpc/${local.name}-flow-logs"
+  retention_in_days = var.log_retention_in_days
+  tags              = var.tags
+}
+
+data "aws_iam_policy_document" "flow_log_assume" {
+  count = var.enable_vpc_flow_logs ? 1 : 0
+
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["vpc-flow-logs.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "flow_log" {
+  count = var.enable_vpc_flow_logs ? 1 : 0
+
+  name               = "${local.name}-flow-log-role"
+  assume_role_policy = data.aws_iam_policy_document.flow_log_assume[0].json
+  tags               = var.tags
+}
+
+data "aws_iam_policy_document" "flow_log_policy" {
+  count = var.enable_vpc_flow_logs ? 1 : 0
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams",
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_role_policy" "flow_log" {
+  count = var.enable_vpc_flow_logs ? 1 : 0
+
+  name   = "${local.name}-flow-log-policy"
+  role   = aws_iam_role.flow_log[0].id
+  policy = data.aws_iam_policy_document.flow_log_policy[0].json
+}
+
+resource "aws_flow_log" "vpc" {
+  count = var.enable_vpc_flow_logs ? 1 : 0
+
+  log_destination      = aws_cloudwatch_log_group.vpc_flow_logs[0].arn
+  log_destination_type = "cloud-watch-logs"
+  iam_role_arn         = aws_iam_role.flow_log[0].arn
+  traffic_type         = "ALL"
+  vpc_id               = aws_vpc.this.id
+  tags                 = merge(var.tags, { Name = "${local.name}-flow-log" })
+}
+
+# Argo's own artifact repository - without this, workflow/pod logs only
+# exist as long as the pod does (archiveLogs is off by default in the
+# chart). Opt-in, self-contained: the module creates its own bucket
+# rather than taking a caller-supplied ARN.
+resource "aws_s3_bucket" "argo_logs" {
+  count = var.enable_artifact_archiving ? 1 : 0
+
+  bucket = "${local.name}-argo-logs"
+  tags   = var.tags
+}
+
+resource "aws_s3_bucket_public_access_block" "argo_logs" {
+  count = var.enable_artifact_archiving ? 1 : 0
+
+  bucket = aws_s3_bucket.argo_logs[0].id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "argo_logs" {
+  count = var.enable_artifact_archiving ? 1 : 0
+
+  bucket = aws_s3_bucket.argo_logs[0].id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "argo_logs" {
+  count = var.enable_artifact_archiving ? 1 : 0
+
+  bucket = aws_s3_bucket.argo_logs[0].id
+
+  rule {
+    id     = "expire-after-retention"
+    status = "Enabled"
+
+    filter {}
+
+    expiration {
+      days = var.log_retention_in_days
+    }
+  }
+}
+
+data "aws_iam_policy_document" "workflow_controller_artifacts_assume" {
+  count = var.enable_artifact_archiving ? 1 : 0
+
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:${var.argo_namespace}:${var.workflow_controller_service_account_name}"]
+    }
+    principals {
+      identifiers = [aws_iam_openid_connect_provider.eks.arn]
+      type        = "Federated"
+    }
+  }
+}
+
+resource "aws_iam_role" "workflow_controller_artifacts" {
+  count = var.enable_artifact_archiving ? 1 : 0
+
+  name               = "${local.name}-workflow-artifacts-role"
+  assume_role_policy = data.aws_iam_policy_document.workflow_controller_artifacts_assume[0].json
+  tags               = var.tags
+}
+
+resource "aws_iam_role_policy" "workflow_controller_artifacts" {
+  count = var.enable_artifact_archiving ? 1 : 0
+
+  name = "${local.name}-workflow-artifacts-s3"
+  role = aws_iam_role.workflow_controller_artifacts[0].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["s3:PutObject", "s3:GetObject"]
+        Resource = "${aws_s3_bucket.argo_logs[0].arn}/*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = aws_s3_bucket.argo_logs[0].arn
+      }
+    ]
+  })
 }
 
 # OIDC provider - needed for per-env IRSA (pipeline pod -> deployment

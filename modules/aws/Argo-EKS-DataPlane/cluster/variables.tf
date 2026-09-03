@@ -228,3 +228,45 @@ variable "deploy_identities" {
   description = "Per-env IRSA identities for pipeline pods (\"Pipeline pod -> deployment target: Cloud-native Workload Identity Federation / IRSA, scoped per env\" per the security review doc) - no standing secret, credential minted per-pod by AWS itself. One IAM role per map entry, trusted via this cluster's own OIDC provider and scoped to exactly that (namespace, ServiceAccount) pair. policy_json is caller-supplied (this module has no opinion on what a pipeline actually needs to reach - e.g. {\"stage\" = {namespace=\"argo-stage\", service_account_name=\"is-deploy-stage\", policy_json=...}})."
   default     = {}
 }
+
+variable "enable_secrets_encryption" {
+  type        = bool
+  description = "Whether to create a dedicated KMS CMK and envelope-encrypt Kubernetes Secrets with it"
+  default     = false
+}
+
+variable "enabled_cluster_log_types" {
+  type        = list(string)
+  description = "List of cluster log types to enable - when non-empty, a matching CloudWatch Log Group is also created with retention set by log_retention_in_days"
+  default     = []
+}
+
+variable "log_retention_in_days" {
+  type        = number
+  description = "Retention for any CloudWatch Log Groups this module creates (EKS cluster logs, VPC flow logs) and the S3 artifact bucket's expiration, if enabled"
+  default     = 90
+}
+
+variable "enable_vpc_flow_logs" {
+  type        = bool
+  description = "Whether to create a VPC Flow Log for this module's own VPC, published to a dedicated CloudWatch Log Group"
+  default     = false
+}
+
+variable "enable_artifact_archiving" {
+  type        = bool
+  description = "Whether to create an S3 bucket + IRSA role for Argo Workflows to archive workflow logs/artifacts to (workflow_controller_artifacts_role_arn/artifact_bucket_name outputs). The caller still wires these into argo_workflows_values' artifactRepository Helm config."
+  default     = false
+}
+
+variable "argo_namespace" {
+  type        = string
+  description = "Kubernetes namespace Argo Workflows runs in - only used to scope the workflow-controller's IRSA trust policy when enable_artifact_archiving is true"
+  default     = "argo"
+}
+
+variable "workflow_controller_service_account_name" {
+  type        = string
+  description = "ServiceAccount name the argo-workflows Helm chart creates for workflow-controller - only used to scope the IRSA trust policy when enable_artifact_archiving is true"
+  default     = "argo-workflows-workflow-controller"
+}
