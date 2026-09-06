@@ -580,6 +580,7 @@ resource "aws_eks_node_group" "eks_node_group" {
     aws_iam_role_policy_attachment.node_worker,
     aws_iam_role_policy_attachment.node_cni,
     aws_iam_role_policy_attachment.node_ecr,
+    aws_route_table_association.private,
   ]
 }
 
