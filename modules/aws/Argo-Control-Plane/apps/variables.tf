@@ -114,10 +114,11 @@ variable "nats_client_identities" {
 
 variable "manifest_files" {
   type = list(object({
-    location     = string
+    location     = optional(string)
+    content      = optional(string)
     template_map = optional(map(string), {})
   }))
-  description = "Additional Kubernetes manifests to apply - dispatch-namespace RBAC, the SSO gateway (oauth2-proxy/credential-injector/link-resolver/submit-attributor), Ingress/Service for the real Load Balancer replacing the current single-VM Elastic IP. Content and ordering are entirely caller-supplied."
+  description = "Additional Kubernetes manifests to apply - dispatch-namespace RBAC, the SSO gateway (oauth2-proxy/credential-injector/link-resolver/submit-attributor), Ingress/Service for the real Load Balancer replacing the current single-VM Elastic IP. Content and ordering are entirely caller-supplied. Set content directly to pass already-fetched text instead of rendering location as a local file path."
   default     = []
 }
 

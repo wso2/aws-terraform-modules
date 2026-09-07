@@ -292,7 +292,7 @@ locals {
   manifest_documents = flatten([
     for idx, m in var.manifest_files : [
       for doc_idx, doc in [
-        for chunk in split("\n---\n", "\n${templatefile(m.location, m.template_map)}") : chunk
+        for chunk in split("\n---\n", "\n${m.content != null ? m.content : templatefile(m.location, m.template_map)}") : chunk
         if trimspace(chunk) != ""
         ] : {
         key      = "${idx}-${doc_idx}"
