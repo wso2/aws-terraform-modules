@@ -465,7 +465,7 @@ resource "aws_eks_addon" "core" {
   addon_name    = each.value.name
   addon_version = try(each.value.version, null)
 
-  depends_on = [aws_eks_cluster.eks_cluster, aws_eks_node_group.eks_node_group]
+  depends_on = [aws_eks_cluster.eks_cluster]
 }
 
 resource "aws_eks_addon" "ebs_csi_driver" {
