@@ -245,7 +245,7 @@ resource "aws_eks_cluster" "eks_cluster" {
 
   access_config {
     authentication_mode                         = "API"
-    bootstrap_cluster_creator_admin_permissions = false
+    bootstrap_cluster_creator_admin_permissions = true
   }
 
   dynamic "encryption_config" {
