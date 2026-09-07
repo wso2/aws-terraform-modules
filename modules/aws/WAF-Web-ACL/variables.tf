@@ -231,9 +231,26 @@ variable "rules" {
         }))
       }))
     }))
+    # Rate-based rule: tracks the request rate per aggregation key over a
+    # 5-minute rolling window and applies the rule action to keys whose rate
+    # exceeds limit. Optional scope-down restricts which requests count
+    # toward (and are affected by) the limit — supports ip_set_reference
+    # directly, or not_statement wrapping one; use not_statement +
+    # ip_set_reference to exempt trusted source IPs (e.g. internal NAT
+    # egress) from rate limiting.
     rate_based_statement = optional(object({
       limit              = number
       aggregate_key_type = string
+      scope_down_statement = optional(object({
+        ip_set_reference_statement = optional(object({
+          arn = string
+        }))
+        not_statement = optional(object({
+          ip_set_reference_statement = optional(object({
+            arn = string
+          }))
+        }))
+      }))
     }))
 
     and_statement = optional(object({
@@ -513,6 +530,40 @@ variable "rules" {
       ]
     ]))
     error_message = "Each statement inside scope_down_statement.and_statement.statements / or_statement.statements (and their not_statement-nested variants) must specify exactly one of byte_match_statement or ip_set_reference_statement."
+  }
+
+  # Validation 9: rate_based_statement.limit must be within AWS WAF bounds and
+  # aggregate_key_type must be IP or CONSTANT (FORWARDED_IP / CUSTOM_KEYS would
+  # require forwarded_ip_config / custom_key blocks the module does not
+  # render). CONSTANT counts all matching requests under one key, which AWS WAF
+  # only accepts together with a scope_down_statement.
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      v.rate_based_statement.limit >= 10 && v.rate_based_statement.limit <= 2000000000
+      && contains(["IP", "CONSTANT"], v.rate_based_statement.aggregate_key_type)
+      && (v.rate_based_statement.aggregate_key_type != "CONSTANT" || try(v.rate_based_statement.scope_down_statement, null) != null)
+      if try(v.rate_based_statement, null) != null
+    ])
+    error_message = "rate_based_statement.limit must be between 10 and 2000000000 and aggregate_key_type must be IP or CONSTANT; CONSTANT additionally requires a scope_down_statement."
+  }
+
+  # Validation 10: rate_based_statement.scope_down_statement must specify
+  # exactly one of ip_set_reference_statement or not_statement, and
+  # not_statement must wrap an ip_set_reference_statement.
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      (
+        (try(v.rate_based_statement.scope_down_statement.ip_set_reference_statement, null) != null ? 1 : 0) +
+        (try(v.rate_based_statement.scope_down_statement.not_statement, null) != null ? 1 : 0) == 1
+        ) && (
+        try(v.rate_based_statement.scope_down_statement.not_statement, null) == null ||
+        try(v.rate_based_statement.scope_down_statement.not_statement.ip_set_reference_statement, null) != null
+      )
+      if try(v.rate_based_statement.scope_down_statement, null) != null
+    ])
+    error_message = "rate_based_statement.scope_down_statement must specify exactly one of ip_set_reference_statement or not_statement, and not_statement must contain an ip_set_reference_statement."
   }
 }
 
