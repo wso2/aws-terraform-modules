@@ -445,6 +445,31 @@ resource "aws_wafv2_web_acl" "web_acl" {
           content {
             limit              = rate_based_statement.value.limit
             aggregate_key_type = rate_based_statement.value.aggregate_key_type
+
+            # Optional scope-down: ip_set_reference_statement directly, or
+            # not_statement wrapping one (exempt trusted source IPs from the
+            # rate limit). Validations 9/10 enforce exactly one branch.
+            dynamic "scope_down_statement" {
+              for_each = rate_based_statement.value.scope_down_statement != null ? [rate_based_statement.value.scope_down_statement] : []
+              content {
+                dynamic "ip_set_reference_statement" {
+                  for_each = scope_down_statement.value.ip_set_reference_statement != null ? [scope_down_statement.value.ip_set_reference_statement] : []
+                  content {
+                    arn = ip_set_reference_statement.value.arn
+                  }
+                }
+                dynamic "not_statement" {
+                  for_each = scope_down_statement.value.not_statement != null ? [scope_down_statement.value.not_statement] : []
+                  content {
+                    statement {
+                      ip_set_reference_statement {
+                        arn = not_statement.value.ip_set_reference_statement.arn
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
         dynamic "geo_match_statement" {
