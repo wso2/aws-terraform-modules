@@ -109,11 +109,20 @@ resource "helm_release" "external_secrets" {
 }
 
 # Several real pipeline manifests are multi-document YAML (Deployment +
-# Service + IngressRoute in one file, multiple RBAC objects, etc.) -
-# yamldecode() only parses a single document, so each file is split on a
-# bare "---" line first. This is a real fix, not a design choice: applying
-# these files through the previous wso2 kubernetes/Manifest module had the
-# exact same single-document limitation.
+# Service + IngressRoute in one file, multiple RBAC objects, etc.) - split
+# on a bare "---" line first. This is a real fix, not a design choice:
+# applying these files through the previous wso2 kubernetes/Manifest module
+# had the exact same single-document limitation.
+#
+# kubectl_manifest (not kubernetes_manifest) - same silent-client-
+# construction-failure bug control-plane's main.tf documents
+# ("kubernetes_manifest's silent token-drop bug with static tokens"):
+# kubernetes_manifest builds its own REST client independently of the rest
+# of the provider, and that path doesn't reliably work with exec-based auth
+# (aws eks get-token here) - confirmed failing on Azure's equivalent module
+# with the identical "cannot create REST client: no client config" error on
+# every instance, regardless of parallelism. kubectl_manifest takes raw
+# YAML text directly, so no yamldecode() round-trip is needed either.
 locals {
   manifest_documents = flatten([
     for idx, m in var.manifest_files : [
@@ -121,17 +130,17 @@ locals {
         for chunk in split("\n---\n", "\n${m.content != null ? m.content : templatefile(m.location, m.template_map)}") : chunk
         if trimspace(chunk) != ""
         ] : {
-        key      = "${idx}-${doc_idx}"
-        manifest = yamldecode(doc)
+        key  = "${idx}-${doc_idx}"
+        body = doc
       }
     ]
   ])
 }
 
-resource "kubernetes_manifest" "this" {
-  for_each = { for d in local.manifest_documents : d.key => d.manifest }
+resource "kubectl_manifest" "this" {
+  for_each = { for d in local.manifest_documents : d.key => d.body }
 
-  manifest = each.value
+  yaml_body = each.value
 
   depends_on = [helm_release.argo_workflows, helm_release.argo_events, helm_release.argocd]
 }
