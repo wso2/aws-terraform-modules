@@ -142,6 +142,15 @@ resource "kubectl_manifest" "this" {
 
   yaml_body = each.value
 
+  # wait_for_rollout defaults to true for Deployment/DaemonSet/StatefulSet
+  # kinds (a no-op for everything else here) - tunnel-client's Deployment
+  # needs a Secret (tunnel-client-key) that's only created once this
+  # entire module finishes applying, so waiting here deadlocks: Terraform
+  # blocks inside this apply for a pod that can't start until after this
+  # apply is done. Kubernetes' own reconciliation starts the pod for real
+  # moments later regardless of whether Terraform waited around for it.
+  wait_for_rollout = false
+
   depends_on = [helm_release.argo_workflows, helm_release.argo_events, helm_release.argocd]
 }
 
@@ -167,6 +176,9 @@ resource "kubectl_manifest" "extra" {
   for_each = { for d in local.kubectl_manifest_documents : d.key => d.body }
 
   yaml_body = each.value
+
+  # See kubectl_manifest.this's identical comment on wait_for_rollout.
+  wait_for_rollout = false
 
   depends_on = [helm_release.external_secrets, helm_release.argo_workflows, helm_release.argo_events, helm_release.argocd]
 }
