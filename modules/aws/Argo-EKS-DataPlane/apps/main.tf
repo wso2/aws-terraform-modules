@@ -167,17 +167,19 @@ locals {
         for chunk in split("\n---\n", "\n${m.content != null ? m.content : templatefile(m.location, m.template_map)}") : chunk
         if trimspace(chunk) != ""
         ] : {
-        key  = "${idx}-${doc_idx}"
-        body = doc
+        key       = "${idx}-${doc_idx}"
+        body      = doc
+        namespace = m.namespace
       }
     ]
   ])
 }
 
 resource "kubectl_manifest" "extra" {
-  for_each = { for d in local.kubectl_manifest_documents : d.key => d.body }
+  for_each = { for d in local.kubectl_manifest_documents : d.key => d }
 
-  yaml_body = each.value
+  yaml_body          = each.value.body
+  override_namespace = each.value.namespace
 
   # See kubectl_manifest.this's identical comment on wait_for_rollout.
   wait_for_rollout = false

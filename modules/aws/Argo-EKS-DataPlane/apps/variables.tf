@@ -147,6 +147,7 @@ variable "kubectl_manifest_files" {
     location     = optional(string)
     content      = optional(string)
     template_map = optional(map(string), {})
+    namespace    = optional(string)
   }))
   description = "Manifests applied via the alekc/kubectl provider instead of kubernetes_manifest - required for anything backed by a CRD installed in this same apply (ESO's ClusterSecretStore/ExternalSecret). Set content directly to pre-process a real file's text instead of rendering location as-is."
   default     = []
