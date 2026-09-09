@@ -130,17 +130,19 @@ locals {
         for chunk in split("\n---\n", "\n${m.content != null ? m.content : templatefile(m.location, m.template_map)}") : chunk
         if trimspace(chunk) != ""
         ] : {
-        key  = "${idx}-${doc_idx}"
-        body = doc
+        key       = "${idx}-${doc_idx}"
+        body      = doc
+        namespace = m.namespace
       }
     ]
   ])
 }
 
 resource "kubectl_manifest" "this" {
-  for_each = { for d in local.manifest_documents : d.key => d.body }
+  for_each = { for d in local.manifest_documents : d.key => d }
 
-  yaml_body = each.value
+  yaml_body          = each.value.body
+  override_namespace = each.value.namespace
 
   # wait_for_rollout defaults to true for Deployment/DaemonSet/StatefulSet
   # kinds (a no-op for everything else here) - tunnel-client's Deployment
