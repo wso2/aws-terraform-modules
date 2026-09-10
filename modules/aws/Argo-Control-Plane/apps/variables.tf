@@ -154,7 +154,8 @@ variable "kubectl_manifest_files" {
     location     = optional(string)
     content      = optional(string)
     template_map = optional(map(string), {})
+    namespace    = optional(string)
   }))
-  description = "Manifests applied via the alekc/kubectl provider instead of kubernetes_manifest - required for anything backed by a CRD installed in this same apply (ESO's ClusterSecretStore/ExternalSecret), since kubernetes_manifest validates against the CRD schema at plan time and fails when the CRD doesn't exist yet. Set content directly to pre-process a real file's text (e.g. strip a document already managed elsewhere) instead of rendering location as-is."
+  description = "Manifests applied via the alekc/kubectl provider instead of kubernetes_manifest - required for anything backed by a CRD installed in this same apply (ESO's ClusterSecretStore/ExternalSecret), since kubernetes_manifest validates against the CRD schema at plan time and fails when the CRD doesn't exist yet. Set content directly to pre-process a real file's text (e.g. strip a document already managed elsewhere) instead of rendering location as-is. namespace, if set, overrides every object's own embedded metadata.namespace via kubectl_manifest's override_namespace - e.g. eventbus.yaml ships with no namespace field at all (\"same manifest applies on both control plane and data plane, just change -n on apply\"), so this is how a plain terraform apply supplies it instead."
   default     = []
 }

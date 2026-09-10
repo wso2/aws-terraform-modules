@@ -317,17 +317,19 @@ locals {
         for chunk in split("\n---\n", "\n${m.content != null ? m.content : templatefile(m.location, m.template_map)}") : chunk
         if trimspace(chunk) != ""
         ] : {
-        key  = "${idx}-${doc_idx}"
-        body = doc
+        key       = "${idx}-${doc_idx}"
+        body      = doc
+        namespace = m.namespace
       }
     ]
   ])
 }
 
 resource "kubectl_manifest" "extra" {
-  for_each = { for d in local.kubectl_manifest_documents : d.key => d.body }
+  for_each = { for d in local.kubectl_manifest_documents : d.key => d }
 
-  yaml_body = each.value
+  yaml_body          = each.value.body
+  override_namespace = each.value.namespace
 
   depends_on = [helm_release.external_secrets, helm_release.nats, helm_release.argo_workflows, helm_release.argo_events]
 }
