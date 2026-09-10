@@ -286,6 +286,7 @@ resource "helm_release" "traefik" {
   version          = var.traefik_chart_version
   namespace        = var.traefik_namespace
   create_namespace = false
+  values           = var.traefik_values
 }
 
 locals {

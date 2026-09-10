@@ -101,6 +101,12 @@ variable "traefik_helm_repo" {
   default = "https://traefik.github.io/charts"
 }
 
+variable "traefik_values" {
+  type        = list(string)
+  description = "Helm values overrides (YAML strings, later entries win) for traefik. gateway.yaml's own backends (control-plane-argo, azure-dp-argo, aws-dp-argo, oauth2-proxy-svc, submit-attributor-svc) are all ExternalName Services by design (this module has no other way to reference a Service in a different namespace/cluster) - modern Traefik's kubernetesCRD provider refuses to route to ANY ExternalName Service by default (SSRF hardening) and silently drops the WHOLE IngressRoute, not just the offending route, with no indication anywhere except its own controller logs (\"externalName services not allowed\"). Found live-broken 2026-09-10 - every portal path 404'd from day one, unrelated to and undetectable from any of the other gateway/oauth2-proxy fixes. The caller MUST set providers.kubernetesCRD.allowExternalNameServices: true here or this entire module's gateway is non-functional."
+  default     = []
+}
+
 variable "traefik_namespace" {
   type    = string
   default = "gateway"
