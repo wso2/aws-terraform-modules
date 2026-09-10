@@ -148,7 +148,7 @@ resource "kubectl_manifest" "nats_server_certificate" {
       renewBefore = "360h"
       privateKey  = { algorithm = "ECDSA", size = 256 }
       usages      = ["server auth", "client auth"]
-      dnsNames    = ["nats.${var.namespace}.svc.cluster.local", "nats"]
+      dnsNames    = concat(["nats.${var.namespace}.svc.cluster.local", "nats"], var.nats_server_external_dns_names)
       issuerRef = {
         name = "nats-client-ca-issuer"
         kind = "ClusterIssuer"

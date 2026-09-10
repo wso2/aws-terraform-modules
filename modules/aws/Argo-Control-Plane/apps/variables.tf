@@ -106,6 +106,12 @@ variable "traefik_namespace" {
   default = "gateway"
 }
 
+variable "nats_server_external_dns_names" {
+  type        = list(string)
+  description = "Extra dnsNames for the nats-server-cert Certificate, beyond the two internal cluster-DNS names (nats.<namespace>.svc.cluster.local, nats) it already gets. Every data-plane environment connects to this NATS broker via its own external LoadBalancer hostname (var.control_plane_nats_host in aws-dataplane/azure-dataplane), not either internal name - without it here too, cross-cluster mTLS connections fail x509 SAN verification (\"certificate is valid for nats.argo.svc.cluster.local, nats, not <lb-hostname>\"), found live-broken 2026-09-10 (every EventSource across every data plane stuck silently retrying \"connecting to nats cluster...\", no dispatch has ever actually reached a data plane since this cert-manager-based cert replaced the old VM's cert). A plain variable, not a live data.kubernetes_service_v1 lookup on the NATS Service this same module creates - that Service depends on this Certificate already existing (see helm_release.nats's depends_on), so deriving dnsNames from the Service's own resulting hostname would be a genuine dependency cycle, same class of issue as control-plane environment's oauth2-proxy CONTROL_PLANE_PORTAL_HOST fix."
+  default     = []
+}
+
 variable "nats_client_identities" {
   type        = list(string)
   description = "commonName for each data-plane NATS client certificate cert-manager issues, e.g. [\"azure-stage\", \"azure-prod\", \"aws-stage\", \"aws-prod\"]. One Certificate per entry; the resulting cert/key end up in a Kubernetes Secret named \"nats-client-<entry>\" in var.namespace, readable via this module's nats_client_cert_pems/nats_client_key_pems outputs for manual, out-of-band distribution to each data plane's own environment - same pattern already used for control_plane_tunnel_host."
