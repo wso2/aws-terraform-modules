@@ -59,6 +59,8 @@ resource "aws_lambda_function" "scanner" {
       HUB_ACCOUNT_NAME      = coalesce(var.hub_account_name, var.account_name)
       TARGET_ROLE_ARNS      = join(",", var.target_role_arns)
       EXCLUSIONS_PARAM_NAME = aws_ssm_parameter.exclusions.name
+      TERRAFORM_TAG_KEYS    = join(",", var.terraform_tag_keys)
+      TERRAFORM_TAG_VALUES  = join(",", var.terraform_tag_values)
     }
   }
 }
