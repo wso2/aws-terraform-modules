@@ -235,9 +235,11 @@ variable "rules" {
     # 5-minute rolling window and applies the rule action to keys whose rate
     # exceeds limit. Optional scope-down restricts which requests count
     # toward (and are affected by) the limit — supports ip_set_reference
-    # directly, or not_statement wrapping one; use not_statement +
-    # ip_set_reference to exempt trusted source IPs (e.g. internal NAT
-    # egress) from rate limiting.
+    # directly, not_statement wrapping one (use to exempt trusted source IPs,
+    # e.g. internal NAT egress, from rate limiting), or the purpose-built
+    # uri_path_scoped_statement below to rate-limit a specific URI path
+    # prefix (optionally on a single host) independently of the rest of the
+    # traffic behind the Web ACL.
     rate_based_statement = optional(object({
       limit              = number
       aggregate_key_type = string
@@ -249,6 +251,25 @@ variable "rules" {
           ip_set_reference_statement = optional(object({
             arn = string
           }))
+        }))
+        # Narrow purpose-built scope-down for URI-scoped rate limits: only
+        # requests whose URI path STARTS_WITH uri_path_prefix count toward
+        # (and are affected by) the limit. host_header additionally requires
+        # an EXACTLY host match, each excluded_uri_path_prefixes entry carves
+        # a sub-path back out of the scope, and exempt_ip_set_arn exempts
+        # source IPs in the referenced IP set (e.g. trusted NAT egress).
+        # Renders as
+        #   AND(byte_match uri STARTS_WITH uri_path_prefix,
+        #       [byte_match host EXACTLY host_header,]
+        #       [NOT(byte_match uri STARTS_WITH excluded_uri_path_prefixes[i]), ...]
+        #       [NOT(ip_set_reference exempt_ip_set_arn)])
+        # or as the bare uri byte_match when no optional field is set (AWS
+        # WAF rejects an and_statement with fewer than 2 nested statements).
+        uri_path_scoped_statement = optional(object({
+          uri_path_prefix            = string
+          host_header                = optional(string)
+          excluded_uri_path_prefixes = optional(list(string), [])
+          exempt_ip_set_arn          = optional(string)
         }))
       }))
     }))
@@ -549,21 +570,44 @@ variable "rules" {
   }
 
   # Validation 10: rate_based_statement.scope_down_statement must specify
-  # exactly one of ip_set_reference_statement or not_statement, and
-  # not_statement must wrap an ip_set_reference_statement.
+  # exactly one of ip_set_reference_statement, not_statement, or
+  # uri_path_scoped_statement, and not_statement must wrap an
+  # ip_set_reference_statement.
   validation {
     condition = alltrue([
       for v in var.rules :
       (
         (try(v.rate_based_statement.scope_down_statement.ip_set_reference_statement, null) != null ? 1 : 0) +
-        (try(v.rate_based_statement.scope_down_statement.not_statement, null) != null ? 1 : 0) == 1
+        (try(v.rate_based_statement.scope_down_statement.not_statement, null) != null ? 1 : 0) +
+        (try(v.rate_based_statement.scope_down_statement.uri_path_scoped_statement, null) != null ? 1 : 0) == 1
         ) && (
         try(v.rate_based_statement.scope_down_statement.not_statement, null) == null ||
         try(v.rate_based_statement.scope_down_statement.not_statement.ip_set_reference_statement, null) != null
       )
       if try(v.rate_based_statement.scope_down_statement, null) != null
     ])
-    error_message = "rate_based_statement.scope_down_statement must specify exactly one of ip_set_reference_statement or not_statement, and not_statement must contain an ip_set_reference_statement."
+    error_message = "rate_based_statement.scope_down_statement must specify exactly one of ip_set_reference_statement, not_statement, or uri_path_scoped_statement, and not_statement must contain an ip_set_reference_statement."
+  }
+
+  # Validation 11: uri_path_scoped_statement path prefixes must be non-empty
+  # and start with "/" (byte_match on uri_path compares against the raw path,
+  # so a prefix without the leading slash would never match), and host_header,
+  # when set, must be non-empty.
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      startswith(v.rate_based_statement.scope_down_statement.uri_path_scoped_statement.uri_path_prefix, "/")
+      && alltrue([
+        for p in v.rate_based_statement.scope_down_statement.uri_path_scoped_statement.excluded_uri_path_prefixes :
+        startswith(p, "/")
+      ])
+      && (
+        v.rate_based_statement.scope_down_statement.uri_path_scoped_statement.host_header == null ||
+        length(coalesce(v.rate_based_statement.scope_down_statement.uri_path_scoped_statement.host_header, "")) > 0
+      )
+      if try(v.rate_based_statement.scope_down_statement.uri_path_scoped_statement, null) != null
+    ])
+    error_message = "uri_path_scoped_statement.uri_path_prefix and every excluded_uri_path_prefixes entry must start with \"/\", and host_header, when set, must be non-empty."
   }
 }
 

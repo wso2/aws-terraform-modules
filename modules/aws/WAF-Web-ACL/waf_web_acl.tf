@@ -446,9 +446,10 @@ resource "aws_wafv2_web_acl" "web_acl" {
             limit              = rate_based_statement.value.limit
             aggregate_key_type = rate_based_statement.value.aggregate_key_type
 
-            # Optional scope-down: ip_set_reference_statement directly, or
+            # Optional scope-down: ip_set_reference_statement directly,
             # not_statement wrapping one (exempt trusted source IPs from the
-            # rate limit). Validations 9/10 enforce exactly one branch.
+            # rate limit), or uri_path_scoped_statement (rate-limit a URI
+            # path prefix). Validations 9/10 enforce exactly one branch.
             dynamic "scope_down_statement" {
               for_each = rate_based_statement.value.scope_down_statement != null ? [rate_based_statement.value.scope_down_statement] : []
               content {
@@ -464,6 +465,118 @@ resource "aws_wafv2_web_acl" "web_acl" {
                     statement {
                       ip_set_reference_statement {
                         arn = not_statement.value.ip_set_reference_statement.arn
+                      }
+                    }
+                  }
+                }
+
+                # uri_path_scoped_statement with only uri_path_prefix set:
+                # a bare byte_match. AWS WAF rejects an and_statement with
+                # fewer than 2 nested statements, so the single-component
+                # case cannot reuse the AND rendering below.
+                dynamic "byte_match_statement" {
+                  for_each = (
+                    scope_down_statement.value.uri_path_scoped_statement != null
+                    && scope_down_statement.value.uri_path_scoped_statement.host_header == null
+                    && length(scope_down_statement.value.uri_path_scoped_statement.excluded_uri_path_prefixes) == 0
+                    && scope_down_statement.value.uri_path_scoped_statement.exempt_ip_set_arn == null
+                  ) ? [scope_down_statement.value.uri_path_scoped_statement] : []
+                  content {
+                    search_string         = byte_match_statement.value.uri_path_prefix
+                    positional_constraint = "STARTS_WITH"
+                    field_to_match {
+                      uri_path {}
+                    }
+                    text_transformation {
+                      priority = 0
+                      type     = "LOWERCASE"
+                    }
+                  }
+                }
+
+                # uri_path_scoped_statement with at least one optional field
+                # set: renders
+                #   AND(byte_match uri STARTS_WITH uri_path_prefix,
+                #       [byte_match host EXACTLY host_header,]
+                #       [NOT(byte_match uri STARTS_WITH excluded prefix), ...]
+                #       [NOT(ip_set_reference exempt_ip_set_arn)])
+                # so only in-scope requests count toward (and are affected
+                # by) the rate limit. Each excluded prefix is emitted as its
+                # own NOT-wrapped AND-sibling (rather than NOT(OR(...))) so
+                # the shape works uniformly for 0, 1, or N exclusions
+                # without tripping AWS WAF's ≥2-statements-per-OR
+                # requirement.
+                dynamic "and_statement" {
+                  for_each = (
+                    scope_down_statement.value.uri_path_scoped_statement != null
+                    && !(
+                      scope_down_statement.value.uri_path_scoped_statement.host_header == null
+                      && length(scope_down_statement.value.uri_path_scoped_statement.excluded_uri_path_prefixes) == 0
+                      && scope_down_statement.value.uri_path_scoped_statement.exempt_ip_set_arn == null
+                    )
+                  ) ? [scope_down_statement.value.uri_path_scoped_statement] : []
+                  content {
+                    statement {
+                      byte_match_statement {
+                        search_string         = and_statement.value.uri_path_prefix
+                        positional_constraint = "STARTS_WITH"
+                        field_to_match {
+                          uri_path {}
+                        }
+                        text_transformation {
+                          priority = 0
+                          type     = "LOWERCASE"
+                        }
+                      }
+                    }
+                    dynamic "statement" {
+                      for_each = and_statement.value.host_header != null ? [and_statement.value.host_header] : []
+                      content {
+                        byte_match_statement {
+                          search_string         = statement.value
+                          positional_constraint = "EXACTLY"
+                          field_to_match {
+                            single_header {
+                              name = "host"
+                            }
+                          }
+                          text_transformation {
+                            priority = 0
+                            type     = "LOWERCASE"
+                          }
+                        }
+                      }
+                    }
+                    dynamic "statement" {
+                      for_each = and_statement.value.excluded_uri_path_prefixes
+                      content {
+                        not_statement {
+                          statement {
+                            byte_match_statement {
+                              search_string         = statement.value
+                              positional_constraint = "STARTS_WITH"
+                              field_to_match {
+                                uri_path {}
+                              }
+                              text_transformation {
+                                priority = 0
+                                type     = "LOWERCASE"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                    dynamic "statement" {
+                      for_each = and_statement.value.exempt_ip_set_arn != null ? [and_statement.value.exempt_ip_set_arn] : []
+                      content {
+                        not_statement {
+                          statement {
+                            ip_set_reference_statement {
+                              arn = statement.value
+                            }
+                          }
+                        }
                       }
                     }
                   }
