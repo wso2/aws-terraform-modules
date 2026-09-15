@@ -818,6 +818,74 @@ resource "aws_wafv2_web_acl" "web_acl" {
             }
           }
         }
+
+        # host_and_path_scoped_statement: renders
+        #   AND(byte_match host EXACTLY host_header,
+        #       byte_match uri STARTS_WITH uri_path_prefix,
+        #       NOT(byte_match uri STARTS_WITH excluded_uri_path_prefixes[0]),
+        #       ...)
+        # so the rule's action fires when the request targets a specific
+        # host+path prefix and does NOT fall under any excluded sub-prefix.
+        # Pair with action = allow to exempt a single endpoint on an otherwise
+        # IP-restricted host from later-priority filter rules, or with
+        # action = block/count for host+path-scoped rules that need no IP-set
+        # condition. Each excluded prefix is emitted as its own NOT-wrapped
+        # AND-sibling (rather than NOT(OR(...))) so the shape works uniformly
+        # for 0, 1, or N exclusions without tripping AWS WAF's
+        # >=2-statements-per-OR requirement.
+        dynamic "and_statement" {
+          for_each = rule.value.host_and_path_scoped_statement != null ? [rule.value.host_and_path_scoped_statement] : []
+          content {
+            statement {
+              byte_match_statement {
+                search_string         = and_statement.value.host_header
+                positional_constraint = "EXACTLY"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+              }
+            }
+            statement {
+              byte_match_statement {
+                search_string         = and_statement.value.uri_path_prefix
+                positional_constraint = "STARTS_WITH"
+                field_to_match {
+                  uri_path {}
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+              }
+            }
+            dynamic "statement" {
+              for_each = coalesce(and_statement.value.excluded_uri_path_prefixes, [])
+              content {
+                not_statement {
+                  statement {
+                    byte_match_statement {
+                      search_string         = statement.value
+                      positional_constraint = "STARTS_WITH"
+                      field_to_match {
+                        uri_path {}
+                      }
+                      text_transformation {
+                        priority = 0
+                        type     = "LOWERCASE"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
 
       visibility_config {
