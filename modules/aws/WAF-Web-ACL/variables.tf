@@ -355,6 +355,29 @@ variable "rules" {
       excluded_uri_path_prefixes = optional(list(string), [])
     }))
 
+    # Narrow purpose-built rule: fires on requests whose host header equals
+    # host_header AND whose URI path starts with uri_path_prefix AND (for
+    # each entry in excluded_uri_path_prefixes) does NOT start with that
+    # excluded prefix. Renders as
+    #   AND(byte_match host EXACTLY host_header,
+    #       byte_match uri STARTS_WITH uri_path_prefix,
+    #       NOT(byte_match uri STARTS_WITH excluded_uri_path_prefixes[0]),
+    #       ...)
+    # Pair with action = allow to exempt a single endpoint on an otherwise
+    # IP-restricted host from later-priority filter rules (e.g. open a JWKS
+    # endpoint to the public internet while the rest of the host stays behind
+    # an IP allowlist), or with action = block/count for host+path-scoped
+    # deny/observe rules that need no IP-set condition. host_header,
+    # uri_path_prefix, and every entry in excluded_uri_path_prefixes are
+    # matched against a LOWERCASE-transformed field and WAF does not transform
+    # the search_string, so all must be provided lowercase; uri_path_prefix
+    # and each excluded prefix must begin with '/'.
+    host_and_path_scoped_statement = optional(object({
+      host_header                = string
+      uri_path_prefix            = string
+      excluded_uri_path_prefixes = optional(list(string), [])
+    }))
+
     # Matches requests whose source IP geolocates to one of the given
     # ISO 3166-1 alpha-2 country codes. Pair with action = block to deny
     # traffic originating from specific countries (e.g. sanctioned
@@ -530,6 +553,28 @@ variable "rules" {
       if try(v.host_and_path_scoped_ip_allowlist_block_statement, null) != null
     ])
     error_message = "host_and_path_scoped_ip_allowlist_block_statement.host_header, uri_path_prefix, and every entry in excluded_uri_path_prefixes must be lowercase, and uri_path_prefix + each excluded prefix must begin with '/' (WAF applies LOWERCASE to the request field but does not transform the search_string; uri_path always begins with '/')."
+  }
+
+  # Validation: host_and_path_scoped_statement.host_header, uri_path_prefix,
+  # and every entry in excluded_uri_path_prefixes must be lowercase; the
+  # request field is matched with a LOWERCASE text_transformation but WAF does
+  # not transform the search_string, so a mixed-case search string would never
+  # match. uri_path_prefix and each excluded prefix must also begin with '/'.
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      (
+        v.host_and_path_scoped_statement.host_header == lower(v.host_and_path_scoped_statement.host_header)
+        && v.host_and_path_scoped_statement.uri_path_prefix == lower(v.host_and_path_scoped_statement.uri_path_prefix)
+        && startswith(v.host_and_path_scoped_statement.uri_path_prefix, "/")
+        && alltrue([
+          for p in coalesce(v.host_and_path_scoped_statement.excluded_uri_path_prefixes, []) :
+          p == lower(p) && startswith(p, "/")
+        ])
+      )
+      if try(v.host_and_path_scoped_statement, null) != null
+    ])
+    error_message = "host_and_path_scoped_statement.host_header, uri_path_prefix, and every entry in excluded_uri_path_prefixes must be lowercase, and uri_path_prefix + each excluded prefix must begin with '/' (WAF applies LOWERCASE to the request field but does not transform the search_string; uri_path always begins with '/')."
   }
 
   # Validation 8: each entry in scope_down_statement.and_statement.statements,
