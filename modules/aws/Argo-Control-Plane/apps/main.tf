@@ -15,6 +15,34 @@ resource "kubernetes_namespace_v1" "namespace" {
   }
 }
 
+# Namespaces for components that live alongside "argo" but aren't part of
+# the Argo Workflows/Events install itself (oauth2-proxy, gateway, the
+# dispatch-tier namespaces) - caller-supplied since this module has no
+# opinion on what else runs on this cluster.
+resource "kubernetes_namespace_v1" "extra" {
+  for_each = toset(var.extra_namespaces)
+
+  metadata {
+    name = each.value
+  }
+}
+
+# ConfigMaps for those same components (e.g. credential-injector.py,
+# submit-attributor.py, link-resolver.py) - created before manifest_files/
+# kubectl_manifest_files so any Deployment mounting one doesn't race its
+# own ConfigMap into existence.
+resource "kubernetes_config_map_v1" "this" {
+  for_each = var.config_maps
+
+  metadata {
+    name      = each.key
+    namespace = each.value.namespace
+  }
+  data = each.value.data
+
+  depends_on = [kubernetes_namespace_v1.extra]
+}
+
 # Reverse-tunnel SSH keypairs, one per data-plane identity - same
 # per-identity generation pattern as the NATS client certs below, just
 # raw SSH keys (tls provider) instead of cert-manager Certificates,
@@ -317,7 +345,7 @@ resource "kubectl_manifest" "this" {
   # wait_for_rollout.
   wait_for_rollout = false
 
-  depends_on = [helm_release.nats, helm_release.argo_workflows, helm_release.argo_events, helm_release.traefik, helm_release.external_secrets]
+  depends_on = [helm_release.nats, helm_release.argo_workflows, helm_release.argo_events, helm_release.traefik, helm_release.external_secrets, kubernetes_namespace_v1.extra, kubernetes_config_map_v1.this]
 }
 
 locals {

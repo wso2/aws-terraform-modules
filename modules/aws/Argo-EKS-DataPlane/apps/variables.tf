@@ -143,3 +143,12 @@ variable "kubectl_manifest_files" {
   description = "Manifests applied via the alekc/kubectl provider instead of kubernetes_manifest - required for anything backed by a CRD installed in this same apply (ESO's ClusterSecretStore/ExternalSecret). Set content directly to pre-process a real file's text instead of rendering location as-is."
   default     = []
 }
+
+variable "rendered_manifest_files" {
+  type = map(object({
+    file_name = string
+    content   = string
+  }))
+  description = "Writes each entry's content to a local file at <module_path>/.rendered/<file_name>, for inspecting rendered manifest content - never applied to the cluster. Map key is arbitrary, only used to identify the resource instance."
+  default     = {}
+}
