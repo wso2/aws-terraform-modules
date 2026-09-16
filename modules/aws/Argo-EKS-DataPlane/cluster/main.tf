@@ -563,20 +563,11 @@ resource "aws_eks_addon" "core" {
   addon_name    = each.value.name
   addon_version = try(each.value.version, null)
 
-  # Deadlocked itself against depends_on = [aws_eks_node_group.stage,
-  # aws_eks_node_group.prod] - vpc-cni is IN this "core" set (see
-  # variables.tf's eks_addons default), and a node can never leave
-  # NotReady ("cni plugin not initialized") without it, but the node
-  # groups' own creation waits for their nodes to become healthy first.
-  # Terraform would therefore never install vpc-cni until the node groups
-  # it was blocking already succeeded or gave up - guaranteed
-  # "NodeCreationFailure: Unhealthy nodes" every time, found live
-  # 2026-09-14 on aws-dataplane's actual first real apply. Argo-Control-
-  # Plane/cluster's own aws_eks_addon.core (same addon set) only ever
-  # depended on aws_eks_cluster itself, never the node groups - matched
-  # that here. (aws_eks_addon.ebs_csi_driver, a separate resource not
-  # in this file, is the one addon that's fine depending on node groups -
-  # nothing needs EBS CSI to already exist before a node can go Ready.)
+  # Must depend only on the cluster, never on the node groups: vpc-cni is
+  # in this addon set, and a node can't leave NotReady without it, but a
+  # node group's own creation waits for its nodes to become healthy
+  # first - depending on the node groups here would deadlock vpc-cni
+  # against the exact nodes it's required to bring up.
   depends_on = [aws_eks_cluster.this]
 }
 
