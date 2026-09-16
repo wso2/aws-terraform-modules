@@ -177,3 +177,14 @@ resource "kubectl_manifest" "extra" {
 
   depends_on = [helm_release.external_secrets, helm_release.argo_workflows, helm_release.argo_events, helm_release.argocd]
 }
+
+# Writes each entry's already-rendered content to local disk under this
+# module's own directory - for inspecting what a manifest_files/
+# kubectl_manifest_files entry actually resolved to, not applied to the
+# cluster itself.
+resource "local_file" "rendered_manifest" {
+  for_each = var.rendered_manifest_files
+
+  filename = "${path.module}/.rendered/${each.value.file_name}"
+  content  = each.value.content
+}
