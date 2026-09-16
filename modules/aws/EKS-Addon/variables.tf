@@ -51,9 +51,3 @@ variable "eks_addon_configuration_values" {
   type        = string
   default     = null
 }
-
-variable "service_account_role_arn" {
-  description = "IRSA role ARN for the addon's service account (optional, e.g. the EBS/EFS CSI driver role output by EKS-Cluster). If null, the addon runs without a dedicated IRSA role."
-  type        = string
-  default     = null
-}
