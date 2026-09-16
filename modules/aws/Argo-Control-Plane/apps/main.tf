@@ -296,17 +296,26 @@ locals {
         for chunk in split("\n---\n", "\n${m.content != null ? m.content : templatefile(m.location, m.template_map)}") : chunk
         if trimspace(chunk) != ""
         ] : {
-        key      = "${idx}-${doc_idx}"
-        manifest = yamldecode(doc)
+        key  = "${idx}-${doc_idx}"
+        body = doc
       }
     ]
   ])
 }
 
-resource "kubernetes_manifest" "kubernetes_object" {
-  for_each = { for d in local.manifest_documents : d.key => d.manifest }
+# kubectl_manifest (alekc/kubectl provider), not kubernetes_manifest - see
+# Argo-EKS-DataPlane/apps' identical comment on its own kubectl_manifest.this:
+# kubernetes_manifest builds its own REST client independently of the rest
+# of the provider, and that path doesn't reliably work with exec-based auth
+# (aws eks get-token here).
+resource "kubectl_manifest" "this" {
+  for_each = { for d in local.manifest_documents : d.key => d }
 
-  manifest = each.value
+  yaml_body = each.value.body
+
+  # See Argo-EKS-DataPlane/apps' identical comment on kubectl_manifest.this's
+  # wait_for_rollout.
+  wait_for_rollout = false
 
   depends_on = [helm_release.nats, helm_release.argo_workflows, helm_release.argo_events, helm_release.traefik, helm_release.external_secrets]
 }
