@@ -26,11 +26,6 @@ variable "subnet_ids" {
   type        = list(string)
   description = "List of subnets to deploy nodepools"
 }
-variable "security_group_ids" {
-  type        = list(string)
-  description = "Additional security group IDs to attach to node instances via the launch template. When empty (default), no vpc_security_group_ids is set on the launch template and AWS falls back to the EKS cluster's own managed security group, matching prior module behavior. When set, the EKS cluster security group ID should be included explicitly alongside any custom ones, since setting this replaces rather than adds to the default."
-  default     = []
-}
 variable "tags" {
   type        = map(string)
   description = "Tags to be associated with the EKS"
