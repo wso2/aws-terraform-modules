@@ -616,6 +616,23 @@ resource "aws_iam_role_policy_attachment" "stage_node_ecr" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
+# Added 2026-09-17 for docs-deploy's own S3 upload step, which
+# deliberately authenticates via this NODE's instance-profile role (not
+# per-pod IRSA - see docs-deploy-001-argo.yaml's deploy-to-s3 template's
+# own header comment for why: it reaches AWS's Instance Metadata Service
+# over hostNetwork, same class of mechanism as the old VM's MSI-based
+# blob upload before Azure's side moved to Workload Identity). No
+# per-pipeline IRSA role fits this shape - var.deploy_identities is
+# IRSA-only, scoped to a (namespace, ServiceAccount) pair, not the node
+# itself. Optional/null by default so this stays a no-op for every
+# caller that doesn't set it.
+resource "aws_iam_role_policy" "stage_node_extra" {
+  count  = var.stage_node_extra_policy_json != null ? 1 : 0
+  name   = "${local.name}-stage-node-extra"
+  role   = aws_iam_role.stage_node.id
+  policy = var.stage_node_extra_policy_json
+}
+
 resource "aws_launch_template" "stage" {
   name_prefix = "${local.name}-stage-"
   vpc_security_group_ids = [
@@ -701,6 +718,14 @@ resource "aws_iam_role_policy_attachment" "prod_node_cni" {
 resource "aws_iam_role_policy_attachment" "prod_node_ecr" {
   role       = aws_iam_role.prod_node.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
+# Same reasoning as aws_iam_role_policy.stage_node_extra above.
+resource "aws_iam_role_policy" "prod_node_extra" {
+  count  = var.prod_node_extra_policy_json != null ? 1 : 0
+  name   = "${local.name}-prod-node-extra"
+  role   = aws_iam_role.prod_node.id
+  policy = var.prod_node_extra_policy_json
 }
 
 resource "aws_launch_template" "prod" {
