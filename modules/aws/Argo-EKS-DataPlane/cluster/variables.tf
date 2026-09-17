@@ -220,6 +220,22 @@ variable "deploy_identities" {
   default     = {}
 }
 
+# Added 2026-09-17 - see aws_iam_role_policy.stage_node_extra/prod_node_extra's
+# own comment for why this is separate from deploy_identities (IRSA-only,
+# doesn't fit a pipeline step that deliberately authenticates as the
+# NODE's own instance-profile role instead of a per-pod federated one).
+variable "stage_node_extra_policy_json" {
+  type        = string
+  description = "Extra IAM policy document (JSON) attached directly to the stage node role, in addition to the standard EKS worker/CNI/ECR policies - e.g. S3 access for a pipeline step that reads node-instance-profile credentials via IMDS. Null (default) attaches nothing."
+  default     = null
+}
+
+variable "prod_node_extra_policy_json" {
+  type        = string
+  description = "Prod counterpart of stage_node_extra_policy_json."
+  default     = null
+}
+
 variable "enable_secrets_encryption" {
   type        = bool
   description = "Whether to create a dedicated KMS CMK and envelope-encrypt Kubernetes Secrets with it"
