@@ -21,6 +21,29 @@ resource "kubernetes_namespace_v1" "this" {
   }
 }
 
+# Same gap and fix as Argo-Control-Plane/apps: the default gp2 StorageClass
+# uses the deprecated in-tree kubernetes.io/aws-ebs provisioner, which
+# doesn't function on modern k8s - any PVC-backed step is stuck Pending
+# without a StorageClass backed by the ebs.csi.aws.com provisioner (see
+# the cluster module's aws_eks_addon.ebs_csi_driver).
+resource "kubernetes_storage_class_v1" "gp3" {
+  metadata {
+    name = "gp3"
+    annotations = {
+      "storageclass.kubernetes.io/is-default-class" = "true"
+    }
+  }
+
+  storage_provisioner    = "ebs.csi.aws.com"
+  reclaim_policy         = "Delete"
+  volume_binding_mode    = "WaitForFirstConsumer"
+  allow_volume_expansion = true
+
+  parameters = {
+    type = "gp3"
+  }
+}
+
 # ONE shared argo-server + workflow-controller per data plane, in
 # system_namespace - matches the security review doc's data-plane diagram
 # ("system-pool - shared ... argo-server (argo-CLOUD-stage / -prod)") and

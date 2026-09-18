@@ -562,6 +562,46 @@ resource "aws_eks_addon" "core" {
   depends_on = [aws_eks_cluster.this]
 }
 
+# EBS CSI driver IRSA - same gap and same fix as Argo-Control-Plane/cluster:
+# the in-tree kubernetes.io/aws-ebs provisioner (gp2) doesn't function on
+# modern k8s, so any PVC-backed pipeline step (e.g. download-github-release)
+# is stuck Pending without this addon and its own StorageClass (see the
+# gp3 kubernetes_storage_class_v1 in the apps module).
+data "aws_iam_policy_document" "ebs_csi_assume" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    effect  = "Allow"
+    condition {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
+    }
+    principals {
+      identifiers = [aws_iam_openid_connect_provider.eks.arn]
+      type        = "Federated"
+    }
+  }
+}
+
+resource "aws_iam_role" "ebs_csi" {
+  name               = "${local.name}-ebs-csi-role"
+  assume_role_policy = data.aws_iam_policy_document.ebs_csi_assume.json
+  tags               = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "ebs_csi" {
+  role       = aws_iam_role.ebs_csi.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+}
+
+resource "aws_eks_addon" "ebs_csi_driver" {
+  cluster_name             = aws_eks_cluster.this.name
+  addon_name               = "aws-ebs-csi-driver"
+  service_account_role_arn = aws_iam_role.ebs_csi.arn
+
+  depends_on = [aws_eks_cluster.this, aws_eks_node_group.stage, aws_eks_node_group.prod]
+}
+
 # --- Cluster-admin access via native IAM (no unified cross-cloud identity) ---
 
 resource "aws_eks_access_entry" "admin" {
