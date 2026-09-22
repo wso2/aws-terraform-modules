@@ -2,10 +2,12 @@
 
 Provisions the EKS cluster and tier-isolated networking an AWS Argo data
 plane runs on. Stage and prod each get their own subnets, NAT Gateway
-(own outbound IP), security group, and EKS node group; the prod node
-group carries an `env=<value>:NoSchedule` taint so only workloads that
-explicitly tolerate it land there. Raw `aws_*`/`tls_*` resource blocks, no
-dependency on any other WSO2 module repo.
+(own outbound IP), security group, and EKS node group. The prod node
+group also carries an `env=<value>:NoSchedule` taint, so only workloads
+that explicitly tolerate it land there.
+
+Raw `aws_*`/`tls_*` resource blocks. No dependency on any other WSO2
+module repo.
 
 ## What it provisions
 
@@ -23,28 +25,37 @@ dependency on any other WSO2 module repo.
 - IRSA roles for the EBS CSI driver and External Secrets Operator's
   controller ServiceAccount.
 - Two EKS node groups (`stage`, `prod`) each with their own launch
-  template, IAM role, and scaling config; `prod` additionally carries a
-  taint + matching node label.
+  template, IAM role, and scaling config. `prod` additionally carries a
+  taint and matching node label.
 - EKS access entries/policy associations for admin IAM principals (native
   IAM cluster access, no unified cross-cloud identity layer).
-- An optional bastion instance (SSM Session Manager only, reached via the
-  stage subnet's NAT egress).
-- Per-env IRSA identities (`deploy_identities`) for pipeline pods - one IAM
-  role per map entry, trust scoped to exactly one `(namespace,
+- An optional bastion instance, reachable only via SSM Session Manager,
+  through the stage subnet's NAT egress.
+- Per-env IRSA identities (`deploy_identities`) for pipeline pods - one
+  IAM role per map entry, trust scoped to exactly one `(namespace,
   ServiceAccount)` pair, policy caller-supplied.
 - Optional extra IAM policy attached directly to the stage/prod node role
-  (`stage_node_extra_policy_json`/`prod_node_extra_policy_json`) for a
+  (`stage_node_extra_policy_json`/`prod_node_extra_policy_json`), for a
   pipeline step that deliberately authenticates via the node's own
   instance-profile role over IMDS instead of per-pod IRSA.
+
+## Notes
+
+- `eso_secretsmanager_key_prefix` defaults to `"*"` (wide) because this
+  data plane's real ExternalSecrets reference bare, unprefixed key names
+  copied from an existing Azure Key Vault store. Narrow it if those keys
+  are ever renamed onto a path convention.
+- `deploy_identities` credentials are minted per-pod by AWS - there is no
+  standing secret.
 
 ## Inputs
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `project` | `string` | required | Name of the project (used for resource naming/tagging) |
-| `environment` | `string` | required | Name of the environment (e.g. dev, stage, prod) |
-| `region` | `string` | required | Code of the AWS region |
-| `application` | `string` | `"argo-dataplane"` | Purpose tag for the resources created by this module |
+| `project` | `string` | required | Project name, used for resource naming/tagging |
+| `environment` | `string` | required | Environment name (e.g. dev, stage, prod) |
+| `region` | `string` | required | AWS region code |
+| `application` | `string` | `"argo-dataplane"` | Purpose tag for resources this module creates |
 | `tags` | `map(string)` | `{}` | |
 | `vpc_cidr_block` | `string` | required | CIDR block for the data plane's VPC |
 | `stage_public_subnet_cidr_block` | `string` | required | CIDR for the public subnet hosting the stage tier's NAT Gateway. Placed in the first AZ of `stage_availability_zones` |
@@ -73,8 +84,8 @@ dependency on any other WSO2 module repo.
 | `prod_node_taint_value` | `string` | `"prod"` | Value for the `env` taint applied to prod nodes (key fixed `env`, effect fixed `NO_SCHEDULE`) |
 | `enable_bastion` | `bool` | `true` | |
 | `bastion_instance_type` | `string` | `"t3.micro"` | |
-| `eso_secretsmanager_key_prefix` | `string` | `"*"` | Defaults wide because this data plane's real ExternalSecrets reference bare, unprefixed key names copied from an existing Azure Key Vault store - narrow if those keys are ever renamed onto a path convention |
-| `deploy_identities` | `map(object({ namespace, service_account_name, policy_json }))` | `{}` | Per-env IRSA identities for pipeline pods - no standing secret, credential minted per-pod. One IAM role per entry, scoped to exactly that `(namespace, ServiceAccount)` pair |
+| `eso_secretsmanager_key_prefix` | `string` | `"*"` | Secrets Manager key-name prefix (glob) the ESO IAM role may read. See Notes above |
+| `deploy_identities` | `map(object({ namespace, service_account_name, policy_json }))` | `{}` | Per-env IRSA identities for pipeline pods. One IAM role per entry, scoped to exactly that `(namespace, ServiceAccount)` pair. See Notes above |
 | `stage_node_extra_policy_json` | `string` | `null` | Extra IAM policy (JSON) attached directly to the stage node role, in addition to the standard EKS worker/CNI/ECR policies |
 | `prod_node_extra_policy_json` | `string` | `null` | Prod counterpart of `stage_node_extra_policy_json` |
 | `enable_secrets_encryption` | `bool` | `false` | |
@@ -100,8 +111,8 @@ dependency on any other WSO2 module repo.
 | `prod_subnet_ids` | |
 | `stage_nat_gateway_public_ip` | |
 | `prod_nat_gateway_public_ip` | |
-| `bastion_instance_id` | `aws ssm start-session --target <this>` to reach the bastion; `null` unless `enable_bastion` |
-| `deploy_identity_role_arns` | Role ARN per `deploy_identities` entry - annotate the matching ServiceAccount with `eks.amazonaws.com/role-arn: <this value>` |
+| `bastion_instance_id` | `null` unless `enable_bastion`. Use `aws ssm start-session --target <this>` to reach the bastion |
+| `deploy_identity_role_arns` | Role ARN per `deploy_identities` entry. Annotate the matching ServiceAccount with `eks.amazonaws.com/role-arn: <this value>` |
 | `eso_role_arn` | IRSA role ARN for ESO's own controller ServiceAccount |
 | `workflow_controller_artifacts_role_arn` | `null` unless `enable_artifact_archiving` |
 | `artifact_bucket_name` | `null` unless `enable_artifact_archiving` |

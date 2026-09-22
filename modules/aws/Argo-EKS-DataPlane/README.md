@@ -1,17 +1,16 @@
 # Argo-EKS-DataPlane
 
 Provisions an AWS-based Argo data plane: an independent EKS cluster that
-pulls dispatch tasks from the control plane over NATS (mTLS) and actually
-runs the deploy pipelines. Each data plane is tier-isolated internally
-(stage vs. prod get their own subnets, NAT Gateways, node groups, and a
-taint on the prod node group) and holds no credentials for any other
-cloud's data plane or for the control plane itself beyond its NATS client
-identity.
+pulls dispatch tasks from the control plane over NATS (mTLS) and runs the
+deploy pipelines. Each data plane is tier-isolated internally - stage and
+prod get their own subnets, NAT Gateways, node groups, and a taint on the
+prod node group. It holds no credentials for any other cloud's data plane
+or for the control plane itself, beyond its own NATS client identity.
 
 ## Structure
 
-This directory contains two independently-callable submodules, plus an
-optional composite entrypoint that wires them together for you:
+Two independently-callable submodules, plus an optional composite
+entrypoint that wires them together for you:
 
 - [`cluster/`](./cluster) - the EKS cluster, VPC (stage/prod tiers, each
   with its own NAT Gateway and subnets), per-env IRSA identities, and
@@ -19,41 +18,43 @@ optional composite entrypoint that wires them together for you:
 - [`apps/`](./apps) - the Kubernetes-level install: Argo Workflows, Argo
   Events, ArgoCD, External Secrets Operator, and caller-supplied
   project-specific manifests.
-- `main.tf`/`variables.tf`/`outputs.tf`/`versions.tf` (this directory's own
-  top level) - a composite root module calling `cluster` and `apps` for
-  you, as an ALTERNATIVE to calling the two submodules separately (see
-  "Composite entrypoint" below).
+- `main.tf`/`variables.tf`/`outputs.tf`/`versions.tf` (this directory) - a
+  composite root module that calls `cluster` and `apps` for you, as an
+  alternative to calling the two submodules separately.
 
 ## Composite entrypoint
 
-Calling this directory itself as a module (instead of `./cluster` and
-`./apps` separately) gets you `module.cluster`/`module.apps` wired
-together in one call: every `cluster` variable passed straight through,
-every `apps` variable passed straight through EXCEPT `eso_role_arn` (wired
-automatically from `module.cluster.eso_role_arn`), and the
-`kubernetes`/`helm`/`kubectl` provider blocks pre-configured against
-`cluster`'s outputs via the `aws_eks_cluster_auth` data source, matching
-exactly what `environments/aws-dataplane`'s own `main.tf` does today.
-`outputs.tf` re-exposes the outputs a caller would actually need (e.g. IRSA
-role ARNs to reference from its own `argo_workflows_values`).
+Calling this directory itself as a module gets you `module.cluster` and
+`module.apps` wired together in one call. Every `cluster` variable passes
+straight through. Every `apps` variable passes straight through too,
+except `eso_role_arn`, which is wired automatically from
+`module.cluster.eso_role_arn`. The `kubernetes`/`helm`/`kubectl` provider
+blocks are pre-configured against `cluster`'s outputs via the
+`aws_eks_cluster_auth` data source, matching what
+`environments/aws-dataplane`'s own `main.tf` does today. `outputs.tf`
+re-exposes the outputs a caller would actually need, e.g. IRSA role ARNs
+to reference from its own `argo_workflows_values`.
 
 ## How the two compose
 
-`apps` does not take cluster credentials as an input variable - it
+`apps` does not take cluster credentials as an input variable. It
 inherits the `kubernetes`/`helm`/`kubectl` provider configuration the
 caller sets up against `cluster`'s outputs (`eks_cluster_endpoint`,
-`eks_base64_encoded_ca_cert`, `eks_cluster_name`), the same implicit
-pattern any Terraform child module uses. The caller additionally wires
-specific `cluster` outputs into `apps` inputs directly: `eso_role_arn` for
-External Secrets Operator's IRSA annotation, and
+`eks_base64_encoded_ca_cert`, `eks_cluster_name`) - the same implicit
+pattern any Terraform child module uses. The caller also wires specific
+`cluster` outputs directly into `apps` inputs: `eso_role_arn` for External
+Secrets Operator's IRSA annotation, and
 `workflow_controller_artifacts_role_arn`/`artifact_bucket_name` for Argo
 Workflows' S3 artifact archiving.
 
-Because `cluster`'s EKS cluster must exist before the `kubernetes`/`helm`
-providers used by `apps` can authenticate against it, a root module calling
-both needs a two-step apply: `terraform apply -target=module.cluster`
-first, then a plain `terraform apply`. See `cloud-sre-common`'s
-`environments/aws-dataplane` for a real, wired-up example.
+## Notes
+
+- `cluster`'s EKS cluster must exist before the `kubernetes`/`helm`
+  providers `apps` uses can authenticate against it. A root module calling
+  both needs a two-step apply: `terraform apply -target=module.cluster`
+  first, then a plain `terraform apply`.
+- See `cloud-sre-common`'s `environments/aws-dataplane` for a real,
+  wired-up example.
 
 ## Example
 
