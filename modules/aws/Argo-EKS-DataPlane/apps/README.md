@@ -1,16 +1,20 @@
 # Argo-EKS-DataPlane/apps
 
 Installs the Kubernetes-level workload an AWS Argo data plane runs: a
-single shared Argo Workflows/Argo Events install (the workflow-controller
-and Argo Events controllers see every namespace on the cluster - normal
-Kubernetes control-plane behavior; tier isolation is enforced via RBAC in
-caller-supplied manifests, not separate controller instances per tier),
-optionally ArgoCD, and External Secrets Operator. Deliberately generic: it
-installs the upstream Helm charts and applies whatever project-specific
-manifests the caller points it at via `manifest_files`/`kubectl_manifest_files`
-- it does not hardcode any project-specific YAML itself. Assumes the caller
-has already configured the `kubernetes`/`helm`/`kubectl` providers against
-the cluster built by the sibling [`../cluster`](../cluster) module.
+single shared Argo Workflows/Argo Events install, optionally ArgoCD, and
+External Secrets Operator.
+
+The workflow-controller and Argo Events controllers see every namespace
+on the cluster - that's normal Kubernetes control-plane behavior. Tier
+isolation is enforced via RBAC in caller-supplied manifests, not by
+running separate controller instances per tier.
+
+This module is deliberately generic: it installs the upstream Helm charts
+and applies whatever project-specific manifests the caller points it at
+via `manifest_files`/`kubectl_manifest_files`. It does not hardcode any
+project-specific YAML itself. It assumes the caller has already
+configured the `kubernetes`/`helm`/`kubectl` providers against the
+cluster built by the sibling [`../cluster`](../cluster) module.
 
 ## What it provisions
 
@@ -33,7 +37,7 @@ the cluster built by the sibling [`../cluster`](../cluster) module.
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `namespaces` | `list(string)` | required | Per-tier Kubernetes namespaces (e.g. `["argo-stage", "argo-prod"]`) - created by this module, but Argo Workflows/Events themselves install once, cluster-wide, in `system_namespace` |
+| `namespaces` | `list(string)` | required | Per-tier Kubernetes namespaces (e.g. `["argo-stage", "argo-prod"]`), created by this module. Argo Workflows/Events themselves install once, cluster-wide, in `system_namespace` |
 | `system_namespace` | `string` | `"argo"` | Namespace for the single shared argo-server/workflow-controller/argo-events install |
 | `argo_workflows_chart_version` | `string` | `null` | Null uses the chart repo's latest |
 | `argo_events_chart_version` | `string` | `null` | |
