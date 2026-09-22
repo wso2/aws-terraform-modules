@@ -72,16 +72,10 @@ module "cluster" {
   workflow_controller_service_account_name = var.workflow_controller_service_account_name
 }
 
-# EKS-Cluster's own auth-token data source, same as
-# environments/aws-dataplane/main.tf - no exec plugin needed, unlike
-# control-plane's composite (see that module's main.tf comment on why it
-# uses exec instead). No depends_on = [module.cluster] here on purpose -
-# same real bug that environment's own comment on this exact data source
-# documents: depending on the WHOLE module forces every one of its
-# resources to refresh before this is considered resolved, which can burn
-# through this 15-minute token's whole lifetime before it's actually used.
-# The `name = module.cluster.eks_cluster_name` argument below already
-# creates the correct, narrower implicit dependency.
+# No depends_on = [module.cluster]: that forces every resource in the
+# module to refresh first and can burn through this token's 15-minute
+# lifetime before use. The narrower name = module.cluster.eks_cluster_name
+# reference below already creates the correct dependency.
 data "aws_eks_cluster_auth" "this" {
   name = module.cluster.eks_cluster_name
 }

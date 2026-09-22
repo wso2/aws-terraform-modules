@@ -60,9 +60,8 @@ module "cluster" {
   eso_secretsmanager_key_prefix = var.eso_secretsmanager_key_prefix
 }
 
-# Same exec-based auth as environments/control-plane/main.tf (avoids
-# kubernetes_manifest's silent token-drop bug with static tokens - see that
-# file's own comment on the kubectl provider below for the full history).
+# exec-based auth: avoids kubernetes_manifest's silent token-drop bug with
+# static tokens.
 provider "kubernetes" {
   host                   = module.cluster.eks_cluster_endpoint
   cluster_ca_certificate = base64decode(module.cluster.eks_base64_encoded_ca_cert)
@@ -87,10 +86,9 @@ provider "helm" {
   }
 }
 
-# lazy_load defers client construction past eager Configure()-time - see
-# environments/control-plane/main.tf's identical provider block for why this
-# was needed (every kubectl_manifest resource previously ran against
-# whatever kubeconfig context happened to be ambient on the machine).
+# lazy_load defers client construction past eager Configure()-time -
+# without it, kubectl_manifest resources ran against whatever kubeconfig
+# context happened to be ambient on the machine.
 provider "kubectl" {
   host                   = module.cluster.eks_cluster_endpoint
   cluster_ca_certificate = base64decode(module.cluster.eks_base64_encoded_ca_cert)
