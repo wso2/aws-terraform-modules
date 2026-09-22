@@ -35,20 +35,6 @@ own `main.tf` does today. `outputs.tf` re-exposes the outputs a downstream
 caller (e.g. a data-plane environment consuming NATS client certs) would
 actually need.
 
-**`cloud-sre-common`'s `environments/control-plane` is NOT being switched
-to this composite module by this change**, and calls `./cluster` and
-`./apps` directly, exactly as before. That environment's Terraform state
-already has real, applied AWS infrastructure (EKS cluster, VPC, IAM roles,
-KMS key, S3 bucket) under `module.cluster.*`/`module.apps.*` addresses -
-pointing its `module.*.source` at this directory instead would nest those
-same resources one level deeper in the state graph (e.g.
-`module.control_plane.module.cluster.*`), which Terraform reads as
-destroying the old address and creating a new one, not a safe drop-in
-change. Adopting this composite module for an already-applied environment
-requires a deliberate state migration first (`terraform state mv` per
-resource, or `moved` blocks referencing the old addresses) as its own
-reviewed step - never bundled into a source-path edit.
-
 ## How the two compose
 
 There is no dependency between the two submodules expressed in Terraform
