@@ -12,21 +12,6 @@
 # Composite entrypoint wiring ./cluster to ./apps in one module call, as an
 # ALTERNATIVE to calling the two submodules separately (see README.md).
 #
-# NOT a replacement for the existing cloud-sre-common environment (see
-# environments/aws-dataplane/main.tf) - that environment calls ./cluster
-# and ./apps directly today, and this change does NOT switch it over to
-# this composite module. Doing so would change every one of that
-# environment's module.cluster.*/module.apps.* resource addresses in
-# Terraform state (this composite module would nest them one level deeper,
-# e.g. module.aws_dataplane.module.cluster.* instead of module.cluster.*),
-# which Terraform reads as "destroy the old address, create a new one" for
-# already-applied, real AWS infrastructure (a live EKS cluster, VPC, IAM
-# roles, KMS key, S3 bucket) - not a safe drop-in source change. Adopting
-# this module for an environment that's already been applied requires a
-# deliberate state migration first (`terraform state mv` per resource, or
-# `moved` blocks referencing the old addresses), done as its own reviewed
-# step, never bundled into a source-path edit.
-#
 # --------------------------------------------------------------------------------------
 
 module "cluster" {
