@@ -105,23 +105,27 @@ variable "stage_node_instance_types" {
 }
 
 variable "stage_node_min_size" {
-  type    = number
-  default = 1
+  type        = number
+  description = "Minimum node count for the stage tier node group's scaling_config"
+  default     = 1
 }
 
 variable "stage_node_max_size" {
-  type    = number
-  default = 3
+  type        = number
+  description = "Maximum node count for the stage tier node group's scaling_config"
+  default     = 3
 }
 
 variable "stage_node_desired_size" {
-  type    = number
-  default = 2
+  type        = number
+  description = "Desired node count for the stage tier node group's scaling_config"
+  default     = 2
 }
 
 variable "stage_node_capacity_type" {
-  type    = string
-  default = "ON_DEMAND"
+  type        = string
+  description = "Capacity type for the stage tier node group (ON_DEMAND or SPOT)"
+  default     = "ON_DEMAND"
 }
 
 variable "stage_security_group_rules" {
@@ -155,23 +159,27 @@ variable "prod_node_instance_types" {
 }
 
 variable "prod_node_min_size" {
-  type    = number
-  default = 1
+  type        = number
+  description = "Minimum node count for the prod tier node group's scaling_config"
+  default     = 1
 }
 
 variable "prod_node_max_size" {
-  type    = number
-  default = 3
+  type        = number
+  description = "Maximum node count for the prod tier node group's scaling_config"
+  default     = 3
 }
 
 variable "prod_node_desired_size" {
-  type    = number
-  default = 2
+  type        = number
+  description = "Desired node count for the prod tier node group's scaling_config"
+  default     = 2
 }
 
 variable "prod_node_capacity_type" {
-  type    = string
-  default = "ON_DEMAND"
+  type        = string
+  description = "Capacity type for the prod tier node group (ON_DEMAND or SPOT)"
+  default     = "ON_DEMAND"
 }
 
 variable "prod_security_group_rules" {
@@ -200,8 +208,9 @@ variable "enable_bastion" {
 }
 
 variable "bastion_instance_type" {
-  type    = string
-  default = "t3.micro"
+  type        = string
+  description = "EC2 instance type for the bastion instance, when enable_bastion is true"
+  default     = "t3.micro"
 }
 
 variable "eso_secretsmanager_key_prefix" {

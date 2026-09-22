@@ -146,23 +146,27 @@ variable "node_instance_types" {
 }
 
 variable "node_min_size" {
-  type    = number
-  default = 2
+  type        = number
+  description = "Minimum node count for the shared node group's scaling_config"
+  default     = 2
 }
 
 variable "node_max_size" {
-  type    = number
-  default = 4
+  type        = number
+  description = "Maximum node count for the shared node group's scaling_config"
+  default     = 4
 }
 
 variable "node_desired_size" {
-  type    = number
-  default = 2
+  type        = number
+  description = "Desired node count for the shared node group's scaling_config"
+  default     = 2
 }
 
 variable "node_capacity_type" {
-  type    = string
-  default = "ON_DEMAND"
+  type        = string
+  description = "Capacity type for the shared node group (ON_DEMAND or SPOT)"
+  default     = "ON_DEMAND"
 }
 
 variable "security_group_rules" {
@@ -185,8 +189,9 @@ variable "enable_bastion" {
 }
 
 variable "bastion_instance_type" {
-  type    = string
-  default = "t3.micro"
+  type        = string
+  description = "EC2 instance type for the bastion instance, when enable_bastion is true"
+  default     = "t3.micro"
 }
 
 variable "eso_secretsmanager_key_prefix" {
