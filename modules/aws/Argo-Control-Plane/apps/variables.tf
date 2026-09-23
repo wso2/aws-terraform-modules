@@ -17,7 +17,7 @@ variable "namespace" {
 
 variable "extra_namespaces" {
   type        = list(string)
-  description = "Additional namespaces to create beyond var.namespace, for components that live alongside the Argo install but aren't part of it (e.g. [\"oauth2-proxy\", \"gateway\"], or the dispatch-tier namespaces) - created before manifest_files/kubectl_manifest_files are applied."
+  description = "Additional namespaces to create beyond var.namespace (e.g. [\"oauth2-proxy\", \"gateway\"]), created before manifest_files/kubectl_manifest_files are applied."
   default     = []
 }
 
@@ -26,13 +26,13 @@ variable "config_maps" {
     namespace = string
     data      = map(string)
   }))
-  description = "ConfigMaps to create before manifest_files/kubectl_manifest_files are applied - e.g. Python scripts a Deployment in manifest_files mounts (credential-injector.py, link-resolver.py). Map key is the ConfigMap name; namespace must be var.namespace or one of extra_namespaces."
+  description = "ConfigMaps to create before manifest_files/kubectl_manifest_files are applied. Map key is the ConfigMap name; namespace must be var.namespace or one of extra_namespaces."
   default     = {}
 }
 
 variable "tunnel_client_identities" {
   type        = list(string)
-  description = "One reverse-tunnel SSH keypair per data-plane identity (e.g. [\"aws\", \"azure\"]) - the resulting private keys are exposed via the tunnel_client_private_keys output for manual, out-of-band distribution to each data plane's own environment, same pattern as nats_client_identities. Default [] creates no keys and no tunnel-server-authorized-keys Secret at all."
+  description = "One reverse-tunnel SSH keypair per data-plane identity (e.g. [\"aws\", \"azure\"]); private keys are exposed via tunnel_client_private_keys for out-of-band distribution. Default [] creates none."
   default     = []
 }
 
@@ -75,13 +75,13 @@ variable "argo_events_values" {
 
 variable "nats_values" {
   type        = list(string)
-  description = "Helm values overrides (YAML strings, later entries win) for the nats chart. Should set JetStream replicas=3 with pod anti-affinity/topologySpreadConstraints across AZs, and a PVC-backed persistent store."
+  description = "Helm values overrides (YAML strings, later entries win) for the nats chart. Should set JetStream replicas=3 with anti-affinity across AZs and a PVC-backed store."
   default     = []
 }
 
 variable "install_cert_manager" {
   type        = bool
-  description = "Install cert-manager and bootstrap a private client-CA for NATS mTLS - the security review doc's stated mechanism (\"client TLS certificates signed by a dedicated client-CA\") for the 5 identities: this control plane's own wildcard, plus one per data plane. cert-manager renews before expiry on its own, which is what makes rotation actually automatic (vs. a one-time tls provider generation)."
+  description = "Install cert-manager and bootstrap a private client-CA for NATS mTLS client certs (this control plane's own, plus one per data plane). cert-manager renews before expiry automatically."
   default     = true
 }
 
@@ -102,7 +102,7 @@ variable "cert_manager_namespace" {
 
 variable "install_traefik" {
   type        = bool
-  description = "Install the Traefik controller - gateway.yaml (the unified /control|/azure|/aws portal router) targets Traefik-specific CRDs (IngressRoute, Middleware, ServersTransport), which only a running Traefik controller registers. Genuinely never installed anywhere in this stack until found missing on this environment's first real end-to-end apply."
+  description = "Install the Traefik controller - required for gateway.yaml's Traefik-specific CRDs (IngressRoute, Middleware, ServersTransport)."
   default     = true
 }
 
@@ -118,7 +118,7 @@ variable "traefik_helm_repo" {
 
 variable "traefik_values" {
   type        = list(string)
-  description = "Helm values overrides (YAML strings, later entries win) for traefik. gateway.yaml's own backends (control-plane-argo, azure-dp-argo, aws-dp-argo, oauth2-proxy-svc, submit-attributor-svc) are all ExternalName Services by design (this module has no other way to reference a Service in a different namespace/cluster) - modern Traefik's kubernetesCRD provider refuses to route to ANY ExternalName Service by default (SSRF hardening) and silently drops the WHOLE IngressRoute, not just the offending route, with no indication anywhere except its own controller logs (\"externalName services not allowed\"). Found live-broken 2026-09-10 - every portal path 404'd from day one, unrelated to and undetectable from any of the other gateway/oauth2-proxy fixes. The caller MUST set providers.kubernetesCRD.allowExternalNameServices: true here or this entire module's gateway is non-functional."
+  description = "Helm values overrides for traefik. Must set providers.kubernetesCRD.allowExternalNameServices: true - gateway.yaml's backends are ExternalName Services, which Traefik refuses to route to by default."
   default     = []
 }
 
@@ -129,13 +129,13 @@ variable "traefik_namespace" {
 
 variable "nats_server_external_dns_names" {
   type        = list(string)
-  description = "Extra dnsNames for the nats-server-cert Certificate, beyond the two internal cluster-DNS names (nats.<namespace>.svc.cluster.local, nats) it already gets. Every data-plane environment connects to this NATS broker via its own external LoadBalancer hostname (var.control_plane_nats_host in aws-dataplane/azure-dataplane), not either internal name - without it here too, cross-cluster mTLS connections fail x509 SAN verification (\"certificate is valid for nats.argo.svc.cluster.local, nats, not <lb-hostname>\"), found live-broken 2026-09-10 (every EventSource across every data plane stuck silently retrying \"connecting to nats cluster...\", no dispatch has ever actually reached a data plane since this cert-manager-based cert replaced the old VM's cert). A plain variable, not a live data.kubernetes_service_v1 lookup on the NATS Service this same module creates - that Service depends on this Certificate already existing (see helm_release.nats's depends_on), so deriving dnsNames from the Service's own resulting hostname would be a genuine dependency cycle, same class of issue as control-plane environment's oauth2-proxy CONTROL_PLANE_PORTAL_HOST fix."
+  description = "Extra dnsNames for the nats-server-cert Certificate, beyond its two internal cluster-DNS names. Must include each data plane's own external NATS LoadBalancer hostname, or cross-cluster mTLS fails x509 SAN verification."
   default     = []
 }
 
 variable "nats_client_identities" {
   type        = list(string)
-  description = "commonName for each data-plane NATS client certificate cert-manager issues, e.g. [\"azure-stage\", \"azure-prod\", \"aws-stage\", \"aws-prod\"]. One Certificate per entry; the resulting cert/key end up in a Kubernetes Secret named \"nats-client-<entry>\" in var.namespace, readable via this module's nats_client_cert_pems/nats_client_key_pems outputs for manual, out-of-band distribution to each data plane's own environment - same pattern already used for control_plane_tunnel_host."
+  description = "commonName for each data-plane NATS client certificate cert-manager issues, e.g. [\"azure-stage\", \"azure-prod\", \"aws-stage\", \"aws-prod\"]. Cert/key land in Secret \"nats-client-<entry>\", readable via nats_client_cert_pems/nats_client_key_pems for out-of-band distribution."
   default     = []
 }
 
@@ -145,13 +145,13 @@ variable "manifest_files" {
     content      = optional(string)
     template_map = optional(map(string), {})
   }))
-  description = "Additional Kubernetes manifests to apply - dispatch-namespace RBAC, the SSO gateway (oauth2-proxy/credential-injector/link-resolver/submit-attributor), Ingress/Service for the real Load Balancer replacing the current single-VM Elastic IP. Content and ordering are entirely caller-supplied. Set content directly to pass already-fetched text instead of rendering location as a local file path."
+  description = "Additional Kubernetes manifests to apply - e.g. dispatch-namespace RBAC, the SSO gateway, Ingress/Service for the Load Balancer. Set content directly to pass already-fetched text instead of a location file path."
   default     = []
 }
 
 variable "install_external_secrets" {
   type        = bool
-  description = "Install External Secrets Operator - the security review doc's stated mechanism for the oauth2-proxy cookie-signing secret (90-day auto-rotation) and the SSO client secret, both synced from AWS Secrets Manager."
+  description = "Install External Secrets Operator, used to sync the oauth2-proxy cookie-signing secret and SSO client secret from AWS Secrets Manager."
   default     = true
 }
 
@@ -183,6 +183,6 @@ variable "kubectl_manifest_files" {
     template_map = optional(map(string), {})
     namespace    = optional(string)
   }))
-  description = "Manifests applied via the alekc/kubectl provider instead of kubernetes_manifest - required for anything backed by a CRD installed in this same apply (ESO's ClusterSecretStore/ExternalSecret), since kubernetes_manifest validates against the CRD schema at plan time and fails when the CRD doesn't exist yet. Set content directly to pre-process a real file's text (e.g. strip a document already managed elsewhere) instead of rendering location as-is. namespace, if set, overrides every object's own embedded metadata.namespace via kubectl_manifest's override_namespace - e.g. eventbus.yaml ships with no namespace field at all (\"same manifest applies on both control plane and data plane, just change -n on apply\"), so this is how a plain terraform apply supplies it instead."
+  description = "Manifests applied via the kubectl provider instead of kubernetes_manifest - required for anything backed by a CRD installed in this same apply (e.g. ESO's ClusterSecretStore/ExternalSecret). namespace, if set, overrides each object's own metadata.namespace."
   default     = []
 }

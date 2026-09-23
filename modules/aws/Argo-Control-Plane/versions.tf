@@ -9,10 +9,8 @@
 #
 # --------------------------------------------------------------------------------------
 #
-# Union of cluster/versions.tf and apps/versions.tf's own requirements -
-# this composite module calls both submodules AND configures the
-# kubernetes/helm/kubectl providers itself (see main.tf), so it needs
-# every provider either of them needs.
+# Union of cluster/ and apps/ requirements - this composite configures the
+# kubernetes/helm/kubectl providers itself too.
 #
 # --------------------------------------------------------------------------------------
 

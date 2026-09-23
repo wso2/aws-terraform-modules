@@ -356,12 +356,8 @@ resource "aws_iam_role_policy" "eso" {
   })
 }
 
-# Argo's own artifact repository - without this, workflow/pod logs only
-# exist as long as the pod does (archiveLogs is off by default in the
-# chart). Opt-in, self-contained: the module creates its own bucket
-# rather than taking a caller-supplied ARN, so a caller only needs to
-# flip enable_artifact_archiving and wire the two outputs below into
-# argo_workflows_values' artifactRepository block.
+# Argo's own artifact repository for workflow/pod logs. Opt-in via
+# enable_artifact_archiving.
 resource "aws_s3_bucket" "argo_logs" {
   count = var.enable_artifact_archiving ? 1 : 0
 

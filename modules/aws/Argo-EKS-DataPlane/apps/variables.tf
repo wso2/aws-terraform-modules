@@ -9,24 +9,17 @@
 #
 # --------------------------------------------------------------------------------------
 #
-# This module assumes the caller (the root/environment config) has already
-# configured the kubernetes and helm providers against the cluster built by
-# the sibling ../cluster module - it does not take cluster credentials as
-# input, it inherits the providers implicitly like any other Terraform
-# child module.
-#
-# This module is deliberately generic: it installs the upstream Argo
-# Workflows/Events/ArgoCD charts, and applies whatever project-specific
-# manifests (RBAC, EventSource/Sensor, ArgoCD Application/AppProject) the
-# caller points it at via manifest_files. It does not hardcode any
-# Asgardeo-specific YAML content itself, so it stays reusable beyond this
-# one project.
+# Assumes the caller has already configured the kubernetes/helm providers
+# against the sibling ../cluster module - takes no cluster credentials as
+# input. Deliberately generic: installs the upstream charts and applies
+# whatever manifest_files supplies, with no project-specific YAML of its
+# own.
 #
 # --------------------------------------------------------------------------------------
 
 variable "namespaces" {
   type        = list(string)
-  description = "Per-tier Kubernetes namespaces (e.g. [\"argo-stage\", \"argo-prod\"]) - created by this module, but Argo Workflows/Events themselves install once, cluster-wide, in system_namespace, not per entry here. RBAC (applied via manifest_files) is what actually isolates tiers, matching the security review doc's stated design."
+  description = "Per-tier Kubernetes namespaces (e.g. [\"argo-stage\", \"argo-prod\"]) created by this module. Argo Workflows/Events install once cluster-wide in system_namespace; RBAC via manifest_files is what isolates tiers."
 }
 
 variable "system_namespace" {
@@ -55,7 +48,7 @@ variable "argo_helm_repo" {
 
 variable "argo_workflows_values" {
   type        = list(string)
-  description = "Helm values overrides (YAML strings, later entries win) for the argo-workflows release. Set controller.workflowNamespaces to var.namespaces (or leave cluster-wide) depending on how narrow you want the watch."
+  description = "Helm values overrides (YAML strings, later entries win) for the argo-workflows release. Set controller.workflowNamespaces to var.namespaces to narrow the watch."
   default     = []
 }
 
@@ -102,7 +95,7 @@ variable "manifest_files" {
     template_map = optional(map(string), {})
     namespace    = optional(string)
   }))
-  description = "Additional Kubernetes manifests to apply after the Helm releases above - e.g. debug-access RBAC, EventSource/Sensor definitions, ArgoCD Application/AppProject objects. Each entry is a template file path plus the variables to render it with; content and ordering are entirely caller-supplied, this module does not know what's in them. Set content directly to pass already-fetched text instead of rendering location as a local file path. namespace, if set, overrides every object's own embedded metadata.namespace via kubectl_manifest's override_namespace - lets one unmodified source file be applied into a different namespace per caller."
+  description = "Additional Kubernetes manifests to apply after the Helm releases above - e.g. debug-access RBAC, EventSource/Sensor definitions, ArgoCD Application/AppProject objects. Set content directly to pass already-fetched text instead of a location file path. namespace, if set, overrides each object's own metadata.namespace."
   default     = []
 }
 
@@ -140,7 +133,7 @@ variable "kubectl_manifest_files" {
     template_map = optional(map(string), {})
     namespace    = optional(string)
   }))
-  description = "Manifests applied via the alekc/kubectl provider instead of kubernetes_manifest - required for anything backed by a CRD installed in this same apply (ESO's ClusterSecretStore/ExternalSecret). Set content directly to pre-process a real file's text instead of rendering location as-is."
+  description = "Manifests applied via the kubectl provider instead of kubernetes_manifest - required for anything backed by a CRD installed in this same apply (e.g. ESO's ClusterSecretStore/ExternalSecret)."
   default     = []
 }
 

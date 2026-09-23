@@ -44,7 +44,7 @@ variable "vpc_cidr_block" {
 
 variable "availability_zones" {
   type        = list(string)
-  description = "Availability zones for the control plane's multi-AZ layout - a config choice, not fixed by this module. NATS JetStream itself still runs 3 replicas regardless of AZ count (set via the apps module); with fewer than 3 AZs, a single-AZ outage can take out a majority of those replicas and break quorum - an inherent property of RAFT, not something more AZs-per-node fixes on its own. 2 is the practical minimum for any node-level HA at all."
+  description = "Availability zones for the control plane's VPC. NATS JetStream runs 3 replicas across these regardless of AZ count; use at least 3 AZs for real node-level HA."
 
   validation {
     condition     = length(var.availability_zones) >= 2
@@ -111,7 +111,7 @@ variable "enable_vpc_flow_logs" {
 
 variable "enable_artifact_archiving" {
   type        = bool
-  description = "Whether to create an S3 bucket + IRSA role for Argo Workflows to archive workflow logs/artifacts to (workflow_controller_artifacts_role_arn/artifact_bucket_name outputs). The caller still wires these into argo_workflows_values' artifactRepository Helm config."
+  description = "Whether to create an S3 bucket + IRSA role for Argo Workflows to archive workflow logs/artifacts to. Wire the two outputs into argo_workflows_values' artifactRepository config."
   default     = false
 }
 
@@ -196,6 +196,6 @@ variable "bastion_instance_type" {
 
 variable "eso_secretsmanager_key_prefix" {
   type        = string
-  description = "Secrets Manager key-name prefix (glob) the eso IAM role may read - scoped to this control plane's own secrets, matching the security review doc's stated scoping (\"IAM-scoped to argo/control-plane/*\") for the oauth2-proxy cookie-signing secret and the SSO client secret."
+  description = "Secrets Manager key-name prefix (glob) the eso IAM role may read, scoped to this control plane's own secrets."
   default     = "argo/control-plane/*"
 }
