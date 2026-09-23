@@ -55,6 +55,13 @@ Workflows' S3 artifact archiving.
   first, then a plain `terraform apply`.
 - See `cloud-sre-common`'s `environments/aws-dataplane` for a real,
   wired-up example.
+- **Apply this module after `Argo-Control-Plane` (aws), not before.** This
+  data plane's own NATS client identity (e.g. `aws-stage`/`aws-prod`) has
+  to already exist as a cert-manager-issued certificate in the control
+  plane's output, copied by hand into this module's `terraform.tfvars`,
+  before `apps` can dial the control plane over NATS. It has no dependency
+  on the Azure data plane (`Argo-AKS-DataPlane`) and can be applied
+  before, after, or in parallel with it.
 
 ## Example
 

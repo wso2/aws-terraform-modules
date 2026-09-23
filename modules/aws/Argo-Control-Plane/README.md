@@ -60,6 +60,16 @@ inside this directory. Instead, the calling root module:
   wired-up example of this pattern - `apps` is called there with
   `depends_on = [module.cluster]` and every relevant cluster output passed
   through explicitly.
+- **Apply this module before either data plane.** `apps` is where
+  cert-manager issues the per-data-plane NATS mTLS client certificate
+  (`nats_client_identities`) and, optionally, the reverse-tunnel SSH keys
+  (`tunnel_client_identities`). Those come out as sensitive outputs
+  (`nats_client_cert_pems`/`nats_client_key_pems`/`nats_client_ca_pems`,
+  `tunnel_client_private_keys`) that get copied by hand into each data
+  plane's own `terraform.tfvars` - there's no remote-state link between
+  this module and `Argo-EKS-DataPlane`/`Argo-AKS-DataPlane`, so a data
+  plane never gets read access to this module's state, only its own copied
+  NATS identity.
 
 ## Example
 
