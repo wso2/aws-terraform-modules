@@ -142,16 +142,8 @@ module "apps" {
   eso_helm_repo            = var.eso_helm_repo
   eso_namespace            = var.eso_namespace
 
-  # The one apps input NOT exposed as this module's own variable - wired
-  # straight from the sibling cluster module's output instead, same as
-  # environments/control-plane/main.tf's identical line. Every other
-  # cluster output (workflow_controller_artifacts_role_arn/artifact_bucket_name
-  # etc.) only ever gets consumed INSIDE a caller-authored Helm values
-  # heredoc (argo_workflows_values), not as a discrete apps variable, so
-  # there's no equivalent 1:1 wiring to replicate generically here - the
-  # caller still supplies argo_workflows_values itself, referencing
-  # module.cluster outputs from further up if using ./cluster and ./apps
-  # directly, or from this module's own outputs.tf if composing through it.
+  # Only apps input auto-wired from cluster; other cluster outputs get
+  # consumed inside the caller's own Helm values instead.
   eso_role_arn = module.cluster.eso_role_arn
 
   kubectl_manifest_files = var.kubectl_manifest_files

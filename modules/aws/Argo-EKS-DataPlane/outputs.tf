@@ -9,11 +9,8 @@
 #
 # --------------------------------------------------------------------------------------
 #
-# A curated merge of cluster/outputs.tf and apps/outputs.tf - only what a
-# caller composing through this module would actually need downstream
-# (e.g. a Helm values override referencing an IRSA role ARN, or an
-# operator reaching the bastion), not every internal output either
-# submodule exposes.
+# Outputs a caller composing through this module actually needs
+# downstream, not every internal cluster/apps output.
 #
 # --------------------------------------------------------------------------------------
 
@@ -47,7 +44,7 @@ output "deploy_identity_role_arns" {
 }
 
 output "eso_role_arn" {
-  description = "IRSA role ARN for External Secrets Operator's own controller ServiceAccount - already wired into module.apps by this composite module, exposed here too since a caller's own argo_workflows_values/other Helm overrides may need it directly"
+  description = "IRSA role ARN for External Secrets Operator's controller ServiceAccount - already wired into module.apps; exposed here too for a caller's own Helm overrides."
   value       = module.cluster.eso_role_arn
 }
 

@@ -21,11 +21,8 @@ resource "kubernetes_namespace_v1" "this" {
   }
 }
 
-# Same gap and fix as Argo-Control-Plane/apps: the default gp2 StorageClass
-# uses the deprecated in-tree kubernetes.io/aws-ebs provisioner, which
-# doesn't function on modern k8s - any PVC-backed step is stuck Pending
-# without a StorageClass backed by the ebs.csi.aws.com provisioner (see
-# the cluster module's aws_eks_addon.ebs_csi_driver).
+# gp3 StorageClass backed by ebs.csi.aws.com - the default gp2 in-tree
+# provisioner doesn't function on modern k8s.
 resource "kubernetes_storage_class_v1" "gp3" {
   metadata {
     name = "gp3"
@@ -44,14 +41,9 @@ resource "kubernetes_storage_class_v1" "gp3" {
   }
 }
 
-# ONE shared argo-server + workflow-controller per data plane, in
-# system_namespace - matches the security review doc's data-plane diagram
-# ("system-pool - shared ... argo-server (argo-CLOUD-stage / -prod)") and
-# its explicit statement that "the workflow-controller and Argo Events
-# controllers see every namespace on their cluster - this is normal
-# Kubernetes control-plane behaviour." Tier isolation is real RBAC
-# (data-plane-tier-rbac.yaml / data-plane-debug-access-rbac.yaml, applied
-# via manifest_files), not separate controller instances per tier.
+# One shared argo-server + workflow-controller per data plane, in
+# system_namespace. Tier isolation is RBAC (applied via manifest_files),
+# not separate controller instances per tier.
 resource "helm_release" "argo_workflows" {
   name             = "argo-workflows"
   repository       = var.argo_helm_repo
@@ -90,11 +82,9 @@ resource "helm_release" "argocd" {
   depends_on = [kubernetes_namespace_v1.this]
 }
 
-# --- External Secrets Operator - syncs this data plane's own tier tokens
-#     (currently referenced by the real ExternalSecret files as bare,
-#     unprefixed key names, copied from an existing Azure Key Vault store)
-#     from AWS Secrets Manager. Same IRSA-annotated-controller pattern as
-#     the control plane's install. ---
+# External Secrets Operator - syncs this data plane's secrets from AWS
+# Secrets Manager, same IRSA-annotated-controller pattern as the control
+# plane's install.
 
 resource "kubernetes_namespace_v1" "external_secrets" {
   count = var.install_external_secrets ? 1 : 0
@@ -122,21 +112,9 @@ resource "helm_release" "external_secrets" {
   depends_on = [kubernetes_namespace_v1.external_secrets]
 }
 
-# Several real pipeline manifests are multi-document YAML (Deployment +
-# Service + IngressRoute in one file, multiple RBAC objects, etc.) - split
-# on a bare "---" line first. This is a real fix, not a design choice:
-# applying these files through the previous wso2 kubernetes/Manifest module
-# had the exact same single-document limitation.
-#
-# kubectl_manifest (not kubernetes_manifest) - same silent-client-
-# construction-failure bug control-plane's main.tf documents
-# ("kubernetes_manifest's silent token-drop bug with static tokens"):
-# kubernetes_manifest builds its own REST client independently of the rest
-# of the provider, and that path doesn't reliably work with exec-based auth
-# (aws eks get-token here) - confirmed failing on Azure's equivalent module
-# with the identical "cannot create REST client: no client config" error on
-# every instance, regardless of parallelism. kubectl_manifest takes raw
-# YAML text directly, so no yamldecode() round-trip is needed either.
+# Split multi-document YAML manifests on a bare "---" line first, then
+# apply each via kubectl_manifest (not kubernetes_manifest) - its REST
+# client doesn't reliably work with exec-based auth (aws eks get-token).
 locals {
   manifest_documents = flatten([
     for idx, m in var.manifest_files : [
@@ -158,13 +136,9 @@ resource "kubectl_manifest" "this" {
   yaml_body          = each.value.body
   override_namespace = each.value.namespace
 
-  # wait_for_rollout defaults to true for Deployment/DaemonSet/StatefulSet
-  # kinds (a no-op for everything else here) - tunnel-client's Deployment
-  # needs a Secret (tunnel-client-key) that's only created once this
-  # entire module finishes applying, so waiting here deadlocks: Terraform
-  # blocks inside this apply for a pod that can't start until after this
-  # apply is done. Kubernetes' own reconciliation starts the pod for real
-  # moments later regardless of whether Terraform waited around for it.
+  # false, not the Deployment/DaemonSet/StatefulSet default of true -
+  # some manifests here depend on state only created once this whole
+  # module finishes applying, which would otherwise deadlock.
   wait_for_rollout = false
 
   depends_on = [helm_release.argo_workflows, helm_release.argo_events, helm_release.argocd]

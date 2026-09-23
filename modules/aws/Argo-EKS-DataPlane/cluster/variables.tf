@@ -203,7 +203,7 @@ variable "prod_node_taint_value" {
 
 variable "enable_bastion" {
   type        = bool
-  description = "Whether to provision a bastion instance for admin access to this data plane, via AWS Systems Manager Session Manager - no inbound security group rules, no open port, matching Azure Bastion's zero-inbound property. Uses the stage private subnet's existing NAT egress to reach the SSM service endpoint."
+  description = "Whether to provision a bastion instance for admin access, via AWS Systems Manager Session Manager - no inbound security group rules, no open port."
   default     = true
 }
 
@@ -215,7 +215,7 @@ variable "bastion_instance_type" {
 
 variable "eso_secretsmanager_key_prefix" {
   type        = string
-  description = "Secrets Manager key-name prefix (glob) the eso IAM role may read. Defaults to \"*\" because this data plane's real ExternalSecrets (the IS-deploy pipeline's tier tokens) reference bare, unprefixed key names copied from an existing Azure Key Vault store - narrow this if/when those keys are ever renamed onto a path convention."
+  description = "Secrets Manager key-name prefix (glob) the eso IAM role may read. Defaults to \"*\" since this data plane's ExternalSecrets reference unprefixed key names."
   default     = "*"
 }
 
@@ -225,7 +225,7 @@ variable "deploy_identities" {
     service_account_name = string
     policy_json          = string
   }))
-  description = "Per-env IRSA identities for pipeline pods (\"Pipeline pod -> deployment target: Cloud-native Workload Identity Federation / IRSA, scoped per env\" per the security review doc) - no standing secret, credential minted per-pod by AWS itself. One IAM role per map entry, trusted via this cluster's own OIDC provider and scoped to exactly that (namespace, ServiceAccount) pair. policy_json is caller-supplied (this module has no opinion on what a pipeline actually needs to reach - e.g. {\"stage\" = {namespace=\"argo-stage\", service_account_name=\"is-deploy-stage\", policy_json=...}})."
+  description = "Per-env IRSA identities for pipeline pods - one IAM role per map entry, trusted via this cluster's own OIDC provider and scoped to a (namespace, ServiceAccount) pair. policy_json is caller-supplied, e.g. {\"stage\" = {namespace=\"argo-stage\", service_account_name=\"is-deploy-stage\", policy_json=...}}."
   default     = {}
 }
 
@@ -235,7 +235,7 @@ variable "deploy_identities" {
 # NODE's own instance-profile role instead of a per-pod federated one).
 variable "stage_node_extra_policy_json" {
   type        = string
-  description = "Extra IAM policy document (JSON) attached directly to the stage node role, in addition to the standard EKS worker/CNI/ECR policies - e.g. S3 access for a pipeline step that reads node-instance-profile credentials via IMDS. Null (default) attaches nothing."
+  description = "Extra IAM policy document (JSON) attached to the stage node role, in addition to the standard EKS worker/CNI/ECR policies. Null (default) attaches nothing."
   default     = null
 }
 
@@ -271,7 +271,7 @@ variable "enable_vpc_flow_logs" {
 
 variable "enable_artifact_archiving" {
   type        = bool
-  description = "Whether to create an S3 bucket + IRSA role for Argo Workflows to archive workflow logs/artifacts to (workflow_controller_artifacts_role_arn/artifact_bucket_name outputs). The caller still wires these into argo_workflows_values' artifactRepository Helm config."
+  description = "Whether to create an S3 bucket + IRSA role for Argo Workflows to archive workflow logs/artifacts to. Wire the two outputs into argo_workflows_values' artifactRepository config."
   default     = false
 }
 

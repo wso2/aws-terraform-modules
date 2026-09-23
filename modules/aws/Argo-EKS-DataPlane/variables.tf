@@ -9,11 +9,8 @@
 #
 # --------------------------------------------------------------------------------------
 #
-# Every variable below is a straight passthrough into module.cluster or
-# module.apps (see main.tf) - same name, type, description and default as
-# that submodule's own variables.tf. The one exception is apps' eso_role_arn,
-# which this module wires automatically from module.cluster.eso_role_arn
-# instead of exposing it here - see main.tf's own comment on why.
+# Straight passthrough into module.cluster or module.apps (see main.tf),
+# except apps' eso_role_arn, which is auto-wired instead of exposed here.
 #
 # --------------------------------------------------------------------------------------
 
@@ -213,7 +210,7 @@ variable "prod_node_taint_value" {
 
 variable "enable_bastion" {
   type        = bool
-  description = "Whether to provision a bastion instance for admin access to this data plane, via AWS Systems Manager Session Manager - no inbound security group rules, no open port, matching Azure Bastion's zero-inbound property. Uses the stage private subnet's existing NAT egress to reach the SSM service endpoint."
+  description = "Whether to provision a bastion instance for admin access, via AWS Systems Manager Session Manager - no inbound security group rules, no open port."
   default     = true
 }
 
@@ -225,7 +222,7 @@ variable "bastion_instance_type" {
 
 variable "eso_secretsmanager_key_prefix" {
   type        = string
-  description = "Secrets Manager key-name prefix (glob) the eso IAM role may read. Defaults to \"*\" because this data plane's real ExternalSecrets (the IS-deploy pipeline's tier tokens) reference bare, unprefixed key names copied from an existing Azure Key Vault store - narrow this if/when those keys are ever renamed onto a path convention."
+  description = "Secrets Manager key-name prefix (glob) the eso IAM role may read. Defaults to \"*\" since this data plane's ExternalSecrets reference unprefixed key names."
   default     = "*"
 }
 
@@ -235,13 +232,13 @@ variable "deploy_identities" {
     service_account_name = string
     policy_json          = string
   }))
-  description = "Per-env IRSA identities for pipeline pods (\"Pipeline pod -> deployment target: Cloud-native Workload Identity Federation / IRSA, scoped per env\" per the security review doc) - no standing secret, credential minted per-pod by AWS itself. One IAM role per map entry, trusted via this cluster's own OIDC provider and scoped to exactly that (namespace, ServiceAccount) pair. policy_json is caller-supplied (this module has no opinion on what a pipeline actually needs to reach - e.g. {\"stage\" = {namespace=\"argo-stage\", service_account_name=\"is-deploy-stage\", policy_json=...}})."
+  description = "Per-env IRSA identities for pipeline pods - one IAM role per map entry, trusted via this cluster's own OIDC provider and scoped to a (namespace, ServiceAccount) pair. policy_json is caller-supplied, e.g. {\"stage\" = {namespace=\"argo-stage\", service_account_name=\"is-deploy-stage\", policy_json=...}}."
   default     = {}
 }
 
 variable "stage_node_extra_policy_json" {
   type        = string
-  description = "Extra IAM policy document (JSON) attached directly to the stage node role, in addition to the standard EKS worker/CNI/ECR policies - e.g. S3 access for a pipeline step that reads node-instance-profile credentials via IMDS. Null (default) attaches nothing."
+  description = "Extra IAM policy document (JSON) attached to the stage node role, in addition to the standard EKS worker/CNI/ECR policies. Null (default) attaches nothing."
   default     = null
 }
 
@@ -277,7 +274,7 @@ variable "enable_vpc_flow_logs" {
 
 variable "enable_artifact_archiving" {
   type        = bool
-  description = "Whether to create an S3 bucket + IRSA role for Argo Workflows to archive workflow logs/artifacts to (workflow_controller_artifacts_role_arn/artifact_bucket_name outputs). The caller still wires these into argo_workflows_values' artifactRepository Helm config."
+  description = "Whether to create an S3 bucket + IRSA role for Argo Workflows to archive workflow logs/artifacts to. Wire the two outputs into argo_workflows_values' artifactRepository config."
   default     = false
 }
 
@@ -297,7 +294,7 @@ variable "workflow_controller_service_account_name" {
 
 variable "namespaces" {
   type        = list(string)
-  description = "Per-tier Kubernetes namespaces (e.g. [\"argo-stage\", \"argo-prod\"]) - created by this module, but Argo Workflows/Events themselves install once, cluster-wide, in system_namespace, not per entry here. RBAC (applied via manifest_files) is what actually isolates tiers, matching the security review doc's stated design."
+  description = "Per-tier Kubernetes namespaces (e.g. [\"argo-stage\", \"argo-prod\"]) created by this module. Argo Workflows/Events install once cluster-wide in system_namespace; RBAC via manifest_files is what isolates tiers."
 }
 
 variable "system_namespace" {
@@ -326,7 +323,7 @@ variable "argo_helm_repo" {
 
 variable "argo_workflows_values" {
   type        = list(string)
-  description = "Helm values overrides (YAML strings, later entries win) for the argo-workflows release. Set controller.workflowNamespaces to var.namespaces (or leave cluster-wide) depending on how narrow you want the watch."
+  description = "Helm values overrides (YAML strings, later entries win) for the argo-workflows release. Set controller.workflowNamespaces to var.namespaces to narrow the watch."
   default     = []
 }
 
@@ -373,7 +370,7 @@ variable "manifest_files" {
     template_map = optional(map(string), {})
     namespace    = optional(string)
   }))
-  description = "Additional Kubernetes manifests to apply after the Helm releases above - e.g. debug-access RBAC, EventSource/Sensor definitions, ArgoCD Application/AppProject objects. Each entry is a template file path plus the variables to render it with; content and ordering are entirely caller-supplied, this module does not know what's in them. Set content directly to pass already-fetched text instead of rendering location as a local file path. namespace, if set, overrides every object's own embedded metadata.namespace via kubectl_manifest's override_namespace - lets one unmodified source file be applied into a different namespace per caller."
+  description = "Additional Kubernetes manifests to apply after the Helm releases above - e.g. debug-access RBAC, EventSource/Sensor definitions, ArgoCD Application/AppProject objects. Set content directly to pass already-fetched text instead of a location file path. namespace, if set, overrides each object's own metadata.namespace."
   default     = []
 }
 
@@ -405,7 +402,7 @@ variable "kubectl_manifest_files" {
     template_map = optional(map(string), {})
     namespace    = optional(string)
   }))
-  description = "Manifests applied via the alekc/kubectl provider instead of kubernetes_manifest - required for anything backed by a CRD installed in this same apply (ESO's ClusterSecretStore/ExternalSecret). Set content directly to pre-process a real file's text instead of rendering location as-is."
+  description = "Manifests applied via the kubectl provider instead of kubernetes_manifest - required for anything backed by a CRD installed in this same apply (e.g. ESO's ClusterSecretStore/ExternalSecret)."
   default     = []
 }
 

@@ -9,10 +9,8 @@
 #
 # --------------------------------------------------------------------------------------
 #
-# Raw provider resource blocks, not wrapped through wso2/aws-terraform-modules
-# - this composite has no dependency on that repo (or any other WSO2 module
-# repo) at all. Same tainted-node-pool + subnet-pinned + NAT-per-tier
-# isolation pattern as before, just expressed directly.
+# Raw provider resource blocks; tainted node group + subnet-pinned +
+# NAT-per-tier isolation between stage and prod.
 #
 # --------------------------------------------------------------------------------------
 
@@ -496,13 +494,9 @@ resource "aws_iam_openid_connect_provider" "eks" {
   tags            = var.tags
 }
 
-# --- External Secrets Operator IRSA - real secret names referenced by
-#     this data plane's own ExternalSecrets (the IS-deploy pipeline's
-#     tier tokens) were copied as-is from an existing Azure Key Vault
-#     store and don't follow a path-prefix convention (e.g. "GIT-BOT-PAT",
-#     not "argo/data-plane/git-bot-pat") - var.eso_secretsmanager_key_prefix
-#     defaults to "*" here for that reason, unlike the control plane's
-#     tightly-scoped "argo/control-plane/*". ---
+# External Secrets Operator IRSA - var.eso_secretsmanager_key_prefix
+# defaults to "*" since this data plane's secret names aren't prefixed,
+# unlike the control plane's tightly-scoped "argo/control-plane/*".
 
 data "aws_iam_policy_document" "eso_assume" {
   statement {
@@ -554,19 +548,15 @@ resource "aws_eks_addon" "core" {
   addon_name    = each.value.name
   addon_version = try(each.value.version, null)
 
-  # Must depend only on the cluster, never on the node groups: vpc-cni is
-  # in this addon set, and a node can't leave NotReady without it, but a
-  # node group's own creation waits for its nodes to become healthy
-  # first - depending on the node groups here would deadlock vpc-cni
-  # against the exact nodes it's required to bring up.
+  # Depend only on the cluster, never the node groups - vpc-cni is
+  # required for a node to leave NotReady, so depending on the node
+  # groups here would deadlock.
   depends_on = [aws_eks_cluster.this]
 }
 
-# EBS CSI driver IRSA - same gap and same fix as Argo-Control-Plane/cluster:
-# the in-tree kubernetes.io/aws-ebs provisioner (gp2) doesn't function on
-# modern k8s, so any PVC-backed pipeline step (e.g. download-github-release)
-# is stuck Pending without this addon and its own StorageClass (see the
-# gp3 kubernetes_storage_class_v1 in the apps module).
+# EBS CSI driver IRSA - the in-tree gp2 provisioner doesn't function on
+# modern k8s, so any PVC-backed step needs this addon plus the gp3
+# StorageClass in the apps module.
 data "aws_iam_policy_document" "ebs_csi_assume" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
@@ -656,16 +646,8 @@ resource "aws_iam_role_policy_attachment" "stage_node_ecr" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
-# Added 2026-09-17 for docs-deploy's own S3 upload step, which
-# deliberately authenticates via this NODE's instance-profile role (not
-# per-pod IRSA - see docs-deploy-001-argo.yaml's deploy-to-s3 template's
-# own header comment for why: it reaches AWS's Instance Metadata Service
-# over hostNetwork, same class of mechanism as the old VM's MSI-based
-# blob upload before Azure's side moved to Workload Identity). No
-# per-pipeline IRSA role fits this shape - var.deploy_identities is
-# IRSA-only, scoped to a (namespace, ServiceAccount) pair, not the node
-# itself. Optional/null by default so this stays a no-op for every
-# caller that doesn't set it.
+# Extra node-role policy for steps that authenticate via the node's own
+# instance-profile role instead of per-pod IRSA. Optional/null by default.
 resource "aws_iam_role_policy" "stage_node_extra" {
   count  = var.stage_node_extra_policy_json != null ? 1 : 0
   name   = "${local.name}-stage-node-extra"

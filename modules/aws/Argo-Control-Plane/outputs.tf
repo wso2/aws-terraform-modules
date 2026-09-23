@@ -9,11 +9,8 @@
 #
 # --------------------------------------------------------------------------------------
 #
-# A curated merge of cluster/outputs.tf and apps/outputs.tf - only what a
-# consumer of this composite module (e.g. a data-plane environment wiring
-# in this control plane's NATS/tunnel material, or an operator reaching the
-# bastion) would actually reference downstream, not every internal output
-# either submodule exposes.
+# Outputs a downstream caller (data-plane environments, bastion access)
+# actually needs, not every internal cluster/apps output.
 #
 # --------------------------------------------------------------------------------------
 
@@ -42,7 +39,7 @@ output "bastion_instance_id" {
 }
 
 output "eso_role_arn" {
-  description = "IRSA role ARN for External Secrets Operator's own controller ServiceAccount - already wired into module.apps by this composite module, exposed here too since a caller's own argo_workflows_values/other Helm overrides may need it directly"
+  description = "IRSA role ARN for External Secrets Operator's controller ServiceAccount - already wired into module.apps; exposed here too for a caller's own Helm overrides."
   value       = module.cluster.eso_role_arn
 }
 
