@@ -88,6 +88,32 @@ def get_tag_value(tags, key):
         return value
     return "".join(char if char >= " " else " " for char in value).strip()
 
+TERRAFORM_TAG_KEYS = tuple(
+    x.strip().lower()
+    for x in os.environ.get("TERRAFORM_TAG_KEYS", "").split(",") if x.strip()
+)
+TERRAFORM_TAG_VALUES = tuple(
+    x.strip().lower()
+    for x in os.environ.get("TERRAFORM_TAG_VALUES", "").split(",") if x.strip()
+)
+
+
+def is_terraform_managed(tags):
+
+    if not TERRAFORM_TAG_KEYS or not TERRAFORM_TAG_VALUES:
+        return "Unknown"   # deployment did not configure a tagging convention
+    if not tags:
+        return "Unknown"
+    for key, value in tags_to_dict(tags).items():
+        if not isinstance(key, str):
+            continue
+        if key.strip().lower() not in TERRAFORM_TAG_KEYS:
+            continue
+        if str(value).strip().lower() in TERRAFORM_TAG_VALUES:
+            return "Yes"
+    return "No"
+
+
 # Fetch the exclusion list from SSM Parameter Store (managed by Terraform).
 # The parameter holds a JSON array of resource IDs, e.g. ["vol-0abc", "eipalloc-0def"].
 def load_exclusions():
@@ -155,18 +181,21 @@ def add_finding(findings, account, region, resource_type, resource_id, reason, t
         return
     if str(get_tag_value(tags, "orphan-scan-ignore")).lower() == "true":
         return
+    # Scanner Error rows carry the raw exception in extra. The report no longer
+    # has an Extra column, so fold it into Reason to keep errors diagnosable.
+    if extra and resource_type == "Scanner Error":
+        reason = f"{reason} {extra}".strip()
     findings.append({
-        "AccountId":         account["AccountId"],
-        "AccountName":       account["AccountName"],
-        "Region":            region,
-        "ResourceType":      resource_type,
-        "ResourceId":        resource_id,
-        "Reason":            reason,
-        "Owner":             get_tag_value(tags, "Owner"),
-        "Environment":       get_tag_value(tags, "Environment"),
-        "CostCenter":        get_tag_value(tags, "CostCenter"),
-        "RecommendedAction": "Review manually. Do not delete without owner confirmation.",
-        "Extra":             extra,
+        "AccountId":        account["AccountId"],
+        "AccountName":      account["AccountName"],
+        "Region":           region,
+        "ResourceType":     resource_type,
+        # Exact string copied into excluded_resource_ids to suppress this finding.
+        "ResourceId":       resource_id,
+        "Reason":           reason,
+        "Owner":            get_tag_value(tags, "Owner"),
+        "Environment":      get_tag_value(tags, "Environment"),
+        "TerraformManaged": is_terraform_managed(tags),
     })
 
 
@@ -1082,7 +1111,7 @@ def generate_csv(findings):
     output     = io.StringIO()
     fieldnames = [
         "AccountId", "AccountName", "Region", "ResourceType", "ResourceId",
-        "Reason", "Owner", "Environment", "CostCenter", "RecommendedAction", "Extra",
+        "Reason", "Owner", "Environment", "TerraformManaged",
     ]
     writer = csv.DictWriter(output, fieldnames=fieldnames)
     writer.writeheader()
@@ -1190,7 +1219,7 @@ def send_email(findings, csv_report, exclusions_error=None, report_s3_key=None):
                     </td>
                     <td style="{bottom}">{html.escape(f['Reason'])}</td>
                     <td style="{bottom}">{html.escape(f['Owner']) if f['Owner'] else '-'}</td>
-                    <td style="font-size:12px;{bottom}">{html.escape(f['Extra']) if f['Extra'] else '-'}</td>
+                    <td style="font-size:12px;{bottom}">{html.escape(f['TerraformManaged'])}</td>
                     <td style="border-right:2px solid #1a3a5c;{bottom}">{console_link}</td>
                 </tr>"""
 
@@ -1233,7 +1262,7 @@ def send_email(findings, csv_report, exclusions_error=None, report_s3_key=None):
         <table>
             <tr>
                 <th>Region</th><th>Resource ID</th><th>Reason</th>
-                <th>Owner</th><th>Extra</th><th>Action</th>
+                <th>Owner</th><th>Terraform</th><th>Action</th>
             </tr>
             {finding_rows}
         </table>
