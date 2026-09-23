@@ -80,6 +80,18 @@ variable "excluded_resource_ids" {
   default     = []
 }
 
+variable "terraform_tag_keys" {
+  description = "Tag keys that mark a resource as IaC-managed, compared case-insensitively. Empty disables detection and every resource reports Unknown."
+  type        = list(string)
+  default     = ["ManagedBy", "managed_by", "terraform", "iac", "provisioner"]
+}
+
+variable "terraform_tag_values" {
+  description = "Tag values that mark a resource as IaC-managed when found on one of terraform_tag_keys, compared case-insensitively."
+  type        = list(string)
+  default     = ["terraform", "true", "tf", "opentofu"]
+}
+
 variable "lambda_runtime" {
   description = "Lambda runtime identifier (e.g. python3.12). Set in the conf tfvars."
   type        = string
