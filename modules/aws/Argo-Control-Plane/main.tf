@@ -8,12 +8,9 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-#
-# Composite entrypoint wiring ./cluster to ./apps in one module call, as an
-# ALTERNATIVE to calling the two submodules separately (see README.md).
-#
-# --------------------------------------------------------------------------------------
 
+
+# Composite entrypoint wiring ./cluster to ./apps in one module call, as an ALTERNATIVE to calling the two submodules separately (see README.md).
 module "cluster" {
   source = "./cluster"
 
