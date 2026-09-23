@@ -1,0 +1,201 @@
+# -------------------------------------------------------------------------------------
+#
+# Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+#
+# This software is the property of WSO2 LLC. and its suppliers, if any.
+# Dissemination of any information or reproduction of any material contained
+# herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
+# You may not alter or remove any copyright or other notice from copies of this content.
+#
+# --------------------------------------------------------------------------------------
+
+variable "project" {
+  type        = string
+  description = "Name of the project (used for resource naming/tagging)"
+}
+
+variable "environment" {
+  type        = string
+  description = "Name of the environment"
+  default     = "prod"
+}
+
+variable "region" {
+  type        = string
+  description = "Code of the AWS region"
+}
+
+variable "application" {
+  type        = string
+  description = "Purpose tag for the resources created by this module"
+  default     = "argo-controlplane"
+}
+
+variable "tags" {
+  type        = map(string)
+  description = "Tags applied to all resources created by this module"
+  default     = {}
+}
+
+variable "vpc_cidr_block" {
+  type        = string
+  description = "CIDR block for the control plane's VPC"
+}
+
+variable "availability_zones" {
+  type        = list(string)
+  description = "Availability zones for the control plane's VPC. NATS JetStream runs 3 replicas across these regardless of AZ count; use at least 3 AZs for real node-level HA."
+
+  validation {
+    condition     = length(var.availability_zones) >= 2
+    error_message = "At least 2 AZs are required for basic node-level HA - a single AZ makes this module's whole per-AZ NAT Gateway/subnet design pointless."
+  }
+}
+
+variable "private_subnet_cidr_blocks" {
+  type        = list(string)
+  description = "One CIDR per AZ for the private (node) subnets, same order as availability_zones"
+}
+
+variable "public_subnet_cidr_blocks" {
+  type        = list(string)
+  description = "One CIDR per AZ for the public (NAT Gateway) subnets, same order as availability_zones"
+}
+
+variable "kubernetes_version" {
+  type        = string
+  description = "Kubernetes version for the EKS cluster"
+}
+
+variable "endpoint_public_access" {
+  type        = bool
+  description = "Whether the EKS API server has a public endpoint"
+  default     = false
+}
+
+variable "public_access_cidrs" {
+  type        = list(string)
+  description = "CIDRs allowed to reach the public API endpoint, if enabled"
+  default     = []
+}
+
+variable "admin_principal_arns" {
+  type        = list(string)
+  description = "IAM principal ARNs (users/roles) granted EKS cluster-admin access entries (native-IAM cluster access path)"
+  default     = []
+}
+
+variable "enable_secrets_encryption" {
+  type        = bool
+  description = "Whether to create a dedicated KMS CMK and envelope-encrypt Kubernetes Secrets with it"
+  default     = false
+}
+
+variable "enabled_cluster_log_types" {
+  type        = list(string)
+  description = "List of cluster log types to enable - when non-empty, a matching CloudWatch Log Group is also created with retention set by log_retention_in_days"
+  default     = []
+}
+
+variable "log_retention_in_days" {
+  type        = number
+  description = "Retention for any CloudWatch Log Groups this module creates (EKS cluster logs, VPC flow logs) and the S3 artifact bucket's expiration, if enabled"
+  default     = 90
+}
+
+variable "enable_vpc_flow_logs" {
+  type        = bool
+  description = "Whether to create a VPC Flow Log for this module's own VPC, published to a dedicated CloudWatch Log Group"
+  default     = false
+}
+
+variable "enable_artifact_archiving" {
+  type        = bool
+  description = "Whether to create an S3 bucket + IRSA role for Argo Workflows to archive workflow logs/artifacts to. Wire the two outputs into argo_workflows_values' artifactRepository config."
+  default     = false
+}
+
+variable "argo_namespace" {
+  type        = string
+  description = "Kubernetes namespace Argo Workflows runs in - only used to scope the workflow-controller's IRSA trust policy when enable_artifact_archiving is true"
+  default     = "argo"
+}
+
+variable "workflow_controller_service_account_name" {
+  type        = string
+  description = "ServiceAccount name the argo-workflows Helm chart creates for workflow-controller - only used to scope the IRSA trust policy when enable_artifact_archiving is true"
+  default     = "argo-workflows-workflow-controller"
+}
+
+variable "eks_addons" {
+  type = list(object({
+    name    = string
+    version = optional(string)
+  }))
+  description = "Core EKS addons to install alongside the EBS CSI driver below"
+  default = [
+    { name = "vpc-cni" },
+    { name = "coredns" },
+    { name = "kube-proxy" },
+  ]
+}
+
+variable "node_instance_types" {
+  type        = list(string)
+  description = "Instance types for the shared node group"
+}
+
+variable "node_min_size" {
+  type        = number
+  description = "Minimum node count for the shared node group's scaling_config"
+  default     = 2
+}
+
+variable "node_max_size" {
+  type        = number
+  description = "Maximum node count for the shared node group's scaling_config"
+  default     = 4
+}
+
+variable "node_desired_size" {
+  type        = number
+  description = "Desired node count for the shared node group's scaling_config"
+  default     = 2
+}
+
+variable "node_capacity_type" {
+  type        = string
+  description = "Capacity type for the shared node group (ON_DEMAND or SPOT)"
+  default     = "ON_DEMAND"
+}
+
+variable "security_group_rules" {
+  type = list(object({
+    direction       = string
+    to_port         = number
+    from_port       = number
+    protocol        = string
+    cidr_blocks     = list(string)
+    security_groups = list(string)
+  }))
+  description = "Additional security group rules, beyond the EKS-managed cluster security group"
+  default     = []
+}
+
+variable "enable_bastion" {
+  type        = bool
+  description = "Whether to provision a bastion instance for admin access, via AWS Systems Manager Session Manager - no inbound security group rules, no open port."
+  default     = true
+}
+
+variable "bastion_instance_type" {
+  type        = string
+  description = "EC2 instance type for the bastion instance, when enable_bastion is true"
+  default     = "t3.micro"
+}
+
+variable "eso_secretsmanager_key_prefix" {
+  type        = string
+  description = "Secrets Manager key-name prefix (glob) the eso IAM role may read, scoped to this control plane's own secrets."
+  default     = "argo/control-plane/*"
+}
