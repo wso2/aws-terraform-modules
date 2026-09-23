@@ -8,18 +8,36 @@ plane's own infrastructure and Kubernetes-level install.
 
 ## Structure
 
-Two independently-callable submodules, plus an optional composite
-entrypoint that wires them together for you:
+This folder has `.tf` files in three places - inside `cluster/`, inside
+`apps/`, and directly in this top-level folder - which looks like
+duplication but isn't. Here's what each one is:
 
-- [`cluster/`](./cluster) - the EKS cluster, VPC, IAM/IRSA roles, KMS, and
-  optional bastion the control plane runs on.
-- [`apps/`](./apps) - the Kubernetes-level install onto that cluster: NATS
-  (JetStream, mTLS via cert-manager), Argo Workflows, Argo Events,
+- [`cluster/`](./cluster) is a real, standalone module. It builds the AWS
+  infrastructure the control plane runs on: the EKS cluster, VPC, IAM/IRSA
+  roles, KMS, an optional bastion. Nothing Kubernetes-level - just what
+  the cluster needs to exist.
+- [`apps/`](./apps) is a second, separate, standalone module. It assumes a
+  cluster already exists and installs everything that runs *inside* it:
+  NATS (JetStream, mTLS via cert-manager), Argo Workflows, Argo Events,
   cert-manager, Traefik, External Secrets Operator, and whatever
   project-specific manifests the caller supplies.
-- `main.tf`/`variables.tf`/`outputs.tf`/`versions.tf` (this directory) - a
-  composite root module that calls `cluster` and `apps` for you, as an
-  alternative to calling the two submodules separately.
+- The top-level `main.tf`/`variables.tf`/`outputs.tf`/`versions.tf` (in
+  *this* folder, not inside `cluster/` or `apps/`) aren't a third thing to
+  build - they're a thin wrapper. All it does is call `cluster/`, then
+  `apps/`, and wire the cluster's connection details into `apps`
+  automatically, so a caller doesn't have to write that wiring by hand.
+
+They're kept as two separate modules instead of one so a caller can, if
+they want, swap one out on its own - e.g. use `cluster/` but install a
+different set of apps than `apps/` provides.
+
+So there are two ways to use this:
+
+1. Call `cluster/` and `apps/` yourself, separately, and wire them
+   together by hand - more control.
+2. Call this top-level folder (`Argo-Control-Plane`) directly and get
+   both, already wired - less to write. This is the "composite
+   entrypoint" described below.
 
 ## Composite entrypoint
 
