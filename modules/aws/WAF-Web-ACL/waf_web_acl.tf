@@ -667,11 +667,15 @@ resource "aws_wafv2_web_acl" "web_acl" {
         }
 
         # labeled_host_scoped_block_statement: renders
-        #   AND(label_match_statement, NOT(byte_match host ENDS_WITH suffix))
+        #   AND(label_match_statement,
+        #       NOT(byte_match host ENDS_WITH suffixes[0]),
+        #       NOT(byte_match host ENDS_WITH suffixes[1]), ...)
         # so the rule's action only fires on requests carrying the label AND
-        # whose host header does NOT match the suffix. Pairs with a managed
+        # whose host header matches NONE of the suffixes. Pairs with a managed
         # rule group whose sub-rule is overridden to `count` so the label is
-        # emitted but the managed group itself does not block.
+        # emitted but the managed group itself does not block. A single
+        # host_header_suffix yields AND(label, NOT(suffix)), identical to the
+        # rendering before host_header_suffixes existed.
         dynamic "and_statement" {
           for_each = rule.value.labeled_host_scoped_block_statement != null ? [rule.value.labeled_host_scoped_block_statement] : []
           content {
@@ -681,20 +685,24 @@ resource "aws_wafv2_web_acl" "web_acl" {
                 key   = and_statement.value.label_name
               }
             }
-            statement {
-              not_statement {
-                statement {
-                  byte_match_statement {
-                    search_string         = and_statement.value.host_header_suffix
-                    positional_constraint = "ENDS_WITH"
-                    field_to_match {
-                      single_header {
-                        name = "host"
+            dynamic "statement" {
+              for_each = and_statement.value.host_header_suffix != null ? [and_statement.value.host_header_suffix] : and_statement.value.host_header_suffixes
+              iterator = host_suffix
+              content {
+                not_statement {
+                  statement {
+                    byte_match_statement {
+                      search_string         = host_suffix.value
+                      positional_constraint = "ENDS_WITH"
+                      field_to_match {
+                        single_header {
+                          name = "host"
+                        }
                       }
-                    }
-                    text_transformation {
-                      priority = 0
-                      type     = "LOWERCASE"
+                      text_transformation {
+                        priority = 0
+                        type     = "LOWERCASE"
+                      }
                     }
                   }
                 }
