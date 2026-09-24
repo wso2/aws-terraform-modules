@@ -307,13 +307,30 @@ variable "rules" {
 
     # Narrow purpose-built rule: blocks requests that carry a specific label
     # (e.g. a managed-rule-group sub-rule label set to count via
-    # rule_action_overrides) UNLESS the host header ends with the given
-    # suffix. Renders as AND(label_match_statement, NOT(byte_match host
-    # ENDS_WITH suffix)). Useful for host-scoping a managed sub-rule action
-    # without disabling the whole rule group.
+    # rule_action_overrides) UNLESS the host header ends with one of the
+    # given suffixes. Renders as
+    #   AND(label_match_statement,
+    #       NOT(byte_match host ENDS_WITH suffixes[0]),
+    #       NOT(byte_match host ENDS_WITH suffixes[1]),
+    #       ...)
+    # i.e. NOT(OR(...)) expanded by De Morgan so the nesting depth stays the
+    # same as the single-suffix form. Useful for host-scoping a managed
+    # sub-rule action without disabling the whole rule group.
+    #
+    # Set exactly one of host_header_suffix (single suffix) or
+    # host_header_suffixes (several hosts exempt from the SAME label). Use one
+    # rule with host_header_suffixes rather than one rule per host: separate
+    # rules on the same label each re-block every host outside their own
+    # suffix, so the exempt set becomes the intersection of the suffixes
+    # (usually empty) instead of their union. A single host_header_suffix
+    # renders exactly as before this field existed, so existing callers see
+    # no plan diff. Suffixes are matched against a LOWERCASE-transformed Host
+    # header and WAF does not transform the search_string, so all must be
+    # lowercase.
     labeled_host_scoped_block_statement = optional(object({
-      label_name         = string
-      host_header_suffix = string
+      label_name           = string
+      host_header_suffix   = optional(string)
+      host_header_suffixes = optional(list(string), [])
     }))
 
     # Narrow purpose-built rule: fires on requests whose host header equals
@@ -530,6 +547,26 @@ variable "rules" {
       ]
     ]))
     error_message = "and_statement / or_statement inside scope_down_statement must contain at least 2 statements."
+  }
+
+  # Validation: labeled_host_scoped_block_statement must set exactly one of
+  # host_header_suffix / host_header_suffixes, and every suffix must be
+  # non-empty, lowercase, and unique within the rule (the Host header is
+  # LOWERCASE-transformed before matching but the search_string is not).
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      (
+        (v.labeled_host_scoped_block_statement.host_header_suffix != null) != (length(coalesce(v.labeled_host_scoped_block_statement.host_header_suffixes, [])) > 0)
+        && alltrue([
+          for s in(v.labeled_host_scoped_block_statement.host_header_suffix != null ? [v.labeled_host_scoped_block_statement.host_header_suffix] : coalesce(v.labeled_host_scoped_block_statement.host_header_suffixes, [])) :
+          length(s) > 0 && s == lower(s)
+        ])
+        && length(distinct(coalesce(v.labeled_host_scoped_block_statement.host_header_suffixes, []))) == length(coalesce(v.labeled_host_scoped_block_statement.host_header_suffixes, []))
+      )
+      if try(v.labeled_host_scoped_block_statement, null) != null
+    ])
+    error_message = "labeled_host_scoped_block_statement must set exactly one of host_header_suffix or a non-empty host_header_suffixes, and every suffix must be non-empty, lowercase, and unique (WAF applies LOWERCASE to the Host header but does not transform the search_string)."
   }
 
   # Validation: host_and_path_scoped_ip_allowlist_block_statement.host_header,
