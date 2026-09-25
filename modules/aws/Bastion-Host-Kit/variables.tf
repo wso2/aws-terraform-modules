@@ -59,12 +59,27 @@ variable "root_volume_size" {
 
 variable "operator_emails" {
   type        = list(string)
-  description = "The people who may open a session. Each gets an OS user named from the local part of the address and a session document that runs the session as that user, so the transcript is attributable before any command is typed"
+  description = "The people who may open a session. Each gets an OS user named from the local part of the address and a session document that runs the session as that user, so the transcript is attributable before any command is typed. Restricting each operator to their own document is the caller's IAM policy (see the session_document comment)"
+
+  validation {
+    condition     = length(distinct([for e in var.operator_emails : split("@", e)[0]])) == length(var.operator_emails)
+    error_message = "Two operators share a local part; the OS user and session document are named from it, so local parts must be distinct."
+  }
+
+  validation {
+    condition     = alltrue([for e in var.operator_emails : can(regex("^[a-z][a-z0-9_-]{0,30}$", split("@", e)[0]))])
+    error_message = "A local part must be a valid Linux user name: lowercase, starting with a letter, up to 31 characters of [a-z0-9_-]."
+  }
+
+  validation {
+    condition     = length(setintersection(toset([for e in var.operator_emails : split("@", e)[0]]), toset(["root", "ec2-user", "ssm-user", "admin", "nobody", "sync", "shutdown", "halt", "daemon", "bin", "sys", "adm", "operator", "games", "ftp", "mail", "systemd-network", "dbus", "sshd", "chrony", "rpc", "rpcuser", "tss"]))) == 0
+    error_message = "A local part collides with a system account; a session document must never run as one."
+  }
 }
 
 variable "user_data" {
   type        = string
-  description = "Shell script the project wants run on its bastion (tool installation and the like), delivered as a State Manager association: it runs as root when the instance starts and again whenever the script changes, with no reboot and no session lost. It must be safe to repeat, and installs must be atomic (download, then install), because it may run while operators are working. Empty means no association"
+  description = "Shell script the project wants run on its bastion (tool installation and the like), delivered as a State Manager association: it runs as root when the association is created and again whenever the script changes, with no reboot and no session lost; a replaced instance receives it as a new target. It must be safe to repeat, and installs must be atomic (download, then install), because it may run while operators are working. Empty means no association"
   default     = ""
 }
 

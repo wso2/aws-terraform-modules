@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "suspension_assume_role" {
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      values   = ["${aws_scheduler_schedule_group.suspension[0].arn}/*"]
+      values   = ["arn:aws:scheduler:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:schedule/${aws_scheduler_schedule_group.suspension[0].name}/*"]
     }
   }
 }

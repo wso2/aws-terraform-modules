@@ -72,21 +72,46 @@ module "instance" {
   user_data = file("${path.module}/scripts/user-data.sh.tftpl")
 }
 
-# Run Command and State Manager need more than the Session Manager policy the
-# EC2-Instance module attaches.
 resource "aws_iam_role_policy_attachment" "ssm_core" {
   role       = module.instance.ec2-instance-role-name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
+# The agent on the instance is what writes the session transcript, so the
+# instance role needs to create streams and put events in the log group
+resource "aws_iam_role_policy" "session_transcripts" {
+  name = "${local.name_prefix}-bastion-session-transcripts"
+  role = module.instance.ec2-instance-role-name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["logs:CreateLogStream", "logs:PutLogEvents", "logs:DescribeLogStreams"]
+        Resource = "${module.session_logs.log_group_arn}:*"
+      },
+      {
+        # The agent verifies that the target group is encrypted before it
+        # streams; DescribeLogGroups cannot be scoped below the account.
+        Effect   = "Allow"
+        Action   = ["logs:DescribeLogGroups"]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 # Configuration that may change is delivered by State Manager, not user data:
-# an association runs when created, at every instance start, and whenever its
-# content changes -- with no reboot, so the sessions on the bastion and any
-# terraform apply running in them survive a change. Two associations: the
-# kit's (operator users) and the caller's (var.user_data: tools and the like).
-# Both scripts must be safe to repeat, and a tool install must be atomic
-# (download to a temporary file, then install) so a binary in use by a running
-# process is never overwritten underneath it.
+# an association runs when it is created and whenever its content changes --
+# with no reboot, so the sessions on the bastion and any terraform apply
+# running in them survive a change. It does not re-run on a plain stop/start,
+# and does not need to: users and installed tools live on the root volume,
+# which persists. A replaced instance is a new target and receives both
+# associations. Two associations: the kit's (operator users) and the caller's
+# (var.user_data: tools and the like). Both scripts must be safe to repeat, and
+# a tool install must be atomic (download to a temporary file, then install) so
+# a binary in use by a running process is never overwritten underneath it.
 resource "aws_ssm_association" "operators" {
   name             = "AWS-RunShellScript"
   association_name = "${local.name_prefix}-bastion-operators"
@@ -101,6 +126,10 @@ resource "aws_ssm_association" "operators" {
   }
 
   compliance_severity = "HIGH"
+
+  # A session document runs as an OS user this association creates; hold the
+  # documents until the users exist.
+  wait_for_success_timeout_seconds = 600
 
   depends_on = [aws_iam_role_policy_attachment.ssm_core]
 }
@@ -174,7 +203,15 @@ module "session_logs" {
 }
 
 # One document per operator, <local-part>-session-manager-doc, running as that
-# OS user.
+# OS user. The documents attribute a session; they do not restrict who may
+# start one. Any principal allowed ssm:StartSession on the instance can use any
+# document, including the AWS default that logs nothing. Enforcement is the
+# caller's IAM policy on the operators' principals: allow ssm:StartSession on
+# this instance only together with the operator's own document
+# (arn:aws:ssm:<region>:<account>:document/<local-part>-session-manager-doc,
+# selected through a principal tag) and with the condition key
+# ssm:SessionDocumentAccessCheck set to true, so the document permission is
+# actually evaluated.
 module "session_document" {
   source   = "../SSM-Document"
   for_each = local.operators
@@ -184,5 +221,5 @@ module "session_document" {
   session_timeout        = var.session_idle_timeout_minutes
   max_session_duration   = var.session_max_duration_minutes
 
-  depends_on = [module.session_logs]
+  depends_on = [module.session_logs, aws_ssm_association.operators]
 }
