@@ -1,0 +1,19 @@
+#!/bin/bash
+# -------------------------------------------------------------------------------------
+#
+# Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+#
+# This software is the property of WSO2 LLC. and its suppliers, if any.
+# Dissemination of any information or reproduction of any material contained
+# herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
+# You may not alter or remove any copyright or other notice from copies of this content.
+#
+# --------------------------------------------------------------------------------------
+#
+# First boot only, and deliberately static: nothing here ever changes after the
+# instance exists, so no configuration change stops the instance and ends the
+# sessions on it. Operators, tools and the banner are delivered by State
+# Manager associations instead (bastion.tf), which run on every start and
+# whenever their content changes, without a reboot.
+set -euo pipefail
+printf '%s\n' 'Bastion. Sessions are recorded. Sign in with your own identity before' 'touching anything:  aws sso login --profile <profile>  (device flow)' > /etc/motd
