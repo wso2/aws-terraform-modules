@@ -63,6 +63,19 @@ resource "aws_iam_role_policy" "suspension" {
   })
 }
 
+# Scheduler validates at creation that it can assume the role. A role is
+# usable everywhere only some seconds after IAM returns, so the schedules
+# wait for that rather than failing the first apply.
+resource "time_sleep" "suspension_role" {
+  count = var.suspension.enabled ? 1 : 0
+
+  create_duration = "20s"
+  triggers        = {
+    role = aws_iam_role.suspension[0].arn,
+    policy = aws_iam_role_policy.suspension[0].id
+  }
+}
+
 resource "aws_scheduler_schedule" "suspension" {
   for_each = var.suspension.enabled ? {
     stop  = { expression = var.suspension.suspend_expression, action = "stopInstances" }
@@ -81,7 +94,7 @@ resource "aws_scheduler_schedule" "suspension" {
 
   target {
     arn      = "arn:aws:scheduler:::aws-sdk:ec2:${each.value.action}"
-    role_arn = aws_iam_role.suspension[0].arn
+    role_arn = time_sleep.suspension_role[0].triggers["role"]
     # PascalCase member names: universal targets take the SDK shape.
     input = jsonencode({ InstanceIds = [module.instance.ec2-instance-id] })
 
