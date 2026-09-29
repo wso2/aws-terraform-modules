@@ -25,5 +25,6 @@ resource "aws_eks_addon" "eks_addon" {
   resolve_conflicts_on_update = var.eks_addon_update_conflict
   resolve_conflicts_on_create = var.eks_addon_update_create
   configuration_values        = var.eks_addon_configuration_values
+  service_account_role_arn    = var.eks_addon_service_account_role_arn
 }
 
