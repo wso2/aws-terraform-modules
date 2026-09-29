@@ -20,6 +20,11 @@ variable "rules" {
     prefix_list_ids = list(string)
   }))
   description = "List of rules to be added to the security group"
+
+  validation {
+    condition     = alltrue([for r in var.rules : length(r.security_groups) <= 1])
+    error_message = "A rule takes at most one security group as its source; give each source security group its own rule."
+  }
 }
 variable "security_group_id" {
   type        = string

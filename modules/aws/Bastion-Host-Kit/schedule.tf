@@ -32,10 +32,17 @@ data "aws_iam_policy_document" "suspension_assume_role" {
       type        = "Service"
       identifiers = ["scheduler.amazonaws.com"]
     }
+    # Scheduler assumes the role with the schedule group as its source, so the
+    # trust names the group, not the schedules in it.
     condition {
-      test     = "ArnLike"
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
+    condition {
+      test     = "StringEquals"
       variable = "aws:SourceArn"
-      values   = ["arn:aws:scheduler:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:schedule/${aws_scheduler_schedule_group.suspension[0].name}/*"]
+      values   = [aws_scheduler_schedule_group.suspension[0].arn]
     }
   }
 }
@@ -70,8 +77,8 @@ resource "time_sleep" "suspension_role" {
   count = var.suspension.enabled ? 1 : 0
 
   create_duration = "20s"
-  triggers        = {
-    role = aws_iam_role.suspension[0].arn,
+  triggers = {
+    role   = aws_iam_role.suspension[0].arn,
     policy = aws_iam_role_policy.suspension[0].id
   }
 }
