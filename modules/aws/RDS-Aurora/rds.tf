@@ -28,6 +28,14 @@
 # trivy:ignore:AVD-AWS-0077
 resource "aws_rds_cluster" "rds_cluster" {
 
+  # RDS spreads an Aurora cluster over three zones and adds a third to the
+  # list when fewer are given. Left tracked, that addition reads as a change
+  # that forces replacement on the next plan, so the list is honoured at
+  # creation and ignored afterwards, as the provider documentation advises.
+  lifecycle {
+    ignore_changes = [availability_zones]
+  }
+
   allow_major_version_upgrade = var.allow_major_version_upgrade
 
   availability_zones = var.availability_zones
