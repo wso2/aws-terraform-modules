@@ -33,6 +33,7 @@ hs_err_pid*
 
 # Terraform state
 .terraform/
+.terraform.lock.hcl
 
 # Sensitive data
 *.secrets*tfvars
