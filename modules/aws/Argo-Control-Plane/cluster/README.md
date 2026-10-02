@@ -80,6 +80,7 @@ module repo.
 | `enable_bastion` | `bool` | `true` | Provisions a bastion instance for admin access via SSM Session Manager only - no inbound security group rules, no open port |
 | `bastion_instance_type` | `string` | `"t3.micro"` | |
 | `eso_secretsmanager_key_prefix` | `string` | `"argo/control-plane/*"` | Secrets Manager key-name prefix (glob) the ESO IAM role may read, scoped to this control plane's own secrets |
+| `eso_namespace` | `string` | `"external-secrets"` | Namespace ESO runs in; scopes the ESO IAM role's trust policy. Must match the `apps` module's `eso_namespace` |
 
 ## Outputs
 

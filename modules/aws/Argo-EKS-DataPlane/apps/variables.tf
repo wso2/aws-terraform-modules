@@ -8,14 +8,6 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-#
-# Assumes the caller has already configured the kubernetes/helm providers
-# against the sibling ../cluster module - takes no cluster credentials as
-# input. Deliberately generic: installs the upstream charts and applies
-# whatever manifest_files supplies, with no project-specific YAML of its
-# own.
-#
-# --------------------------------------------------------------------------------------
 
 variable "namespaces" {
   type        = list(string)

@@ -8,11 +8,6 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-#
-# Union of cluster/ and apps/ requirements - this composite configures the
-# kubernetes/helm/kubectl providers itself too.
-#
-# --------------------------------------------------------------------------------------
 
 terraform {
   required_version = ">= 1.10"
@@ -35,7 +30,7 @@ terraform {
     }
     kubectl = {
       source  = "alekc/kubectl"
-      version = ">= 2.0"
+      version = ">= 2.1"
     }
   }
 }

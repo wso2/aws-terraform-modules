@@ -8,11 +8,6 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-#
-# Straight passthrough into module.cluster or module.apps (see main.tf),
-# except apps' eso_role_arn, which is auto-wired instead of exposed here.
-#
-# --------------------------------------------------------------------------------------
 
 # --- Passed to module.cluster ---
 
@@ -202,7 +197,7 @@ variable "eso_secretsmanager_key_prefix" {
   default     = "argo/control-plane/*"
 }
 
-# --- Passed to module.apps (eso_role_arn intentionally NOT here - see main.tf) ---
+# --- Passed to module.apps ---
 
 variable "namespace" {
   type        = string

@@ -15,10 +15,6 @@ resource "kubernetes_namespace_v1" "namespace" {
   }
 }
 
-# Namespaces for components that live alongside "argo" but aren't part of
-# the Argo Workflows/Events install itself (oauth2-proxy, gateway, the
-# dispatch-tier namespaces) - caller-supplied since this module has no
-# opinion on what else runs on this cluster.
 resource "kubernetes_namespace_v1" "extra" {
   for_each = toset(var.extra_namespaces)
 
@@ -27,10 +23,7 @@ resource "kubernetes_namespace_v1" "extra" {
   }
 }
 
-# ConfigMaps for those same components (e.g. credential-injector.py,
-# submit-attributor.py, link-resolver.py) - created before manifest_files/
-# kubectl_manifest_files so any Deployment mounting one doesn't race its
-# own ConfigMap into existence.
+# Created before manifest_files so a Deployment mounting one doesn't race it.
 resource "kubernetes_config_map_v1" "this" {
   for_each = var.config_maps
 
@@ -40,13 +33,9 @@ resource "kubernetes_config_map_v1" "this" {
   }
   data = each.value.data
 
-  depends_on = [kubernetes_namespace_v1.extra]
+  depends_on = [kubernetes_namespace_v1.namespace, kubernetes_namespace_v1.extra]
 }
 
-# Reverse-tunnel SSH keypairs, one per data-plane identity - same
-# per-identity generation pattern as the NATS client certs below, just
-# raw SSH keys (tls provider) instead of cert-manager Certificates,
-# since tunnel-server.yaml speaks plain SSH, not TLS.
 resource "tls_private_key" "tunnel_client" {
   for_each = toset(var.tunnel_client_identities)
 
@@ -184,7 +173,7 @@ resource "kubectl_manifest" "nats_server_certificate" {
     }
   })
 
-  depends_on = [kubectl_manifest.nats_ca_issuer]
+  depends_on = [kubectl_manifest.nats_ca_issuer, kubernetes_namespace_v1.namespace]
 }
 
 resource "kubectl_manifest" "nats_client_certificate" {
@@ -211,7 +200,16 @@ resource "kubectl_manifest" "nats_client_certificate" {
     }
   })
 
-  depends_on = [kubectl_manifest.nats_ca_issuer]
+  # Without this, the secret read below can run before cert-manager has
+  # issued it, leaving the nats_client_* outputs null until a second apply.
+  wait_for {
+    condition {
+      type   = "Ready"
+      status = "True"
+    }
+  }
+
+  depends_on = [kubectl_manifest.nats_ca_issuer, kubernetes_namespace_v1.namespace]
 }
 
 data "kubernetes_secret_v1" "nats_client_certificate" {
@@ -313,8 +311,10 @@ resource "helm_release" "traefik" {
   chart            = "traefik"
   version          = var.traefik_chart_version
   namespace        = var.traefik_namespace
-  create_namespace = false
+  create_namespace = true
   values           = var.traefik_values
+
+  depends_on = [kubernetes_namespace_v1.extra]
 }
 
 locals {
@@ -331,8 +331,7 @@ locals {
   ])
 }
 
-# kubectl_manifest, not kubernetes_manifest - kubernetes_manifest's REST
-# client doesn't reliably work with exec-based auth (aws eks get-token).
+# kubectl_manifest: kubernetes_manifest doesn't work reliably with exec auth.
 resource "kubectl_manifest" "this" {
   for_each = { for d in local.manifest_documents : d.key => d }
 

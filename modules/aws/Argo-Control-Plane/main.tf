@@ -10,7 +10,6 @@
 # --------------------------------------------------------------------------------------
 
 
-# Composite entrypoint wiring ./cluster to ./apps in one module call, as an ALTERNATIVE to calling the two submodules separately (see README.md).
 module "cluster" {
   source = "./cluster"
 
@@ -55,10 +54,10 @@ module "cluster" {
   workflow_controller_service_account_name = var.workflow_controller_service_account_name
 
   eso_secretsmanager_key_prefix = var.eso_secretsmanager_key_prefix
+  eso_namespace                 = var.eso_namespace
 }
 
-# exec-based auth: avoids kubernetes_manifest's silent token-drop bug with
-# static tokens.
+# exec auth: kubernetes_manifest silently drops static tokens.
 provider "kubernetes" {
   host                   = module.cluster.eks_cluster_endpoint
   cluster_ca_certificate = base64decode(module.cluster.eks_base64_encoded_ca_cert)
@@ -83,9 +82,7 @@ provider "helm" {
   }
 }
 
-# lazy_load defers client construction past eager Configure()-time -
-# without it, kubectl_manifest resources ran against whatever kubeconfig
-# context happened to be ambient on the machine.
+# lazy_load stops kubectl from falling back to the ambient kubeconfig context.
 provider "kubectl" {
   host                   = module.cluster.eks_cluster_endpoint
   cluster_ca_certificate = base64decode(module.cluster.eks_base64_encoded_ca_cert)
@@ -139,8 +136,6 @@ module "apps" {
   eso_helm_repo            = var.eso_helm_repo
   eso_namespace            = var.eso_namespace
 
-  # Only apps input auto-wired from cluster; other cluster outputs get
-  # consumed inside the caller's own Helm values instead.
   eso_role_arn = module.cluster.eso_role_arn
 
   kubectl_manifest_files = var.kubectl_manifest_files

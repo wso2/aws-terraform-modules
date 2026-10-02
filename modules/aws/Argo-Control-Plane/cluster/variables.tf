@@ -199,3 +199,9 @@ variable "eso_secretsmanager_key_prefix" {
   description = "Secrets Manager key-name prefix (glob) the eso IAM role may read, scoped to this control plane's own secrets."
   default     = "argo/control-plane/*"
 }
+
+variable "eso_namespace" {
+  type        = string
+  description = "Namespace External Secrets Operator runs in - scopes the eso IAM role's trust policy. Must match the apps module's eso_namespace."
+  default     = "external-secrets"
+}

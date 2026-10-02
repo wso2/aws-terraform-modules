@@ -85,6 +85,7 @@ module repo.
 | `enable_bastion` | `bool` | `true` | |
 | `bastion_instance_type` | `string` | `"t3.micro"` | |
 | `eso_secretsmanager_key_prefix` | `string` | `"*"` | Secrets Manager key-name prefix (glob) the ESO IAM role may read. See Notes above |
+| `eso_namespace` | `string` | `"external-secrets"` | Namespace ESO runs in; scopes the ESO IAM role's trust policy. Must match the `apps` module's `eso_namespace` |
 | `deploy_identities` | `map(object({ namespace, service_account_name, policy_json }))` | `{}` | Per-env IRSA identities for pipeline pods. One IAM role per entry, scoped to exactly that `(namespace, ServiceAccount)` pair. See Notes above |
 | `stage_node_extra_policy_json` | `string` | `null` | Extra IAM policy (JSON) attached directly to the stage node role, in addition to the standard EKS worker/CNI/ECR policies |
 | `prod_node_extra_policy_json` | `string` | `null` | Prod counterpart of `stage_node_extra_policy_json` |

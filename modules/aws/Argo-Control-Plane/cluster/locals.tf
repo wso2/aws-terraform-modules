@@ -37,9 +37,7 @@ locals {
 
   artifact_bucket_name = join("-", [local.name_prefix, "argo-logs"])
 
-  # No "-role" suffix here (unlike the other *_role_name locals) - with
-  # this project/environment/region's name_prefix length, adding it pushes
-  # past AWS IAM's 64-character role name limit by exactly 1 character.
+  # No "-role" suffix: it would exceed IAM's 64-character role name limit.
   workflow_controller_artifacts_role_name   = join("-", [local.name_prefix, "workflow-artifacts"])
   workflow_controller_artifacts_policy_name = join("-", [local.name_prefix, "workflow-artifacts-s3"])
 

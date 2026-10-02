@@ -8,10 +8,6 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-#
-# Raw kubernetes/helm resources, no dependency on wso2/common-terraform-modules.
-#
-# --------------------------------------------------------------------------------------
 
 resource "kubernetes_namespace_v1" "this" {
   for_each = toset(concat(var.namespaces, [var.argocd_namespace, var.system_namespace]))
@@ -21,8 +17,6 @@ resource "kubernetes_namespace_v1" "this" {
   }
 }
 
-# gp3 StorageClass backed by ebs.csi.aws.com - the default gp2 in-tree
-# provisioner doesn't function on modern k8s.
 resource "kubernetes_storage_class_v1" "gp3" {
   metadata {
     name = "gp3"
@@ -41,9 +35,7 @@ resource "kubernetes_storage_class_v1" "gp3" {
   }
 }
 
-# One shared argo-server + workflow-controller per data plane, in
-# system_namespace. Tier isolation is RBAC (applied via manifest_files),
-# not separate controller instances per tier.
+# One shared controller per data plane; tiers are isolated by RBAC, not separate installs.
 resource "helm_release" "argo_workflows" {
   name             = "argo-workflows"
   repository       = var.argo_helm_repo
@@ -82,10 +74,6 @@ resource "helm_release" "argocd" {
   depends_on = [kubernetes_namespace_v1.this]
 }
 
-# External Secrets Operator - syncs this data plane's secrets from AWS
-# Secrets Manager, same IRSA-annotated-controller pattern as the control
-# plane's install.
-
 resource "kubernetes_namespace_v1" "external_secrets" {
   count = var.install_external_secrets ? 1 : 0
 
@@ -112,9 +100,7 @@ resource "helm_release" "external_secrets" {
   depends_on = [kubernetes_namespace_v1.external_secrets]
 }
 
-# Split multi-document YAML manifests on a bare "---" line first, then
-# apply each via kubectl_manifest (not kubernetes_manifest) - its REST
-# client doesn't reliably work with exec-based auth (aws eks get-token).
+# kubectl_manifest: kubernetes_manifest doesn't work reliably with exec auth.
 locals {
   manifest_documents = flatten([
     for idx, m in var.manifest_files : [
@@ -136,18 +122,12 @@ resource "kubectl_manifest" "this" {
   yaml_body          = each.value.body
   override_namespace = each.value.namespace
 
-  # false, not the Deployment/DaemonSet/StatefulSet default of true -
-  # some manifests here depend on state only created once this whole
-  # module finishes applying, which would otherwise deadlock.
+  # Some manifests depend on state created later in this apply; waiting would deadlock.
   wait_for_rollout = false
 
   depends_on = [helm_release.argo_workflows, helm_release.argo_events, helm_release.argocd]
 }
 
-# CRD-backed manifests (ESO's ClusterSecretStore/ExternalSecret) applied in
-# the same run that installs their CRDs - see the control-plane apps
-# module's identical mechanism for why kubectl_manifest, not
-# kubernetes_manifest, is required here.
 locals {
   kubectl_manifest_documents = flatten([
     for idx, m in var.kubectl_manifest_files : [
@@ -169,16 +149,11 @@ resource "kubectl_manifest" "extra" {
   yaml_body          = each.value.body
   override_namespace = each.value.namespace
 
-  # See kubectl_manifest.this's identical comment on wait_for_rollout.
   wait_for_rollout = false
 
   depends_on = [helm_release.external_secrets, helm_release.argo_workflows, helm_release.argo_events, helm_release.argocd]
 }
 
-# Writes each entry's already-rendered content to local disk under this
-# module's own directory - for inspecting what a manifest_files/
-# kubectl_manifest_files entry actually resolved to, not applied to the
-# cluster itself.
 resource "local_file" "rendered_manifest" {
   for_each = var.rendered_manifest_files
 

@@ -229,10 +229,6 @@ variable "deploy_identities" {
   default     = {}
 }
 
-# Added 2026-09-17 - see aws_iam_role_policy.stage_node_extra/prod_node_extra's
-# own comment for why this is separate from deploy_identities (IRSA-only,
-# doesn't fit a pipeline step that deliberately authenticates as the
-# NODE's own instance-profile role instead of a per-pod federated one).
 variable "stage_node_extra_policy_json" {
   type        = string
   description = "Extra IAM policy document (JSON) attached to the stage node role, in addition to the standard EKS worker/CNI/ECR policies. Null (default) attaches nothing."
@@ -285,4 +281,10 @@ variable "workflow_controller_service_account_name" {
   type        = string
   description = "ServiceAccount name the argo-workflows Helm chart creates for workflow-controller - only used to scope the IRSA trust policy when enable_artifact_archiving is true"
   default     = "argo-workflows-workflow-controller"
+}
+
+variable "eso_namespace" {
+  type        = string
+  description = "Namespace External Secrets Operator runs in - scopes the eso IAM role's trust policy. Must match the apps module's eso_namespace."
+  default     = "external-secrets"
 }

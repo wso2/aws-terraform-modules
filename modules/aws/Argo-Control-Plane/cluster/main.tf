@@ -49,9 +49,6 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public[each.key].id
 }
 
-# Duplicates the repo's own VPC-Flow-Log module inline, same reason its
-# own vpc.tf leaves flow logs out of itself (see that module's
-# AVD-AWS-0178 ignore) - kept opt-in rather than always-on.
 resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
   count = var.enable_vpc_flow_logs ? 1 : 0
 
@@ -320,7 +317,7 @@ data "aws_iam_policy_document" "eso_assume" {
     condition {
       test     = "StringEquals"
       variable = "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub"
-      values   = ["system:serviceaccount:external-secrets:external-secrets"]
+      values   = ["system:serviceaccount:${var.eso_namespace}:external-secrets"]
     }
     principals {
       identifiers = [aws_iam_openid_connect_provider.eks.arn]
@@ -356,8 +353,6 @@ resource "aws_iam_role_policy" "eso" {
   })
 }
 
-# Argo's own artifact repository for workflow/pod logs. Opt-in via
-# enable_artifact_archiving.
 resource "aws_s3_bucket" "argo_logs" {
   count = var.enable_artifact_archiving ? 1 : 0
 

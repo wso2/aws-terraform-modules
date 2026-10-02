@@ -8,11 +8,6 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-#
-# Outputs a downstream caller (data-plane environments, bastion access)
-# actually needs, not every internal cluster/apps output.
-#
-# --------------------------------------------------------------------------------------
 
 # --- From module.cluster ---
 

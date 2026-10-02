@@ -8,11 +8,6 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-#
-# Outputs a caller composing through this module actually needs
-# downstream, not every internal cluster/apps output.
-#
-# --------------------------------------------------------------------------------------
 
 # --- From module.cluster ---
 

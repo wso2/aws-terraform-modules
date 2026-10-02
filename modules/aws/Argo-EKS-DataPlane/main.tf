@@ -8,11 +8,6 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-#
-# Composite entrypoint wiring ./cluster to ./apps in one module call, as an
-# ALTERNATIVE to calling the two submodules separately (see README.md).
-#
-# --------------------------------------------------------------------------------------
 
 module "cluster" {
   source = "./cluster"
@@ -60,6 +55,7 @@ module "cluster" {
   bastion_instance_type = var.bastion_instance_type
 
   eso_secretsmanager_key_prefix = var.eso_secretsmanager_key_prefix
+  eso_namespace                 = var.eso_namespace
   deploy_identities             = var.deploy_identities
 
   enable_secrets_encryption = var.enable_secrets_encryption
@@ -72,10 +68,8 @@ module "cluster" {
   workflow_controller_service_account_name = var.workflow_controller_service_account_name
 }
 
-# No depends_on = [module.cluster]: that forces every resource in the
-# module to refresh first and can burn through this token's 15-minute
-# lifetime before use. The narrower name = module.cluster.eks_cluster_name
-# reference below already creates the correct dependency.
+# No depends_on: refreshing all of module.cluster first can outlive the
+# token's 15-minute lifetime.
 data "aws_eks_cluster_auth" "this" {
   name = module.cluster.eks_cluster_name
 }
@@ -128,8 +122,6 @@ module "apps" {
   eso_helm_repo            = var.eso_helm_repo
   eso_namespace            = var.eso_namespace
 
-  # Only apps input auto-wired from cluster; other cluster outputs get
-  # consumed inside the caller's own Helm values instead.
   eso_role_arn = module.cluster.eso_role_arn
 
   kubectl_manifest_files  = var.kubectl_manifest_files

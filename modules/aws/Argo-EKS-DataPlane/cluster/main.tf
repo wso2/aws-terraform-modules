@@ -8,11 +8,6 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-#
-# Raw provider resource blocks; tainted node group + subnet-pinned +
-# NAT-per-tier isolation between stage and prod.
-#
-# --------------------------------------------------------------------------------------
 
 locals {
   name = "${var.project}-${var.application}-${var.environment}"
@@ -104,8 +99,7 @@ resource "aws_nat_gateway" "prod" {
   depends_on    = [aws_internet_gateway.this]
 }
 
-# --- Private subnets (EKS nodes live here, tier-isolated egress via each
-#     tier's own NAT Gateway) ---
+# --- Private subnets (nodes) ---
 
 resource "aws_subnet" "stage_private" {
   for_each = { for idx, az in var.stage_availability_zones : az => var.stage_subnet_cidr_blocks[idx] }
@@ -155,8 +149,7 @@ resource "aws_route_table_association" "prod_private" {
   route_table_id = aws_route_table.prod_private.id
 }
 
-# --- Per-tier security groups (extend the EKS-managed cluster SG, don't
-#     replace it) ---
+# --- Per-tier security groups ---
 
 resource "aws_security_group" "stage" {
   name_prefix = "${local.name}-stage-"
@@ -313,9 +306,6 @@ resource "aws_cloudwatch_log_group" "eks_cluster" {
   depends_on = [aws_eks_cluster.this]
 }
 
-# Duplicates the repo's own VPC-Flow-Log module inline, same reason its
-# own vpc.tf leaves flow logs out of itself (see that module's
-# AVD-AWS-0178 ignore) - kept opt-in rather than always-on.
 resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
   count = var.enable_vpc_flow_logs ? 1 : 0
 
@@ -380,10 +370,6 @@ resource "aws_flow_log" "vpc" {
   tags                 = merge(var.tags, { Name = "${local.name}-flow-log" })
 }
 
-# Argo's own artifact repository - without this, workflow/pod logs only
-# exist as long as the pod does (archiveLogs is off by default in the
-# chart). Opt-in, self-contained: the module creates its own bucket
-# rather than taking a caller-supplied ARN.
 resource "aws_s3_bucket" "argo_logs" {
   count = var.enable_artifact_archiving ? 1 : 0
 
@@ -480,9 +466,6 @@ resource "aws_iam_role_policy" "workflow_controller_artifacts" {
   })
 }
 
-# OIDC provider - needed for per-env IRSA (pipeline pod -> deployment
-# target identity), not yet wired up here but the cluster needs this to
-# exist before that can be built.
 data "tls_certificate" "eks" {
   url = aws_eks_cluster.this.identity[0].oidc[0].issuer
 }
@@ -494,10 +477,6 @@ resource "aws_iam_openid_connect_provider" "eks" {
   tags            = var.tags
 }
 
-# External Secrets Operator IRSA - var.eso_secretsmanager_key_prefix
-# defaults to "*" since this data plane's secret names aren't prefixed,
-# unlike the control plane's tightly-scoped "argo/control-plane/*".
-
 data "aws_iam_policy_document" "eso_assume" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
@@ -505,7 +484,7 @@ data "aws_iam_policy_document" "eso_assume" {
     condition {
       test     = "StringEquals"
       variable = "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub"
-      values   = ["system:serviceaccount:external-secrets:external-secrets"]
+      values   = ["system:serviceaccount:${var.eso_namespace}:external-secrets"]
     }
     principals {
       identifiers = [aws_iam_openid_connect_provider.eks.arn]
@@ -548,15 +527,11 @@ resource "aws_eks_addon" "core" {
   addon_name    = each.value.name
   addon_version = try(each.value.version, null)
 
-  # Depend only on the cluster, never the node groups - vpc-cni is
-  # required for a node to leave NotReady, so depending on the node
-  # groups here would deadlock.
+  # Not the node groups: nodes need vpc-cni to become Ready, so that would deadlock.
   depends_on = [aws_eks_cluster.this]
 }
 
-# EBS CSI driver IRSA - the in-tree gp2 provisioner doesn't function on
-# modern k8s, so any PVC-backed step needs this addon plus the gp3
-# StorageClass in the apps module.
+# The in-tree gp2 provisioner doesn't work on current Kubernetes.
 data "aws_iam_policy_document" "ebs_csi_assume" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
@@ -592,7 +567,7 @@ resource "aws_eks_addon" "ebs_csi_driver" {
   depends_on = [aws_eks_cluster.this, aws_eks_node_group.stage, aws_eks_node_group.prod]
 }
 
-# --- Cluster-admin access via native IAM (no unified cross-cloud identity) ---
+# --- Cluster-admin access ---
 
 resource "aws_eks_access_entry" "admin" {
   for_each = toset(var.admin_principal_arns)
@@ -646,8 +621,6 @@ resource "aws_iam_role_policy_attachment" "stage_node_ecr" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
-# Extra node-role policy for steps that authenticate via the node's own
-# instance-profile role instead of per-pod IRSA. Optional/null by default.
 resource "aws_iam_role_policy" "stage_node_extra" {
   count  = var.stage_node_extra_policy_json != null ? 1 : 0
   name   = "${local.name}-stage-node-extra"
@@ -711,6 +684,7 @@ resource "aws_eks_node_group" "stage" {
     aws_iam_role_policy_attachment.stage_node_worker,
     aws_iam_role_policy_attachment.stage_node_cni,
     aws_iam_role_policy_attachment.stage_node_ecr,
+    aws_route_table_association.stage_private,
   ]
 }
 
@@ -742,7 +716,6 @@ resource "aws_iam_role_policy_attachment" "prod_node_ecr" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
-# Same reasoning as aws_iam_role_policy.stage_node_extra above.
 resource "aws_iam_role_policy" "prod_node_extra" {
   count  = var.prod_node_extra_policy_json != null ? 1 : 0
   name   = "${local.name}-prod-node-extra"
@@ -812,13 +785,11 @@ resource "aws_eks_node_group" "prod" {
     aws_iam_role_policy_attachment.prod_node_worker,
     aws_iam_role_policy_attachment.prod_node_cni,
     aws_iam_role_policy_attachment.prod_node_ecr,
+    aws_route_table_association.prod_private,
   ]
 }
 
-# --- Bastion: native-identity admin access via SSM Session Manager, not a
-#     traditional jump box - no inbound rule, no open port, ever. Reaches
-#     the SSM service endpoint through the stage subnet's existing NAT
-#     Gateway egress, same outbound-only property as Azure Bastion. ---
+# --- Bastion (SSM Session Manager only, no inbound rules) ---
 
 data "aws_ami" "bastion" {
   count = var.enable_bastion ? 1 : 0
@@ -893,6 +864,10 @@ resource "aws_instance" "bastion" {
   vpc_security_group_ids = [aws_security_group.bastion[0].id]
   iam_instance_profile   = aws_iam_instance_profile.bastion[0].name
 
+  root_block_device {
+    encrypted = true
+  }
+
   metadata_options {
     http_tokens = "required"
   }
@@ -900,9 +875,7 @@ resource "aws_instance" "bastion" {
   tags = merge(var.tags, { Name = "${local.name}-bastion" })
 }
 
-# --- Per-env IRSA identities for pipeline pods. Trust is scoped to
-#     exactly one (namespace, ServiceAccount) pair per entry via the
-#     sub condition below - no wildcard, no cross-env reuse possible. ---
+# --- Per-env IRSA identities for pipeline pods ---
 
 data "aws_iam_policy_document" "deploy_identity_assume" {
   for_each = var.deploy_identities

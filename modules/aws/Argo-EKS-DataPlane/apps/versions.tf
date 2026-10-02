@@ -20,9 +20,7 @@ terraform {
       source  = "hashicorp/helm"
       version = "~> 2.17"
     }
-    # kubectl, not kubernetes_manifest, for ESO's CRDs - kubernetes_manifest
-    # validates against the CRD schema at plan time, before ESO's own
-    # helm_release has installed it.
+    # kubernetes_manifest validates CRD schemas at plan time, before ESO installs them.
     kubectl = {
       source  = "alekc/kubectl"
       version = ">= 2.0"
