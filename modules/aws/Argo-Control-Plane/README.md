@@ -8,48 +8,21 @@ plane's own infrastructure and Kubernetes-level install.
 
 ## Structure
 
-This folder has `.tf` files in three places - inside `cluster/`, inside
-`apps/`, and directly in this top-level folder - which looks like
-duplication but isn't. Here's what each one is:
+Two independently-callable submodules. This folder itself is not a
+module - call `cluster/` and `apps/` separately from your root module.
 
-- [`cluster/`](./cluster) is a real, standalone module. It builds the AWS
-  infrastructure the control plane runs on: the EKS cluster, VPC, IAM/IRSA
-  roles, KMS, an optional bastion. Nothing Kubernetes-level - just what
-  the cluster needs to exist.
-- [`apps/`](./apps) is a second, separate, standalone module. It assumes a
-  cluster already exists and installs everything that runs *inside* it:
-  NATS (JetStream, mTLS via cert-manager), Argo Workflows, Argo Events,
-  cert-manager, Traefik, External Secrets Operator, and whatever
-  project-specific manifests the caller supplies.
-- The top-level `main.tf`/`variables.tf`/`outputs.tf`/`versions.tf` (in
-  *this* folder, not inside `cluster/` or `apps/`) aren't a third thing to
-  build - they're a thin wrapper. All it does is call `cluster/`, then
-  `apps/`, and wire the cluster's connection details into `apps`
-  automatically, so a caller doesn't have to write that wiring by hand.
+- [`cluster/`](./cluster) builds the AWS infrastructure the control plane
+  runs on: the EKS cluster, VPC, IAM/IRSA roles, KMS, an optional bastion.
+  Nothing Kubernetes-level - just what the cluster needs to exist.
+- [`apps/`](./apps) assumes a cluster already exists and installs
+  everything that runs *inside* it: NATS (JetStream, mTLS via
+  cert-manager), Argo Workflows, Argo Events, cert-manager, Traefik,
+  External Secrets Operator, and whatever project-specific manifests the
+  caller supplies.
 
-They're kept as two separate modules instead of one so a caller can, if
-they want, swap one out on its own - e.g. use `cluster/` but install a
-different set of apps than `apps/` provides.
-
-So there are two ways to use this:
-
-1. Call `cluster/` and `apps/` yourself, separately, and wire them
-   together by hand - more control.
-2. Call this top-level folder (`Argo-Control-Plane`) directly and get
-   both, already wired - less to write. This is the "composite
-   entrypoint" described below.
-
-## Composite entrypoint
-
-Calling this directory itself as a module gets you `module.cluster` and
-`module.apps` wired together in one call. Every `cluster` variable passes
-straight through. Every `apps` variable passes straight through too,
-except `eso_role_arn`, which is wired automatically from
-`module.cluster.eso_role_arn`. The `kubernetes`/`helm`/`kubectl` provider
-blocks are pre-configured against `cluster`'s outputs, matching what
-`environments/control-plane`'s own `main.tf` does today. `outputs.tf`
-re-exposes the outputs a downstream caller (e.g. a data-plane environment
-consuming NATS client certs) actually needs.
+They're kept as two separate modules so a caller can swap one out on its
+own - e.g. use `cluster/` but install a different set of apps than
+`apps/` provides.
 
 ## How the two compose
 

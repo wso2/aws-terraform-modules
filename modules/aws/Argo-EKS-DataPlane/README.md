@@ -9,8 +9,8 @@ or for the control plane itself, beyond its own NATS client identity.
 
 ## Structure
 
-Two independently-callable submodules, plus an optional composite
-entrypoint that wires them together for you:
+Two independently-callable submodules. This folder itself is not a
+module - call `cluster/` and `apps/` separately from your root module.
 
 - [`cluster/`](./cluster) - the EKS cluster, VPC (stage/prod tiers, each
   with its own NAT Gateway and subnets), per-env IRSA identities, and
@@ -18,22 +18,6 @@ entrypoint that wires them together for you:
 - [`apps/`](./apps) - the Kubernetes-level install: Argo Workflows, Argo
   Events, ArgoCD, External Secrets Operator, and caller-supplied
   project-specific manifests.
-- `main.tf`/`variables.tf`/`outputs.tf`/`versions.tf` (this directory) - a
-  composite root module that calls `cluster` and `apps` for you, as an
-  alternative to calling the two submodules separately.
-
-## Composite entrypoint
-
-Calling this directory itself as a module gets you `module.cluster` and
-`module.apps` wired together in one call. Every `cluster` variable passes
-straight through. Every `apps` variable passes straight through too,
-except `eso_role_arn`, which is wired automatically from
-`module.cluster.eso_role_arn`. The `kubernetes`/`helm`/`kubectl` provider
-blocks are pre-configured against `cluster`'s outputs via the
-`aws_eks_cluster_auth` data source, matching what
-`environments/aws-dataplane`'s own `main.tf` does today. `outputs.tf`
-re-exposes the outputs a caller would actually need, e.g. IRSA role ARNs
-to reference from its own `argo_workflows_values`.
 
 ## How the two compose
 
