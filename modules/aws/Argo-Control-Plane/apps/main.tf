@@ -24,7 +24,7 @@ resource "kubernetes_namespace_v1" "extra" {
 }
 
 # Created before manifest_files so a Deployment mounting one doesn't race it.
-resource "kubernetes_config_map_v1" "this" {
+resource "kubernetes_config_map_v1" "config_map" {
   for_each = var.config_maps
 
   metadata {
@@ -332,14 +332,14 @@ locals {
 }
 
 # kubectl_manifest: kubernetes_manifest doesn't work reliably with exec auth.
-resource "kubectl_manifest" "this" {
+resource "kubectl_manifest" "kubernetes_object" {
   for_each = { for d in local.manifest_documents : d.key => d }
 
   yaml_body = each.value.body
 
   wait_for_rollout = false
 
-  depends_on = [helm_release.nats, helm_release.argo_workflows, helm_release.argo_events, helm_release.traefik, helm_release.external_secrets, kubernetes_namespace_v1.extra, kubernetes_config_map_v1.this]
+  depends_on = [helm_release.nats, helm_release.argo_workflows, helm_release.argo_events, helm_release.traefik, helm_release.external_secrets, kubernetes_namespace_v1.extra, kubernetes_config_map_v1.config_map]
 }
 
 locals {

@@ -11,7 +11,7 @@
 
 output "namespace_names" {
   description = "Names of every namespace this module created (var.namespaces plus var.argocd_namespace/var.system_namespace)"
-  value       = [for ns in kubernetes_namespace_v1.this : ns.metadata[0].name]
+  value       = [for ns in kubernetes_namespace_v1.namespace : ns.metadata[0].name]
 }
 
 output "system_namespace" {

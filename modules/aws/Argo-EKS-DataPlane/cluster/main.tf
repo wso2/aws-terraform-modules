@@ -13,22 +13,22 @@ locals {
   name = "${var.project}-${var.application}-${var.environment}"
 }
 
-resource "aws_vpc" "this" {
+resource "aws_vpc" "vpc" {
   cidr_block           = var.vpc_cidr_block
   enable_dns_support   = true
   enable_dns_hostnames = true
   tags                 = merge(var.tags, { Name = "${local.name}-vpc" })
 }
 
-resource "aws_internet_gateway" "this" {
-  vpc_id = aws_vpc.this.id
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.vpc.id
   tags   = merge(var.tags, { Name = "${local.name}-igw" })
 }
 
 # --- Public subnets (NAT Gateway placement only, no workloads) ---
 
 resource "aws_subnet" "stage_public" {
-  vpc_id                  = aws_vpc.this.id
+  vpc_id                  = aws_vpc.vpc.id
   cidr_block              = var.stage_public_subnet_cidr_block
   availability_zone       = var.stage_availability_zones[0]
   map_public_ip_on_launch = true
@@ -36,7 +36,7 @@ resource "aws_subnet" "stage_public" {
 }
 
 resource "aws_subnet" "prod_public" {
-  vpc_id                  = aws_vpc.this.id
+  vpc_id                  = aws_vpc.vpc.id
   cidr_block              = var.prod_public_subnet_cidr_block
   availability_zone       = var.prod_availability_zones[0]
   map_public_ip_on_launch = true
@@ -44,19 +44,19 @@ resource "aws_subnet" "prod_public" {
 }
 
 resource "aws_route_table" "stage_public" {
-  vpc_id = aws_vpc.this.id
+  vpc_id = aws_vpc.vpc.id
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.this.id
+    gateway_id = aws_internet_gateway.gw.id
   }
   tags = merge(var.tags, { Name = "${local.name}-stage-public-rt" })
 }
 
 resource "aws_route_table" "prod_public" {
-  vpc_id = aws_vpc.this.id
+  vpc_id = aws_vpc.vpc.id
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.this.id
+    gateway_id = aws_internet_gateway.gw.id
   }
   tags = merge(var.tags, { Name = "${local.name}-prod-public-rt" })
 }
@@ -76,27 +76,27 @@ resource "aws_route_table_association" "prod_public" {
 resource "aws_eip" "stage_nat" {
   domain     = "vpc"
   tags       = merge(var.tags, { Name = "${local.name}-stage-nat-eip" })
-  depends_on = [aws_internet_gateway.this]
+  depends_on = [aws_internet_gateway.gw]
 }
 
 resource "aws_nat_gateway" "stage" {
   allocation_id = aws_eip.stage_nat.id
   subnet_id     = aws_subnet.stage_public.id
   tags          = merge(var.tags, { Name = "${local.name}-stage-nat" })
-  depends_on    = [aws_internet_gateway.this]
+  depends_on    = [aws_internet_gateway.gw]
 }
 
 resource "aws_eip" "prod_nat" {
   domain     = "vpc"
   tags       = merge(var.tags, { Name = "${local.name}-prod-nat-eip" })
-  depends_on = [aws_internet_gateway.this]
+  depends_on = [aws_internet_gateway.gw]
 }
 
 resource "aws_nat_gateway" "prod" {
   allocation_id = aws_eip.prod_nat.id
   subnet_id     = aws_subnet.prod_public.id
   tags          = merge(var.tags, { Name = "${local.name}-prod-nat" })
-  depends_on    = [aws_internet_gateway.this]
+  depends_on    = [aws_internet_gateway.gw]
 }
 
 # --- Private subnets (nodes) ---
@@ -104,7 +104,7 @@ resource "aws_nat_gateway" "prod" {
 resource "aws_subnet" "stage_private" {
   for_each = { for idx, az in var.stage_availability_zones : az => var.stage_subnet_cidr_blocks[idx] }
 
-  vpc_id            = aws_vpc.this.id
+  vpc_id            = aws_vpc.vpc.id
   cidr_block        = each.value
   availability_zone = each.key
   tags              = merge(var.tags, { Name = "${local.name}-stage-${each.key}" })
@@ -113,14 +113,14 @@ resource "aws_subnet" "stage_private" {
 resource "aws_subnet" "prod_private" {
   for_each = { for idx, az in var.prod_availability_zones : az => var.prod_subnet_cidr_blocks[idx] }
 
-  vpc_id            = aws_vpc.this.id
+  vpc_id            = aws_vpc.vpc.id
   cidr_block        = each.value
   availability_zone = each.key
   tags              = merge(var.tags, { Name = "${local.name}-prod-${each.key}" })
 }
 
 resource "aws_route_table" "stage_private" {
-  vpc_id = aws_vpc.this.id
+  vpc_id = aws_vpc.vpc.id
   route {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.stage.id
@@ -129,7 +129,7 @@ resource "aws_route_table" "stage_private" {
 }
 
 resource "aws_route_table" "prod_private" {
-  vpc_id = aws_vpc.this.id
+  vpc_id = aws_vpc.vpc.id
   route {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.prod.id
@@ -154,7 +154,7 @@ resource "aws_route_table_association" "prod_private" {
 resource "aws_security_group" "stage" {
   name_prefix = "${local.name}-stage-"
   description = "Stage-tier data plane nodes"
-  vpc_id      = aws_vpc.this.id
+  vpc_id      = aws_vpc.vpc.id
 
   dynamic "ingress" {
     for_each = [for r in var.stage_security_group_rules : r if r.direction == "ingress"]
@@ -190,7 +190,7 @@ resource "aws_security_group" "stage" {
 resource "aws_security_group" "prod" {
   name_prefix = "${local.name}-prod-"
   description = "Prod-tier data plane nodes"
-  vpc_id      = aws_vpc.this.id
+  vpc_id      = aws_vpc.vpc.id
 
   dynamic "ingress" {
     for_each = [for r in var.prod_security_group_rules : r if r.direction == "ingress"]
@@ -258,7 +258,7 @@ resource "aws_kms_alias" "eks_secrets" {
   target_key_id = aws_kms_key.eks_secrets[0].key_id
 }
 
-resource "aws_eks_cluster" "this" {
+resource "aws_eks_cluster" "eks_cluster" {
   name                          = local.name
   role_arn                      = aws_iam_role.eks_cluster.arn
   version                       = var.kubernetes_version
@@ -303,7 +303,7 @@ resource "aws_cloudwatch_log_group" "eks_cluster" {
   retention_in_days = var.log_retention_in_days
   tags              = var.tags
 
-  depends_on = [aws_eks_cluster.this]
+  depends_on = [aws_eks_cluster.eks_cluster]
 }
 
 resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
@@ -366,7 +366,7 @@ resource "aws_flow_log" "vpc" {
   log_destination_type = "cloud-watch-logs"
   iam_role_arn         = aws_iam_role.flow_log[0].arn
   traffic_type         = "ALL"
-  vpc_id               = aws_vpc.this.id
+  vpc_id               = aws_vpc.vpc.id
   tags                 = merge(var.tags, { Name = "${local.name}-flow-log" })
 }
 
@@ -467,13 +467,13 @@ resource "aws_iam_role_policy" "workflow_controller_artifacts" {
 }
 
 data "tls_certificate" "eks" {
-  url = aws_eks_cluster.this.identity[0].oidc[0].issuer
+  url = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
 }
 
 resource "aws_iam_openid_connect_provider" "eks" {
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
-  url             = aws_eks_cluster.this.identity[0].oidc[0].issuer
+  url             = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
   tags            = var.tags
 }
 
@@ -523,12 +523,12 @@ resource "aws_iam_role_policy" "eso" {
 resource "aws_eks_addon" "core" {
   for_each = { for a in var.eks_addons : a.name => a }
 
-  cluster_name  = aws_eks_cluster.this.name
+  cluster_name  = aws_eks_cluster.eks_cluster.name
   addon_name    = each.value.name
   addon_version = try(each.value.version, null)
 
   # Not the node groups: nodes need vpc-cni to become Ready, so that would deadlock.
-  depends_on = [aws_eks_cluster.this]
+  depends_on = [aws_eks_cluster.eks_cluster]
 }
 
 # The in-tree gp2 provisioner doesn't work on current Kubernetes.
@@ -560,11 +560,11 @@ resource "aws_iam_role_policy_attachment" "ebs_csi" {
 }
 
 resource "aws_eks_addon" "ebs_csi_driver" {
-  cluster_name             = aws_eks_cluster.this.name
+  cluster_name             = aws_eks_cluster.eks_cluster.name
   addon_name               = "aws-ebs-csi-driver"
   service_account_role_arn = aws_iam_role.ebs_csi.arn
 
-  depends_on = [aws_eks_cluster.this, aws_eks_node_group.stage, aws_eks_node_group.prod]
+  depends_on = [aws_eks_cluster.eks_cluster, aws_eks_node_group.stage, aws_eks_node_group.prod]
 }
 
 # --- Cluster-admin access ---
@@ -572,7 +572,7 @@ resource "aws_eks_addon" "ebs_csi_driver" {
 resource "aws_eks_access_entry" "admin" {
   for_each = toset(var.admin_principal_arns)
 
-  cluster_name  = aws_eks_cluster.this.name
+  cluster_name  = aws_eks_cluster.eks_cluster.name
   principal_arn = each.value
   type          = "STANDARD"
 }
@@ -580,7 +580,7 @@ resource "aws_eks_access_entry" "admin" {
 resource "aws_eks_access_policy_association" "admin" {
   for_each = toset(var.admin_principal_arns)
 
-  cluster_name  = aws_eks_cluster.this.name
+  cluster_name  = aws_eks_cluster.eks_cluster.name
   principal_arn = each.value
   policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
 
@@ -631,7 +631,7 @@ resource "aws_iam_role_policy" "stage_node_extra" {
 resource "aws_launch_template" "stage" {
   name_prefix = "${local.name}-stage-"
   vpc_security_group_ids = [
-    aws_eks_cluster.this.vpc_config[0].cluster_security_group_id,
+    aws_eks_cluster.eks_cluster.vpc_config[0].cluster_security_group_id,
     aws_security_group.stage.id,
   ]
 
@@ -650,7 +650,7 @@ resource "aws_launch_template" "stage" {
 }
 
 resource "aws_eks_node_group" "stage" {
-  cluster_name    = aws_eks_cluster.this.name
+  cluster_name    = aws_eks_cluster.eks_cluster.name
   node_group_name = "${local.name}-stage"
   node_role_arn   = aws_iam_role.stage_node.arn
   subnet_ids      = [for s in aws_subnet.stage_private : s.id]
@@ -726,7 +726,7 @@ resource "aws_iam_role_policy" "prod_node_extra" {
 resource "aws_launch_template" "prod" {
   name_prefix = "${local.name}-prod-"
   vpc_security_group_ids = [
-    aws_eks_cluster.this.vpc_config[0].cluster_security_group_id,
+    aws_eks_cluster.eks_cluster.vpc_config[0].cluster_security_group_id,
     aws_security_group.prod.id,
   ]
 
@@ -745,7 +745,7 @@ resource "aws_launch_template" "prod" {
 }
 
 resource "aws_eks_node_group" "prod" {
-  cluster_name    = aws_eks_cluster.this.name
+  cluster_name    = aws_eks_cluster.eks_cluster.name
   node_group_name = "${local.name}-prod"
   node_role_arn   = aws_iam_role.prod_node.arn
   subnet_ids      = [for s in aws_subnet.prod_private : s.id]
@@ -838,7 +838,7 @@ resource "aws_security_group" "bastion" {
 
   name_prefix = "${local.name}-bastion-"
   description = "Bastion instance - zero inbound rules by design, SSM Session Manager only"
-  vpc_id      = aws_vpc.this.id
+  vpc_id      = aws_vpc.vpc.id
 
   egress {
     description = "HTTPS to SSM service endpoints"
