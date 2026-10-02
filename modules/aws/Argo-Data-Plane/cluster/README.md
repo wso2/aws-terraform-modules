@@ -1,4 +1,4 @@
-# Argo-EKS-DataPlane/cluster
+# Argo-Data-Plane/cluster
 
 Provisions the EKS cluster and tier-isolated networking an AWS Argo data
 plane runs on. Stage and prod each get their own subnets, NAT Gateway
@@ -122,7 +122,7 @@ module repo.
 
 ```hcl
 module "cluster" {
-  source = "git::https://github.com/wso2/aws-terraform-modules.git//modules/aws/Argo-EKS-DataPlane/cluster?ref=v1.0.0"
+  source = "git::https://github.com/wso2/aws-terraform-modules.git//modules/aws/Argo-Data-Plane/cluster?ref=v1.0.0"
 
   project     = "asgardeo"
   environment = "prod"

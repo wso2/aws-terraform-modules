@@ -1,4 +1,4 @@
-# Argo-EKS-DataPlane
+# Argo-Data-Plane
 
 Provisions an AWS-based Argo data plane: an independent EKS cluster that
 pulls dispatch tasks from the control plane over NATS (mTLS) and runs the
@@ -44,14 +44,14 @@ Workflows' S3 artifact archiving.
   to already exist as a cert-manager-issued certificate in the control
   plane's output, copied by hand into this module's `terraform.tfvars`,
   before `apps` can dial the control plane over NATS. It has no dependency
-  on the Azure data plane (`Argo-AKS-DataPlane`) and can be applied
+  on the Azure data plane (`azurerm/Argo-Data-Plane`) and can be applied
   before, after, or in parallel with it.
 
 ## Example
 
 ```hcl
 module "cluster" {
-  source = "git::https://github.com/wso2/aws-terraform-modules.git//modules/aws/Argo-EKS-DataPlane/cluster?ref=v1.0.0"
+  source = "git::https://github.com/wso2/aws-terraform-modules.git//modules/aws/Argo-Data-Plane/cluster?ref=v1.0.0"
 
   project     = "asgardeo"
   environment = "prod"
@@ -74,7 +74,7 @@ module "cluster" {
 }
 
 module "apps" {
-  source = "git::https://github.com/wso2/aws-terraform-modules.git//modules/aws/Argo-EKS-DataPlane/apps?ref=v1.0.0"
+  source = "git::https://github.com/wso2/aws-terraform-modules.git//modules/aws/Argo-Data-Plane/apps?ref=v1.0.0"
 
   namespaces     = ["argo-aws-stage", "argo-aws-prod"]
   install_argocd = true

@@ -1,4 +1,4 @@
-# Argo-EKS-DataPlane/apps
+# Argo-Data-Plane/apps
 
 Installs the Kubernetes-level workload an AWS Argo data plane runs: a
 single shared Argo Workflows/Argo Events install, optionally ArgoCD, and
@@ -66,7 +66,7 @@ None.
 
 ```hcl
 module "apps" {
-  source = "git::https://github.com/wso2/aws-terraform-modules.git//modules/aws/Argo-EKS-DataPlane/apps?ref=v1.0.0"
+  source = "git::https://github.com/wso2/aws-terraform-modules.git//modules/aws/Argo-Data-Plane/apps?ref=v1.0.0"
 
   namespaces     = ["argo-aws-stage", "argo-aws-prod"]
   install_argocd = true
