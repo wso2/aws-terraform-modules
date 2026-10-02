@@ -23,7 +23,6 @@ resource "kubernetes_namespace_v1" "extra" {
   }
 }
 
-# Created before manifest_files so a Deployment mounting one doesn't race it.
 resource "kubernetes_config_map_v1" "config_map" {
   for_each = var.config_maps
 
