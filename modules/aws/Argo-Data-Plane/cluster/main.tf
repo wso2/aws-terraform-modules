@@ -248,21 +248,6 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
-resource "aws_kms_key" "eks_secrets" {
-  count = var.enable_secrets_encryption ? 1 : 0
-
-  description         = "Encrypts EKS Kubernetes Secrets for ${local.name}"
-  enable_key_rotation = true
-  tags                = var.tags
-}
-
-resource "aws_kms_alias" "eks_secrets" {
-  count = var.enable_secrets_encryption ? 1 : 0
-
-  name          = "alias/${local.name}-eks-secrets"
-  target_key_id = aws_kms_key.eks_secrets[0].key_id
-}
-
 resource "aws_eks_cluster" "eks_cluster" {
   name                          = local.name
   role_arn                      = aws_iam_role.eks_cluster.arn
@@ -282,16 +267,6 @@ resource "aws_eks_cluster" "eks_cluster" {
   access_config {
     authentication_mode                         = "API"
     bootstrap_cluster_creator_admin_permissions = true
-  }
-
-  dynamic "encryption_config" {
-    for_each = var.enable_secrets_encryption ? [1] : []
-    content {
-      provider {
-        key_arn = aws_kms_key.eks_secrets[0].arn
-      }
-      resources = ["secrets"]
-    }
   }
 
   enabled_cluster_log_types = var.enabled_cluster_log_types
@@ -471,15 +446,10 @@ resource "aws_iam_role_policy" "workflow_controller_artifacts" {
   })
 }
 
-data "tls_certificate" "eks" {
-  url = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
-}
-
 resource "aws_iam_openid_connect_provider" "eks" {
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
-  url             = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
-  tags            = var.tags
+  client_id_list = ["sts.amazonaws.com"]
+  url            = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
+  tags           = var.tags
 }
 
 data "aws_iam_policy_document" "eso_assume" {

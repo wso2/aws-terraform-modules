@@ -94,12 +94,6 @@ variable "admin_principal_arns" {
   default     = []
 }
 
-variable "enable_secrets_encryption" {
-  type        = bool
-  description = "Whether to create a dedicated KMS CMK and envelope-encrypt Kubernetes Secrets with it"
-  default     = false
-}
-
 variable "enabled_cluster_log_types" {
   type        = list(string)
   description = "List of cluster log types to enable - when non-empty, a matching CloudWatch Log Group is also created with retention set by log_retention_in_days"

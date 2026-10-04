@@ -38,7 +38,6 @@ locals {
   eso_role_name   = join("-", [local.name_prefix, "eso-role"])
   eso_policy_name = join("-", [local.name_prefix, "eso-secretsmanager"])
 
-  eks_secrets_kms_alias = join("-", [local.name_prefix, "eks-secrets"])
 
   flow_log_role_name   = join("-", [local.name_prefix, "flow-log-role"])
   flow_log_policy_name = join("-", [local.name_prefix, "flow-log-policy"])

@@ -6,7 +6,7 @@ plane runs on. Stage and prod each get their own subnets, NAT Gateway
 group also carries an `env=<value>:NoSchedule` taint, so only workloads
 that explicitly tolerate it land there.
 
-Raw `aws_*`/`tls_*` resource blocks. No dependency on any other WSO2
+Raw `aws_*` resource blocks. No dependency on any other WSO2
 module repo.
 
 ## What it provisions
@@ -16,9 +16,8 @@ module repo.
   Gateway per tier.
 - Per-tier security groups, extending (not replacing) the EKS-managed
   cluster security group, with caller-supplied ingress/egress rules.
-- The EKS cluster (API-based access entries, optional KMS envelope
-  encryption of Secrets, optional control-plane log types), its OIDC
-  provider, and core addons (`vpc-cni`, `coredns`, `kube-proxy` by default)
+- The EKS cluster (API-based access entries, optional control-plane log
+  types), its OIDC provider, and core addons (`vpc-cni`, `coredns`, `kube-proxy` by default)
   plus the `aws-ebs-csi-driver` addon.
 - Optional VPC Flow Logs and an optional S3 bucket (+ IRSA role) for Argo
   Workflows' artifact archiving, same shape as `Argo-Control-Plane/cluster`.
@@ -41,6 +40,12 @@ module repo.
 
 ## Notes
 
+- Kubernetes Secrets are envelope-encrypted by EKS itself with an AWS owned
+  key (default on Kubernetes 1.28 and later), so this module creates no KMS
+  key.
+- The OIDC provider sets no `thumbprint_list`. IAM validates EKS OIDC
+  issuers against its own trusted CAs, so there is no certificate thumbprint
+  to rotate. This needs AWS provider 5.81 or later.
 - `eso_secretsmanager_key_prefix` defaults to `"*"` (wide) because this
   data plane's real ExternalSecrets reference bare, unprefixed key names
   copied from an existing Azure Key Vault store. Narrow it if those keys
@@ -89,7 +94,6 @@ module repo.
 | `deploy_identities` | `map(object({ namespace, service_account_name, policy_json }))` | `{}` | Per-env IRSA identities for pipeline pods. One IAM role per entry, scoped to exactly that `(namespace, ServiceAccount)` pair. See Notes above |
 | `stage_node_extra_policy_json` | `string` | `null` | Extra IAM policy (JSON) attached directly to the stage node role, in addition to the standard EKS worker/CNI/ECR policies |
 | `prod_node_extra_policy_json` | `string` | `null` | Prod counterpart of `stage_node_extra_policy_json` |
-| `enable_secrets_encryption` | `bool` | `false` | |
 | `enabled_cluster_log_types` | `list(string)` | `[]` | |
 | `log_retention_in_days` | `number` | `90` | |
 | `enable_vpc_flow_logs` | `bool` | `false` | |

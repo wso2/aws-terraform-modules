@@ -12,7 +12,7 @@ Two independently-callable submodules. This folder itself is not a
 module - call `cluster/` and `apps/` separately from your root module.
 
 - [`cluster/`](./cluster) builds the AWS infrastructure the control plane
-  runs on: the EKS cluster, VPC, IAM/IRSA roles, KMS, an optional bastion.
+  runs on: the EKS cluster, VPC, IAM/IRSA roles, an optional bastion.
   Nothing Kubernetes-level - just what the cluster needs to exist.
 - [`apps/`](./apps) assumes a cluster already exists and installs
   everything that runs *inside* it: NATS (JetStream, mTLS via
@@ -82,7 +82,6 @@ module "cluster" {
 
   node_instance_types = ["m6i.large"]
 
-  enable_secrets_encryption = true
   enable_artifact_archiving = true
 }
 
