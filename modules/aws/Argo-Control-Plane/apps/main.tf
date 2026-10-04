@@ -1,11 +1,20 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+# Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
 #
-# This software is the property of WSO2 LLC. and its suppliers, if any.
-# Dissemination of any information or reproduction of any material contained
-# herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
-# You may not alter or remove any copyright or other notice from copies of this content.
+# WSO2 LLC. licenses this file to you under the Apache License,
+# Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
 #
 # --------------------------------------------------------------------------------------
 
@@ -39,13 +48,6 @@ resource "tls_private_key" "tunnel_client" {
   for_each = toset(var.tunnel_client_identities)
 
   algorithm = "ED25519"
-}
-
-locals {
-  tunnel_authorized_keys = join("\n", [
-    for identity, key in tls_private_key.tunnel_client :
-    "command=\"/bin/false\",no-pty,no-agent-forwarding,no-x11-forwarding ${trimspace(key.public_key_openssh)} ${identity}-dp-tunnel"
-  ])
 }
 
 resource "kubernetes_secret_v1" "tunnel_server_authorized_keys" {
@@ -316,20 +318,6 @@ resource "helm_release" "traefik" {
   depends_on = [kubernetes_namespace_v1.extra]
 }
 
-locals {
-  manifest_documents = flatten([
-    for idx, m in var.manifest_files : [
-      for doc_idx, doc in [
-        for chunk in split("\n---\n", "\n${m.content != null ? m.content : templatefile(m.location, m.template_map)}") : chunk
-        if trimspace(chunk) != ""
-        ] : {
-        key  = "${idx}-${doc_idx}"
-        body = doc
-      }
-    ]
-  ])
-}
-
 # kubectl_manifest: kubernetes_manifest doesn't work reliably with exec auth.
 resource "kubectl_manifest" "kubernetes_object" {
   for_each = { for d in local.manifest_documents : d.key => d }
@@ -339,21 +327,6 @@ resource "kubectl_manifest" "kubernetes_object" {
   wait_for_rollout = false
 
   depends_on = [helm_release.nats, helm_release.argo_workflows, helm_release.argo_events, helm_release.traefik, helm_release.external_secrets, kubernetes_namespace_v1.extra, kubernetes_config_map_v1.config_map]
-}
-
-locals {
-  kubectl_manifest_documents = flatten([
-    for idx, m in var.kubectl_manifest_files : [
-      for doc_idx, doc in [
-        for chunk in split("\n---\n", "\n${m.content != null ? m.content : templatefile(m.location, m.template_map)}") : chunk
-        if trimspace(chunk) != ""
-        ] : {
-        key       = "${idx}-${doc_idx}"
-        body      = doc
-        namespace = m.namespace
-      }
-    ]
-  ])
 }
 
 resource "kubectl_manifest" "extra" {

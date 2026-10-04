@@ -18,25 +18,6 @@
 #
 # --------------------------------------------------------------------------------------
 
-terraform {
-  required_version = ">= 1.10"
-  required_providers {
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = ">= 2.36.0"
-    }
-    helm = {
-      source  = "hashicorp/helm"
-      version = "~> 2.17"
-    }
-    # kubernetes_manifest validates CRD schemas at plan time, before ESO installs them.
-    kubectl = {
-      source  = "alekc/kubectl"
-      version = ">= 2.0"
-    }
-    local = {
-      source  = "hashicorp/local"
-      version = ">= 2.0"
-    }
-  }
+locals {
+  name = "${var.project}-${var.application}-${var.environment}"
 }
