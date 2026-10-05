@@ -46,28 +46,33 @@ variable "tunnel_client_identities" {
 }
 
 variable "argo_workflows_chart_version" {
-  type    = string
-  default = null
+  type        = string
+  description = "Argo Workflows Helm chart version. Null installs the latest; pin it to keep applies repeatable."
+  default     = null
 }
 
 variable "argo_events_chart_version" {
-  type    = string
-  default = null
+  type        = string
+  description = "Argo Events Helm chart version. Null installs the latest; pin it to keep applies repeatable."
+  default     = null
 }
 
 variable "nats_chart_version" {
-  type    = string
-  default = null
+  type        = string
+  description = "NATS Helm chart version. Null installs the latest; pin it to keep applies repeatable."
+  default     = null
 }
 
 variable "argo_helm_repo" {
-  type    = string
-  default = "https://argoproj.github.io/argo-helm"
+  type        = string
+  description = "Helm repository URL for the Argo charts."
+  default     = "https://argoproj.github.io/argo-helm"
 }
 
 variable "nats_helm_repo" {
-  type    = string
-  default = "https://nats-io.github.io/k8s/helm/charts/"
+  type        = string
+  description = "Helm repository URL for the NATS chart."
+  default     = "https://nats-io.github.io/k8s/helm/charts/"
 }
 
 variable "argo_workflows_values" {
@@ -95,18 +100,21 @@ variable "install_cert_manager" {
 }
 
 variable "cert_manager_chart_version" {
-  type    = string
-  default = null
+  type        = string
+  description = "cert-manager Helm chart version. Null installs the latest; pin it to keep applies repeatable."
+  default     = null
 }
 
 variable "cert_manager_helm_repo" {
-  type    = string
-  default = "https://charts.jetstack.io"
+  type        = string
+  description = "Helm repository URL for the cert-manager chart."
+  default     = "https://charts.jetstack.io"
 }
 
 variable "cert_manager_namespace" {
-  type    = string
-  default = "cert-manager"
+  type        = string
+  description = "Namespace cert-manager is installed into."
+  default     = "cert-manager"
 }
 
 variable "install_traefik" {
@@ -116,13 +124,15 @@ variable "install_traefik" {
 }
 
 variable "traefik_chart_version" {
-  type    = string
-  default = null
+  type        = string
+  description = "Traefik Helm chart version. Null installs the latest; pin it to keep applies repeatable."
+  default     = null
 }
 
 variable "traefik_helm_repo" {
-  type    = string
-  default = "https://traefik.github.io/charts"
+  type        = string
+  description = "Helm repository URL for the Traefik chart."
+  default     = "https://traefik.github.io/charts"
 }
 
 variable "traefik_values" {
@@ -132,8 +142,9 @@ variable "traefik_values" {
 }
 
 variable "traefik_namespace" {
-  type    = string
-  default = "gateway"
+  type        = string
+  description = "Namespace Traefik is installed into."
+  default     = "gateway"
 }
 
 variable "nats_server_external_dns_names" {
@@ -171,18 +182,21 @@ variable "eso_role_arn" {
 }
 
 variable "eso_chart_version" {
-  type    = string
-  default = null
+  type        = string
+  description = "External Secrets Operator Helm chart version. Null installs the latest; pin it to keep applies repeatable."
+  default     = null
 }
 
 variable "eso_helm_repo" {
-  type    = string
-  default = "https://charts.external-secrets.io"
+  type        = string
+  description = "Helm repository URL for the External Secrets Operator chart."
+  default     = "https://charts.external-secrets.io"
 }
 
 variable "eso_namespace" {
-  type    = string
-  default = "external-secrets"
+  type        = string
+  description = "Namespace External Secrets Operator is installed into. Must match the cluster module's eso_namespace."
+  default     = "external-secrets"
 }
 
 variable "kubectl_manifest_files" {

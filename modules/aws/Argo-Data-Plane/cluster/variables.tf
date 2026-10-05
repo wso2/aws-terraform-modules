@@ -219,8 +219,7 @@ variable "bastion_instance_type" {
 
 variable "eso_secretsmanager_key_prefix" {
   type        = string
-  description = "Secrets Manager key-name prefix (glob) the eso IAM role may read. Defaults to \"*\" since this data plane's ExternalSecrets reference unprefixed key names."
-  default     = "*"
+  description = "Secrets Manager key-name prefix (glob) the eso IAM role may read, e.g. \"argo/aws-dataplane/*\". No default: \"*\" lets ESO read every secret in the account, so the caller has to choose it explicitly."
 }
 
 variable "deploy_identities" {

@@ -46,10 +46,13 @@ module repo.
 - The OIDC provider sets no `thumbprint_list`. IAM validates EKS OIDC
   issuers against its own trusted CAs, so there is no certificate thumbprint
   to rotate. This needs AWS provider 5.81 or later.
-- `eso_secretsmanager_key_prefix` defaults to `"*"` (wide) because this
-  data plane's real ExternalSecrets reference bare, unprefixed key names
-  copied from an existing Azure Key Vault store. Narrow it if those keys
-  are ever renamed onto a path convention.
+- `eso_secretsmanager_key_prefix` has no default. `"*"` lets ESO read every
+  secret in the account; pass it only if the ExternalSecrets reference
+  bare, unprefixed key names, and narrow it once those keys follow a path
+  convention.
+- Stage and prod are built from one set of resource blocks that iterate
+  over `local.tiers` (see `locals.tf`). Tier-scoped resources are addressed
+  by tier, e.g. `aws_eks_node_group.node["prod"]`.
 - `deploy_identities` credentials are minted per-pod by AWS - there is no
   standing secret.
 
@@ -88,7 +91,7 @@ module repo.
 | `prod_node_taint_value` | `string` | `"prod"` | Value for the `env` taint applied to prod nodes (key fixed `env`, effect fixed `NO_SCHEDULE`) |
 | `enable_bastion` | `bool` | `true` | |
 | `bastion_instance_type` | `string` | `"t3.micro"` | |
-| `eso_secretsmanager_key_prefix` | `string` | `"*"` | Secrets Manager key-name prefix (glob) the ESO IAM role may read. See Notes above |
+| `eso_secretsmanager_key_prefix` | `string` | required | Secrets Manager key-name prefix (glob) the ESO IAM role may read. See Notes above |
 | `eso_namespace` | `string` | `"external-secrets"` | Namespace ESO runs in; scopes the ESO IAM role's trust policy. Must match the `apps` module's `eso_namespace` |
 | `deploy_identities` | `map(object({ namespace, service_account_name, policy_json }))` | `{}` | Per-env IRSA identities for pipeline pods. One IAM role per entry, scoped to exactly that `(namespace, ServiceAccount)` pair. See Notes above |
 | `stage_node_extra_policy_json` | `string` | `null` | Extra IAM policy (JSON) attached directly to the stage node role, in addition to the standard EKS worker/CNI/ECR policies |

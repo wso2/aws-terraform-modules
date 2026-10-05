@@ -60,4 +60,18 @@ locals {
   bastion_sg_tags      = merge(var.tags, { Name = local.bastion_sg_name })
   bastion_name         = join("-", [local.name_prefix, "bastion"])
   bastion_tags         = merge(var.tags, { Name = local.bastion_name })
+
+  oidc_issuer = replace(aws_iam_openid_connect_provider.eks.url, "https://", "")
+
+  # "<namespace>:<ServiceAccount>" allowed to assume each IRSA role.
+  irsa_service_accounts = merge(
+    {
+      ebs_csi = "kube-system:ebs-csi-controller-sa"
+      eso     = "${var.eso_namespace}:external-secrets"
+    },
+    {
+      for k, v in { workflow_controller_artifacts = "${var.argo_namespace}:${var.workflow_controller_service_account_name}" } :
+      k => v if var.enable_artifact_archiving
+    },
+  )
 }

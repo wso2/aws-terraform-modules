@@ -47,19 +47,19 @@ output "vpc_id" {
 }
 
 output "stage_subnet_ids" {
-  value = [for s in aws_subnet.stage_private : s.id]
+  value = [for k, s in aws_subnet.private : s.id if local.private_subnets[k].tier == "stage"]
 }
 
 output "prod_subnet_ids" {
-  value = [for s in aws_subnet.prod_private : s.id]
+  value = [for k, s in aws_subnet.private : s.id if local.private_subnets[k].tier == "prod"]
 }
 
 output "stage_nat_gateway_public_ip" {
-  value = aws_eip.stage_nat.public_ip
+  value = aws_eip.nat["stage"].public_ip
 }
 
 output "prod_nat_gateway_public_ip" {
-  value = aws_eip.prod_nat.public_ip
+  value = aws_eip.nat["prod"].public_ip
 }
 
 output "bastion_instance_id" {

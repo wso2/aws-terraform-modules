@@ -113,18 +113,21 @@ variable "eso_role_arn" {
 }
 
 variable "eso_chart_version" {
-  type    = string
-  default = null
+  type        = string
+  description = "External Secrets Operator Helm chart version. Null installs the latest; pin it to keep applies repeatable."
+  default     = null
 }
 
 variable "eso_helm_repo" {
-  type    = string
-  default = "https://charts.external-secrets.io"
+  type        = string
+  description = "Helm repository URL for the External Secrets Operator chart."
+  default     = "https://charts.external-secrets.io"
 }
 
 variable "eso_namespace" {
-  type    = string
-  default = "external-secrets"
+  type        = string
+  description = "Namespace External Secrets Operator is installed into. Must match the cluster module's eso_namespace."
+  default     = "external-secrets"
 }
 
 variable "kubectl_manifest_files" {

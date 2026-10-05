@@ -38,7 +38,7 @@ resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = var.public_subnet_cidr_blocks[each.value]
   availability_zone       = each.key
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
   tags                    = merge(var.tags, { Name = join("-", [local.name_prefix, "public", each.key]) })
 }
 
@@ -269,15 +269,24 @@ resource "aws_iam_openid_connect_provider" "eks" {
   tags           = var.tags
 }
 
-data "aws_iam_policy_document" "ebs_csi_assume" {
+data "aws_iam_policy_document" "irsa_assume" {
+  for_each = local.irsa_service_accounts
+
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
     effect  = "Allow"
+
     condition {
       test     = "StringEquals"
-      variable = "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub"
-      values   = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
+      variable = "${local.oidc_issuer}:sub"
+      values   = ["system:serviceaccount:${each.value}"]
     }
+    condition {
+      test     = "StringEquals"
+      variable = "${local.oidc_issuer}:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
     principals {
       identifiers = [aws_iam_openid_connect_provider.eks.arn]
       type        = "Federated"
@@ -287,7 +296,7 @@ data "aws_iam_policy_document" "ebs_csi_assume" {
 
 resource "aws_iam_role" "ebs_csi" {
   name               = local.ebs_csi_role_name
-  assume_role_policy = data.aws_iam_policy_document.ebs_csi_assume.json
+  assume_role_policy = data.aws_iam_policy_document.irsa_assume["ebs_csi"].json
   tags               = var.tags
 }
 
@@ -296,25 +305,9 @@ resource "aws_iam_role_policy_attachment" "ebs_csi" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
 
-data "aws_iam_policy_document" "eso_assume" {
-  statement {
-    actions = ["sts:AssumeRoleWithWebIdentity"]
-    effect  = "Allow"
-    condition {
-      test     = "StringEquals"
-      variable = "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub"
-      values   = ["system:serviceaccount:${var.eso_namespace}:external-secrets"]
-    }
-    principals {
-      identifiers = [aws_iam_openid_connect_provider.eks.arn]
-      type        = "Federated"
-    }
-  }
-}
-
 resource "aws_iam_role" "eso" {
   name               = local.eso_role_name
-  assume_role_policy = data.aws_iam_policy_document.eso_assume.json
+  assume_role_policy = data.aws_iam_policy_document.irsa_assume["eso"].json
   tags               = var.tags
 }
 
@@ -386,29 +379,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "argo_logs" {
   }
 }
 
-data "aws_iam_policy_document" "workflow_controller_artifacts_assume" {
-  count = var.enable_artifact_archiving ? 1 : 0
-
-  statement {
-    actions = ["sts:AssumeRoleWithWebIdentity"]
-    effect  = "Allow"
-    condition {
-      test     = "StringEquals"
-      variable = "${replace(aws_iam_openid_connect_provider.eks.url, "https://", "")}:sub"
-      values   = ["system:serviceaccount:${var.argo_namespace}:${var.workflow_controller_service_account_name}"]
-    }
-    principals {
-      identifiers = [aws_iam_openid_connect_provider.eks.arn]
-      type        = "Federated"
-    }
-  }
-}
-
 resource "aws_iam_role" "workflow_controller_artifacts" {
   count = var.enable_artifact_archiving ? 1 : 0
 
   name               = local.workflow_controller_artifacts_role_name
-  assume_role_policy = data.aws_iam_policy_document.workflow_controller_artifacts_assume[0].json
+  assume_role_policy = data.aws_iam_policy_document.irsa_assume["workflow_controller_artifacts"].json
   tags               = var.tags
 }
 
@@ -532,9 +507,10 @@ resource "aws_eks_node_group" "eks_node_group" {
   instance_types  = var.node_instance_types
   capacity_type   = var.node_capacity_type
 
+  # A fixed version number: "$Latest" shows a diff on every plan.
   launch_template {
     id      = aws_launch_template.launch_template.id
-    version = "$Latest"
+    version = aws_launch_template.launch_template.latest_version
   }
 
   scaling_config {
