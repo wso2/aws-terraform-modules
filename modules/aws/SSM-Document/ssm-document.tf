@@ -41,7 +41,7 @@ resource "aws_ssm_document" "session_manager_doc" {
       runAsDefaultUser            = local.user_name,
       shellProfile = {
         windows = "",
-        linux   = "timestamp=$(date '+%Y-%m-%dT%H:%M:%SZ');user=$(whoami);echo $timestamp && echo \"Welcome $user\"'!';cd /home/$user/"
+        linux   = "timestamp=$(date '+%Y-%m-%dT%H:%M:%SZ');user=$(whoami);echo $timestamp && echo \"Welcome $user\"'!';cd /home/$user/ && exec /bin/bash -l"
       }
     }
   })
