@@ -28,11 +28,6 @@ variable "environment" {
   description = "Name of the environment (e.g. dev, stage, prod)"
 }
 
-variable "region" {
-  type        = string
-  description = "Code of the AWS region"
-}
-
 variable "application" {
   type        = string
   description = "Purpose tag for the resources created by this module"

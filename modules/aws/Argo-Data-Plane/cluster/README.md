@@ -59,7 +59,6 @@ module repo.
 |---|---|---|---|
 | `project` | `string` | required | Project name, used for resource naming/tagging |
 | `environment` | `string` | required | Environment name (e.g. dev, stage, prod) |
-| `region` | `string` | required | AWS region code |
 | `application` | `string` | `"argo-dataplane"` | Purpose tag for resources this module creates |
 | `tags` | `map(string)` | `{}` | |
 | `vpc_cidr_block` | `string` | required | CIDR block for the data plane's VPC |
@@ -130,7 +129,6 @@ module "cluster" {
 
   project     = "asgardeo"
   environment = "prod"
-  region      = "us-east-1"
 
   vpc_cidr_block = "10.3.0.0/16"
 

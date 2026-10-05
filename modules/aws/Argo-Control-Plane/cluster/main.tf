@@ -18,6 +18,8 @@
 #
 # --------------------------------------------------------------------------------------
 
+# Flow logs are opt-in (enable_vpc_flow_logs) to avoid CloudWatch cost.
+# trivy:ignore:AVD-AWS-0178
 resource "aws_vpc" "vpc" {
   cidr_block           = var.vpc_cidr_block
   enable_dns_support   = true
@@ -220,6 +222,11 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
+# Control-plane logging is opt-in (enabled_cluster_log_types) to avoid
+# CloudWatch cost. Secrets are envelope-encrypted by EKS with an AWS owned
+# key by default on Kubernetes 1.28+, so no encryption_config is set.
+# trivy:ignore:AVD-AWS-0038
+# trivy:ignore:AVD-AWS-0039
 resource "aws_eks_cluster" "eks_cluster" {
   name     = local.eks_cluster_name
   role_arn = aws_iam_role.eks_cluster.arn
