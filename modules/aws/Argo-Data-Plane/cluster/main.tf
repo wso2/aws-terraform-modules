@@ -38,7 +38,7 @@ resource "aws_subnet" "stage_public" {
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = var.stage_public_subnet_cidr_block
   availability_zone       = var.stage_availability_zones[0]
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
   tags                    = merge(var.tags, { Name = "${local.name}-stage-public" })
 }
 
@@ -46,7 +46,7 @@ resource "aws_subnet" "prod_public" {
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = var.prod_public_subnet_cidr_block
   availability_zone       = var.prod_availability_zones[0]
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
   tags                    = merge(var.tags, { Name = "${local.name}-prod-public" })
 }
 
@@ -815,6 +815,8 @@ resource "aws_iam_instance_profile" "bastion" {
   tags = var.tags
 }
 
+# Outbound HTTPS only, needed to reach the SSM endpoints. No inbound rules.
+# trivy:ignore:AVD-AWS-0104
 resource "aws_security_group" "bastion" {
   count = var.enable_bastion ? 1 : 0
 

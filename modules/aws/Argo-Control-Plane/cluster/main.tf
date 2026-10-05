@@ -603,6 +603,8 @@ resource "aws_iam_instance_profile" "bastion" {
   tags = var.tags
 }
 
+# Outbound HTTPS only, needed to reach the SSM endpoints. No inbound rules.
+# trivy:ignore:AVD-AWS-0104
 resource "aws_security_group" "bastion" {
   count = var.enable_bastion ? 1 : 0
 
