@@ -96,3 +96,20 @@ variable "object_ownership" {
   type        = string
   default     = "BucketOwnerPreferred"
 }
+
+variable "lifecycle_rules" {
+  description = "Lifecycle rules for the bucket; an empty list creates no lifecycle configuration. Each rule applies to objects under prefix (whole bucket when null) and may define storage-class transitions, current/noncurrent object expiration, and incomplete multipart upload cleanup."
+  type = list(object({
+    id     = string
+    status = optional(string, "Enabled")
+    prefix = optional(string, null)
+    transitions = optional(list(object({
+      days          = number
+      storage_class = string
+    })), [])
+    expiration_days                        = optional(number, null)
+    noncurrent_version_expiration_days     = optional(number, null)
+    abort_incomplete_multipart_upload_days = optional(number, null)
+  }))
+  default = []
+}

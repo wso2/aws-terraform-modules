@@ -46,6 +46,12 @@ variable "eks_addon_update_create" {
   default     = null
 }
 
+variable "eks_addon_service_account_role_arn" {
+  description = "IAM role the add-on's service account assumes through IRSA (optional). This is how EKS binds a role to an add-on; add-on schemas do not accept service account annotations."
+  type        = string
+  default     = null
+}
+
 variable "eks_addon_configuration_values" {
   description = "Custom configuration values for the addon as a JSON string (optional)"
   type        = string
