@@ -102,7 +102,7 @@ module "apps" {
   tunnel_client_identities = ["aws"]
 
   install_external_secrets = true
-  eso_role_arn              = module.cluster.eso_role_arn
+  eso_role_arn             = module.cluster.eso_role_arn
 
   depends_on = [module.cluster]
 }

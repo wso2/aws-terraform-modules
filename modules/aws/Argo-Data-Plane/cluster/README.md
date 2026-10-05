@@ -17,8 +17,8 @@ module repo.
 - Per-tier security groups, extending (not replacing) the EKS-managed
   cluster security group, with caller-supplied ingress/egress rules.
 - The EKS cluster (API-based access entries, optional control-plane log
-  types), its OIDC provider, and core addons (`vpc-cni`, `coredns`, `kube-proxy` by default)
-  plus the `aws-ebs-csi-driver` addon.
+  types), its OIDC provider, and core addons (`vpc-cni`, `coredns`,
+  `kube-proxy` by default) plus the `aws-ebs-csi-driver` addon.
 - Optional VPC Flow Logs and an optional S3 bucket (+ IRSA role) for Argo
   Workflows' artifact archiving, same shape as `Argo-Control-Plane/cluster`.
 - IRSA roles for the EBS CSI driver and External Secrets Operator's
@@ -43,6 +43,8 @@ module repo.
 - Kubernetes Secrets are envelope-encrypted by EKS itself with an AWS owned
   key (default on Kubernetes 1.28 and later), so this module creates no KMS
   key.
+- Control-plane logging and VPC Flow Logs are off by default. Set
+  `enabled_cluster_log_types` / `enable_vpc_flow_logs` to turn them on.
 - The OIDC provider sets no `thumbprint_list`. IAM validates EKS OIDC
   issuers against its own trusted CAs, so there is no certificate thumbprint
   to rotate. This needs AWS provider 5.81 or later.
@@ -150,9 +152,9 @@ module "cluster" {
 
   deploy_identities = {
     "is-deploy-stage" = {
-      namespace             = "argo-aws-stage"
-      service_account_name  = "asgardeo-is-deploy-sa"
-      policy_json            = data.aws_iam_policy_document.is_deploy_stage.json
+      namespace            = "argo-aws-stage"
+      service_account_name = "asgardeo-is-deploy-sa"
+      policy_json          = data.aws_iam_policy_document.is_deploy_stage.json
     }
   }
 }

@@ -60,7 +60,13 @@ cluster built by the sibling [`../cluster`](../cluster) module.
 
 ## Outputs
 
-None.
+| Name | Description |
+|---|---|
+| `namespace_names` | Every namespace this module created |
+| `system_namespace` | Same value as the `system_namespace` input |
+| `argocd_namespace` | `null` unless `install_argocd` |
+| `eso_namespace` | `null` unless `install_external_secrets` |
+| `gp3_storage_class_name` | The default `StorageClass` this module creates |
 
 ## Example
 
@@ -87,7 +93,7 @@ module "apps" {
   ]
 
   install_external_secrets = true
-  eso_role_arn              = module.cluster.eso_role_arn
+  eso_role_arn             = module.cluster.eso_role_arn
 
   depends_on = [module.cluster]
 }

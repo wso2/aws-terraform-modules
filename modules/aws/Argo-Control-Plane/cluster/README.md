@@ -16,12 +16,11 @@ module repo.
 - Optional VPC Flow Logs (own CloudWatch Log Group + IAM role), opt-in via
   `enable_vpc_flow_logs`.
 - A security group for cluster nodes with caller-supplied ingress/egress
-  rules, plus a separate security group and NSG rule for the optional
-  bastion.
+  rules, plus a separate security group for the optional bastion.
 - The EKS cluster itself (API-based access entries, private/optional-public
-  endpoint, optional control-plane log types), its EKS-managed node group (launch template,
-  scaling config, one shared "system" node group), and the standard
-  worker/CNI/ECR-readonly IAM policy attachments.
+  endpoint, optional control-plane log types), its EKS-managed node group
+  (launch template, scaling config, one shared "system" node group), and
+  the standard worker/CNI/ECR-readonly IAM policy attachments.
 - The cluster's OIDC provider, plus IRSA roles for the EBS CSI driver,
   External Secrets Operator's controller ServiceAccount, and (opt-in) the
   workflow-controller's artifact-archiving role.
@@ -39,6 +38,8 @@ module repo.
 - Kubernetes Secrets are envelope-encrypted by EKS itself with an AWS owned
   key (default on Kubernetes 1.28 and later), so this module creates no KMS
   key.
+- Control-plane logging and VPC Flow Logs are off by default. Set
+  `enabled_cluster_log_types` / `enable_vpc_flow_logs` to turn them on.
 - The OIDC provider sets no `thumbprint_list`. IAM validates EKS OIDC
   issuers against its own trusted CAs, so there is no certificate thumbprint
   to rotate. This needs AWS provider 5.81 or later.
@@ -123,12 +124,10 @@ module "cluster" {
   admin_principal_arns = ["arn:aws:iam::123456789012:role/platform-admin"]
 
   node_instance_types = ["m6i.large"]
-  node_min_size        = 2
-  node_desired_size     = 2
-  node_max_size          = 4
+  node_min_size       = 2
+  node_desired_size   = 2
+  node_max_size       = 4
 
-  enabled_cluster_log_types = ["api", "audit"]
-  enable_vpc_flow_logs      = true
   enable_artifact_archiving = true
 }
 ```
