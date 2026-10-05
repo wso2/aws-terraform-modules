@@ -38,6 +38,9 @@ module repo.
 - Kubernetes Secrets are envelope-encrypted by EKS itself with an AWS owned
   key (default on Kubernetes 1.28 and later), so this module creates no KMS
   key.
+- Cluster access comes only from `admin_principal_arns`; the creator gets
+  no implicit admin access. Include the identity that runs
+  `terraform apply`, or the `apps` module cannot authenticate.
 - Control-plane logging and VPC Flow Logs are off by default. Set
   `enabled_cluster_log_types` / `enable_vpc_flow_logs` to turn them on.
 - The OIDC provider sets no `thumbprint_list`. IAM validates EKS OIDC

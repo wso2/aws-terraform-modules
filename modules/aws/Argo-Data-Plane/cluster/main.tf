@@ -188,9 +188,13 @@ resource "aws_eks_cluster" "eks_cluster" {
     public_access_cidrs     = var.public_access_cidrs
   }
 
+  # Admin access comes only from admin_principal_arns. Leaving the creator
+  # bootstrap on makes EKS add its own access entry for the creating
+  # principal, which collides with aws_eks_access_entry.admin when that
+  # principal is also listed.
   access_config {
     authentication_mode                         = "API"
-    bootstrap_cluster_creator_admin_permissions = true
+    bootstrap_cluster_creator_admin_permissions = false
   }
 
   enabled_cluster_log_types = var.enabled_cluster_log_types
