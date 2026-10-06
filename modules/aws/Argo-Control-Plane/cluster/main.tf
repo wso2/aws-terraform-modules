@@ -254,17 +254,20 @@ resource "aws_eks_cluster" "eks_cluster" {
 
   tags = var.tags
 
-  depends_on = [aws_iam_role_policy_attachment.eks_cluster_policy]
+  depends_on = [aws_iam_role_policy_attachment.eks_cluster_policy, aws_cloudwatch_log_group.eks_cluster]
 }
 
+# Created before the cluster, not after: when enabled_cluster_log_types
+# is non-empty, EKS creates this same log group itself as soon as the
+# cluster comes up, so creating it afterwards here would race and fail
+# with ResourceAlreadyExistsException. aws_eks_cluster depends on this
+# instead (see its own depends_on below).
 resource "aws_cloudwatch_log_group" "eks_cluster" {
   count = length(var.enabled_cluster_log_types) > 0 ? 1 : 0
 
   name              = "/aws/eks/${local.eks_cluster_name}/cluster"
   retention_in_days = var.log_retention_in_days
   tags              = var.tags
-
-  depends_on = [aws_eks_cluster.eks_cluster]
 }
 
 resource "aws_iam_openid_connect_provider" "eks" {
@@ -414,14 +417,28 @@ resource "aws_iam_role_policy" "workflow_controller_artifacts" {
   })
 }
 
+# vpc-cni/kube-proxy: installed before the node group exists, so nodes
+# have a working CNI as soon as they join instead of racing it.
 resource "aws_eks_addon" "core" {
-  for_each = { for a in var.eks_addons : a.name => a }
+  for_each = local.pre_compute_addons
 
   cluster_name  = aws_eks_cluster.eks_cluster.name
   addon_name    = each.value.name
   addon_version = try(each.value.version, null)
 
   depends_on = [aws_eks_cluster.eks_cluster]
+}
+
+# coredns and anything else: needs a node to schedule onto, so it
+# depends on the node group instead of racing it.
+resource "aws_eks_addon" "core_post_compute" {
+  for_each = local.post_compute_addons
+
+  cluster_name  = aws_eks_cluster.eks_cluster.name
+  addon_name    = each.value.name
+  addon_version = try(each.value.version, null)
+
+  depends_on = [aws_eks_cluster.eks_cluster, aws_eks_node_group.eks_node_group]
 }
 
 resource "aws_eks_addon" "ebs_csi_driver" {
@@ -538,19 +555,17 @@ resource "aws_eks_node_group" "eks_node_group" {
     aws_iam_role_policy_attachment.node_cni,
     aws_iam_role_policy_attachment.node_ecr,
     aws_route_table_association.private,
+    aws_eks_addon.core,
   ]
 }
 
-data "aws_ami" "bastion" {
+# The SSM public parameter, not an AMI name filter: "al2023-ami-*-x86_64"
+# also matches the minimal/ECS variants, which don't ship the SSM agent
+# the bastion depends on.
+data "aws_ssm_parameter" "bastion_ami" {
   count = var.enable_bastion ? 1 : 0
 
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["al2023-ami-*-x86_64"]
-  }
+  name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 }
 
 resource "aws_iam_role" "bastion" {
@@ -610,7 +625,7 @@ resource "aws_security_group" "bastion" {
 resource "aws_instance" "bastion" {
   count = var.enable_bastion ? 1 : 0
 
-  ami                    = data.aws_ami.bastion[0].id
+  ami                    = data.aws_ssm_parameter.bastion_ami[0].value
   instance_type          = var.bastion_instance_type
   subnet_id              = aws_subnet.private[var.availability_zones[0]].id
   vpc_security_group_ids = [aws_security_group.bastion[0].id]
@@ -625,4 +640,22 @@ resource "aws_instance" "bastion" {
   }
 
   tags = local.bastion_tags
+
+  lifecycle {
+    ignore_changes = [ami]
+  }
+}
+
+# Without this, the bastion SG isn't a member of (or allowed into) the
+# cluster SG, so kubectl/SSM port-forwarding from the bastion to the
+# private API endpoint times out.
+resource "aws_security_group_rule" "bastion_to_api" {
+  count = var.enable_bastion ? 1 : 0
+
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  security_group_id        = aws_eks_cluster.eks_cluster.vpc_config[0].cluster_security_group_id
+  source_security_group_id = aws_security_group.bastion[0].id
 }

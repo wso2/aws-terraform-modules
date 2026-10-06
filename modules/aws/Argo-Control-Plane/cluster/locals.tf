@@ -63,6 +63,13 @@ locals {
 
   oidc_issuer = replace(aws_iam_openid_connect_provider.eks.url, "https://", "")
 
+  # vpc-cni/kube-proxy must exist before the node group so nodes can reach
+  # Ready; coredns depends on the node group instead, since it needs a
+  # node to schedule onto.
+  pre_compute_addon_names = ["vpc-cni", "kube-proxy"]
+  pre_compute_addons      = { for a in var.eks_addons : a.name => a if contains(local.pre_compute_addon_names, a.name) }
+  post_compute_addons     = { for a in var.eks_addons : a.name => a if !contains(local.pre_compute_addon_names, a.name) }
+
   # "<namespace>:<ServiceAccount>" allowed to assume each IRSA role.
   irsa_service_accounts = merge(
     {

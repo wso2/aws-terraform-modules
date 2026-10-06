@@ -93,4 +93,11 @@ locals {
     },
     { for k, v in var.deploy_identities : "deploy/${k}" => "${v.namespace}:${v.service_account_name}" },
   )
+
+  # vpc-cni/kube-proxy must exist before either node group so nodes can
+  # reach Ready; coredns depends on a node group instead, since it needs
+  # a node to schedule onto.
+  pre_compute_addon_names = ["vpc-cni", "kube-proxy"]
+  pre_compute_addons      = { for a in var.eks_addons : a.name => a if contains(local.pre_compute_addon_names, a.name) }
+  post_compute_addons     = { for a in var.eks_addons : a.name => a if !contains(local.pre_compute_addon_names, a.name) }
 }
