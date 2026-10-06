@@ -24,6 +24,15 @@ variable "kms_key_id" {
   type        = string
   default     = null
 }
+variable "replication_overwrite_protection" {
+  description = "Whether this file system may be designated as an EFS Replication destination. AWS defaults new file systems to ENABLED (blocks it). Set to DISABLED to allow aws_efs_replication_configuration to target this file system — otherwise CreateReplicationConfiguration fails with 'has replication overwrite protection enabled'. Leave null (unset) to keep the AWS default."
+  type        = string
+  default     = null
+  validation {
+    condition     = var.replication_overwrite_protection == null ? true : contains(["ENABLED", "DISABLED"], var.replication_overwrite_protection)
+    error_message = "replication_overwrite_protection must be \"ENABLED\", \"DISABLED\", or null."
+  }
+}
 variable "performance_mode" {
   description = "The performance mode of the file system"
   type        = string

@@ -157,6 +157,12 @@ variable "force_destroy_bucket" {
   default     = false
 }
 
+variable "log_group_kms_key_id" {
+  description = "KMS key ARN to encrypt the scanner Lambda's CloudWatch log group. Null (default) leaves it unencrypted at the CloudWatch-managed level."
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   description = "Additional tags to apply to all resources. Module-managed tags take precedence on key conflicts."
   type        = map(string)

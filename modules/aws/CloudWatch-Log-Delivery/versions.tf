@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
+# Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
 #
 # WSO2 LLC. licenses this file to you under the Apache License,
 # Version 2.0 (the "License"); you may not use this file except
@@ -18,29 +18,15 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "eks_cluster_name" {
-  description = "The name of the EKS cluster"
-  type        = string
-}
-
-variable "principal_arn" {
-  description = "The ARN of the principal to associate the policy with"
-  type        = string
-}
-
-variable "policy_arn" {
-  description = "The ARN of the access policy (e.g., arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy)"
-  type        = string
-}
-
-variable "type" {
-  description = "The type of the access scope (cluster or namespace)"
-  type        = string
-  default     = "cluster"
-}
-
-variable "namespace" {
-  description = "List of namespaces for namespace-scoped policies"
-  type        = list(string)
-  default     = null
+terraform {
+  required_version = ">= 1.3.8"
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      # aws_cloudwatch_log_delivery(_source/_destination) don't exist before 5.83.0
+      # (confirmed by bisection: 5.82.2 errors with "provider does not support resource
+      # type", 5.83.0 works) - encode the real floor rather than the generic "~> 5.0".
+      version = ">= 5.83.0"
+    }
+  }
 }

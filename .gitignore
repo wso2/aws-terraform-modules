@@ -33,6 +33,11 @@ hs_err_pid*
 
 # Terraform state
 .terraform/
+.terraform.lock.hcl
+
+# Python bytecode cache
+__pycache__/
+*.pyc
 
 # Sensitive data
 *.secrets*tfvars

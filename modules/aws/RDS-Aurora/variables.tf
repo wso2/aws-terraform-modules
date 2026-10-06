@@ -210,6 +210,12 @@ variable "publicly_accessible" {
   default     = false
 }
 
+variable "apply_immediately" {
+  description = "Whether cluster-instance modifications apply immediately instead of waiting for the next preferred_maintenance_window"
+  type        = bool
+  default     = false
+}
+
 variable "cluster_instances" {
   description = "List of cluster instances"
   type = map(object({

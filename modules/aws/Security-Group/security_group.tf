@@ -20,6 +20,13 @@ resource "aws_security_group" "security_group" {
   tags = local.sg_tags
 }
 
+# Ignore: AVD-AWS-0104, AVD-AWS-0124 (https://avd.aquasec.com/misconfig/avd-aws-0104,
+# https://avd.aquasec.com/misconfig/avd-aws-0124)
+# Reason: generic module - direction/ports/protocol/cidr_blocks/description are entirely
+# caller-controlled via var.rules, so the actual security posture is the caller's
+# responsibility, not something this module can statically guarantee.
+# trivy:ignore:AVD-AWS-0104
+# trivy:ignore:AVD-AWS-0124
 resource "aws_security_group_rule" "security_group_rule" {
   count = length(var.rules)
 
