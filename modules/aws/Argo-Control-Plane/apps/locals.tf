@@ -30,8 +30,9 @@ locals {
         for chunk in split("\n---\n", "\n${m.content != null ? m.content : templatefile(m.location, m.template_map)}") : chunk
         if trimspace(chunk) != ""
         ] : {
-        key  = "${idx}-${doc_idx}"
-        body = doc
+        key         = "${idx}-${doc_idx}"
+        body        = doc
+        is_sa_token = try(yamldecode(doc).type, "") == "kubernetes.io/service-account-token"
       }
     ]
   ])
@@ -42,9 +43,10 @@ locals {
         for chunk in split("\n---\n", "\n${m.content != null ? m.content : templatefile(m.location, m.template_map)}") : chunk
         if trimspace(chunk) != ""
         ] : {
-        key       = "${idx}-${doc_idx}"
-        body      = doc
-        namespace = m.namespace
+        key         = "${idx}-${doc_idx}"
+        body        = doc
+        is_sa_token = try(yamldecode(doc).type, "") == "kubernetes.io/service-account-token"
+        namespace   = m.namespace
       }
     ]
   ])
