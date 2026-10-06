@@ -21,7 +21,7 @@
 # Domain identity with Easy DKIM. Unlike the older aws_ses_domain_identity/aws_ses_domain_dkim
 # pair, ownership is proven entirely via the 3 DKIM CNAME records below — no separate
 # _amazonses TXT verification token is needed for a DKIM-verified SESv2 domain identity.
-resource "aws_sesv2_email_identity" "this" {
+resource "aws_sesv2_email_identity" "identity" {
   email_identity = var.domain_name
   tags           = var.tags
 
@@ -31,10 +31,10 @@ resource "aws_sesv2_email_identity" "this" {
 }
 
 # Custom MAIL FROM domain (SPF alignment) — optional, off by default.
-resource "aws_sesv2_email_identity_mail_from_attributes" "this" {
+resource "aws_sesv2_email_identity_mail_from_attributes" "mail_from" {
   count = var.mail_from_subdomain != null ? 1 : 0
 
-  email_identity         = aws_sesv2_email_identity.this.email_identity
+  email_identity         = aws_sesv2_email_identity.identity.email_identity
   mail_from_domain       = "${var.mail_from_subdomain}.${var.domain_name}"
   behavior_on_mx_failure = "USE_DEFAULT_VALUE"
 }
@@ -42,7 +42,7 @@ resource "aws_sesv2_email_identity_mail_from_attributes" "this" {
 # Bounce/complaint tracking, published to an existing alerting SNS topic (not created here —
 # a deployment may already have one). Feeds the same suppression list that
 # sre-task-automation/toil/aws-ses-suppression-list manages.
-resource "aws_sesv2_configuration_set" "this" {
+resource "aws_sesv2_configuration_set" "configuration_set" {
   count = var.enable_event_destination ? 1 : 0
 
   configuration_set_name = "${local.name}-config-set"
@@ -52,7 +52,7 @@ resource "aws_sesv2_configuration_set" "this" {
 resource "aws_sesv2_configuration_set_event_destination" "sns" {
   count = var.enable_event_destination ? 1 : 0
 
-  configuration_set_name = aws_sesv2_configuration_set.this[0].configuration_set_name
+  configuration_set_name = aws_sesv2_configuration_set.configuration_set[0].configuration_set_name
   event_destination_name = "${local.name}-bounce-complaint-sns"
 
   event_destination {

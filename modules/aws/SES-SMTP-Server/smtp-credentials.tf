@@ -41,7 +41,7 @@ resource "aws_iam_user_policy" "smtp" {
       {
         Effect   = "Allow"
         Action   = ["ses:SendRawEmail", "ses:SendEmail"]
-        Resource = aws_sesv2_email_identity.this.arn
+        Resource = aws_sesv2_email_identity.identity.arn
       }
     ]
   })

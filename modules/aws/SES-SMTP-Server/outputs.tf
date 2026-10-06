@@ -20,17 +20,17 @@
 
 output "identity_arn" {
   description = "ARN of the SES domain identity"
-  value       = aws_sesv2_email_identity.this.arn
+  value       = aws_sesv2_email_identity.identity.arn
 }
 
 output "dkim_tokens" {
   description = "3 DKIM CNAME record hosts to create at <token>._domainkey.<domain_name> (each pointing to <token>.dkim.amazonses.com) to verify the domain and enable signing"
-  value       = aws_sesv2_email_identity.this.dkim_signing_attributes[0].tokens
+  value       = aws_sesv2_email_identity.identity.dkim_signing_attributes[0].tokens
 }
 
 output "mail_from_domain" {
   description = "Custom MAIL FROM domain, if enabled (needs an MX and a permissive SPF TXT record in DNS)"
-  value       = try(aws_sesv2_email_identity_mail_from_attributes.this[0].mail_from_domain, null)
+  value       = try(aws_sesv2_email_identity_mail_from_attributes.mail_from[0].mail_from_domain, null)
 }
 
 output "smtp_hostname" {
