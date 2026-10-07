@@ -47,20 +47,20 @@ variable "tunnel_client_identities" {
 
 variable "argo_workflows_chart_version" {
   type        = string
-  description = "Argo Workflows Helm chart version. Null installs the latest; pin it to keep applies repeatable."
-  default     = null
+  description = "Argo Workflows Helm chart version. Pinned so every apply and both clouds install the same release; bump it deliberately."
+  default     = "2.0.6"
 }
 
 variable "argo_events_chart_version" {
   type        = string
-  description = "Argo Events Helm chart version. Null installs the latest; pin it to keep applies repeatable."
-  default     = null
+  description = "Argo Events Helm chart version. Pinned so every apply and both clouds install the same release; bump it deliberately."
+  default     = "2.4.27"
 }
 
 variable "nats_chart_version" {
   type        = string
-  description = "NATS Helm chart version. Null installs the latest; pin it to keep applies repeatable."
-  default     = null
+  description = "NATS Helm chart version. Pinned so every apply and both clouds install the same release; bump it deliberately."
+  default     = "2.14.6"
 }
 
 variable "argo_helm_repo" {
@@ -101,8 +101,8 @@ variable "install_cert_manager" {
 
 variable "cert_manager_chart_version" {
   type        = string
-  description = "cert-manager Helm chart version. Null installs the latest; pin it to keep applies repeatable."
-  default     = null
+  description = "cert-manager Helm chart version. Pinned so every apply and both clouds install the same release; bump it deliberately."
+  default     = "v1.21.2"
 }
 
 variable "cert_manager_helm_repo" {
@@ -125,8 +125,8 @@ variable "install_traefik" {
 
 variable "traefik_chart_version" {
   type        = string
-  description = "Traefik Helm chart version. Null installs the latest; pin it to keep applies repeatable."
-  default     = null
+  description = "Traefik Helm chart version. Pinned so every apply and both clouds install the same release; bump it deliberately."
+  default     = "41.6.1"
 }
 
 variable "traefik_helm_repo" {
@@ -183,8 +183,8 @@ variable "eso_role_arn" {
 
 variable "eso_chart_version" {
   type        = string
-  description = "External Secrets Operator Helm chart version. Null installs the latest; pin it to keep applies repeatable."
-  default     = null
+  description = "External Secrets Operator Helm chart version. Pinned so every apply and both clouds install the same release; bump it deliberately."
+  default     = "2.11.0"
 }
 
 variable "eso_helm_repo" {

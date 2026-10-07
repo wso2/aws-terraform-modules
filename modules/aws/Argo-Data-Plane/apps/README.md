@@ -29,9 +29,6 @@ cluster built by the sibling [`../cluster`](../cluster) module.
   silent-client-construction-failure bug under exec-based auth) and
   `kubectl_manifest_files` (for anything backed by a CRD installed in the
   same apply, e.g. ESO's `ClusterSecretStore`/`ExternalSecret`).
-- Optional local files under `<module_path>/.rendered/` for inspecting
-  rendered manifest content (`rendered_manifest_files`) - never applied to
-  the cluster itself.
 
 ## Inputs
 
@@ -39,24 +36,23 @@ cluster built by the sibling [`../cluster`](../cluster) module.
 |---|---|---|---|
 | `namespaces` | `list(string)` | required | Per-tier Kubernetes namespaces (e.g. `["argo-stage", "argo-prod"]`), created by this module. Argo Workflows/Events themselves install once, cluster-wide, in `system_namespace` |
 | `system_namespace` | `string` | `"argo"` | Namespace for the single shared argo-server/workflow-controller/argo-events install |
-| `argo_workflows_chart_version` | `string` | `null` | Null uses the chart repo's latest |
-| `argo_events_chart_version` | `string` | `null` | |
+| `argo_workflows_chart_version` | `string` | `"2.0.6"` | Pinned; bump deliberately |
+| `argo_events_chart_version` | `string` | `"2.4.27"` | Pinned; bump deliberately |
 | `argo_helm_repo` | `string` | `"https://argoproj.github.io/argo-helm"` | |
 | `argo_workflows_values` | `list(string)` | `[]` | Helm values overrides (YAML strings, later entries win). Set `controller.workflowNamespaces` to `namespaces` (or leave cluster-wide) depending on how narrow you want the watch |
 | `argo_events_values` | `list(string)` | `[]` | |
 | `install_argocd` | `bool` | `true` | |
 | `argocd_namespace` | `string` | `"argocd"` | |
-| `argocd_chart_version` | `string` | `null` | |
+| `argocd_chart_version` | `string` | `"10.9.1"` | Pinned; bump deliberately |
 | `argocd_helm_repo` | `string` | `"https://argoproj.github.io/argo-helm"` | |
 | `argocd_values` | `list(string)` | `[]` | |
 | `manifest_files` | `list(object({ location, content, template_map, namespace }))` | `[]` | Additional manifests applied after the Helm releases - RBAC, EventSource/Sensor definitions, ArgoCD Application/AppProject objects. `namespace`, if set, overrides every object's embedded `metadata.namespace` |
 | `install_external_secrets` | `bool` | `true` | |
 | `eso_role_arn` | `string` | `null` | IRSA role ARN for ESO's own controller ServiceAccount, from the `cluster` module's `eso_role_arn` output. Required when `install_external_secrets` is true |
-| `eso_chart_version` | `string` | `null` | |
+| `eso_chart_version` | `string` | `"2.11.0"` | Pinned; bump deliberately |
 | `eso_helm_repo` | `string` | `"https://charts.external-secrets.io"` | |
 | `eso_namespace` | `string` | `"external-secrets"` | |
 | `kubectl_manifest_files` | `list(object({ location, content, template_map, namespace }))` | `[]` | Manifests applied via the `alekc/kubectl` provider - required for anything backed by a CRD installed in this same apply |
-| `rendered_manifest_files` | `map(object({ file_name, content }))` | `{}` | Writes each entry's content to `<module_path>/.rendered/<file_name>`, for inspection only - never applied to the cluster |
 
 ## Outputs
 

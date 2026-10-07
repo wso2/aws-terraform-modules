@@ -60,20 +60,20 @@ other Terraform child module.
 | `extra_namespaces` | `list(string)` | `[]` | Additional namespaces to create beyond `namespace` |
 | `config_maps` | `map(object({ namespace, data }))` | `{}` | ConfigMaps to create before `manifest_files`/`kubectl_manifest_files` are applied, e.g. scripts a Deployment in `manifest_files` mounts. Map key is the ConfigMap name |
 | `tunnel_client_identities` | `list(string)` | `[]` | One reverse-tunnel SSH keypair per data-plane identity, e.g. `["aws", "azure"]`. Resulting private keys come back via `tunnel_client_private_keys` for manual, out-of-band distribution |
-| `argo_workflows_chart_version` | `string` | `null` | |
-| `argo_events_chart_version` | `string` | `null` | |
-| `nats_chart_version` | `string` | `null` | |
+| `argo_workflows_chart_version` | `string` | `"2.0.6"` | Pinned; bump deliberately |
+| `argo_events_chart_version` | `string` | `"2.4.27"` | Pinned; bump deliberately |
+| `nats_chart_version` | `string` | `"2.14.6"` | Pinned; bump deliberately |
 | `argo_helm_repo` | `string` | `"https://argoproj.github.io/argo-helm"` | |
 | `nats_helm_repo` | `string` | `"https://nats-io.github.io/k8s/helm/charts/"` | |
 | `argo_workflows_values` | `list(string)` | `[]` | Helm values overrides (YAML strings, later entries win). See Notes above |
 | `argo_events_values` | `list(string)` | `[]` | Helm values overrides (YAML strings, later entries win) for argo-events |
 | `nats_values` | `list(string)` | `[]` | Helm values overrides (YAML strings, later entries win) for the nats chart. See Notes above |
 | `install_cert_manager` | `bool` | `true` | Installs cert-manager and bootstraps a private client-CA for NATS mTLS |
-| `cert_manager_chart_version` | `string` | `null` | |
+| `cert_manager_chart_version` | `string` | `"v1.21.2"` | Pinned; bump deliberately |
 | `cert_manager_helm_repo` | `string` | `"https://charts.jetstack.io"` | |
 | `cert_manager_namespace` | `string` | `"cert-manager"` | |
 | `install_traefik` | `bool` | `true` | Installs the Traefik controller. The portal gateway's `IngressRoute`/`Middleware`/`ServersTransport` CRDs need a running Traefik controller to register them |
-| `traefik_chart_version` | `string` | `null` | |
+| `traefik_chart_version` | `string` | `"41.6.1"` | Pinned; bump deliberately |
 | `traefik_helm_repo` | `string` | `"https://traefik.github.io/charts"` | |
 | `traefik_values` | `list(string)` | `[]` | Helm values overrides for traefik. See Notes above |
 | `traefik_namespace` | `string` | `"gateway"` | |
@@ -82,7 +82,7 @@ other Terraform child module.
 | `manifest_files` | `list(object({ location, content, template_map }))` | `[]` | Additional Kubernetes manifests to apply - dispatch-namespace RBAC, the SSO gateway, Ingress/Service for the real Load Balancer. Content and ordering are entirely caller-supplied |
 | `install_external_secrets` | `bool` | `true` | Installs External Secrets Operator |
 | `eso_role_arn` | `string` | `null` | IRSA role ARN for ESO's own controller ServiceAccount, from the `cluster` module's `eso_role_arn` output. Required when `install_external_secrets` is true |
-| `eso_chart_version` | `string` | `null` | |
+| `eso_chart_version` | `string` | `"2.11.0"` | Pinned; bump deliberately |
 | `eso_helm_repo` | `string` | `"https://charts.external-secrets.io"` | |
 | `eso_namespace` | `string` | `"external-secrets"` | |
 | `kubectl_manifest_files` | `list(object({ location, content, template_map, namespace }))` | `[]` | Manifests applied via the `alekc/kubectl` provider - required for anything backed by a CRD installed in this same apply. `namespace`, if set, overrides every object's own embedded `metadata.namespace` |

@@ -31,14 +31,14 @@ variable "system_namespace" {
 
 variable "argo_workflows_chart_version" {
   type        = string
-  description = "Argo Workflows Helm chart version. Null uses the chart repo's latest."
-  default     = null
+  description = "Argo Workflows Helm chart version. Pinned so every apply and both clouds install the same release; bump it deliberately."
+  default     = "2.0.6"
 }
 
 variable "argo_events_chart_version" {
   type        = string
-  description = "Argo Events Helm chart version. Null uses the chart repo's latest."
-  default     = null
+  description = "Argo Events Helm chart version. Pinned so every apply and both clouds install the same release; bump it deliberately."
+  default     = "2.4.27"
 }
 
 variable "argo_helm_repo" {
@@ -73,8 +73,8 @@ variable "argocd_namespace" {
 
 variable "argocd_chart_version" {
   type        = string
-  description = "ArgoCD Helm chart version. Null uses the chart repo's latest."
-  default     = null
+  description = "ArgoCD Helm chart version. Pinned so every apply and both clouds install the same release; bump it deliberately."
+  default     = "10.9.1"
 }
 
 variable "argocd_helm_repo" {
@@ -114,8 +114,8 @@ variable "eso_role_arn" {
 
 variable "eso_chart_version" {
   type        = string
-  description = "External Secrets Operator Helm chart version. Null installs the latest; pin it to keep applies repeatable."
-  default     = null
+  description = "External Secrets Operator Helm chart version. Pinned so every apply and both clouds install the same release; bump it deliberately."
+  default     = "2.11.0"
 }
 
 variable "eso_helm_repo" {
@@ -139,13 +139,4 @@ variable "kubectl_manifest_files" {
   }))
   description = "Manifests applied via the kubectl provider instead of kubernetes_manifest - required for anything backed by a CRD installed in this same apply (e.g. ESO's ClusterSecretStore/ExternalSecret)."
   default     = []
-}
-
-variable "rendered_manifest_files" {
-  type = map(object({
-    file_name = string
-    content   = string
-  }))
-  description = "Writes each entry's content to a local file at <module_path>/.rendered/<file_name>, for inspecting rendered manifest content - never applied to the cluster. Map key is arbitrary, only used to identify the resource instance."
-  default     = {}
 }

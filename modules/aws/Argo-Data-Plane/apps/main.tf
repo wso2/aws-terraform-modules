@@ -148,10 +148,3 @@ resource "kubectl_manifest" "service_account_token" {
 
   depends_on = [kubectl_manifest.kubernetes_object, kubectl_manifest.extra]
 }
-
-resource "local_file" "rendered_manifest" {
-  for_each = var.rendered_manifest_files
-
-  filename = "${path.module}/.rendered/${each.value.file_name}"
-  content  = each.value.content
-}
