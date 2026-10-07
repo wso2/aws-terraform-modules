@@ -21,7 +21,7 @@ output "efs_dns_name" {
 output "efs_access_point_ids" {
   value = zipmap(values(aws_efs_access_point.efs_access_point)[*].tags["Name"], values(aws_efs_access_point.efs_access_point)[*].id)
 }
-# Keyed by the raw efs_access_points map key, not the derived Name tag — callers don't need to reconstruct local.efs_name.
+# Keyed by the raw efs_access_points map key, not the derived Name tag, so callers don't need to reconstruct local.efs_name.
 output "efs_access_point_ids_by_key" {
   value = { for k, ap in aws_efs_access_point.efs_access_point : k => ap.id }
 }

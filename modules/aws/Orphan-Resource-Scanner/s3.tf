@@ -35,7 +35,7 @@ resource "aws_s3_bucket" "reports" {
 resource "aws_s3_bucket_versioning" "reports" {
   bucket = aws_s3_bucket.reports.id
   versioning_configuration {
-    status = "Enabled"
+    status = var.report_bucket_versioning_status
   }
 }
 

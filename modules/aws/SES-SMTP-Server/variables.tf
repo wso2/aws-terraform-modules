@@ -61,6 +61,22 @@ variable "enable_event_destination" {
   default     = true
 }
 
+variable "event_destination_matching_types" {
+  description = "SES event types published to sns_topic_arn when enable_event_destination is true"
+  type        = list(string)
+  default     = ["BOUNCE", "COMPLAINT"]
+}
+
+variable "dkim_signing_key_length" {
+  description = "DKIM signing key length for the domain identity"
+  type        = string
+  default     = "RSA_2048_BIT"
+  validation {
+    condition     = contains(["RSA_1024_BIT", "RSA_2048_BIT"], var.dkim_signing_key_length)
+    error_message = "dkim_signing_key_length must be \"RSA_1024_BIT\" or \"RSA_2048_BIT\"."
+  }
+}
+
 variable "sns_topic_arn" {
   description = "SNS topic ARN to publish bounce/complaint events to. Required when enable_event_destination is true."
   type        = string

@@ -13,7 +13,8 @@ terraform {
   required_version = ">= 1.3.8"
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
+      source = "hashicorp/aws"
+      # replication_overwrite_protection (variables.tf) requires provider >= 5.32.0.
       version = ">= 5.32.0"
     }
   }

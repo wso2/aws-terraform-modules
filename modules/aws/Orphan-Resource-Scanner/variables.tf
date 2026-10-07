@@ -157,6 +157,16 @@ variable "force_destroy_bucket" {
   default     = false
 }
 
+variable "report_bucket_versioning_status" {
+  description = "Versioning status for the report bucket"
+  type        = string
+  default     = "Enabled"
+  validation {
+    condition     = contains(["Enabled", "Suspended"], var.report_bucket_versioning_status)
+    error_message = "report_bucket_versioning_status must be \"Enabled\" or \"Suspended\"."
+  }
+}
+
 variable "log_group_kms_key_id" {
   description = "KMS key ARN to encrypt the scanner Lambda's CloudWatch log group. Null (default) leaves it unencrypted at the CloudWatch-managed level."
   type        = string

@@ -23,9 +23,7 @@ terraform {
   required_providers {
     aws = {
       source = "hashicorp/aws"
-      # aws_cloudwatch_log_delivery(_source/_destination) don't exist before 5.83.0
-      # (confirmed by bisection: 5.82.2 errors with "provider does not support resource
-      # type", 5.83.0 works) - encode the real floor rather than the generic "~> 5.0".
+      # aws_cloudwatch_log_delivery resources require provider >= 5.83.0.
       version = ">= 5.83.0"
     }
   }

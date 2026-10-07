@@ -18,9 +18,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-# Wraps AWS's unified vended-logs delivery API (source -> destination -> delivery link),
-# used by services that don't take a log destination directly on the resource itself
-# (CloudFront standard logs, WAF, Route 53 Resolver query logs, etc).
+# Wraps AWS's unified vended-logs delivery API for services with no direct log destination argument (CloudFront standard logs, WAF, Route 53 Resolver query logs).
 resource "aws_cloudwatch_log_delivery_source" "source" {
   name         = coalesce(var.source_name, var.name)
   log_type     = var.log_type
@@ -30,8 +28,7 @@ resource "aws_cloudwatch_log_delivery_source" "source" {
 
 resource "aws_cloudwatch_log_delivery_destination" "destination" {
   name = coalesce(var.destination_name, var.name)
-  # delivery_destination_type is computed by AWS from destination_resource_arn's own
-  # ARN (e.g. a log-group ARN resolves to "CWL") - not a settable argument.
+  # delivery_destination_type is computed by AWS from destination_resource_arn and isn't a settable argument.
   output_format = var.output_format
   tags          = var.tags
 
