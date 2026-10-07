@@ -62,4 +62,14 @@ locals {
       }
     ]
   ])
+
+  # One entry per tiered namespace, carrying the namespaces of every other
+  # tier - those are the ones its NetworkPolicy keeps out.
+  tier_namespaces = merge([
+    for tier, namespaces in var.namespace_tiers : {
+      for ns in namespaces : ns => flatten([
+        for other_tier, other_namespaces in var.namespace_tiers : other_namespaces if other_tier != tier
+      ])
+    }
+  ]...)
 }

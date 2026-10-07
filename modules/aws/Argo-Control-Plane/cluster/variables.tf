@@ -130,6 +130,20 @@ variable "workflow_controller_service_account_name" {
   default     = "argo-workflows-workflow-controller"
 }
 
+variable "enable_network_policy" {
+  type        = bool
+  description = "Turn on the VPC CNI's NetworkPolicy agent so Kubernetes NetworkPolicy objects are enforced. Without it they are accepted and silently ignored. Applies to the vpc-cni entry of eks_addons."
+  default     = true
+}
+
+variable "group_access" {
+  type = map(object({
+    principal_arn = string
+  }))
+  description = "IAM roles that sign in as a Kubernetes group instead of as cluster-admin, keyed by the group name. Map one role per team (e.g. an IAM Identity Center permission-set role), then grant the group per-namespace access with the apps module's group_role_bindings. A principal listed in admin_principal_arns must not be repeated here."
+  default     = {}
+}
+
 variable "eks_addons" {
   type = list(object({
     name    = string

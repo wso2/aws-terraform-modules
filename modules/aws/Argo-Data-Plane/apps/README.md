@@ -53,6 +53,8 @@ cluster built by the sibling [`../cluster`](../cluster) module.
 | `eso_helm_repo` | `string` | `"https://charts.external-secrets.io"` | |
 | `eso_namespace` | `string` | `"external-secrets"` | |
 | `kubectl_manifest_files` | `list(object({ location, content, template_map, namespace }))` | `[]` | Manifests applied via the `alekc/kubectl` provider - required for anything backed by a CRD installed in this same apply |
+| `group_role_bindings` | `map(object({ group_name, namespace, cluster_role }))` | `{}` | Per-namespace access for the Kubernetes groups that the cluster module's `group_access` maps IAM roles to. `cluster_role` is `view`, `edit` (default) or `admin` |
+| `namespace_tiers` | `map(list(string))` | `{}` | Namespaces grouped by tier. Each one gets a NetworkPolicy that drops traffic from pods in every other tier's namespaces. Needs `enable_network_policy` on the cluster module |
 
 ## Outputs
 

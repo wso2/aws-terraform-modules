@@ -492,6 +492,8 @@ resource "aws_eks_addon" "core" {
   addon_name    = each.value.name
   addon_version = try(each.value.version, null)
 
+  configuration_values = each.key == "vpc-cni" && var.enable_network_policy ? jsonencode({ enableNetworkPolicy = "true" }) : null
+
   depends_on = [aws_eks_cluster.eks_cluster]
 }
 
@@ -557,6 +559,18 @@ resource "aws_eks_access_policy_association" "admin" {
   }
 
   depends_on = [aws_eks_access_entry.admin]
+}
+
+# --- Group access: an IAM role signs in as a Kubernetes group, and the
+# apps module's group_role_bindings decides what that group can do ---
+
+resource "aws_eks_access_entry" "group" {
+  for_each = var.group_access
+
+  cluster_name      = aws_eks_cluster.eks_cluster.name
+  principal_arn     = each.value.principal_arn
+  kubernetes_groups = [each.key]
+  type              = "STANDARD"
 }
 
 # --- Node groups, one per tier: stage (untainted), prod (tainted) ---

@@ -38,9 +38,16 @@ module repo.
 - Kubernetes Secrets are envelope-encrypted by EKS itself with an AWS owned
   key (default on Kubernetes 1.28 and later), so this module creates no KMS
   key.
-- Cluster access comes only from `admin_principal_arns`; the creator gets
-  no implicit admin access. Include the identity that runs
+- Cluster-admin access comes only from `admin_principal_arns`; the creator
+  gets no implicit admin access. Include the identity that runs
   `terraform apply`, or the `apps` module cannot authenticate.
+- Everyone else comes in through `group_access`: an IAM role signs in as a
+  Kubernetes group with no permissions of its own, and the `apps` module's
+  `group_role_bindings` grants that group one namespace. Access is then
+  managed by who can assume the role, not by editing this module.
+- `enable_network_policy` turns on the VPC CNI's NetworkPolicy agent. The
+  `apps` module's `namespace_tiers` relies on it to keep the non-prod and
+  prod dispatch namespaces from reaching each other's pods.
 - Control-plane logging and VPC Flow Logs are off by default. Set
   `enabled_cluster_log_types` / `enable_vpc_flow_logs` to turn them on.
 - The OIDC provider sets no `thumbprint_list`. IAM validates EKS OIDC
@@ -72,6 +79,7 @@ module repo.
 | `endpoint_public_access` | `bool` | `false` | Whether the EKS API server has a public endpoint |
 | `public_access_cidrs` | `list(string)` | `[]` | CIDRs allowed to reach the public API endpoint, if enabled |
 | `admin_principal_arns` | `list(string)` | `[]` | IAM principal ARNs (users/roles) granted EKS cluster-admin access entries |
+| `group_access` | `map(object({ principal_arn }))` | `{}` | IAM roles that sign in as a Kubernetes group, keyed by the group name. Pair with the apps module's `group_role_bindings` |
 | `enabled_cluster_log_types` | `list(string)` | `[]` | Cluster log types to enable. When non-empty, also creates a matching CloudWatch Log Group with retention set by `log_retention_in_days` |
 | `log_retention_in_days` | `number` | `90` | Retention for this module's CloudWatch Log Groups and the S3 artifact bucket's expiration, if enabled |
 | `enable_vpc_flow_logs` | `bool` | `false` | Creates a VPC Flow Log for this module's VPC, published to a dedicated CloudWatch Log Group |
@@ -79,6 +87,7 @@ module repo.
 | `argo_namespace` | `string` | `"argo"` | Namespace Argo Workflows runs in. Only used to scope the workflow-controller's IRSA trust policy when `enable_artifact_archiving` is true |
 | `workflow_controller_service_account_name` | `string` | `"argo-workflows-workflow-controller"` | ServiceAccount name the argo-workflows Helm chart creates for workflow-controller. Only used to scope the IRSA trust policy when `enable_artifact_archiving` is true |
 | `eks_addons` | `list(object({ name = string, version = optional(string) }))` | `[vpc-cni, coredns, kube-proxy]` | Core EKS addons to install alongside the EBS CSI driver |
+| `enable_network_policy` | `bool` | `true` | Turn on the VPC CNI NetworkPolicy agent. Without it NetworkPolicy objects are ignored |
 | `node_instance_types` | `list(string)` | required | Instance types for the shared node group |
 | `node_min_size` | `number` | `2` | |
 | `node_max_size` | `number` | `4` | |

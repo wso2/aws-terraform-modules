@@ -51,6 +51,13 @@ module repo.
   metrics-server scraping prod kubelets) needs a rule in
   `prod_security_group_rules`, and a prod workload is only isolated from
   stage once it is pinned to prod nodes with a toleration and node selector.
+- **Three layers separate the tiers.** Security groups (above) work on
+  nodes. `enable_network_policy` plus the `apps` module's `namespace_tiers`
+  works on namespaces, so it also covers a prod-namespace pod that landed
+  on a stage node. `group_access` plus the `apps` module's
+  `group_role_bindings` decides which people can touch which namespace: an
+  IAM role signs in as a Kubernetes group and is bound to one tier's
+  namespace.
 ## Inputs
 
 | Name | Type | Default | Description |
@@ -67,7 +74,9 @@ module repo.
 | `endpoint_public_access` | `bool` | `false` | |
 | `public_access_cidrs` | `list(string)` | `[]` | |
 | `admin_principal_arns` | `list(string)` | `[]` | IAM principal ARNs granted EKS cluster-admin access entries |
+| `group_access` | `map(object({ principal_arn }))` | `{}` | IAM roles that sign in as a Kubernetes group, keyed by the group name. Pair with the apps module's `group_role_bindings` |
 | `eks_addons` | `list(object({ name, version }))` | `[vpc-cni, coredns, kube-proxy]` | |
+| `enable_network_policy` | `bool` | `true` | Turn on the VPC CNI NetworkPolicy agent. Without it NetworkPolicy objects are ignored |
 | `stage_availability_zones` | `list(string)` | required | |
 | `stage_subnet_cidr_blocks` | `list(string)` | required | One per AZ |
 | `stage_node_instance_types` | `list(string)` | required | |
