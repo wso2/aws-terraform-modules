@@ -20,13 +20,21 @@
 
 locals {
   # kubectl_manifest: kubernetes_manifest doesn't work reliably with exec auth.
+  # Documents are keyed by what they are (<kind>/<namespace>/<name>, "_" for
+  # cluster-scoped), not by their position in the list. A positional key
+  # shifts when a manifest is added or removed, and Terraform then deletes
+  # and recreates every object after it.
   manifest_documents = flatten([
     for idx, m in var.manifest_files : [
       for doc_idx, doc in [
         for chunk in split("\n---\n", "\n${m.content != null ? m.content : templatefile(m.location, m.template_map)}") : chunk
         if trimspace(chunk) != ""
         ] : {
-        key         = "${idx}-${doc_idx}"
+        key = try(join("/", [
+          yamldecode(doc).kind,
+          coalesce(try(m.namespace, null), try(yamldecode(doc).metadata.namespace, null), "_"),
+          yamldecode(doc).metadata.name,
+        ]), "${idx}-${doc_idx}")
         body        = doc
         is_sa_token = try(yamldecode(doc).type, "") == "kubernetes.io/service-account-token"
         namespace   = m.namespace
@@ -40,7 +48,11 @@ locals {
         for chunk in split("\n---\n", "\n${m.content != null ? m.content : templatefile(m.location, m.template_map)}") : chunk
         if trimspace(chunk) != ""
         ] : {
-        key         = "${idx}-${doc_idx}"
+        key = try(join("/", [
+          yamldecode(doc).kind,
+          coalesce(try(m.namespace, null), try(yamldecode(doc).metadata.namespace, null), "_"),
+          yamldecode(doc).metadata.name,
+        ]), "${idx}-${doc_idx}")
         body        = doc
         is_sa_token = try(yamldecode(doc).type, "") == "kubernetes.io/service-account-token"
         namespace   = m.namespace

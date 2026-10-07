@@ -431,6 +431,14 @@ resource "aws_eks_addon" "core" {
 
 # coredns and anything else: needs a node to schedule onto, so it
 # depends on the node group instead of racing it.
+# CoreDNS used to sit in aws_eks_addon.core. Without this, an environment
+# applied before the split deletes and reinstalls it, taking cluster DNS
+# down in between.
+moved {
+  from = aws_eks_addon.core["coredns"]
+  to   = aws_eks_addon.core_post_compute["coredns"]
+}
+
 resource "aws_eks_addon" "core_post_compute" {
   for_each = local.post_compute_addons
 
