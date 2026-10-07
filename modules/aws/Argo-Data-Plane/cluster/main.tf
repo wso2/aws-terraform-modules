@@ -114,6 +114,10 @@ resource "aws_route_table_association" "private" {
 
 # --- Per-tier security groups ---
 
+# Each tier's nodes (and, with the VPC CNI, their pods) sit in that tier's
+# own group only. They are not members of the EKS cluster security group,
+# which allows everything between its members and would let stage reach
+# prod regardless of these groups.
 resource "aws_security_group" "tier" {
   for_each = local.tiers
 
@@ -121,35 +125,93 @@ resource "aws_security_group" "tier" {
   description = "${title(each.key)}-tier data plane nodes"
   vpc_id      = aws_vpc.vpc.id
 
-  dynamic "ingress" {
-    for_each = [for r in each.value.security_group_rules : r if r.direction == "ingress"]
-    content {
-      description     = "custom rule"
-      from_port       = ingress.value.from_port
-      to_port         = ingress.value.to_port
-      protocol        = ingress.value.protocol
-      cidr_blocks     = ingress.value.cidr_blocks
-      security_groups = ingress.value.security_groups
-    }
-  }
-
-  dynamic "egress" {
-    for_each = [for r in each.value.security_group_rules : r if r.direction == "egress"]
-    content {
-      description     = "custom rule"
-      from_port       = egress.value.from_port
-      to_port         = egress.value.to_port
-      protocol        = egress.value.protocol
-      cidr_blocks     = egress.value.cidr_blocks
-      security_groups = egress.value.security_groups
-    }
-  }
-
-  tags = merge(var.tags, { Name = "${local.name}-${each.key}-sg" })
+  tags = merge(var.tags, {
+    Name = "${local.name}-${each.key}-sg"
+    # Without the shared cluster group, the load balancer controller needs
+    # this to know which group to open for a Service.
+    "kubernetes.io/cluster/${local.name}" = "owned"
+  })
 
   lifecycle {
     create_before_destroy = true
   }
+}
+
+resource "aws_security_group_rule" "tier_self" {
+  for_each = local.tiers
+
+  description       = "Nodes and pods within the ${each.key} tier"
+  type              = "ingress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  self              = true
+  security_group_id = aws_security_group.tier[each.key].id
+}
+
+resource "aws_security_group_rule" "tier_egress" {
+  for_each = local.tiers
+
+  description       = "All outbound"
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.tier[each.key].id
+}
+
+# Control plane to kubelets (logs, exec) and to pods that serve admission
+# webhooks or aggregated APIs.
+resource "aws_security_group_rule" "tier_from_control_plane" {
+  for_each = local.tiers
+
+  description              = "EKS control plane to kubelets and webhooks"
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 65535
+  protocol                 = "tcp"
+  source_security_group_id = aws_eks_cluster.eks_cluster.vpc_config[0].cluster_security_group_id
+  security_group_id        = aws_security_group.tier[each.key].id
+}
+
+resource "aws_security_group_rule" "control_plane_from_tier" {
+  for_each = local.tiers
+
+  description              = "${title(each.key)} nodes and pods to the API server"
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.tier[each.key].id
+  security_group_id        = aws_eks_cluster.eks_cluster.vpc_config[0].cluster_security_group_id
+}
+
+# Isolation is one-way. Prod may open connections to stage, because
+# anything without a prod toleration runs on the untainted stage nodes:
+# CoreDNS, the cluster add-ons and, unless they are pinned, the prod
+# namespace's own event bus. Stage cannot open a connection to prod.
+resource "aws_security_group_rule" "stage_from_prod" {
+  description              = "Prod nodes and pods to services hosted on stage nodes"
+  type                     = "ingress"
+  from_port                = 0
+  to_port                  = 0
+  protocol                 = "-1"
+  source_security_group_id = aws_security_group.tier["prod"].id
+  security_group_id        = aws_security_group.tier["stage"].id
+}
+
+resource "aws_security_group_rule" "tier_custom" {
+  for_each = local.tier_custom_rules
+
+  description              = "custom rule"
+  type                     = each.value.direction
+  from_port                = each.value.from_port
+  to_port                  = each.value.to_port
+  protocol                 = each.value.protocol
+  cidr_blocks              = each.value.cidr_blocks
+  source_security_group_id = each.value.security_group
+  security_group_id        = aws_security_group.tier[each.value.tier].id
 }
 
 # --- EKS cluster ---
@@ -532,11 +594,8 @@ resource "aws_iam_role_policy" "node_extra" {
 resource "aws_launch_template" "node" {
   for_each = local.tiers
 
-  name_prefix = "${local.name}-${each.key}-"
-  vpc_security_group_ids = [
-    aws_eks_cluster.eks_cluster.vpc_config[0].cluster_security_group_id,
-    aws_security_group.tier[each.key].id,
-  ]
+  name_prefix            = "${local.name}-${each.key}-"
+  vpc_security_group_ids = [aws_security_group.tier[each.key].id]
 
   metadata_options {
     http_tokens = "required"
@@ -595,10 +654,17 @@ resource "aws_eks_node_group" "node" {
 
   tags = var.tags
 
+  # The security group rules have to exist first: a node that can't reach
+  # the API server or cluster DNS never becomes Ready.
   depends_on = [
     aws_iam_role_policy_attachment.node,
     aws_route_table_association.private,
     aws_eks_addon.core,
+    aws_security_group_rule.tier_self,
+    aws_security_group_rule.tier_egress,
+    aws_security_group_rule.tier_from_control_plane,
+    aws_security_group_rule.control_plane_from_tier,
+    aws_security_group_rule.stage_from_prod,
   ]
 }
 

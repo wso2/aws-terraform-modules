@@ -40,27 +40,17 @@ module repo.
 
 ## Notes
 
-- Kubernetes Secrets are envelope-encrypted by EKS itself with an AWS owned
-  key (default on Kubernetes 1.28 and later), so this module creates no KMS
-  key.
-- Cluster access comes only from `admin_principal_arns`; the creator gets
-  no implicit admin access. Include the identity that runs
-  `terraform apply`, or the `apps` module cannot authenticate.
-- Control-plane logging and VPC Flow Logs are off by default. Set
-  `enabled_cluster_log_types` / `enable_vpc_flow_logs` to turn them on.
-- The OIDC provider sets no `thumbprint_list`. IAM validates EKS OIDC
-  issuers against its own trusted CAs, so there is no certificate thumbprint
-  to rotate. This needs AWS provider 5.81 or later.
-- `eso_secretsmanager_key_prefix` has no default. `"*"` lets ESO read every
-  secret in the account; pass it only if the ExternalSecrets reference
-  bare, unprefixed key names, and narrow it once those keys follow a path
-  convention.
-- Stage and prod are built from one set of resource blocks that iterate
-  over `local.tiers` (see `locals.tf`). Tier-scoped resources are addressed
-  by tier, e.g. `aws_eks_node_group.node["prod"]`.
-- `deploy_identities` credentials are minted per-pod by AWS - there is no
-  standing secret.
-
+- **Stage cannot open connections to prod.** Each tier's nodes, and their
+  pods, are members of that tier's security group only, not of the EKS
+  cluster security group, which allows everything between its members.
+  The groups allow traffic within a tier, the control plane to kubelets
+  and webhooks, and nodes to the API server. Prod may open connections to
+  stage, since CoreDNS, the cluster add-ons and any prod-namespace pod
+  without a prod toleration run on the untainted stage nodes. Two
+  consequences: anything on stage nodes that has to reach prod (for example
+  metrics-server scraping prod kubelets) needs a rule in
+  `prod_security_group_rules`, and a prod workload is only isolated from
+  stage once it is pinned to prod nodes with a toleration and node selector.
 ## Inputs
 
 | Name | Type | Default | Description |
@@ -85,7 +75,7 @@ module repo.
 | `stage_node_max_size` | `number` | `3` | |
 | `stage_node_desired_size` | `number` | `2` | |
 | `stage_node_capacity_type` | `string` | `"ON_DEMAND"` | |
-| `stage_security_group_rules` | `list(object({...}))` | `[]` | Additional rules for the stage tier, beyond the EKS-managed cluster SG |
+| `stage_security_group_rules` | `list(object({...}))` | `[]` | Additional rules for the stage tier's own security group |
 | `prod_availability_zones` | `list(string)` | required | |
 | `prod_subnet_cidr_blocks` | `list(string)` | required | One per AZ |
 | `prod_node_instance_types` | `list(string)` | required | |

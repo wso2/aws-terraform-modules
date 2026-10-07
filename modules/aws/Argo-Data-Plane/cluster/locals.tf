@@ -102,4 +102,20 @@ locals {
   pre_compute_addon_names = ["vpc-cni", "kube-proxy"]
   pre_compute_addons      = { for a in var.eks_addons : a.name => a if contains(local.pre_compute_addon_names, a.name) }
   post_compute_addons     = { for a in var.eks_addons : a.name => a if !contains(local.pre_compute_addon_names, a.name) }
+
+  # A security group rule takes either CIDRs or one source group, so each
+  # caller-supplied rule becomes one rule for its CIDRs plus one per group.
+  tier_custom_rules = merge([
+    for tier, t in local.tiers : merge([
+      for r in t.security_group_rules : merge(
+        length(coalesce(r.cidr_blocks, [])) > 0 ? {
+          "${tier}/${r.direction}/${r.protocol}/${r.from_port}-${r.to_port}/cidr" = merge(r, { tier = tier, security_group = null })
+        } : {},
+        {
+          for sg in coalesce(r.security_groups, []) :
+          "${tier}/${r.direction}/${r.protocol}/${r.from_port}-${r.to_port}/${sg}" => merge(r, { tier = tier, cidr_blocks = null, security_group = sg })
+        },
+      )
+    ]...)
+  ]...)
 }
