@@ -68,6 +68,7 @@ module repo.
 | `project` | `string` | required | Project name, used for resource naming/tagging |
 | `environment` | `string` | required | Environment name (e.g. dev, stage, prod) |
 | `application` | `string` | `"argo-dataplane"` | Purpose tag for resources this module creates |
+| `name_override` | `string` | `null` | Replaces the derived `<project>-<application>-<environment>-<region>` name prefix. Set it to an already-applied environment's existing prefix, since most names force replacement |
 | `tags` | `map(string)` | `{}` | |
 | `vpc_cidr_block` | `string` | required | CIDR block for the data plane's VPC |
 | `stage_public_subnet_cidr_block` | `string` | required | CIDR for the public subnet hosting the stage tier's NAT Gateway. Placed in the first AZ of `stage_availability_zones` |

@@ -20,6 +20,8 @@
 
 # Flow logs are opt-in (enable_vpc_flow_logs) to avoid CloudWatch cost.
 # trivy:ignore:AVD-AWS-0178
+data "aws_region" "current" {}
+
 resource "aws_vpc" "vpc" {
   cidr_block           = var.vpc_cidr_block
   enable_dns_support   = true

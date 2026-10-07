@@ -34,6 +34,12 @@ variable "application" {
   default     = "argo-dataplane"
 }
 
+variable "name_override" {
+  type        = string
+  description = "Replaces the derived <project>-<application>-<environment>-<region> prefix on every resource name. Most of those names force replacement when changed, so set this to an already-applied environment's existing prefix. Null for a fresh environment."
+  default     = null
+}
+
 variable "tags" {
   type        = map(string)
   description = "Tags applied to all resources created by this module"

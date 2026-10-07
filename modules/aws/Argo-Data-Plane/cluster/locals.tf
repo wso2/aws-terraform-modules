@@ -19,7 +19,9 @@
 # --------------------------------------------------------------------------------------
 
 locals {
-  name = "${var.project}-${var.application}-${var.environment}"
+  # Region is part of the name because IAM role and S3 bucket names are
+  # global: without it a second region or account collides.
+  name = coalesce(var.name_override, join("-", [var.project, var.application, var.environment, data.aws_region.current.name]))
 
   # Everything that differs between the two tiers. Tier-scoped resources
   # iterate over this map instead of being written out once per tier.
