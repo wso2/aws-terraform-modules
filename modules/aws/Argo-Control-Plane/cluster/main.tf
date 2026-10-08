@@ -674,6 +674,7 @@ resource "aws_instance" "bastion" {
 resource "aws_security_group_rule" "bastion_to_api" {
   count = var.enable_bastion ? 1 : 0
 
+  description              = "Bastion to EKS API over HTTPS"
   type                     = "ingress"
   from_port                = 443
   to_port                  = 443

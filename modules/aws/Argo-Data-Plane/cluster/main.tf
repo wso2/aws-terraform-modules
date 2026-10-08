@@ -18,10 +18,10 @@
 #
 # --------------------------------------------------------------------------------------
 
-# Flow logs are opt-in (enable_vpc_flow_logs) to avoid CloudWatch cost.
-# trivy:ignore:AVD-AWS-0178
 data "aws_region" "current" {}
 
+# Flow logs are opt-in (enable_vpc_flow_logs) to avoid CloudWatch cost.
+# trivy:ignore:AVD-AWS-0178
 resource "aws_vpc" "vpc" {
   cidr_block           = var.vpc_cidr_block
   enable_dns_support   = true
@@ -149,6 +149,13 @@ resource "aws_security_group_rule" "tier_self" {
   security_group_id = aws_security_group.tier[each.key].id
 }
 
+# Nodes need broad outbound reach (image pulls from ECR/public registries,
+# the EKS/STS/S3 APIs, NTP, DNS) that isn't a fixed, enumerable list of
+# destinations - the EKS-managed cluster security group these replaced had
+# the same unrestricted egress, just not as an explicit, scanned resource.
+# Narrowing this to specific destinations is real follow-up work, not done
+# here.
+# trivy:ignore:AVD-AWS-0104
 resource "aws_security_group_rule" "tier_egress" {
   for_each = local.tiers
 
@@ -777,6 +784,7 @@ resource "aws_instance" "bastion" {
 resource "aws_security_group_rule" "bastion_to_api" {
   count = var.enable_bastion ? 1 : 0
 
+  description              = "Bastion to EKS API over HTTPS"
   type                     = "ingress"
   from_port                = 443
   to_port                  = 443
