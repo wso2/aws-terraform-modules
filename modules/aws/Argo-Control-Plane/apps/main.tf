@@ -121,7 +121,15 @@ resource "kubectl_manifest" "nats_ca_certificate" {
       commonName = "nats-client-ca"
       secretName = "nats-client-ca-secret"
       duration   = "8760h"
-      privateKey = { algorithm = "ECDSA", size = 256 }
+      # Never (not cert-manager >=1.18's default of Always): the CA's own
+      # renewal reuses its private key instead of generating a new one, so
+      # every client cert already issued by it stays trusted across a CA
+      # renewal. Without this, the CA's ~8-month renewal silently breaks
+      # mTLS for every data plane at once - they're still presenting certs
+      # signed by a key the broker no longer trusts. See the rotation
+      # runbook below for what Never does NOT fix (leaf certs still expire
+      # on their own 90-day clock and still need manual re-distribution).
+      privateKey = { algorithm = "ECDSA", size = 256, rotationPolicy = "Never" }
       issuerRef = {
         name = "selfsigned-bootstrap"
         kind = "Issuer"

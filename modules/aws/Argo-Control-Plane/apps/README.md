@@ -52,6 +52,48 @@ other Terraform child module.
   anti-affinity/topology spread across AZs, and a PVC-backed persistent
   store.
 
+## NATS client certificate rotation runbook
+
+Client certs (`nats-client-<identity>-secret`, `duration=2160h`,
+`renewBefore=360h`) are distributed to each data plane by hand - copied
+into that environment's own `terraform.tfvars` (see
+`terraform.secrets.tfvars` in each environment under
+`cloud-sre-common/iac/asgardeo-argo/environments/`) - not pulled
+automatically. cert-manager reissues each one here on this cluster roughly
+every 75 days (90-day duration minus the 15-day `renewBefore`), but a data
+plane keeps using whatever PEM it was last given until someone re-copies
+it, and the data plane's own copy expires at day 90 regardless of what
+happens here. Left alone, every data plane silently drops off NATS at
+that point.
+
+The CA itself (`nats-client-ca-secret`, `duration=8760h`,
+`rotationPolicy=Never`) keeps the same private key across its own ~8-month
+renewal, so a CA renewal does not also invalidate every already-issued
+client cert the way it would under cert-manager's current default
+(`Always`) - see the comment on `nats_ca_certificate` in main.tf. That
+only protects against the CA-wide failure mode; it does not replace
+re-copying a client cert before its own 90-day clock runs out.
+
+**To rotate one data plane's client cert:**
+
+```bash
+kubectl get secret nats-client-<identity>-secret -n <namespace> \
+  -o jsonpath="{.data.tls\.crt}" | base64 -d
+kubectl get secret nats-client-<identity>-secret -n <namespace> \
+  -o jsonpath="{.data.tls\.key}" | base64 -d
+```
+
+Paste the two PEMs into that data plane's `terraform.secrets.tfvars`
+(`nats_client_<tier>_cert_pem` / `_key_pem`) and apply. Do this within the
+75-90 day window, before the data plane's existing copy expires.
+
+**Not yet built, worth doing next:** cert-manager exposes
+`certmanager_certificate_expiration_timestamp_seconds` as a Prometheus
+metric when its own metrics endpoint is scraped - an alert on that metric
+(or a scheduled check against each `nats-client-*-secret`'s real
+`notAfter`) would turn this from a manual calendar reminder into a real
+alert. No monitoring stack is wired into either control plane yet.
+
 ## Inputs
 
 | Name | Type | Default | Description |
