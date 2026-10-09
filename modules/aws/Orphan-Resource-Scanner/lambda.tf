@@ -37,6 +37,11 @@ data "archive_file" "scanner_lambda" {
   output_path = "${path.module}/scripts/scanner_lambda.zip"
 }
 
+# Ignore: AVD-AWS-0066 (https://avd.aquasec.com/misconfig/avd-aws-0066)
+# Reason: a weekly scheduled batch job with no caller to trace a request through - X-Ray
+# tracing would add IAM permissions and cost for no practical observability benefit here;
+# CloudWatch Logs already covers what this function needs.
+# trivy:ignore:AVD-AWS-0066
 resource "aws_lambda_function" "scanner" {
   filename         = data.archive_file.scanner_lambda.output_path
   function_name    = "${local.name_prefix}-lambda-function"
@@ -65,8 +70,14 @@ resource "aws_lambda_function" "scanner" {
   }
 }
 
+# Ignore: AVD-AWS-0017 (https://avd.aquasec.com/misconfig/avd-aws-0017)
+# Reason: KMS encryption is opt-in via var.log_group_kms_key_id (default null) - the
+# scanner only logs resource IDs and scan progress, nothing sensitive, so a mandatory CMK
+# isn't justified by default; callers needing it can set the variable.
+# trivy:ignore:AVD-AWS-0017
 resource "aws_cloudwatch_log_group" "scanner_lambda" {
   name              = "/aws/lambda/${aws_lambda_function.scanner.function_name}"
   retention_in_days = var.log_retention_days
+  kms_key_id        = var.log_group_kms_key_id
   tags              = local.tags
 }

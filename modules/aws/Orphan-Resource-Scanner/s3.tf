@@ -20,6 +20,12 @@
 
 # S3 report bucket - stores the weekly CSV reports written by the scanner Lambda.
 
+# Ignore: AVD-AWS-0089 (https://avd.aquasec.com/misconfig/avd-aws-0089)
+# Reason: internal CSV reports bucket for a scheduled scanner tool - access logging would
+# require wiring up a separate log-target bucket for data that's neither sensitive nor
+# accessed by anyone outside this account. The public access block below already covers
+# the real risk here.
+# trivy:ignore:AVD-AWS-0089
 resource "aws_s3_bucket" "reports" {
   bucket        = var.report_bucket_name
   force_destroy = var.force_destroy_bucket
@@ -29,10 +35,24 @@ resource "aws_s3_bucket" "reports" {
 resource "aws_s3_bucket_versioning" "reports" {
   bucket = aws_s3_bucket.reports.id
   versioning_configuration {
-    status = "Suspended"
+    status = var.report_bucket_versioning_status
   }
 }
 
+resource "aws_s3_bucket_public_access_block" "reports" {
+  bucket = aws_s3_bucket.reports.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# Ignore: AVD-AWS-0132 (https://avd.aquasec.com/misconfig/avd-aws-0132)
+# Reason: internal CSV reports bucket for a scheduled scanner tool - a customer-managed
+# KMS key adds key management overhead for data that's neither sensitive nor accessed by
+# anyone outside this account. SSE-S3 already covers the real risk here.
+# trivy:ignore:AVD-AWS-0132
 resource "aws_s3_bucket_server_side_encryption_configuration" "reports" {
   bucket = aws_s3_bucket.reports.id
   rule {

@@ -1,6 +1,6 @@
 # -------------------------------------------------------------------------------------
 #
-# Copyright (c) 2025, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
+# Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
 #
 # WSO2 LLC. licenses this file to you under the Apache License,
 # Version 2.0 (the "License"); you may not use this file except
@@ -18,29 +18,22 @@
 #
 # --------------------------------------------------------------------------------------
 
-variable "eks_cluster_name" {
-  description = "The name of the EKS cluster"
-  type        = string
+output "distribution_id" {
+  description = "ID of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.distribution.id
 }
 
-variable "principal_arn" {
-  description = "The ARN of the principal to associate the policy with"
-  type        = string
+output "distribution_arn" {
+  description = "ARN of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.distribution.arn
 }
 
-variable "policy_arn" {
-  description = "The ARN of the access policy (e.g., arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy)"
-  type        = string
+output "distribution_domain_name" {
+  description = "Domain name of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.distribution.domain_name
 }
 
-variable "type" {
-  description = "The type of the access scope (cluster or namespace)"
-  type        = string
-  default     = "cluster"
-}
-
-variable "namespace" {
-  description = "List of namespaces for namespace-scoped policies"
-  type        = list(string)
-  default     = null
+output "distribution_hosted_zone_id" {
+  description = "Hosted zone ID of the CloudFront distribution"
+  value       = aws_cloudfront_distribution.distribution.hosted_zone_id
 }

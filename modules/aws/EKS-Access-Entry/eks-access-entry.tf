@@ -25,4 +25,8 @@ resource "aws_eks_access_entry" "eks_access_entry" {
   type              = var.type
   user_name         = var.user_name
   tags              = var.tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
