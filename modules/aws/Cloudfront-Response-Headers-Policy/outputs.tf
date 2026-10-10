@@ -18,12 +18,12 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_cloudwatch_event_rule" "rule" {
-  name                = var.abbreviation != null && var.abbreviation != "" ? join("-", [var.name, var.abbreviation]) : var.name
-  description         = var.description
-  event_pattern       = var.event_pattern
-  schedule_expression = var.schedule_expression
-  state               = var.state
-  role_arn            = var.role_arn
-  tags                = var.tags
+output "id" {
+  description = "ID of the response headers policy."
+  value       = aws_cloudfront_response_headers_policy.policy.id
+}
+
+output "name" {
+  description = "Name of the response headers policy."
+  value       = aws_cloudfront_response_headers_policy.policy.name
 }

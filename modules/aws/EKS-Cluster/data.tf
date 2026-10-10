@@ -8,16 +8,18 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-data "aws_eks_cluster" "eks_cluster" {
-  name = join("-", [var.project, var.application, var.environment, var.region, "eks"])
+# (Removed: data.aws_eks_cluster.eks_cluster - a pure roundtrip for values the
+# aws_eks_cluster.eks_cluster resource (eks.tf) already exposes directly, and being an
+# unconditional data source with depends_on the very resource it duplicates, it forced
+# Terraform to defer reading it until apply on ANY change to the cluster (even unrelated
+# tag updates) - marking oidc.issuer "known after apply" and forcing a spurious replace of
+# the (immutable-url) OIDC provider resource in iam_role.tf. Referencing the resource
+# directly makes url/thumbprint_list track genuine issuer/certificate changes correctly,
+# without ignore_changes masking real rotations.
 
-  depends_on = [
-    aws_eks_cluster.eks_cluster
-  ]
-}
 # Obtain TLS certificate for the OIDC provider
 data "tls_certificate" "tls" {
-  url = data.aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
+  url = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
 }
 
 data "aws_iam_policy_document" "cluster_autoscaler_sts_policy" {
