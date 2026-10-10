@@ -28,7 +28,8 @@ variable "hosted_zone_id" {
   type        = string
   default     = null
   validation {
-    condition     = var.hosted_zone_id == null || length(trimspace(var.hosted_zone_id)) > 0
+    # Ternary (not ||) so trimspace() is never evaluated on a null hosted_zone_id.
+    condition     = var.hosted_zone_id == null ? true : length(trimspace(var.hosted_zone_id)) > 0
     error_message = "hosted_zone_id must be null or a non-empty Route53 hosted zone ID."
   }
 }

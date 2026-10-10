@@ -94,8 +94,8 @@ output "tls_cert_sha1_fingerprint" {
 }
 
 output "eks_cluster_issuer" {
-  value      = data.aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
-  depends_on = [data.aws_eks_cluster.eks_cluster]
+  value      = aws_eks_cluster.eks_cluster.identity[0].oidc[0].issuer
+  depends_on = [aws_eks_cluster.eks_cluster]
 }
 
 output "eks_route_table_ids" {

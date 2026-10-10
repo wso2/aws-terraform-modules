@@ -18,12 +18,35 @@
 #
 # --------------------------------------------------------------------------------------
 
-resource "aws_cloudwatch_event_rule" "rule" {
-  name                = var.abbreviation != null && var.abbreviation != "" ? join("-", [var.name, var.abbreviation]) : var.name
-  description         = var.description
-  event_pattern       = var.event_pattern
-  schedule_expression = var.schedule_expression
-  state               = var.state
-  role_arn            = var.role_arn
-  tags                = var.tags
+variable "name" {
+  description = "Name of the CloudFront Function (unique within the account)."
+  type        = string
+}
+
+variable "runtime" {
+  description = "CloudFront Function runtime."
+  type        = string
+  default     = "cloudfront-js-2.0"
+
+  validation {
+    condition     = contains(["cloudfront-js-1.0", "cloudfront-js-2.0"], var.runtime)
+    error_message = "runtime must be one of: cloudfront-js-1.0, cloudfront-js-2.0."
+  }
+}
+
+variable "comment" {
+  description = "Comment describing the function."
+  type        = string
+  default     = null
+}
+
+variable "code" {
+  description = "The JavaScript source code of the function."
+  type        = string
+}
+
+variable "publish" {
+  description = "Whether to publish the function to the LIVE stage on create/update."
+  type        = bool
+  default     = true
 }

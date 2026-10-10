@@ -41,7 +41,7 @@ variable "subnet_ids" {
   default     = {}
 }
 variable "deletion_protection_flag" {
-  type        = string
+  type        = bool
   description = "Flag to indicate whether the ALB instance is protected from accidental termination or not"
   default     = true
 }
@@ -60,12 +60,12 @@ variable "private_ip_addresses" {
   default     = {}
 }
 variable "enable_shield_protection" {
-  type        = string
+  type        = bool
   description = "Flag to indicate whether the ALB instance is protected by AWS Shield or not"
   default     = false
 }
 variable "enable_cross_zone_load_balancing" {
-  type        = string
+  type        = bool
   description = "Flag to indicate whether the cross zone load balancing is enabled for the ALB instance or not"
   default     = false
 }
