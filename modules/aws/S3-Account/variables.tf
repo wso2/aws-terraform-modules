@@ -97,8 +97,32 @@ variable "object_ownership" {
   default     = "BucketOwnerPreferred"
 }
 
+variable "bucket_name" {
+  description = "Explicit bucket name. Null falls back to the join(project, application, environment, region, \"bucket\") default."
+  type        = string
+  default     = null
+}
+
+variable "acl" {
+  description = "Canned ACL to apply to the bucket, e.g. \"log-delivery-write\". Null skips setting an ACL."
+  type        = string
+  default     = null
+}
+
+variable "lifecycle_expiration_days" {
+  description = "Days after which objects expire. Null skips creating a lifecycle rule. Mutually exclusive with lifecycle_rules - use lifecycle_rules instead for anything beyond a flat expiration."
+  type        = number
+  default     = null
+}
+
+variable "lifecycle_rule_id" {
+  description = "ID of the expiration lifecycle rule, when lifecycle_expiration_days is set"
+  type        = string
+  default     = "expire-objects"
+}
+
 variable "lifecycle_rules" {
-  description = "Lifecycle rules for the bucket; an empty list creates no lifecycle configuration. Each rule applies to objects under prefix (whole bucket when null) and may define storage-class transitions, current/noncurrent object expiration, and incomplete multipart upload cleanup."
+  description = "Lifecycle rules for the bucket; an empty list creates no lifecycle configuration. Each rule applies to objects under prefix (whole bucket when null) and may define storage-class transitions, current/noncurrent object expiration, and incomplete multipart upload cleanup. Mutually exclusive with lifecycle_expiration_days."
   type = list(object({
     id     = string
     status = optional(string, "Enabled")
@@ -112,4 +136,9 @@ variable "lifecycle_rules" {
     abort_incomplete_multipart_upload_days = optional(number, null)
   }))
   default = []
+
+  validation {
+    condition     = !(length(var.lifecycle_rules) > 0 && var.lifecycle_expiration_days != null)
+    error_message = "Set at most one of lifecycle_rules or lifecycle_expiration_days, not both."
+  }
 }
