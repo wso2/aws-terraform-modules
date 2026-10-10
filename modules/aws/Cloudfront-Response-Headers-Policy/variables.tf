@@ -29,7 +29,7 @@ variable "comment" {
   default     = null
 }
 
-# --- Security headers (each sub-block is optional; omit to leave that header unmanaged) ------
+# Security headers. Each sub-block below is optional, omit it to leave that header unmanaged.
 
 variable "strict_transport_security" {
   description = "HSTS. Set null to omit."
@@ -102,7 +102,7 @@ variable "xss_protection" {
 }
 
 variable "content_security_policy" {
-  description = "Content-Security-Policy. Prefer setting per-host CSP in a CloudFront Function; use this only for a single static CSP. Set null to omit."
+  description = "Content-Security-Policy. Use only for a single static CSP, prefer a CloudFront Function for per-host CSP. Set null to omit."
   type = object({
     content_security_policy = string
     override                = optional(bool, true)
@@ -111,7 +111,7 @@ variable "content_security_policy" {
 }
 
 variable "custom_headers" {
-  description = "Additional custom response headers. Map of header name -> { value, override }."
+  description = "Additional custom response headers as a map of header name to value and override."
   type = map(object({
     value    = string
     override = optional(bool, true)

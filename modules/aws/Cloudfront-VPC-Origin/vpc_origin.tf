@@ -18,8 +18,8 @@
 #
 # --------------------------------------------------------------------------------------
 #
-# CloudFront VPC Origin — private connectivity from CloudFront to an internal ALB/NLB/EC2
-# via AWS-managed ENIs (requires aws provider >= 5.82.0).
+# CloudFront VPC Origin for private connectivity from CloudFront to an internal ALB, NLB or EC2
+# instance via AWS managed ENIs. Requires aws provider version 5.82.0 or later.
 # --------------------------------------------------------------------------------------
 
 resource "aws_cloudfront_vpc_origin" "vpc_origin" {

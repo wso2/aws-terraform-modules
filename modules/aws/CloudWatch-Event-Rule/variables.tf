@@ -24,7 +24,7 @@ variable "name" {
 }
 
 variable "abbreviation" {
-  description = "Suffix appended to the rule name as \"<name>-<abbreviation>\". Default kept as \"rule\" for backward compatibility with existing callers that don't set this - pass null/empty explicitly to use name as-is instead."
+  description = "Suffix appended to the rule name. Default is rule for backward compatibility. Set to empty to use name as is."
   type        = string
   default     = "rule"
 }

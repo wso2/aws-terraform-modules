@@ -468,14 +468,9 @@ resource "aws_wafv2_web_acl" "web_acl" {
             limit              = rate_based_statement.value.limit
             aggregate_key_type = rate_based_statement.value.aggregate_key_type
 
-            # Scope-down for the rate-based statement. Two independent shapes,
-            # mutually exclusive (enforced in variables.tf): a generic
-            # byte_match/ip_set/and/or/not composition (mirrors
-            # managed_rule_group_statement's scope_down_statement above), or
-            # the purpose-built uri_path_scoped_statement convenience type for
-            # the common "rate-limit a URI path prefix, optionally scoped to a
-            # host and/or excluding sub-prefixes and/or exempting an IP set"
-            # case.
+            # Scope down for the rate based statement. Two mutually exclusive shapes: a generic
+            # byte match, ip set, and, or, not composition, or the uri_path_scoped_statement
+            # convenience type below for rate limiting a URI path prefix.
             dynamic "scope_down_statement" {
               for_each = try(rate_based_statement.value.scope_down_statement, null) != null ? [rate_based_statement.value.scope_down_statement] : []
               content {

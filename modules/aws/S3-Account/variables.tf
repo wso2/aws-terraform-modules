@@ -98,25 +98,25 @@ variable "object_ownership" {
 }
 
 variable "bucket_name" {
-  description = "Explicit bucket name. Null falls back to the join(project, application, environment, region, \"bucket\") default."
+  description = "Explicit bucket name. Null falls back to the default name built from project, application, environment and region."
   type        = string
   default     = null
 }
 
 variable "acl" {
-  description = "Canned ACL to apply to the bucket, e.g. \"log-delivery-write\". Null skips setting an ACL."
+  description = "Canned ACL to apply to the bucket. Null skips setting an ACL."
   type        = string
   default     = null
 }
 
 variable "lifecycle_expiration_days" {
-  description = "Days after which objects expire. Null skips creating a lifecycle rule. Mutually exclusive with lifecycle_rules - use lifecycle_rules instead for anything beyond a flat expiration."
+  description = "Days after which objects expire. Null skips creating a lifecycle rule. Mutually exclusive with lifecycle_rules."
   type        = number
   default     = null
 }
 
 variable "lifecycle_rule_id" {
-  description = "ID of the expiration lifecycle rule, when lifecycle_expiration_days is set"
+  description = "ID of the expiration lifecycle rule, used when lifecycle_expiration_days is set."
   type        = string
   default     = "expire-objects"
 }

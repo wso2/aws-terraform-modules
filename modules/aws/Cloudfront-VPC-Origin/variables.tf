@@ -24,7 +24,7 @@ variable "name" {
 }
 
 variable "origin_arn" {
-  description = "ARN of the internal ALB / NLB / EC2 the VPC origin points to"
+  description = "ARN of the internal ALB, NLB or EC2 instance the VPC origin points to"
   type        = string
 }
 

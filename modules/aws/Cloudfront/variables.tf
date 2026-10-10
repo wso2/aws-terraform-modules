@@ -19,12 +19,12 @@
 # --------------------------------------------------------------------------------------
 
 variable "dns_name" {
-  description = "The DNS name of the origin. For a VPC origin this is not resolved for routing; it is used only as the SNI/Host and for origin-certificate SAN validation, so it must be a host covered by the origin cert."
+  description = "The DNS name of the origin. For a VPC origin this is used only for SNI and certificate validation, so it must be a host covered by the origin certificate."
   type        = string
 }
 
 variable "vpc_origin_id" {
-  description = "ID of an aws_cloudfront_vpc_origin. When set, the origin uses vpc_origin_config (private ALB/NLB/EC2) instead of custom_origin_config. Default null keeps the existing custom-origin behavior."
+  description = "ID of a CloudFront VPC origin. When set, the origin connects privately instead of using the default public origin config."
   type        = string
   default     = null
 }
@@ -136,10 +136,9 @@ variable "ordered_cache_behaviors" {
     compress                 = bool
     cache_policy_id          = optional(string)
     origin_request_policy_id = optional(string)
-    # Optional response headers policy for this behavior (e.g. static security headers).
+    # Optional response headers policy for this behavior.
     response_headers_policy_id = optional(string)
-    # Optional CloudFront Function associations for this behavior. At most one per event_type
-    # ("viewer-request" | "viewer-response"). Default [] keeps existing callers unchanged.
+    # Optional CloudFront Function associations for this behavior, at most one per event type.
     function_associations = optional(list(object({
       event_type   = string
       function_arn = string
@@ -147,7 +146,7 @@ variable "ordered_cache_behaviors" {
   }))
   default = []
 
-  # CloudFront allows at most one function association per event type per behavior.
+  # At most one function association per event type per behavior.
   validation {
     condition = alltrue([
       for b in var.ordered_cache_behaviors : alltrue([
@@ -166,7 +165,7 @@ variable "ordered_cache_behaviors" {
 }
 
 variable "default_function_associations" {
-  description = "CloudFront Function associations for the default cache behavior. At most one per event_type (viewer-request | viewer-response)."
+  description = "CloudFront Function associations for the default cache behavior, at most one per event type."
   type = list(object({
     event_type   = string
     function_arn = string

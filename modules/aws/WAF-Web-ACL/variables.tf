@@ -107,23 +107,16 @@ variable "rules" {
     blocked_ip_set_arn = optional(string)
     host_header        = optional(string)
 
-    # Geo match statement - match requests by ISO 3166-1 alpha-2 country codes; omit forwarded_ip_config unless a client-supplied header must be honored (spoofable, and unnecessary at CLOUDFRONT scope).
+    # Geo match statement, matches requests by country code. Omit forwarded_ip_config unless a client supplied header must be honored.
     geo_match_statement = optional(object({
       country_codes = list(string)
       forwarded_ip_config = optional(object({
         header_name       = string
-        fallback_behavior = string # MATCH | NO_MATCH
+        fallback_behavior = string # MATCH or NO_MATCH
       }))
     }))
 
-    # Matches requests carrying a WAF label added by an earlier-priority rule
-    # (labels only exist on a request after the rule that emits them has been
-    # evaluated). Example: pair a count-action geo_match_statement rule (which
-    # makes WAF emit awswaf:clientip:geo:region:<ISO-3166-2> labels) with a
-    # block-action label_match_statement rule on a specific region label to
-    # block sub-national regions that geo_match_statement alone cannot target.
-    # scope LABEL matches one label key exactly; NAMESPACE matches a label
-    # prefix.
+    # Matches requests carrying a WAF label added by an earlier priority rule. Scope LABEL matches one label key exactly, NAMESPACE matches a label prefix.
     label_match_statement = optional(object({
       scope = optional(string, "LABEL")
       key   = string
@@ -255,16 +248,10 @@ variable "rules" {
       }))
     }))
 
-    # Rate-based rule: tracks the request rate per aggregation key over a
-    # 5-minute rolling window and applies the rule action to keys whose rate
-    # exceeds limit. Optional scope-down restricts which requests count
-    # toward (and are affected by) the limit - supports a generic
-    # byte_match/ip_set_reference/and/or/not composition (mirrors
-    # managed_rule_group_statement.scope_down_statement above), or the
-    # purpose-built uri_path_scoped_statement below to rate-limit a specific
-    # URI path prefix (optionally on a single host) independently of the rest
-    # of the traffic behind the Web ACL. Exactly one of the fields below may
-    # be set (see validation).
+    # Rate based rule, tracks request rate per aggregation key over a 5 minute window and applies
+    # the action when the limit is exceeded. Optional scope_down restricts which requests count
+    # toward the limit, either a generic byte match, ip set, and, or, not composition, or the
+    # purpose built uri_path_scoped_statement to rate limit a specific URI path prefix.
     rate_based_statement = optional(object({
       limit              = number
       aggregate_key_type = string
@@ -651,9 +638,7 @@ variable "rules" {
     error_message = "and_statement / or_statement inside scope_down_statement must contain at least 2 statements."
   }
 
-  # Validation 8: each entry in scope_down_statement.and_statement.statements,
-  # scope_down_statement.or_statement.statements, and the same lists under not_statement,
-  # must specify exactly one of byte_match_statement or ip_set_reference_statement.
+  # Validation 8: each and/or statement entry under scope_down_statement must specify exactly one of byte_match_statement or ip_set_reference_statement.
   validation {
     condition = alltrue(flatten([
       for v in var.rules : [
@@ -672,11 +657,7 @@ variable "rules" {
     error_message = "Each statement inside scope_down_statement.and_statement.statements / or_statement.statements (and their not_statement-nested variants) must specify exactly one of byte_match_statement or ip_set_reference_statement."
   }
 
-  # Validation 9: rate_based_statement.limit must be within AWS WAF bounds and
-  # aggregate_key_type must be IP or CONSTANT (FORWARDED_IP / CUSTOM_KEYS would
-  # require forwarded_ip_config / custom_key blocks the module does not
-  # render). CONSTANT counts all matching requests under one key, which AWS WAF
-  # only accepts together with a scope_down_statement.
+  # Validation 9: rate_based_statement.limit must be within AWS WAF bounds and aggregate_key_type must be IP or CONSTANT. CONSTANT requires a scope_down_statement.
   validation {
     condition = alltrue([
       for v in var.rules :
@@ -688,9 +669,7 @@ variable "rules" {
     error_message = "rate_based_statement.limit must be between 10 and 2000000000 and aggregate_key_type must be IP or CONSTANT; CONSTANT additionally requires a scope_down_statement."
   }
 
-  # Validation 10: rate_based_statement.scope_down_statement must specify exactly one of
-  # byte_match_statement, ip_set_reference_statement, and_statement, or_statement,
-  # not_statement, or uri_path_scoped_statement.
+  # Validation 10: rate_based_statement.scope_down_statement must specify exactly one supported statement type.
   validation {
     condition = alltrue([
       for v in var.rules :
@@ -704,9 +683,7 @@ variable "rules" {
     ])
     error_message = "rate_based_statement.scope_down_statement must specify exactly one of byte_match_statement, ip_set_reference_statement, and_statement, or_statement, not_statement, or uri_path_scoped_statement."
   }
-  # Validation 11: When rate_based_statement.scope_down_statement.not_statement is used,
-  # exactly one of byte_match_statement, ip_set_reference_statement, and_statement, or
-  # or_statement must be set under it.
+  # Validation 11: rate_based_statement.scope_down_statement.not_statement must contain exactly one supported statement type.
   validation {
     condition = alltrue([
       for v in var.rules :
@@ -719,8 +696,7 @@ variable "rules" {
     error_message = "rate_based_statement.scope_down_statement.not_statement must contain exactly one of byte_match_statement, ip_set_reference_statement, and_statement, or or_statement."
   }
 
-  # Validation 12: and_statement / or_statement inside rate_based_statement.scope_down_statement
-  # (directly or under not_statement) must each contain >= 2 statements.
+  # Validation 12: each and/or statement under rate_based_statement.scope_down_statement must contain at least 2 statements.
   validation {
     condition = alltrue(flatten([
       for v in var.rules : [
@@ -737,9 +713,7 @@ variable "rules" {
     error_message = "and_statement / or_statement inside rate_based_statement.scope_down_statement must contain at least 2 statements."
   }
 
-  # Validation 13: each entry in rate_based_statement.scope_down_statement.and_statement.statements,
-  # or_statement.statements, and the same lists under not_statement, must specify exactly one of
-  # byte_match_statement or ip_set_reference_statement.
+  # Validation 13: each and/or statement entry under rate_based_statement.scope_down_statement must specify exactly one of byte_match_statement or ip_set_reference_statement.
   validation {
     condition = alltrue(flatten([
       for v in var.rules : [
@@ -758,9 +732,7 @@ variable "rules" {
     error_message = "Each statement inside rate_based_statement.scope_down_statement.and_statement.statements / or_statement.statements (and their not_statement-nested variants) must specify exactly one of byte_match_statement or ip_set_reference_statement."
   }
 
-  # Validation 14: Ensure exactly one field_to_match selector is set inside every byte_match_statement
-  # under managed_rule_group_statement.scope_down_statement and rate_based_statement.scope_down_statement
-  # (top-level, and/or list entries, not_statement, and not_statement-nested and/or).
+  # Validation 14: exactly one field_to_match selector must be set inside every byte_match_statement under scope_down_statement.
   validation {
     condition = alltrue(flatten([
       for v in var.rules : [
@@ -785,9 +757,7 @@ variable "rules" {
     error_message = "Inside every byte_match_statement under managed_rule_group_statement.scope_down_statement and rate_based_statement.scope_down_statement, exactly one field_to_match selector (uri_path or single_header) must be set."
   }
 
-  # Validation 15: uri_path_scoped_statement path prefixes must be non-empty and start with "/"
-  # (byte_match on uri_path compares against the raw path, so a prefix without the leading slash
-  # would never match), and host_header, when set, must be non-empty.
+  # Validation 15: uri_path_scoped_statement path prefixes must start with a slash, and host_header, when set, must be non-empty.
   validation {
     condition = alltrue([
       for v in var.rules :
@@ -802,7 +772,7 @@ variable "rules" {
       )
       if try(v.rate_based_statement.scope_down_statement.uri_path_scoped_statement, null) != null
     ])
-    error_message = "uri_path_scoped_statement.uri_path_prefix and every excluded_uri_path_prefixes entry must start with \"/\", and host_header, when set, must be non-empty."
+    error_message = "uri_path_scoped_statement.uri_path_prefix and every excluded_uri_path_prefixes entry must start with a slash, and host_header, when set, must be non-empty."
   }
 
   # Validation: labeled_host_scoped_block_statement must set exactly one of

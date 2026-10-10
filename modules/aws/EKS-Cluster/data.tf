@@ -8,14 +8,8 @@
 # You may not alter or remove any copyright or other notice from copies of this content.
 #
 # --------------------------------------------------------------------------------------
-# (Removed: data.aws_eks_cluster.eks_cluster - a pure roundtrip for values the
-# aws_eks_cluster.eks_cluster resource (eks.tf) already exposes directly, and being an
-# unconditional data source with depends_on the very resource it duplicates, it forced
-# Terraform to defer reading it until apply on ANY change to the cluster (even unrelated
-# tag updates) - marking oidc.issuer "known after apply" and forcing a spurious replace of
-# the (immutable-url) OIDC provider resource in iam_role.tf. Referencing the resource
-# directly makes url/thumbprint_list track genuine issuer/certificate changes correctly,
-# without ignore_changes masking real rotations.
+# Removed the separate eks_cluster data source. Referencing the resource directly avoids a
+# spurious replace of the OIDC provider on unrelated cluster changes.
 
 # Obtain TLS certificate for the OIDC provider
 data "tls_certificate" "tls" {

@@ -23,9 +23,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
     domain_name = var.dns_name
     origin_id   = var.origin_id
 
-    # VPC-origin path: when vpc_origin_id is set, CloudFront reaches a private ALB/NLB/EC2
-    # via managed ENIs (custom_origin_config must be absent). domain_name is still required
-    # and is used as the SNI/Host + for origin certificate SAN validation.
+    # VPC origin path, used when vpc_origin_id is set. domain_name is still required for SNI and certificate validation.
     dynamic "vpc_origin_config" {
       for_each = var.vpc_origin_id != null ? [1] : []
       content {
@@ -33,7 +31,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
       }
     }
 
-    # Public/custom-origin path (default; unchanged when vpc_origin_id is null).
+    # Default public origin path, used when vpc_origin_id is null.
     dynamic "custom_origin_config" {
       for_each = var.vpc_origin_id == null ? [1] : []
       content {

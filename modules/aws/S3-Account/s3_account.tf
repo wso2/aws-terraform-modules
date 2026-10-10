@@ -83,8 +83,7 @@ resource "aws_s3_bucket_acl" "s3_bucket_acl" {
   depends_on = [aws_s3_bucket_ownership_controls.s3_bucket_ownership_controls, aws_s3_bucket_public_access_block.s3_bucket_public_access_block]
 }
 
-# Simple single-rule expiration shortcut. Mutually exclusive with lifecycle_rules (see
-# variables.tf validation) - use lifecycle_rules instead for anything beyond a flat expiration.
+# Simple single-rule expiration shortcut, mutually exclusive with lifecycle_rules.
 resource "aws_s3_bucket_lifecycle_configuration" "s3_bucket_lifecycle" {
   count = var.lifecycle_expiration_days != null ? 1 : 0
 
