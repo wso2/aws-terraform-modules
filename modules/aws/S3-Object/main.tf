@@ -28,13 +28,9 @@ resource "aws_s3_object" "s3_object" {
   kms_key_id             = var.kms_key_id
   tags                   = var.tags
 
-  # The ETag of a KMS-encrypted object is not its MD5, so changes to a source file are
-  # detected through this hash instead.
   source_hash = var.source_file == null ? null : filemd5(var.source_file)
 
   lifecycle {
-    # A new bucket or key replaces the object. Upload the new one first, so anything
-    # that references the object never points at a key that no longer exists.
     create_before_destroy = true
 
     precondition {

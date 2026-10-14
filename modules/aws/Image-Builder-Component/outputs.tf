@@ -27,8 +27,6 @@ output "latest_version_arn" {
   description = "ARN that always resolves to the latest version of the component (<name>/x.x.x). Known at plan time, so a recipe that uses it is not replaced when a new version is created."
   value       = local.latest_version_arn
 
-  # The value does not come from the resource, so make anything that uses it (a recipe)
-  # wait until the component exists.
   depends_on = [aws_imagebuilder_component.imagebuilder_component]
 }
 

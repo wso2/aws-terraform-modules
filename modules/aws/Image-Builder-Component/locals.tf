@@ -21,9 +21,6 @@
 locals {
   name = join("-", compact([var.project, var.application, var.environment, var.region, var.name, "ib-component"]))
 
-  # Reference to the latest version of this component. Built from values known at plan
-  # time, not from the component's ARN: a recipe that uses it stays unchanged when a new
-  # component version replaces the old one. Image Builder lower-cases names in ARNs.
   latest_version_arn = format(
     "arn:%s:imagebuilder:%s:%s:component/%s/x.x.x",
     data.aws_partition.current.partition,

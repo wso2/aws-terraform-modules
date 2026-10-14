@@ -32,8 +32,6 @@ resource "aws_imagebuilder_component" "imagebuilder_component" {
   tags                  = var.tags
 
   lifecycle {
-    # Component versions are immutable, so every change replaces the component. Create
-    # the new version first: AWS refuses to delete a version that a recipe still uses.
     create_before_destroy = true
 
     precondition {

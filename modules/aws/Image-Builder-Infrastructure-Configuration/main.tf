@@ -30,8 +30,6 @@ resource "aws_imagebuilder_infrastructure_configuration" "imagebuilder_infrastru
   terminate_instance_on_failure = var.terminate_instance_on_failure
   tags                          = var.tags
 
-  # Tags for the build and test instances Image Builder launches. Provider default_tags
-  # do not reach them.
   resource_tags = var.resource_tags
 
   instance_metadata_options {

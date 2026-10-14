@@ -18,9 +18,6 @@
 #
 # --------------------------------------------------------------------------------------
 
-# An inline policy is embedded in its role: it is created, changed and deleted together
-# with the role, and needs only iam:PutRolePolicy, not the managed-policy permissions
-# (iam:CreatePolicy and friends) that the IAM-Policy module requires.
 resource "aws_iam_role_policy" "iam_role_inline_policy" {
   name   = join("-", compact([var.project, var.application, var.environment, var.region, var.name, "iam-inline-policy"]))
   role   = var.role

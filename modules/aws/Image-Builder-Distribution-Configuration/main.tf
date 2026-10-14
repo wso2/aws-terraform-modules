@@ -23,7 +23,6 @@ resource "aws_imagebuilder_distribution_configuration" "imagebuilder_distributio
   description = var.description
   tags        = var.tags
 
-  # One block per region the AMI is distributed to.
   dynamic "distribution" {
     for_each = var.distributions
     content {

@@ -38,11 +38,6 @@ output "uri" {
   value       = "s3://${aws_s3_object.s3_object.bucket}/${aws_s3_object.s3_object.key}"
 }
 
-output "etag" {
-  description = "ETag of the object"
-  value       = aws_s3_object.s3_object.etag
-}
-
 output "version_id" {
   description = "Version ID of the object, when the bucket has versioning enabled"
   value       = aws_s3_object.s3_object.version_id

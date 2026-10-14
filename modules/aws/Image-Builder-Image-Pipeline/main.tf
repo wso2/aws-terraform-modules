@@ -33,7 +33,6 @@ resource "aws_imagebuilder_image_pipeline" "imagebuilder_image_pipeline" {
     timeout_minutes     = var.image_tests_timeout_minutes
   }
 
-  # Amazon Inspector scanning. Needs Inspector enabled for the account.
   dynamic "image_scanning_configuration" {
     for_each = var.image_scanning_enabled ? [1] : []
     content {
@@ -41,7 +40,6 @@ resource "aws_imagebuilder_image_pipeline" "imagebuilder_image_pipeline" {
     }
   }
 
-  # No schedule = the pipeline runs only when started, e.g. from a CI/CD pipeline.
   dynamic "schedule" {
     for_each = var.schedule == null ? [] : [var.schedule]
     content {

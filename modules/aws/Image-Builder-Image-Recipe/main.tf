@@ -27,7 +27,6 @@ resource "aws_imagebuilder_image_recipe" "imagebuilder_image_recipe" {
   user_data_base64  = var.user_data_base64
   tags              = var.tags
 
-  # Components run in the order given.
   dynamic "component" {
     for_each = var.components
     content {
@@ -74,8 +73,6 @@ resource "aws_imagebuilder_image_recipe" "imagebuilder_image_recipe" {
   }
 
   lifecycle {
-    # Recipe versions are immutable, so every change replaces the recipe. Create the new
-    # version first: AWS refuses to delete a recipe that an image pipeline still uses.
     create_before_destroy = true
   }
 }
