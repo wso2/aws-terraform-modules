@@ -19,8 +19,14 @@
 # --------------------------------------------------------------------------------------
 
 variable "dns_name" {
-  description = "The DNS name of the origin"
+  description = "The DNS name of the origin. For a VPC origin this is used only for SNI and certificate validation, so it must be a host covered by the origin certificate."
   type        = string
+}
+
+variable "vpc_origin_id" {
+  description = "ID of a CloudFront VPC origin. When set, the origin connects privately instead of using the default public origin config."
+  type        = string
+  default     = null
 }
 
 variable "origin_id" {
@@ -130,8 +136,50 @@ variable "ordered_cache_behaviors" {
     compress                 = bool
     cache_policy_id          = optional(string)
     origin_request_policy_id = optional(string)
+    # Optional response headers policy for this behavior.
+    response_headers_policy_id = optional(string)
+    # Optional CloudFront Function associations for this behavior, at most one per event type.
+    function_associations = optional(list(object({
+      event_type   = string
+      function_arn = string
+    })), [])
   }))
   default = []
+
+  # At most one function association per event type per behavior.
+  validation {
+    condition = alltrue([
+      for b in var.ordered_cache_behaviors : alltrue([
+        for fa in b.function_associations : contains(["viewer-request", "viewer-response"], fa.event_type)
+      ])
+    ])
+    error_message = "ordered_cache_behaviors[*].function_associations[*].event_type must be one of: viewer-request, viewer-response."
+  }
+  validation {
+    condition = alltrue([
+      for b in var.ordered_cache_behaviors :
+      length(b.function_associations) == length(distinct([for fa in b.function_associations : fa.event_type]))
+    ])
+    error_message = "Each event_type may appear at most once per ordered_cache_behavior (one viewer-request and/or one viewer-response)."
+  }
+}
+
+variable "default_function_associations" {
+  description = "CloudFront Function associations for the default cache behavior, at most one per event type."
+  type = list(object({
+    event_type   = string
+    function_arn = string
+  }))
+  default = []
+
+  validation {
+    condition     = alltrue([for fa in var.default_function_associations : contains(["viewer-request", "viewer-response"], fa.event_type)])
+    error_message = "default_function_associations[*].event_type must be one of: viewer-request, viewer-response."
+  }
+  validation {
+    condition     = length(var.default_function_associations) == length(distinct([for fa in var.default_function_associations : fa.event_type]))
+    error_message = "Each event_type may appear at most once in default_function_associations."
+  }
 }
 
 variable "enable_logging_config" {
