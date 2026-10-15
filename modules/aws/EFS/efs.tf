@@ -20,7 +20,18 @@ resource "aws_efs_file_system" "efs_file_system" {
 
   creation_token = var.creation_token
 
+  dynamic "protection" {
+    for_each = var.replication_overwrite_protection == null ? [] : [var.replication_overwrite_protection]
+    content {
+      replication_overwrite = protection.value
+    }
+  }
+
   tags = local.tags
+
+  lifecycle {
+    ignore_changes = [protection]
+  }
 }
 
 resource "aws_efs_access_point" "efs_access_point" {

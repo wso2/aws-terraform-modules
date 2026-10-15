@@ -74,3 +74,9 @@ variable "environment_variables" {
   description = "Environment variables to set on the Lambda function"
   default     = {}
 }
+
+variable "timeout" {
+  description = "Amount of time (in seconds) the Lambda function is allowed to run before it is stopped"
+  type        = number
+  default     = 3
+}

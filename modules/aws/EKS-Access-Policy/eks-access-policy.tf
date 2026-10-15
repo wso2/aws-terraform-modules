@@ -27,5 +27,9 @@ resource "aws_eks_access_policy_association" "eks_access_policy" {
     type       = var.type
     namespaces = var.namespace
   }
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 

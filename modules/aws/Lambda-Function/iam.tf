@@ -32,6 +32,7 @@ data "aws_iam_policy_document" "assume_role" {
 }
 
 resource "aws_iam_role" "lambda_function_role" {
-  name               = join("-", [var.project, var.application, var.environment, var.region, var.lambda_function_name, "lf-iam-role"])
+  # IAM role name must be <= 64 characters
+  name               = substr(join("-", [var.project, var.application, var.environment, var.region, var.lambda_function_name, "lf-iam-role"]), 0, 64)
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }

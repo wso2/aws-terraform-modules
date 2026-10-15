@@ -32,8 +32,11 @@ resource "aws_rds_cluster" "rds_cluster" {
   # list when fewer are given. Left tracked, that addition reads as a change
   # that forces replacement on the next plan, so the list is honoured at
   # creation and ignored afterwards, as the provider documentation advises.
+  # global_cluster_identifier: when a separate aws_rds_global_cluster resource attaches this
+  # cluster to a Global Database, AWS sets this field as a side effect — ignoring changes here
+  # makes the external attachment resource the sole owner of it.
   lifecycle {
-    ignore_changes = [availability_zones]
+    ignore_changes = [availability_zones, global_cluster_identifier]
   }
 
   allow_major_version_upgrade = var.allow_major_version_upgrade
@@ -123,6 +126,7 @@ resource "aws_rds_cluster_instance" "cluster_instances" {
   preferred_maintenance_window = var.preferred_maintenance_window == null ? each.value.preferred_maintenance_window : var.preferred_maintenance_window
 
   publicly_accessible = var.publicly_accessible
+  apply_immediately   = var.apply_immediately
 
   tags = var.tags
 
