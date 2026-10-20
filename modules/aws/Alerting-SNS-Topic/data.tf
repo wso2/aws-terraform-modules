@@ -80,4 +80,22 @@ data "aws_iam_policy_document" "sns_topic_policy" {
       values   = [data.aws_caller_identity.current.account_id]
     }
   }
+  dynamic "statement" {
+    for_each = length(var.publisher_service_principals) > 0 ? [1] : []
+    content {
+      sid    = "AWSServices-notification"
+      effect = "Allow"
+      principals {
+        type        = "Service"
+        identifiers = var.publisher_service_principals
+      }
+      actions   = ["SNS:Publish"]
+      resources = [aws_sns_topic.sns_topic.arn]
+      condition {
+        test     = "StringEquals"
+        variable = "aws:SourceAccount"
+        values   = [data.aws_caller_identity.current.account_id]
+      }
+    }
+  }
 }

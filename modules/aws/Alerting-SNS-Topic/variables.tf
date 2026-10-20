@@ -67,6 +67,11 @@ variable "kms_master_key_id" {
   description = "The ID of an AWS-managed customer master key (CMK) for Amazon SNS or a custom CMK"
   default     = null
 }
+variable "publisher_service_principals" {
+  type        = list(string)
+  description = "AWS service principals allowed to publish to the topic from this account, e.g. events.amazonaws.com for EventBridge rules or events.rds.amazonaws.com for RDS event subscriptions"
+  default     = []
+}
 variable "delivery_policy" {
   type        = string
   description = "The SNS delivery policy for HTTP/S endpoints"
