@@ -33,3 +33,8 @@ variable "tags" {
   description = "Tags to be associated with the EKS"
   default     = {}
 }
+variable "permissions_boundary" {
+  type        = string
+  description = "ARN of the managed policy to set as the permissions boundary of the IAM Role; null for none"
+  default     = null
+}

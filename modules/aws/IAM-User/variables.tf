@@ -30,3 +30,8 @@ variable "tags" {
   description = "Tags to be associated with the IAM User"
   default     = {}
 }
+variable "permissions_boundary" {
+  type        = string
+  description = "ARN of the managed policy to set as the permissions boundary of the IAM User; null for none"
+  default     = null
+}

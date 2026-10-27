@@ -10,6 +10,7 @@
 # --------------------------------------------------------------------------------------
 
 resource "aws_iam_user" "iam_user" {
-  name = join("-", [var.project, var.application, var.environment, var.region, "iam-user"])
-  tags = var.tags
+  name                 = join("-", [var.project, var.application, var.environment, var.region, "iam-user"])
+  tags                 = var.tags
+  permissions_boundary = var.permissions_boundary
 }
