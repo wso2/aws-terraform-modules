@@ -744,9 +744,10 @@ variable "log_redacted_headers" {
   description = "Request headers blanked in WAF logs, in lower case (e.g. authorization, cookie). WAF otherwise logs bearer tokens and session cookies in clear."
   type        = list(string)
   default     = []
+  nullable    = false
 
   validation {
-    condition     = alltrue([for h in var.log_redacted_headers : h == lower(h)])
-    error_message = "log_redacted_headers must be lower case: the AWS provider requires single_header names in lower case."
+    condition     = alltrue([for h in var.log_redacted_headers : trimspace(h) != "" && h == lower(h)])
+    error_message = "log_redacted_headers entries must be non-empty and lower case: the AWS provider requires single_header names in lower case."
   }
 }

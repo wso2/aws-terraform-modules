@@ -47,8 +47,8 @@ variable "origin_read_timeout" {
   default     = 30
 
   validation {
-    condition     = var.origin_read_timeout >= 1 && var.origin_read_timeout <= 180
-    error_message = "origin_read_timeout must be between 1 and 180 seconds."
+    condition     = var.origin_read_timeout >= 1 && var.origin_read_timeout <= 180 && floor(var.origin_read_timeout) == var.origin_read_timeout
+    error_message = "origin_read_timeout must be a whole number of seconds between 1 and 180."
   }
 }
 
@@ -58,8 +58,8 @@ variable "origin_keepalive_timeout" {
   default     = 5
 
   validation {
-    condition     = var.origin_keepalive_timeout >= 1 && var.origin_keepalive_timeout <= 180
-    error_message = "origin_keepalive_timeout must be between 1 and 180 seconds."
+    condition     = var.origin_keepalive_timeout >= 1 && var.origin_keepalive_timeout <= 180 && floor(var.origin_keepalive_timeout) == var.origin_keepalive_timeout
+    error_message = "origin_keepalive_timeout must be a whole number of seconds between 1 and 180."
   }
 }
 
