@@ -24,10 +24,12 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
     origin_id   = var.origin_id
 
     custom_origin_config {
-      http_port              = 80
-      https_port             = 443
-      origin_protocol_policy = var.origin_protocol_policy
-      origin_ssl_protocols   = var.origin_ssl_protocols
+      http_port                = 80
+      https_port               = 443
+      origin_protocol_policy   = var.origin_protocol_policy
+      origin_ssl_protocols     = var.origin_ssl_protocols
+      origin_read_timeout      = var.origin_read_timeout
+      origin_keepalive_timeout = var.origin_keepalive_timeout
     }
 
     dynamic "custom_header" {
@@ -48,6 +50,7 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
   }
 
   enabled         = var.enabled
+  price_class     = var.price_class
   is_ipv6_enabled = var.is_ipv6_enabled
   comment         = var.comment
 

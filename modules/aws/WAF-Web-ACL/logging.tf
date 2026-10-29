@@ -28,6 +28,16 @@ resource "aws_wafv2_web_acl_logging_configuration" "waf" {
   log_destination_configs = var.log_destination_arns
   resource_arn            = aws_wafv2_web_acl.web_acl.arn
 
+  # WAF logs the matched request with its headers; blank the ones that carry credentials.
+  dynamic "redacted_fields" {
+    for_each = var.log_redacted_headers
+    content {
+      single_header {
+        name = redacted_fields.value
+      }
+    }
+  }
+
   logging_filter {
     default_behavior = var.log_filter_default_behavior
 
