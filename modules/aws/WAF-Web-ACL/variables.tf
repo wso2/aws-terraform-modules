@@ -739,3 +739,14 @@ variable "log_filter_keep_actions" {
     error_message = "Each entry in log_filter_keep_actions must be one of: ALLOW, BLOCK, COUNT, CAPTCHA, CHALLENGE, EXCLUDED_AS_COUNT."
   }
 }
+
+variable "log_redacted_headers" {
+  description = "Request headers blanked in WAF logs, in lower case (e.g. authorization, cookie). WAF otherwise logs bearer tokens and session cookies in clear."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = alltrue([for h in var.log_redacted_headers : h == lower(h)])
+    error_message = "log_redacted_headers must be lower case: the AWS provider requires single_header names in lower case."
+  }
+}
