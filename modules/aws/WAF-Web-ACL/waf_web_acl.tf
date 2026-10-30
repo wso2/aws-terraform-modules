@@ -675,9 +675,11 @@ resource "aws_wafv2_web_acl" "web_acl" {
         # rule group whose sub-rule is overridden to `count` so the label is
         # emitted but the managed group itself does not block. A single
         # host_header_suffix yields AND(label, NOT(suffix)), identical to the
-        # rendering before host_header_suffixes existed.
+        # rendering before host_header_suffixes existed. This form is used
+        # only when exempt_match_conditions is empty, so existing callers see
+        # no plan diff; otherwise the block below renders instead.
         dynamic "and_statement" {
-          for_each = rule.value.labeled_host_scoped_block_statement != null ? [rule.value.labeled_host_scoped_block_statement] : []
+          for_each = rule.value.labeled_host_scoped_block_statement != null && length(rule.value.labeled_host_scoped_block_statement.exempt_match_conditions) == 0 ? [rule.value.labeled_host_scoped_block_statement] : []
           content {
             statement {
               label_match_statement {
@@ -702,6 +704,102 @@ resource "aws_wafv2_web_acl" "web_acl" {
                       text_transformation {
                         priority = 0
                         type     = "LOWERCASE"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        # labeled_host_scoped_block_statement with exempt_match_conditions:
+        # renders
+        #   AND(label_match_statement,
+        #       OR(NOT(byte_match host ENDS_WITH suffixes[0]), ...,
+        #          NOT(byte_match condition[0]), NOT(byte_match condition[1]), ...))
+        # so the rule's action fires on labelled requests unless the host
+        # matches a suffix AND every condition matches, i.e. the exemption is
+        # narrowed to the request shape the conditions describe on the listed
+        # hosts. The OR always holds at least two statements (one host suffix
+        # plus at least one condition).
+        dynamic "and_statement" {
+          for_each = rule.value.labeled_host_scoped_block_statement != null && length(rule.value.labeled_host_scoped_block_statement.exempt_match_conditions) > 0 ? [rule.value.labeled_host_scoped_block_statement] : []
+          content {
+            statement {
+              label_match_statement {
+                scope = "LABEL"
+                key   = and_statement.value.label_name
+              }
+            }
+            statement {
+              or_statement {
+                dynamic "statement" {
+                  for_each = and_statement.value.host_header_suffix != null ? [and_statement.value.host_header_suffix] : and_statement.value.host_header_suffixes
+                  iterator = host_suffix
+                  content {
+                    not_statement {
+                      statement {
+                        byte_match_statement {
+                          search_string         = host_suffix.value
+                          positional_constraint = "ENDS_WITH"
+                          field_to_match {
+                            single_header {
+                              name = "host"
+                            }
+                          }
+                          text_transformation {
+                            priority = 0
+                            type     = "LOWERCASE"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                dynamic "statement" {
+                  for_each = and_statement.value.exempt_match_conditions
+                  iterator = cond
+                  content {
+                    not_statement {
+                      statement {
+                        byte_match_statement {
+                          search_string         = cond.value.search_string
+                          positional_constraint = cond.value.positional_constraint
+                          field_to_match {
+                            dynamic "uri_path" {
+                              for_each = try(cond.value.field_to_match.uri_path, false) == true ? [1] : []
+                              content {}
+                            }
+                            dynamic "query_string" {
+                              for_each = try(cond.value.field_to_match.query_string, false) == true ? [1] : []
+                              content {}
+                            }
+                            dynamic "method" {
+                              for_each = try(cond.value.field_to_match.method, false) == true ? [1] : []
+                              content {}
+                            }
+                            dynamic "single_header" {
+                              for_each = cond.value.field_to_match.single_header != null ? [cond.value.field_to_match.single_header] : []
+                              content {
+                                name = single_header.value
+                              }
+                            }
+                            dynamic "single_query_argument" {
+                              for_each = cond.value.field_to_match.single_query_argument != null ? [cond.value.field_to_match.single_query_argument] : []
+                              content {
+                                name = single_query_argument.value
+                              }
+                            }
+                          }
+                          dynamic "text_transformation" {
+                            for_each = cond.value.text_transformations
+                            content {
+                              priority = text_transformation.value.priority
+                              type     = text_transformation.value.type
+                            }
+                          }
+                        }
                       }
                     }
                   }

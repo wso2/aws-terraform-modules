@@ -327,10 +327,54 @@ variable "rules" {
     # no plan diff. Suffixes are matched against a LOWERCASE-transformed Host
     # header and WAF does not transform the search_string, so all must be
     # lowercase.
+    #
+    # exempt_match_conditions narrows the exemption below host level: each
+    # entry is a byte-match on one request component, and a request is exempt
+    # only when its host matches a suffix AND every condition matches (the
+    # conditions are AND-ed; to exempt alternatives, use separate rules).
+    # When the list is non-empty the rule renders as
+    #   AND(label_match_statement,
+    #       OR(NOT(byte_match host ENDS_WITH suffixes[0]), ...,
+    #          NOT(byte_match condition[0]), NOT(byte_match condition[1]), ...))
+    # i.e. NOT(host AND cond[0] AND cond[1] ...) by De Morgan. The OR adds one
+    # logical level (AND > OR > NOT > byte_match); AWS WAF documents no
+    # API-side limit on nesting depth (only the console's visual editor is
+    # limited to one level, and the AWS docs' own AND example nests an OR),
+    # and the depth does not grow with the number of suffixes or conditions.
+    # An empty list renders exactly as before this field existed (no plan
+    # diff). Example: exempt only the OAuth authorize endpoint when the
+    # redirect_uri argument points at a loopback address:
+    #   exempt_match_conditions = [
+    #     { field_to_match = { uri_path = true }, positional_constraint = "EXACTLY",
+    #       search_string = "/oauth2/authorize" },
+    #     { field_to_match = { single_query_argument = "redirect_uri" },
+    #       positional_constraint = "STARTS_WITH", search_string = "http://127.0.0.1:1042",
+    #       text_transformations = [{ priority = 0, type = "URL_DECODE" }, { priority = 1, type = "LOWERCASE" }] },
+    #   ]
+    # text_transformations defaults to NONE; WAF never transforms the
+    # search_string, so when LOWERCASE is applied the search_string must be
+    # lowercase. Every transformation other than NONE costs 10 WCU.
     labeled_host_scoped_block_statement = optional(object({
       label_name           = string
       host_header_suffix   = optional(string)
       host_header_suffixes = optional(list(string), [])
+      exempt_match_conditions = optional(list(object({
+        # Exactly one selector must be set.
+        field_to_match = object({
+          uri_path              = optional(bool)
+          query_string          = optional(bool)
+          method                = optional(bool)
+          single_header         = optional(string) # header name, lowercase
+          single_query_argument = optional(string) # argument name
+        })
+        # EXACTLY | STARTS_WITH | ENDS_WITH | CONTAINS | CONTAINS_WORD
+        positional_constraint = string
+        search_string         = string
+        text_transformations = optional(list(object({
+          priority = number
+          type     = string
+        })), [{ priority = 0, type = "NONE" }])
+      })), [])
     }))
 
     # Narrow purpose-built rule: fires on requests whose host header equals
@@ -567,6 +611,42 @@ variable "rules" {
       if try(v.labeled_host_scoped_block_statement, null) != null
     ])
     error_message = "labeled_host_scoped_block_statement must set exactly one of host_header_suffix or a non-empty host_header_suffixes, and every suffix must be non-empty, lowercase, and unique (WAF applies LOWERCASE to the Host header but does not transform the search_string)."
+  }
+
+  # Validation: each labeled_host_scoped_block_statement.exempt_match_conditions
+  # entry must select exactly one field_to_match component, use a supported
+  # positional_constraint, carry a non-empty search_string within WAF's
+  # 200-character quota, and list at least one text transformation of a
+  # supported type with unique priorities. When LOWERCASE is applied the
+  # search_string must itself be lowercase (WAF does not transform it).
+  validation {
+    condition = alltrue(flatten([
+      for v in var.rules : [
+        for c in v.labeled_host_scoped_block_statement.exempt_match_conditions :
+        (
+          (
+            (try(c.field_to_match.uri_path, false) == true ? 1 : 0)
+            + (try(c.field_to_match.query_string, false) == true ? 1 : 0)
+            + (try(c.field_to_match.method, false) == true ? 1 : 0)
+            + (try(c.field_to_match.single_header, null) != null ? 1 : 0)
+            + (try(c.field_to_match.single_query_argument, null) != null ? 1 : 0)
+          ) == 1
+          && try(length(c.field_to_match.single_header) > 0 && c.field_to_match.single_header == lower(c.field_to_match.single_header), true)
+          && try(length(c.field_to_match.single_query_argument) > 0, true)
+          && contains(["EXACTLY", "STARTS_WITH", "ENDS_WITH", "CONTAINS", "CONTAINS_WORD"], c.positional_constraint)
+          && length(c.search_string) > 0 && length(c.search_string) <= 200
+          && length(c.text_transformations) > 0
+          && length(distinct([for t in c.text_transformations : t.priority])) == length(c.text_transformations)
+          && alltrue([
+            for t in c.text_transformations :
+            contains(["NONE", "COMPRESS_WHITE_SPACE", "HTML_ENTITY_DECODE", "LOWERCASE", "CMD_LINE", "URL_DECODE", "BASE64_DECODE", "HEX_DECODE", "MD5", "REPLACE_COMMENTS", "ESCAPE_SEQ_DECODE", "SQL_HEX_DECODE", "CSS_DECODE", "JS_DECODE", "NORMALIZE_PATH", "NORMALIZE_PATH_WIN", "REMOVE_NULLS", "REPLACE_NULLS", "BASE64_DECODE_EXT", "URL_DECODE_UNI", "UTF8_TO_UNICODE"], t.type)
+          ])
+          && (anytrue([for t in c.text_transformations : t.type == "LOWERCASE"]) ? c.search_string == lower(c.search_string) : true)
+        )
+      ]
+      if try(v.labeled_host_scoped_block_statement, null) != null
+    ]))
+    error_message = "Each labeled_host_scoped_block_statement.exempt_match_conditions entry must set exactly one field_to_match selector (uri_path, query_string, method, single_header [lowercase name] or single_query_argument), a positional_constraint of EXACTLY, STARTS_WITH, ENDS_WITH, CONTAINS or CONTAINS_WORD, a non-empty search_string of at most 200 characters (lowercase when a LOWERCASE transformation is applied), and at least one text_transformation of a supported AWS WAF type with unique priorities."
   }
 
   # Validation: host_and_path_scoped_ip_allowlist_block_statement.host_header,
