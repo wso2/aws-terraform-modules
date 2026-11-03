@@ -16,3 +16,10 @@ resource "aws_iam_role" "iam_role" {
   assume_role_policy   = var.assume_role_policy
   permissions_boundary = var.permissions_boundary
 }
+
+resource "aws_iam_role_policy" "iam_role_inline_policy" {
+  for_each = var.inline_policies
+  name     = each.value.name
+  role     = aws_iam_role.iam_role.id
+  policy   = each.value.policy
+}

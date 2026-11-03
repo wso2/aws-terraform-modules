@@ -48,3 +48,11 @@ variable "description" {
   type        = string
   default     = null
 }
+variable "inline_policies" {
+  description = "Inline policies to embed in the IAM Role keyed by a stable label with the policy name and JSON document"
+  type = map(object({
+    name   = string
+    policy = string
+  }))
+  default = {}
+}
