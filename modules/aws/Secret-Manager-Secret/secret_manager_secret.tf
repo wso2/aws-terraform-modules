@@ -39,7 +39,7 @@ resource "aws_secretsmanager_secret_version" "secretsmanager_secret_version" {
   }
 }
 
-# Sets the initial value only; later values are written outside Terraform.
+# Sets the initial value only as later values are written outside Terraform
 resource "aws_secretsmanager_secret_version" "secretsmanager_secret_version_unmanaged" {
   count = var.ignore_secret_string_changes ? 1 : 0
 

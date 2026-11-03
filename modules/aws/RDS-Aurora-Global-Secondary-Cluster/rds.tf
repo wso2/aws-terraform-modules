@@ -9,8 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-# Secondary (read-only) member of an Aurora Global Database. It inherits the
-# master user and database from the primary, so neither is set here.
+# Read only secondary member of an Aurora Global Database that inherits the master user and database from the primary
 resource "aws_rds_cluster" "rds_cluster" {
   cluster_identifier        = local.cluster_name
   global_cluster_identifier = var.global_cluster_identifier
@@ -23,7 +22,7 @@ resource "aws_rds_cluster" "rds_cluster" {
   vpc_security_group_ids = var.vpc_security_group_ids
   port                   = var.database_port
 
-  # Encrypted cross-region secondaries need a key from their own region.
+  # Encrypted cross region secondaries need a key from their own region
   storage_encrypted = true
   kms_key_id        = var.kms_key_id
 
@@ -43,8 +42,7 @@ resource "aws_rds_cluster" "rds_cluster" {
     }
   }
 
-  # AWS sets replication_source_identifier when the cluster joins the global
-  # database; the provider documents ignoring it for global members.
+  # AWS sets replication_source_identifier when the cluster joins the global database
   lifecycle {
     ignore_changes = [replication_source_identifier]
   }

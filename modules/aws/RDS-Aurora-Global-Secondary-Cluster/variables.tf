@@ -103,7 +103,7 @@ variable "min_capacity" {
 }
 
 variable "max_capacity" {
-  description = "Serverless v2 maximum capacity; null for no serverless v2 scaling configuration"
+  description = "Serverless v2 maximum capacity or null to skip the serverless v2 scaling configuration"
   type        = number
   default     = null
 }

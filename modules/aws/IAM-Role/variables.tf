@@ -39,12 +39,12 @@ variable "permissions_boundary" {
   default     = null
 }
 variable "name_override" {
-  type        = string
   description = "Role name to use instead of the generated name"
+  type        = string
   default     = null
 }
 variable "description" {
-  type        = string
   description = "Description of the IAM Role"
+  type        = string
   default     = null
 }

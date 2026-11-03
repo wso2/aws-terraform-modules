@@ -9,8 +9,7 @@
 #
 # --------------------------------------------------------------------------------------
 
-# The destination file system must have replication overwrite protection
-# DISABLED (see the EFS module's replication_overwrite_protection).
+# The destination file system must have replication overwrite protection disabled
 resource "aws_efs_replication_configuration" "efs_replication" {
   source_file_system_id = var.source_file_system_id
 

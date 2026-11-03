@@ -21,7 +21,7 @@ variable "destination_region" {
 }
 
 variable "destination_file_system_id" {
-  description = "ID of an existing destination file system; null lets EFS create one"
+  description = "ID of an existing destination file system or null to let EFS create one"
   type        = string
   default     = null
 }
