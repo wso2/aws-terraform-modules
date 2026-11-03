@@ -38,3 +38,13 @@ variable "permissions_boundary" {
   description = "ARN of the managed policy to set as the permissions boundary of the IAM Role; null for none"
   default     = null
 }
+variable "name_override" {
+  type        = string
+  description = "Role name to use instead of the generated name"
+  default     = null
+}
+variable "description" {
+  type        = string
+  description = "Description of the IAM Role"
+  default     = null
+}

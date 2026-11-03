@@ -29,11 +29,25 @@ resource "aws_secretsmanager_secret" "secretsmanager_secret" {
 }
 
 resource "aws_secretsmanager_secret_version" "secretsmanager_secret_version" {
+  count = var.ignore_secret_string_changes ? 0 : 1
+
   secret_id     = aws_secretsmanager_secret.secretsmanager_secret.id
   secret_string = var.secret_string
 
   lifecycle {
     create_before_destroy = true
+  }
+}
+
+# Sets the initial value only; later values are written outside Terraform.
+resource "aws_secretsmanager_secret_version" "secretsmanager_secret_version_unmanaged" {
+  count = var.ignore_secret_string_changes ? 1 : 0
+
+  secret_id     = aws_secretsmanager_secret.secretsmanager_secret.id
+  secret_string = var.secret_string
+
+  lifecycle {
+    ignore_changes = [secret_string]
   }
 }
 
