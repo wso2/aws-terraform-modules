@@ -82,7 +82,7 @@ variable "metric_queries" {
     period      = optional(number)
     return_data = optional(bool)
     metrics = optional(map(object({
-      dimensions  = optional(string)
+      dimensions  = optional(map(string))
       metric_name = optional(string)
       namespace   = optional(string)
       period      = optional(number)
