@@ -53,6 +53,11 @@ variable "evaluation_periods" {
   type        = number
   default     = 1
 }
+variable "treat_missing_data" {
+  description = "How the alarm treats missing data points: missing, ignore, breaching or notBreaching"
+  type        = string
+  default     = "missing"
+}
 variable "threshold" {
   description = "The threshold for the alarm"
   type        = number
