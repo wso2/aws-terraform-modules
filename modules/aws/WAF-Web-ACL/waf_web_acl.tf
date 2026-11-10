@@ -748,6 +748,157 @@ resource "aws_wafv2_web_acl" "web_acl" {
           }
         }
 
+        # host_scoped_basic_auth_block_statement: renders
+        #   AND(byte_match host EXACTLY host_header,
+        #       NOT(ip_set_reference allowed_ip_set_arn),
+        #       NOT(byte_match authorization EXACTLY authorization_values[0]),
+        #       NOT(byte_match authorization EXACTLY authorization_values[1]),
+        #       ...)
+        # so the rule's action fires when the request targets a specific host,
+        # its source IP is NOT in the allowed IP set, and it carries none of
+        # the issued Authorization header values. Pair with action = block
+        # carrying response_code 401 and a WWW-Authenticate response_header to
+        # put an HTTP basic-auth prompt in front of that host while allowlisted
+        # source IPs are served straight through. Each credential is emitted as
+        # its own NOT-wrapped AND-sibling (rather than NOT(OR(...))) so the
+        # shape holds uniformly for 1 or N credentials without tripping AWS
+        # WAF's >=2-statements-per-OR requirement. The Authorization match uses
+        # text transformation NONE because the base64 credential is
+        # case-sensitive; the host match keeps LOWERCASE as elsewhere.
+        dynamic "and_statement" {
+          for_each = rule.value.host_scoped_basic_auth_block_statement != null ? [rule.value.host_scoped_basic_auth_block_statement] : []
+          content {
+            statement {
+              byte_match_statement {
+                search_string         = and_statement.value.host_header
+                positional_constraint = "EXACTLY"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+              }
+            }
+            dynamic "statement" {
+              for_each = and_statement.value.allowed_ip_set_arn != null ? [and_statement.value.allowed_ip_set_arn] : []
+              content {
+                not_statement {
+                  statement {
+                    ip_set_reference_statement {
+                      arn = statement.value
+                    }
+                  }
+                }
+              }
+            }
+            dynamic "statement" {
+              for_each = and_statement.value.authorization_values
+              content {
+                not_statement {
+                  statement {
+                    byte_match_statement {
+                      search_string         = statement.value
+                      positional_constraint = "EXACTLY"
+                      field_to_match {
+                        single_header {
+                          name = "authorization"
+                        }
+                      }
+                      text_transformation {
+                        priority = 0
+                        type     = "NONE"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        # host_scoped_authorization_allow_statement: renders
+        #   AND(byte_match host EXACTLY host_header,
+        #       byte_match authorization EXACTLY authorization_values[0])
+        # for one credential, or
+        #   AND(byte_match host EXACTLY host_header,
+        #       OR(byte_match authorization EXACTLY authorization_values[i]...))
+        # for two or more — a lone credential stays a bare AND-sibling because
+        # AWS WAF requires at least 2 statements inside an OR. Pair with
+        # action = allow at a priority ahead of an IP-filter block rule so a
+        # visitor who answered the basic-auth challenge is not then denied by
+        # the IP filter.
+        #
+        # NOTE: allow terminates Web ACL evaluation, so requests admitted here
+        # skip every later rule, managed rule groups included.
+        dynamic "and_statement" {
+          for_each = rule.value.host_scoped_authorization_allow_statement != null ? [rule.value.host_scoped_authorization_allow_statement] : []
+          content {
+            statement {
+              byte_match_statement {
+                search_string         = and_statement.value.host_header
+                positional_constraint = "EXACTLY"
+                field_to_match {
+                  single_header {
+                    name = "host"
+                  }
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "LOWERCASE"
+                }
+              }
+            }
+            dynamic "statement" {
+              for_each = length(and_statement.value.authorization_values) == 1 ? and_statement.value.authorization_values : []
+              content {
+                byte_match_statement {
+                  search_string         = statement.value
+                  positional_constraint = "EXACTLY"
+                  field_to_match {
+                    single_header {
+                      name = "authorization"
+                    }
+                  }
+                  text_transformation {
+                    priority = 0
+                    type     = "NONE"
+                  }
+                }
+              }
+            }
+            dynamic "statement" {
+              for_each = length(and_statement.value.authorization_values) > 1 ? [1] : []
+              content {
+                or_statement {
+                  dynamic "statement" {
+                    iterator = cred
+                    for_each = and_statement.value.authorization_values
+                    content {
+                      byte_match_statement {
+                        search_string         = cred.value
+                        positional_constraint = "EXACTLY"
+                        field_to_match {
+                          single_header {
+                            name = "authorization"
+                          }
+                        }
+                        text_transformation {
+                          priority = 0
+                          type     = "NONE"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
         # host_and_path_scoped_ip_allowlist_block_statement: renders
         #   AND(byte_match host EXACTLY host_header,
         #       byte_match uri STARTS_WITH uri_path_prefix,
