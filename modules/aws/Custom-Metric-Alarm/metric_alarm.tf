@@ -17,6 +17,7 @@ resource "aws_cloudwatch_metric_alarm" "metric_alarm" {
   comparison_operator = var.comparison_operator
   evaluation_periods  = var.evaluation_periods
   unit                = var.unit
+  treat_missing_data  = var.treat_missing_data
 
   alarm_actions             = var.alarm_actions
   ok_actions                = var.ok_actions
