@@ -344,6 +344,65 @@ variable "rules" {
     }))
 
     # Narrow purpose-built rule: fires on requests whose host header equals
+    # host_header AND whose source IP is NOT in the referenced IP set (when one
+    # is given) AND whose Authorization header matches NONE of
+    # authorization_values. Renders as
+    #   AND(byte_match host EXACTLY host_header,
+    #       NOT(ip_set_reference allowed_ip_set_arn),
+    #       NOT(byte_match authorization EXACTLY authorization_values[0]),
+    #       NOT(byte_match authorization EXACTLY authorization_values[1]),
+    #       ...)
+    # Each credential is emitted as its own NOT-wrapped AND-sibling rather than
+    # NOT(OR(...)) so the shape holds uniformly for 1 or N credentials without
+    # tripping AWS WAF's >=2-statements-per-OR requirement.
+    #
+    # Pair with action = block carrying response_code 401 and a
+    # WWW-Authenticate response_header to put an HTTP basic-auth prompt in
+    # front of a single host: source IPs in the allowlist are served without a
+    # prompt, everyone else is challenged and admitted only by presenting one
+    # of the issued credentials. authorization_values carry the full header
+    # value ("Basic " + base64("user:password")) and are matched with text
+    # transformation NONE, since base64 is case-sensitive.
+    #
+    # The credentials are readable to anyone who can read the Web ACL, and the
+    # browser keeps sending them for the life of the tab. This gates a
+    # pre-release host; it is not an authentication system.
+    host_scoped_basic_auth_block_statement = optional(object({
+      host_header          = string
+      allowed_ip_set_arn   = optional(string)
+      authorization_values = list(string)
+    }))
+
+    # Narrow purpose-built rule: fires on requests whose host header equals
+    # host_header AND whose Authorization header matches ANY of
+    # authorization_values. Renders as
+    #   AND(byte_match host EXACTLY host_header,
+    #       byte_match authorization EXACTLY authorization_values[0])
+    # for a single credential, and as
+    #   AND(byte_match host EXACTLY host_header,
+    #       OR(byte_match authorization EXACTLY authorization_values[0],
+    #          byte_match authorization EXACTLY authorization_values[1], ...))
+    # for two or more — the single-credential form stays a bare sibling
+    # because AWS WAF requires at least 2 statements inside an OR.
+    #
+    # This is the admit half of the basic-auth pair: pair it with
+    # action = allow, at a priority ahead of an IP-filter block rule, so a
+    # visitor who answers the challenge from
+    # host_scoped_basic_auth_block_statement is not then denied by the IP
+    # filter. The two statements are disjoint by construction (one requires a
+    # known credential, the other requires none to match), so their relative
+    # priority does not matter.
+    #
+    # NOTE: an allow action terminates Web ACL evaluation, so requests admitted
+    # by this rule skip every later rule — managed rule groups included. Keep
+    # its priority as late as the IP-filter rule allows, and treat the host as
+    # one whose traffic is gated but not inspected.
+    host_scoped_authorization_allow_statement = optional(object({
+      host_header          = string
+      authorization_values = list(string)
+    }))
+
+    # Narrow purpose-built rule: fires on requests whose host header equals
     # host_header AND whose URI path starts with uri_path_prefix AND (for
     # each entry in excluded_uri_path_prefixes) does NOT start with that
     # excluded prefix AND whose source IP is NOT in the referenced IP set.
@@ -422,6 +481,24 @@ variable "rules" {
   # Validation 0: geo_match_statement.country_codes must be non-empty and each
   # entry a two-letter uppercase ISO 3166-1 alpha-2 code (AWS WAF rejects
   # anything else at apply time; catch it at plan time instead).
+
+
+  validation {
+    condition = alltrue([
+      for k, r in var.rules :
+      r.host_scoped_authorization_allow_statement == null ||
+      length(r.host_scoped_authorization_allow_statement.authorization_values) > 0
+    ])
+    error_message = "host_scoped_authorization_allow_statement.authorization_values must hold at least one \"Basic <base64>\" value - with none the AND would collapse to a single statement and AWS WAF requires at least two."
+  }
+  validation {
+    condition = alltrue([
+      for k, r in var.rules :
+      r.host_scoped_basic_auth_block_statement == null ||
+      length(r.host_scoped_basic_auth_block_statement.authorization_values) > 0
+    ])
+    error_message = "host_scoped_basic_auth_block_statement.authorization_values must hold at least one \"Basic <base64>\" value - a basic-auth rule with no credential blocks every request that is not already IP-allowlisted."
+  }
   validation {
     condition = alltrue([
       for v in var.rules :
