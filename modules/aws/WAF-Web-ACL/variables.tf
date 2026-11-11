@@ -480,7 +480,7 @@ variable "rules" {
     # Narrow purpose-built rule: blocks requests that carry any of the given
     # labels (e.g. managed-rule-group sub-rule labels set to count via
     # rule_action_overrides) UNLESS the request falls under one exempt request
-    # shape: a URI path (after NORMALIZE_PATH) starting with
+    # shape: a URI path (after URL_DECODE and NORMALIZE_PATH) starting with
     # exempt_uri_path_prefix and, when exempt_methods is non-empty, an HTTP
     # method in exempt_methods. Renders as
     #   AND(label_match label_names[0],
@@ -492,8 +492,9 @@ variable "rules" {
     # request-scoped counterpart of labeled_host_scoped_block_statement: use it
     # when one endpoint, rather than a whole host, needs to be exempt from a
     # managed sub-rule while every other request keeps its blocking.
-    # NORMALIZE_PATH collapses repeated slashes and resolves "./" and "../"
-    # segments, so <prefix>/../other does not get the exemption. The path match
+    # URL_DECODE then NORMALIZE_PATH decodes percent-encoding, collapses
+    # repeated slashes and resolves "./" and "../" segments, so neither
+    # <prefix>/../other nor <prefix>%2F..%2Fother gets the exemption. The path match
     # is case-sensitive (no LOWERCASE transform), so a differently-cased path
     # is not exempt. The method set is one regex rather than an OR of byte
     # matches: an OR inside NOT(AND(...)) would exceed the provider's nesting
@@ -505,8 +506,9 @@ variable "rules" {
     }))
 
     # Narrow purpose-built rule: matches requests whose URI path (after
-    # NORMALIZE_PATH) starts with uri_path_prefix AND whose body matches
-    # regex_string after text_transformations (applied in list order).
+    # URL_DECODE and NORMALIZE_PATH, as above) starts with uri_path_prefix
+    # AND whose body matches regex_string after text_transformations (applied
+    # in list order).
     # Renders as
     #   AND(byte_match uri_path STARTS_WITH uri_path_prefix,
     #       regex_match body regex_string)

@@ -1053,8 +1053,9 @@ resource "aws_wafv2_web_acl" "web_acl" {
         # with OR(label_match ...) for two or more labels and
         # NOT(byte_match uri_path ...) when exempt_methods is empty, so the
         # rule's action fires on requests carrying any of the labels unless
-        # they fall under the exempt path (and method). The path match uses
-        # NORMALIZE_PATH so "../" segments cannot reach the exemption.
+        # they fall under the exempt path (and method). The path match applies
+        # URL_DECODE then NORMALIZE_PATH, so neither "../" segments nor
+        # percent-encoded ones ("%2F..%2F") can reach the exemption.
         dynamic "and_statement" {
           for_each = rule.value.labeled_request_scoped_block_statement != null ? [rule.value.labeled_request_scoped_block_statement] : []
           content {
@@ -1100,6 +1101,10 @@ resource "aws_wafv2_web_acl" "web_acl" {
                       }
                       text_transformation {
                         priority = 0
+                        type     = "URL_DECODE"
+                      }
+                      text_transformation {
+                        priority = 1
                         type     = "NORMALIZE_PATH"
                       }
                     }
@@ -1117,6 +1122,10 @@ resource "aws_wafv2_web_acl" "web_acl" {
                           }
                           text_transformation {
                             priority = 0
+                            type     = "URL_DECODE"
+                          }
+                          text_transformation {
+                            priority = 1
                             type     = "NORMALIZE_PATH"
                           }
                         }
@@ -1144,7 +1153,9 @@ resource "aws_wafv2_web_acl" "web_acl" {
         # uri_path_scoped_body_regex_statement: renders
         #   AND(byte_match uri_path STARTS_WITH uri_path_prefix,
         #       regex_match body regex_string)
-        # with the body's text transformations applied in list order, so the
+        # with the same path transformations as the request-scoped exemption
+        # (URL_DECODE, NORMALIZE_PATH) and the body's text transformations
+        # applied in list order, so the
         # rule's action fires when a request to the path prefix carries a body
         # matching the pattern.
         dynamic "and_statement" {
@@ -1159,6 +1170,10 @@ resource "aws_wafv2_web_acl" "web_acl" {
                 }
                 text_transformation {
                   priority = 0
+                  type     = "URL_DECODE"
+                }
+                text_transformation {
+                  priority = 1
                   type     = "NORMALIZE_PATH"
                 }
               }
