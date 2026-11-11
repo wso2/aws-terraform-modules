@@ -476,6 +476,55 @@ variable "rules" {
       scope = optional(string, "LABEL")
       key   = string
     }))
+
+    # Narrow purpose-built rule: blocks requests that carry any of the given
+    # labels (e.g. managed-rule-group sub-rule labels set to count via
+    # rule_action_overrides) UNLESS the request falls under one exempt request
+    # shape: a URI path (after URL_DECODE and NORMALIZE_PATH) starting with
+    # exempt_uri_path_prefix and, when exempt_methods is non-empty, an HTTP
+    # method in exempt_methods. Renders as
+    #   AND(label_match label_names[0],
+    #       NOT(AND(byte_match uri_path STARTS_WITH exempt_uri_path_prefix,
+    #               regex_match method ^(exempt_methods[0]|...)$)))
+    # Two or more label_names render as OR(label_match ...), and an empty
+    # exempt_methods renders NOT(byte_match uri_path ...) directly, because
+    # AWS WAF requires at least 2 statements inside an AND or OR. This is the
+    # request-scoped counterpart of labeled_host_scoped_block_statement: use it
+    # when one endpoint, rather than a whole host, needs to be exempt from a
+    # managed sub-rule while every other request keeps its blocking.
+    # URL_DECODE then NORMALIZE_PATH decodes percent-encoding, collapses
+    # repeated slashes and resolves "./" and "../" segments, so neither
+    # <prefix>/../other nor <prefix>%2F..%2Fother gets the exemption. The path match
+    # is case-sensitive (no LOWERCASE transform), so a differently-cased path
+    # is not exempt. The method set is one regex rather than an OR of byte
+    # matches: an OR inside NOT(AND(...)) would exceed the provider's nesting
+    # depth for web ACL rule statements.
+    labeled_request_scoped_block_statement = optional(object({
+      label_names            = list(string)
+      exempt_uri_path_prefix = string
+      exempt_methods         = optional(list(string), [])
+    }))
+
+    # Narrow purpose-built rule: matches requests whose URI path (after
+    # URL_DECODE and NORMALIZE_PATH, as above) starts with uri_path_prefix
+    # AND whose body matches regex_string after text_transformations (applied
+    # in list order).
+    # Renders as
+    #   AND(byte_match uri_path STARTS_WITH uri_path_prefix,
+    #       regex_match body regex_string)
+    # Pair with action = block to keep a body pattern out of one endpoint, e.g.
+    # to keep blocking cloud metadata service addresses on an endpoint that a
+    # labeled_request_scoped_block_statement exempts from a managed body
+    # sub-rule. oversize_handling decides what happens when the body is larger
+    # than the resource's body inspection limit: CONTINUE inspects the part
+    # that fits, MATCH treats the request as matching, NO_MATCH as not
+    # matching. The path match is case-sensitive, as above.
+    uri_path_scoped_body_regex_statement = optional(object({
+      uri_path_prefix      = string
+      regex_string         = string
+      text_transformations = optional(list(string), ["URL_DECODE", "LOWERCASE"])
+      oversize_handling    = optional(string, "CONTINUE")
+    }))
   }))
 
   # Validation 0: geo_match_statement.country_codes must be non-empty and each
@@ -767,6 +816,42 @@ variable "rules" {
       if try(v.rate_based_statement.scope_down_statement.uri_path_scoped_statement, null) != null
     ])
     error_message = "uri_path_scoped_statement.uri_path_prefix and every excluded_uri_path_prefixes entry must start with \"/\", and host_header, when set, must be non-empty."
+  }
+
+  # Validation 12: labeled_request_scoped_block_statement needs at least one
+  # distinct, non-empty label; an exempt path prefix starting with "/"; and
+  # exempt_methods, when set, as distinct uppercase method names (the method
+  # regex is built from them and matched with no text transformation).
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      length(v.labeled_request_scoped_block_statement.label_names) > 0
+      && length(distinct(v.labeled_request_scoped_block_statement.label_names)) == length(v.labeled_request_scoped_block_statement.label_names)
+      && alltrue([for l in v.labeled_request_scoped_block_statement.label_names : length(l) > 0])
+      && startswith(v.labeled_request_scoped_block_statement.exempt_uri_path_prefix, "/")
+      && length(distinct(v.labeled_request_scoped_block_statement.exempt_methods)) == length(v.labeled_request_scoped_block_statement.exempt_methods)
+      && alltrue([for m in v.labeled_request_scoped_block_statement.exempt_methods : can(regex("^[A-Z]+$", m))])
+      if try(v.labeled_request_scoped_block_statement, null) != null
+    ])
+    error_message = "labeled_request_scoped_block_statement needs at least one distinct, non-empty label_names entry, an exempt_uri_path_prefix starting with \"/\", and exempt_methods (when set) as distinct uppercase HTTP method names (e.g. \"POST\")."
+  }
+
+  # Validation 13: uri_path_scoped_body_regex_statement needs a path prefix
+  # starting with "/", a regex within AWS WAF's 512-character limit, 1 to 10
+  # distinct text transformations, and a valid oversize_handling value.
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      startswith(v.uri_path_scoped_body_regex_statement.uri_path_prefix, "/")
+      && length(v.uri_path_scoped_body_regex_statement.regex_string) > 0
+      && length(v.uri_path_scoped_body_regex_statement.regex_string) <= 512
+      && length(v.uri_path_scoped_body_regex_statement.text_transformations) > 0
+      && length(v.uri_path_scoped_body_regex_statement.text_transformations) <= 10
+      && length(distinct(v.uri_path_scoped_body_regex_statement.text_transformations)) == length(v.uri_path_scoped_body_regex_statement.text_transformations)
+      && contains(["CONTINUE", "MATCH", "NO_MATCH"], v.uri_path_scoped_body_regex_statement.oversize_handling)
+      if try(v.uri_path_scoped_body_regex_statement, null) != null
+    ])
+    error_message = "uri_path_scoped_body_regex_statement needs a uri_path_prefix starting with \"/\", a regex_string of 1-512 characters, 1-10 distinct text_transformations, and oversize_handling of CONTINUE, MATCH or NO_MATCH."
   }
 }
 
