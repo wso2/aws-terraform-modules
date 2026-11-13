@@ -1,0 +1,205 @@
+# -------------------------------------------------------------------------------------
+#
+# Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
+#
+# WSO2 LLC. licenses this file to you under the Apache License,
+# Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+# --------------------------------------------------------------------------------------
+
+resource "kubernetes_namespace_v1" "namespace" {
+  for_each = toset(concat(var.namespaces, [var.argocd_namespace, var.system_namespace]))
+
+  metadata {
+    name = each.value
+  }
+}
+
+resource "kubernetes_storage_class_v1" "gp3" {
+  metadata {
+    name = "gp3"
+    annotations = {
+      "storageclass.kubernetes.io/is-default-class" = "true"
+    }
+  }
+
+  storage_provisioner    = "ebs.csi.aws.com"
+  reclaim_policy         = "Delete"
+  volume_binding_mode    = "WaitForFirstConsumer"
+  allow_volume_expansion = true
+
+  parameters = {
+    type = "gp3"
+  }
+}
+
+# One shared controller per data plane; tiers are isolated by RBAC, not separate installs.
+resource "helm_release" "argo_workflows" {
+  name             = "argo-workflows"
+  repository       = var.argo_helm_repo
+  chart            = "argo-workflows"
+  version          = var.argo_workflows_chart_version
+  namespace        = var.system_namespace
+  create_namespace = false
+  values           = var.argo_workflows_values
+
+  depends_on = [kubernetes_namespace_v1.namespace]
+}
+
+resource "helm_release" "argo_events" {
+  name             = "argo-events"
+  repository       = var.argo_helm_repo
+  chart            = "argo-events"
+  version          = var.argo_events_chart_version
+  namespace        = var.system_namespace
+  create_namespace = false
+  values           = var.argo_events_values
+
+  depends_on = [kubernetes_namespace_v1.namespace]
+}
+
+resource "helm_release" "argocd" {
+  count = var.install_argocd ? 1 : 0
+
+  name             = "argocd"
+  repository       = var.argocd_helm_repo
+  chart            = "argo-cd"
+  version          = var.argocd_chart_version
+  namespace        = var.argocd_namespace
+  create_namespace = false
+  values           = var.argocd_values
+
+  depends_on = [kubernetes_namespace_v1.namespace]
+}
+
+resource "kubernetes_namespace_v1" "external_secrets" {
+  count = var.install_external_secrets ? 1 : 0
+
+  metadata {
+    name = var.eso_namespace
+  }
+}
+
+resource "helm_release" "external_secrets" {
+  count = var.install_external_secrets ? 1 : 0
+
+  name             = "external-secrets"
+  repository       = var.eso_helm_repo
+  chart            = "external-secrets"
+  version          = var.eso_chart_version
+  namespace        = var.eso_namespace
+  create_namespace = false
+
+  set {
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = var.eso_role_arn
+  }
+
+  depends_on = [kubernetes_namespace_v1.external_secrets]
+}
+
+resource "kubectl_manifest" "kubernetes_object" {
+  for_each = { for d in local.manifest_documents : d.key => d if !d.is_sa_token }
+
+  yaml_body          = each.value.body
+  override_namespace = each.value.namespace
+
+  # Some manifests depend on state created later in this apply; waiting would deadlock.
+  wait_for_rollout = false
+
+  depends_on = [helm_release.argo_workflows, helm_release.argo_events, helm_release.argocd]
+}
+
+resource "kubectl_manifest" "extra" {
+  for_each = { for d in local.kubectl_manifest_documents : d.key => d if !d.is_sa_token }
+
+  yaml_body          = each.value.body
+  override_namespace = each.value.namespace
+
+  wait_for_rollout = false
+
+  depends_on = [helm_release.external_secrets, helm_release.argo_workflows, helm_release.argo_events, helm_release.argocd]
+}
+
+# A service-account-token Secret is deleted by Kubernetes if its
+# ServiceAccount does not exist yet, so these are applied after every other
+# caller-supplied manifest instead of in parallel with them.
+resource "kubectl_manifest" "service_account_token" {
+  for_each = merge(
+    { for d in local.manifest_documents : "manifest-${d.key}" => d if d.is_sa_token },
+    { for d in local.kubectl_manifest_documents : "kubectl-${d.key}" => d if d.is_sa_token },
+  )
+
+  yaml_body          = each.value.body
+  override_namespace = try(each.value.namespace, null)
+
+  wait_for_rollout = false
+
+  depends_on = [kubectl_manifest.kubernetes_object, kubectl_manifest.extra]
+}
+
+resource "kubernetes_role_binding_v1" "group" {
+  for_each = var.group_role_bindings
+
+  metadata {
+    name      = "group-${each.key}"
+    namespace = each.value.namespace
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = each.value.cluster_role
+  }
+
+  subject {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Group"
+    name      = each.value.group_name
+  }
+
+  depends_on = [kubernetes_namespace_v1.namespace, kubectl_manifest.kubernetes_object, kubectl_manifest.extra]
+}
+
+# NetworkPolicy has no deny rule, so each tiered namespace allows ingress
+# from every namespace except the other tiers'. Anything that isn't a pod
+# (a load balancer, another VNet/VPC) is dropped as well, which fits the
+# no-inbound design of the tier namespaces.
+resource "kubernetes_network_policy_v1" "tier_isolation" {
+  for_each = local.tier_namespaces
+
+  metadata {
+    name      = "deny-other-tiers"
+    namespace = each.key
+  }
+
+  spec {
+    pod_selector {}
+    policy_types = ["Ingress"]
+
+    ingress {
+      from {
+        namespace_selector {
+          match_expressions {
+            key      = "kubernetes.io/metadata.name"
+            operator = "NotIn"
+            values   = each.value
+          }
+        }
+      }
+    }
+  }
+
+  depends_on = [kubernetes_namespace_v1.namespace, kubectl_manifest.kubernetes_object, kubectl_manifest.extra]
+}
