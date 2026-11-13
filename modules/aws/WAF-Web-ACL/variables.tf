@@ -479,30 +479,51 @@ variable "rules" {
 
     # Narrow purpose-built rule: blocks requests that carry any of the given
     # labels (e.g. managed-rule-group sub-rule labels set to count via
-    # rule_action_overrides) UNLESS the request falls under one exempt request
-    # shape: a URI path (after URL_DECODE and NORMALIZE_PATH) starting with
-    # exempt_uri_path_prefix and, when exempt_methods is non-empty, an HTTP
-    # method in exempt_methods. Renders as
+    # rule_action_overrides) UNLESS the request matches EVERY exempt_*
+    # condition set on the statement. The conditions, in rendering order:
+    #
+    #   exempt_host_header_suffix  byte_match  host ENDS_WITH, LOWERCASE
+    #   exempt_uri_path_prefix     byte_match  uri_path STARTS_WITH, URL_DECODE + NORMALIZE_PATH
+    #   exempt_uri_path_regex      regex_match uri_path, URL_DECODE + NORMALIZE_PATH
+    #   exempt_methods             regex_match method ^(m1|m2|...)$, no transform
+    #   exempt_query_string_regex  regex_match query_string, URL_DECODE + LOWERCASE
+    #
+    # Set exactly one of exempt_uri_path_prefix (one endpoint or subtree) and
+    # exempt_uri_path_regex (several unrelated endpoints, e.g.
+    # "^/oauth2/(authorize|logout)" — an OR of byte matches would exceed the
+    # provider's nesting depth here). Every other condition is optional and
+    # omitted conditions simply do not narrow the exemption. Renders as
     #   AND(label_match label_names[0],
-    #       NOT(AND(byte_match uri_path STARTS_WITH exempt_uri_path_prefix,
-    #               regex_match method ^(exempt_methods[0]|...)$)))
-    # Two or more label_names render as OR(label_match ...), and an empty
-    # exempt_methods renders NOT(byte_match uri_path ...) directly, because
-    # AWS WAF requires at least 2 statements inside an AND or OR. This is the
+    #       NOT(AND(<condition>, <condition>, ...)))
+    # Two or more label_names render as OR(label_match ...), and a single
+    # exempt condition renders NOT(<condition>) directly, because AWS WAF
+    # requires at least 2 statements inside an AND or OR. This is the
     # request-scoped counterpart of labeled_host_scoped_block_statement: use it
     # when one endpoint, rather than a whole host, needs to be exempt from a
     # managed sub-rule while every other request keeps its blocking.
+    #
     # URL_DECODE then NORMALIZE_PATH decodes percent-encoding, collapses
     # repeated slashes and resolves "./" and "../" segments, so neither
     # <prefix>/../other nor <prefix>%2F..%2Fother gets the exemption. The path match
     # is case-sensitive (no LOWERCASE transform), so a differently-cased path
     # is not exempt. The method set is one regex rather than an OR of byte
-    # matches: an OR inside NOT(AND(...)) would exceed the provider's nesting
-    # depth for web ACL rule statements.
+    # matches, for the same nesting-depth reason as exempt_uri_path_regex.
+    #
+    # exempt_query_string_regex narrows the exemption to requests whose query
+    # string carries an expected pattern (e.g. a loopback redirect_uri on an
+    # OAuth authorize call). It is matched after a single URL_DECODE, so a
+    # double-encoded payload does not reach the exemption and stays blocked.
+    # A query string can hold several parameters, so an exemption keyed on one
+    # of them still lets the rest of the query string through the relaxed
+    # sub-rule: pair it with a uri_path_scoped_query_string_regex_statement
+    # rule to keep the dangerous pattern blocked on the exempt endpoint.
     labeled_request_scoped_block_statement = optional(object({
-      label_names            = list(string)
-      exempt_uri_path_prefix = string
-      exempt_methods         = optional(list(string), [])
+      label_names               = list(string)
+      exempt_uri_path_prefix    = optional(string)
+      exempt_uri_path_regex     = optional(string)
+      exempt_methods            = optional(list(string), [])
+      exempt_host_header_suffix = optional(string)
+      exempt_query_string_regex = optional(string)
     }))
 
     # Narrow purpose-built rule: matches requests whose URI path (after
@@ -524,6 +545,27 @@ variable "rules" {
       regex_string         = string
       text_transformations = optional(list(string), ["URL_DECODE", "LOWERCASE"])
       oversize_handling    = optional(string, "CONTINUE")
+    }))
+
+    # Narrow purpose-built rule: matches requests whose URI path (after
+    # URL_DECODE and NORMALIZE_PATH, as above) starts with uri_path_prefix
+    # AND whose query string matches regex_string after text_transformations
+    # (applied in list order).
+    # Renders as
+    #   AND(byte_match uri_path STARTS_WITH uri_path_prefix,
+    #       regex_match query_string regex_string)
+    # The query-string counterpart of uri_path_scoped_body_regex_statement:
+    # pair it with action = block to keep a pattern out of one endpoint's
+    # query string, e.g. to keep blocking cloud metadata service addresses on
+    # an endpoint that a labeled_request_scoped_block_statement exempts from a
+    # managed query-argument sub-rule. AWS WAF inspects the whole query string
+    # (it is part of the request line, not the body), so unlike the body
+    # statement there is no oversize handling to configure. The path match is
+    # case-sensitive, as above.
+    uri_path_scoped_query_string_regex_statement = optional(object({
+      uri_path_prefix      = string
+      regex_string         = string
+      text_transformations = optional(list(string), ["URL_DECODE", "LOWERCASE"])
     }))
   }))
 
@@ -819,21 +861,50 @@ variable "rules" {
   }
 
   # Validation 12: labeled_request_scoped_block_statement needs at least one
-  # distinct, non-empty label; an exempt path prefix starting with "/"; and
-  # exempt_methods, when set, as distinct uppercase method names (the method
-  # regex is built from them and matched with no text transformation).
+  # distinct, non-empty label, and exempt_methods, when set, as distinct
+  # uppercase method names (the method regex is built from them and matched
+  # with no text transformation).
   validation {
     condition = alltrue([
       for v in var.rules :
       length(v.labeled_request_scoped_block_statement.label_names) > 0
       && length(distinct(v.labeled_request_scoped_block_statement.label_names)) == length(v.labeled_request_scoped_block_statement.label_names)
       && alltrue([for l in v.labeled_request_scoped_block_statement.label_names : length(l) > 0])
-      && startswith(v.labeled_request_scoped_block_statement.exempt_uri_path_prefix, "/")
       && length(distinct(v.labeled_request_scoped_block_statement.exempt_methods)) == length(v.labeled_request_scoped_block_statement.exempt_methods)
       && alltrue([for m in v.labeled_request_scoped_block_statement.exempt_methods : can(regex("^[A-Z]+$", m))])
       if try(v.labeled_request_scoped_block_statement, null) != null
     ])
-    error_message = "labeled_request_scoped_block_statement needs at least one distinct, non-empty label_names entry, an exempt_uri_path_prefix starting with \"/\", and exempt_methods (when set) as distinct uppercase HTTP method names (e.g. \"POST\")."
+    error_message = "labeled_request_scoped_block_statement needs at least one distinct, non-empty label_names entry, and exempt_methods (when set) as distinct uppercase HTTP method names (e.g. \"POST\")."
+  }
+
+  # Validation 12a: the path condition is mandatory and exclusive - exactly one
+  # of exempt_uri_path_prefix (starting with "/") and exempt_uri_path_regex
+  # (1-512 characters, the AWS WAF regex limit). Without a path condition the
+  # statement would exempt whole hosts, which labeled_host_scoped_block_statement
+  # already does.
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      (v.labeled_request_scoped_block_statement.exempt_uri_path_prefix != null) != (v.labeled_request_scoped_block_statement.exempt_uri_path_regex != null)
+      && (v.labeled_request_scoped_block_statement.exempt_uri_path_prefix == null || startswith(coalesce(v.labeled_request_scoped_block_statement.exempt_uri_path_prefix, "/"), "/"))
+      && (v.labeled_request_scoped_block_statement.exempt_uri_path_regex == null || (length(coalesce(v.labeled_request_scoped_block_statement.exempt_uri_path_regex, "")) > 0 && length(coalesce(v.labeled_request_scoped_block_statement.exempt_uri_path_regex, "")) <= 512))
+      if try(v.labeled_request_scoped_block_statement, null) != null
+    ])
+    error_message = "labeled_request_scoped_block_statement must set exactly one of exempt_uri_path_prefix (beginning with \"/\") or exempt_uri_path_regex (1-512 characters, the AWS WAF regex limit)."
+  }
+
+  # Validation 12b: the optional host and query-string conditions. The Host
+  # header is LOWERCASE-transformed before matching but the search_string is
+  # not, so the suffix must be lowercase; the query-string regex is matched
+  # after URL_DECODE + LOWERCASE and is subject to WAF's 512-character limit.
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      (v.labeled_request_scoped_block_statement.exempt_host_header_suffix == null || (length(coalesce(v.labeled_request_scoped_block_statement.exempt_host_header_suffix, "")) > 0 && coalesce(v.labeled_request_scoped_block_statement.exempt_host_header_suffix, "") == lower(coalesce(v.labeled_request_scoped_block_statement.exempt_host_header_suffix, ""))))
+      && (v.labeled_request_scoped_block_statement.exempt_query_string_regex == null || (length(coalesce(v.labeled_request_scoped_block_statement.exempt_query_string_regex, "")) > 0 && length(coalesce(v.labeled_request_scoped_block_statement.exempt_query_string_regex, "")) <= 512))
+      if try(v.labeled_request_scoped_block_statement, null) != null
+    ])
+    error_message = "labeled_request_scoped_block_statement exempt_host_header_suffix, when set, must be a non-empty lowercase host suffix (WAF applies LOWERCASE to the Host header but does not transform the search_string), and exempt_query_string_regex, when set, must be 1-512 characters (the AWS WAF regex limit)."
   }
 
   # Validation 13: uri_path_scoped_body_regex_statement needs a path prefix
@@ -852,6 +923,24 @@ variable "rules" {
       if try(v.uri_path_scoped_body_regex_statement, null) != null
     ])
     error_message = "uri_path_scoped_body_regex_statement needs a uri_path_prefix starting with \"/\", a regex_string of 1-512 characters, 1-10 distinct text_transformations, and oversize_handling of CONTINUE, MATCH or NO_MATCH."
+  }
+
+  # Validation 14: uri_path_scoped_query_string_regex_statement needs a path
+  # prefix starting with "/", a regex within AWS WAF's 512-character limit and
+  # 1 to 10 distinct text transformations. There is no oversize_handling: WAF
+  # inspects the whole query string.
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      startswith(v.uri_path_scoped_query_string_regex_statement.uri_path_prefix, "/")
+      && length(v.uri_path_scoped_query_string_regex_statement.regex_string) > 0
+      && length(v.uri_path_scoped_query_string_regex_statement.regex_string) <= 512
+      && length(v.uri_path_scoped_query_string_regex_statement.text_transformations) > 0
+      && length(v.uri_path_scoped_query_string_regex_statement.text_transformations) <= 10
+      && length(distinct(v.uri_path_scoped_query_string_regex_statement.text_transformations)) == length(v.uri_path_scoped_query_string_regex_statement.text_transformations)
+      if try(v.uri_path_scoped_query_string_regex_statement, null) != null
+    ])
+    error_message = "uri_path_scoped_query_string_regex_statement needs a uri_path_prefix starting with \"/\", a regex_string of 1-512 characters, and 1-10 distinct text_transformations."
   }
 }
 
