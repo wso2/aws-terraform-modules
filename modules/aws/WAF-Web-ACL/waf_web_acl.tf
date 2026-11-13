@@ -1045,6 +1045,304 @@ resource "aws_wafv2_web_acl" "web_acl" {
             }
           }
         }
+
+        # labeled_request_scoped_block_statement: renders
+        #   AND(label_match label_names[0],
+        #       NOT(AND(<exempt condition>, <exempt condition>, ...)))
+        # with OR(label_match ...) for two or more labels and
+        # NOT(<exempt condition>) when the statement carries exactly one, since
+        # AWS WAF rejects an AND or OR holding fewer than 2 statements. The
+        # rule's action fires on requests carrying any of the labels unless
+        # they match EVERY exempt condition. The conditions are built in
+        # locals.tf, in a fixed order (host, path, method, query string), so
+        # adding an optional condition to a statement does not reshuffle the
+        # rendering of the ones already there. Path matches apply URL_DECODE
+        # then NORMALIZE_PATH, so neither "../" segments nor percent-encoded
+        # ones ("%2F..%2F") can reach the exemption.
+        dynamic "and_statement" {
+          for_each = rule.value.labeled_request_scoped_block_statement != null ? [rule.value.labeled_request_scoped_block_statement] : []
+          content {
+            dynamic "statement" {
+              for_each = length(and_statement.value.label_names) == 1 ? and_statement.value.label_names : []
+              iterator = label
+              content {
+                label_match_statement {
+                  scope = "LABEL"
+                  key   = label.value
+                }
+              }
+            }
+            dynamic "statement" {
+              for_each = length(and_statement.value.label_names) > 1 ? [and_statement.value.label_names] : []
+              iterator = labels
+              content {
+                or_statement {
+                  dynamic "statement" {
+                    for_each = labels.value
+                    iterator = label
+                    content {
+                      label_match_statement {
+                        scope = "LABEL"
+                        key   = label.value
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            statement {
+              not_statement {
+                statement {
+                  dynamic "byte_match_statement" {
+                    for_each = [for c in local.labeled_request_scoped_exempt_conditions[rule.key] : c if length(local.labeled_request_scoped_exempt_conditions[rule.key]) == 1 && c.type == "byte_match"]
+                    iterator = cond
+                    content {
+                      search_string         = cond.value.match
+                      positional_constraint = cond.value.constraint
+                      field_to_match {
+                        dynamic "uri_path" {
+                          for_each = cond.value.field == "uri_path" ? [1] : []
+                          content {}
+                        }
+                        dynamic "query_string" {
+                          for_each = cond.value.field == "query_string" ? [1] : []
+                          content {}
+                        }
+                        dynamic "method" {
+                          for_each = cond.value.field == "method" ? [1] : []
+                          content {}
+                        }
+                        dynamic "single_header" {
+                          for_each = cond.value.field == "host" ? [1] : []
+                          content {
+                            name = "host"
+                          }
+                        }
+                      }
+                      dynamic "text_transformation" {
+                        for_each = cond.value.transformations
+                        content {
+                          priority = text_transformation.key
+                          type     = text_transformation.value
+                        }
+                      }
+                    }
+                  }
+                  dynamic "regex_match_statement" {
+                    for_each = [for c in local.labeled_request_scoped_exempt_conditions[rule.key] : c if length(local.labeled_request_scoped_exempt_conditions[rule.key]) == 1 && c.type == "regex_match"]
+                    iterator = cond
+                    content {
+                      regex_string = cond.value.match
+                      field_to_match {
+                        dynamic "uri_path" {
+                          for_each = cond.value.field == "uri_path" ? [1] : []
+                          content {}
+                        }
+                        dynamic "query_string" {
+                          for_each = cond.value.field == "query_string" ? [1] : []
+                          content {}
+                        }
+                        dynamic "method" {
+                          for_each = cond.value.field == "method" ? [1] : []
+                          content {}
+                        }
+                        dynamic "single_header" {
+                          for_each = cond.value.field == "host" ? [1] : []
+                          content {
+                            name = "host"
+                          }
+                        }
+                      }
+                      dynamic "text_transformation" {
+                        for_each = cond.value.transformations
+                        content {
+                          priority = text_transformation.key
+                          type     = text_transformation.value
+                        }
+                      }
+                    }
+                  }
+                  dynamic "and_statement" {
+                    for_each = length(local.labeled_request_scoped_exempt_conditions[rule.key]) > 1 ? [local.labeled_request_scoped_exempt_conditions[rule.key]] : []
+                    iterator = conds
+                    content {
+                      dynamic "statement" {
+                        for_each = conds.value
+                        iterator = cond
+                        content {
+                          dynamic "byte_match_statement" {
+                            for_each = cond.value.type == "byte_match" ? [cond.value] : []
+                            iterator = m
+                            content {
+                              search_string         = m.value.match
+                              positional_constraint = m.value.constraint
+                              field_to_match {
+                                dynamic "uri_path" {
+                                  for_each = m.value.field == "uri_path" ? [1] : []
+                                  content {}
+                                }
+                                dynamic "query_string" {
+                                  for_each = cond.value.field == "query_string" ? [1] : []
+                                  content {}
+                                }
+                                dynamic "method" {
+                                  for_each = cond.value.field == "method" ? [1] : []
+                                  content {}
+                                }
+                                dynamic "single_header" {
+                                  for_each = cond.value.field == "host" ? [1] : []
+                                  content {
+                                    name = "host"
+                                  }
+                                }
+                              }
+                              dynamic "text_transformation" {
+                                for_each = cond.value.transformations
+                                content {
+                                  priority = text_transformation.key
+                                  type     = text_transformation.value
+                                }
+                              }
+                            }
+                          }
+                          dynamic "regex_match_statement" {
+                            for_each = cond.value.type == "regex_match" ? [cond.value] : []
+                            iterator = m
+                            content {
+                              regex_string = m.value.match
+                              field_to_match {
+                                dynamic "uri_path" {
+                                  for_each = m.value.field == "uri_path" ? [1] : []
+                                  content {}
+                                }
+                                dynamic "query_string" {
+                                  for_each = cond.value.field == "query_string" ? [1] : []
+                                  content {}
+                                }
+                                dynamic "method" {
+                                  for_each = cond.value.field == "method" ? [1] : []
+                                  content {}
+                                }
+                                dynamic "single_header" {
+                                  for_each = cond.value.field == "host" ? [1] : []
+                                  content {
+                                    name = "host"
+                                  }
+                                }
+                              }
+                              dynamic "text_transformation" {
+                                for_each = cond.value.transformations
+                                content {
+                                  priority = text_transformation.key
+                                  type     = text_transformation.value
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        # uri_path_scoped_body_regex_statement: renders
+        #   AND(byte_match uri_path STARTS_WITH uri_path_prefix,
+        #       regex_match body regex_string)
+        # with the same path transformations as the request-scoped exemption
+        # (URL_DECODE, NORMALIZE_PATH) and the body's text transformations
+        # applied in list order, so the
+        # rule's action fires when a request to the path prefix carries a body
+        # matching the pattern.
+        dynamic "and_statement" {
+          for_each = rule.value.uri_path_scoped_body_regex_statement != null ? [rule.value.uri_path_scoped_body_regex_statement] : []
+          content {
+            statement {
+              byte_match_statement {
+                search_string         = and_statement.value.uri_path_prefix
+                positional_constraint = "STARTS_WITH"
+                field_to_match {
+                  uri_path {}
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "URL_DECODE"
+                }
+                text_transformation {
+                  priority = 1
+                  type     = "NORMALIZE_PATH"
+                }
+              }
+            }
+            statement {
+              regex_match_statement {
+                regex_string = and_statement.value.regex_string
+                field_to_match {
+                  body {
+                    oversize_handling = and_statement.value.oversize_handling
+                  }
+                }
+                dynamic "text_transformation" {
+                  for_each = and_statement.value.text_transformations
+                  content {
+                    priority = text_transformation.key
+                    type     = text_transformation.value
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        # uri_path_scoped_query_string_regex_statement: renders
+        #   AND(byte_match uri_path STARTS_WITH uri_path_prefix,
+        #       regex_match query_string regex_string)
+        # the query-string counterpart of the body rule above, with the same
+        # path transformations (URL_DECODE, NORMALIZE_PATH) and the query
+        # string's own text transformations applied in list order, so the
+        # rule's action fires when a request to the path prefix carries a
+        # query string matching the pattern. WAF inspects the whole query
+        # string, so there is no oversize handling here.
+        dynamic "and_statement" {
+          for_each = rule.value.uri_path_scoped_query_string_regex_statement != null ? [rule.value.uri_path_scoped_query_string_regex_statement] : []
+          content {
+            statement {
+              byte_match_statement {
+                search_string         = and_statement.value.uri_path_prefix
+                positional_constraint = "STARTS_WITH"
+                field_to_match {
+                  uri_path {}
+                }
+                text_transformation {
+                  priority = 0
+                  type     = "URL_DECODE"
+                }
+                text_transformation {
+                  priority = 1
+                  type     = "NORMALIZE_PATH"
+                }
+              }
+            }
+            statement {
+              regex_match_statement {
+                regex_string = and_statement.value.regex_string
+                field_to_match {
+                  query_string {}
+                }
+                dynamic "text_transformation" {
+                  for_each = and_statement.value.text_transformations
+                  content {
+                    priority = text_transformation.key
+                    type     = text_transformation.value
+                  }
+                }
+              }
+            }
+          }
+        }
       }
 
       visibility_config {
