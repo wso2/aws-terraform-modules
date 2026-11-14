@@ -79,3 +79,9 @@ variable "storage_encrypted" {
   type        = bool
   default     = true
 }
+
+variable "name_override" {
+  description = "Global cluster identifier to use instead of the generated name"
+  type        = string
+  default     = null
+}

@@ -18,7 +18,7 @@ output "secret_arn" {
   depends_on = [aws_secretsmanager_secret.secretsmanager_secret]
 }
 output "secret_version" {
-  value      = aws_secretsmanager_secret_version.secretsmanager_secret_version.version_id
+  value      = one(concat(aws_secretsmanager_secret_version.secretsmanager_secret_version[*].version_id, aws_secretsmanager_secret_version.secretsmanager_secret_version_unmanaged[*].version_id))
   depends_on = [aws_secretsmanager_secret.secretsmanager_secret]
 }
 output "secret_name" {

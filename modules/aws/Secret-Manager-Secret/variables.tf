@@ -47,3 +47,8 @@ variable "replica_regions" {
   description = "Replica regions for secret"
   default     = []
 }
+variable "ignore_secret_string_changes" {
+  description = "Set the secret value on creation only and ignore later changes for values managed outside Terraform"
+  type        = bool
+  default     = false
+}
