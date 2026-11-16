@@ -59,7 +59,7 @@ locals {
       }] : [],
       length(r.labeled_request_scoped_block_statement.exempt_methods) > 0 ? [{
         type            = "regex_match"
-        match           = "^(${join("|", r.labeled_request_scoped_block_statement.exempt_methods)})$"
+        match           = "^(?:${join("|", r.labeled_request_scoped_block_statement.exempt_methods)})$"
         constraint      = ""
         field           = "method"
         transformations = ["NONE"]
@@ -73,5 +73,19 @@ locals {
       }] : [],
     )
     if r.labeled_request_scoped_block_statement != null
+  }
+
+  # Per-rule field list for multi_field_regex_statement, keyed by the var.rules
+  # map key like the exempt conditions above. Each element names the request
+  # field and the text transformations applied to it (the body has its own
+  # list, so JSON escapes can be decoded there without touching the path).
+  multi_field_regex_fields = {
+    for k, r in var.rules : k => [
+      for f in r.multi_field_regex_statement.fields : {
+        field           = f
+        transformations = f == "body" ? r.multi_field_regex_statement.body_text_transformations : r.multi_field_regex_statement.text_transformations
+      }
+    ]
+    if r.multi_field_regex_statement != null
   }
 }

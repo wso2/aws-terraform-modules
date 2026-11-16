@@ -485,7 +485,7 @@ variable "rules" {
     #   exempt_host_header_suffix  byte_match  host ENDS_WITH, LOWERCASE
     #   exempt_uri_path_prefix     byte_match  uri_path STARTS_WITH, URL_DECODE + NORMALIZE_PATH
     #   exempt_uri_path_regex      regex_match uri_path, URL_DECODE + NORMALIZE_PATH
-    #   exempt_methods             regex_match method ^(m1|m2|...)$, no transform
+    #   exempt_methods             regex_match method ^(?:m1|m2|...)$, no transform
     #   exempt_query_string_regex  regex_match query_string, URL_DECODE + LOWERCASE
     #
     # Set exactly one of exempt_uri_path_prefix (one endpoint or subtree) and
@@ -566,6 +566,30 @@ variable "rules" {
       uri_path_prefix      = string
       regex_string         = string
       text_transformations = optional(list(string), ["URL_DECODE", "LOWERCASE"])
+    }))
+
+    # Matches requests in which ANY of the listed fields matches regex_string,
+    # e.g. a cloud metadata backstop over the body, query string and URI path
+    # on every route. Renders as
+    #   OR(regex_match <field> regex_string, ...)
+    # or, with exempt_ip_set_arn (source IPs that skip the rule, e.g. trusted
+    # internal NAT egress, as for a managed rule group's scope-down),
+    #   AND(NOT(ip_set_reference exempt_ip_set_arn), OR(regex_match ...))
+    # A single field renders the regex_match directly, because AWS WAF needs
+    # at least two statements inside an AND or OR. fields is any of "body",
+    # "query_string" and "uri_path". body_text_transformations apply to the
+    # body (default URL_DECODE, JS_DECODE for JSON \u escapes, LOWERCASE) and
+    # text_transformations to the other fields, each in list order.
+    # oversize_handling decides bodies past the inspection limit (CONTINUE
+    # inspects the part that fits). AWS WAF does not support capturing groups:
+    # write groups as (?:...).
+    multi_field_regex_statement = optional(object({
+      regex_string              = string
+      fields                    = list(string)
+      text_transformations      = optional(list(string), ["URL_DECODE", "LOWERCASE"])
+      body_text_transformations = optional(list(string), ["URL_DECODE", "JS_DECODE", "LOWERCASE"])
+      oversize_handling         = optional(string, "CONTINUE")
+      exempt_ip_set_arn         = optional(string)
     }))
   }))
 
@@ -941,6 +965,50 @@ variable "rules" {
       if try(v.uri_path_scoped_query_string_regex_statement, null) != null
     ])
     error_message = "uri_path_scoped_query_string_regex_statement needs a uri_path_prefix starting with \"/\", a regex_string of 1-512 characters, and 1-10 distinct text_transformations."
+  }
+
+  # Validation 15: multi_field_regex_statement needs a regex within AWS WAF's
+  # 512-character limit, 1 to 3 distinct fields out of body, query_string and
+  # uri_path, 1 to 10 distinct text transformations per list, a valid
+  # oversize_handling, and exempt_ip_set_arn (when set) as an ARN.
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      length(v.multi_field_regex_statement.regex_string) > 0
+      && length(v.multi_field_regex_statement.regex_string) <= 512
+      && length(v.multi_field_regex_statement.fields) > 0
+      && length(distinct(v.multi_field_regex_statement.fields)) == length(v.multi_field_regex_statement.fields)
+      && alltrue([for f in v.multi_field_regex_statement.fields : contains(["body", "query_string", "uri_path"], f)])
+      && length(v.multi_field_regex_statement.text_transformations) > 0
+      && length(v.multi_field_regex_statement.text_transformations) <= 10
+      && length(distinct(v.multi_field_regex_statement.text_transformations)) == length(v.multi_field_regex_statement.text_transformations)
+      && length(v.multi_field_regex_statement.body_text_transformations) > 0
+      && length(v.multi_field_regex_statement.body_text_transformations) <= 10
+      && length(distinct(v.multi_field_regex_statement.body_text_transformations)) == length(v.multi_field_regex_statement.body_text_transformations)
+      && contains(["CONTINUE", "MATCH", "NO_MATCH"], v.multi_field_regex_statement.oversize_handling)
+      && (v.multi_field_regex_statement.exempt_ip_set_arn == null || startswith(coalesce(v.multi_field_regex_statement.exempt_ip_set_arn, "arn:"), "arn:"))
+      if try(v.multi_field_regex_statement, null) != null
+    ])
+    error_message = "multi_field_regex_statement needs a regex_string of 1-512 characters, 1-3 distinct fields out of body, query_string and uri_path, 1-10 distinct entries in each transformation list, oversize_handling of CONTINUE, MATCH or NO_MATCH, and exempt_ip_set_arn (when set) as an ARN."
+  }
+
+  # Validation 16: AWS WAF rejects capturing groups ("backreferences and
+  # capturing subexpressions" are unsupported), and only at apply time. Catch
+  # them at plan time in every regex these statement types take: a "(" that is
+  # neither escaped ("\(") nor the start of a non-capturing group ("(?").
+  validation {
+    condition = alltrue(flatten([
+      for v in var.rules : [
+        for x in [
+          try(v.labeled_request_scoped_block_statement.exempt_uri_path_regex, null),
+          try(v.labeled_request_scoped_block_statement.exempt_query_string_regex, null),
+          try(v.uri_path_scoped_body_regex_statement.regex_string, null),
+          try(v.uri_path_scoped_query_string_regex_statement.regex_string, null),
+          try(v.multi_field_regex_statement.regex_string, null),
+        ] : length(regexall("\\(", replace(replace(x, "\\(", ""), "(?", ""))) == 0 if x != null
+      ]
+    ]))
+    error_message = "AWS WAF does not support capturing groups: write every group in exempt_uri_path_regex, exempt_query_string_regex and regex_string as (?:...), and escape a literal parenthesis as \\(."
   }
 }
 

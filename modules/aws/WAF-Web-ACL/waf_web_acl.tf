@@ -1343,6 +1343,164 @@ resource "aws_wafv2_web_acl" "web_acl" {
             }
           }
         }
+
+        # multi_field_regex_statement: renders one regex over several request
+        # fields, OR-ed, optionally behind a trusted-IP skip:
+        #   with exempt_ip_set_arn:    AND(NOT(ip_set_reference), OR(regex_match <field>, ...))
+        #   without exempt_ip_set_arn: OR(regex_match <field>, ...)
+        # One field renders its regex_match directly (inside the AND, or as
+        # the rule's statement), as AWS WAF needs two or more statements in an
+        # AND or OR. Field specs come from local.multi_field_regex_fields.
+        dynamic "and_statement" {
+          for_each = try(rule.value.multi_field_regex_statement.exempt_ip_set_arn, null) != null ? [1] : []
+          content {
+            statement {
+              not_statement {
+                statement {
+                  ip_set_reference_statement {
+                    arn = rule.value.multi_field_regex_statement.exempt_ip_set_arn
+                  }
+                }
+              }
+            }
+            statement {
+              dynamic "or_statement" {
+                for_each = length(local.multi_field_regex_fields[rule.key]) > 1 ? [1] : []
+                content {
+                  dynamic "statement" {
+                    for_each = local.multi_field_regex_fields[rule.key]
+                    iterator = field
+                    content {
+                      regex_match_statement {
+                        regex_string = rule.value.multi_field_regex_statement.regex_string
+                        field_to_match {
+                          dynamic "body" {
+                            for_each = field.value.field == "body" ? [1] : []
+                            content {
+                              oversize_handling = rule.value.multi_field_regex_statement.oversize_handling
+                            }
+                          }
+                          dynamic "query_string" {
+                            for_each = field.value.field == "query_string" ? [1] : []
+                            content {}
+                          }
+                          dynamic "uri_path" {
+                            for_each = field.value.field == "uri_path" ? [1] : []
+                            content {}
+                          }
+                        }
+                        dynamic "text_transformation" {
+                          for_each = field.value.transformations
+                          content {
+                            priority = text_transformation.key
+                            type     = text_transformation.value
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              dynamic "regex_match_statement" {
+                for_each = length(local.multi_field_regex_fields[rule.key]) == 1 ? local.multi_field_regex_fields[rule.key] : []
+                iterator = field
+                content {
+                  regex_string = rule.value.multi_field_regex_statement.regex_string
+                  field_to_match {
+                    dynamic "body" {
+                      for_each = field.value.field == "body" ? [1] : []
+                      content {
+                        oversize_handling = rule.value.multi_field_regex_statement.oversize_handling
+                      }
+                    }
+                    dynamic "query_string" {
+                      for_each = field.value.field == "query_string" ? [1] : []
+                      content {}
+                    }
+                    dynamic "uri_path" {
+                      for_each = field.value.field == "uri_path" ? [1] : []
+                      content {}
+                    }
+                  }
+                  dynamic "text_transformation" {
+                    for_each = field.value.transformations
+                    content {
+                      priority = text_transformation.key
+                      type     = text_transformation.value
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        dynamic "or_statement" {
+          for_each = try(rule.value.multi_field_regex_statement, null) != null && try(rule.value.multi_field_regex_statement.exempt_ip_set_arn, null) == null && length(try(local.multi_field_regex_fields[rule.key], [])) > 1 ? [1] : []
+          content {
+            dynamic "statement" {
+              for_each = local.multi_field_regex_fields[rule.key]
+              iterator = field
+              content {
+                regex_match_statement {
+                  regex_string = rule.value.multi_field_regex_statement.regex_string
+                  field_to_match {
+                    dynamic "body" {
+                      for_each = field.value.field == "body" ? [1] : []
+                      content {
+                        oversize_handling = rule.value.multi_field_regex_statement.oversize_handling
+                      }
+                    }
+                    dynamic "query_string" {
+                      for_each = field.value.field == "query_string" ? [1] : []
+                      content {}
+                    }
+                    dynamic "uri_path" {
+                      for_each = field.value.field == "uri_path" ? [1] : []
+                      content {}
+                    }
+                  }
+                  dynamic "text_transformation" {
+                    for_each = field.value.transformations
+                    content {
+                      priority = text_transformation.key
+                      type     = text_transformation.value
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        dynamic "regex_match_statement" {
+          for_each = try(rule.value.multi_field_regex_statement, null) != null && try(rule.value.multi_field_regex_statement.exempt_ip_set_arn, null) == null && length(try(local.multi_field_regex_fields[rule.key], [])) == 1 ? local.multi_field_regex_fields[rule.key] : []
+          iterator = field
+          content {
+            regex_string = rule.value.multi_field_regex_statement.regex_string
+            field_to_match {
+              dynamic "body" {
+                for_each = field.value.field == "body" ? [1] : []
+                content {
+                  oversize_handling = rule.value.multi_field_regex_statement.oversize_handling
+                }
+              }
+              dynamic "query_string" {
+                for_each = field.value.field == "query_string" ? [1] : []
+                content {}
+              }
+              dynamic "uri_path" {
+                for_each = field.value.field == "uri_path" ? [1] : []
+                content {}
+              }
+            }
+            dynamic "text_transformation" {
+              for_each = field.value.transformations
+              content {
+                priority = text_transformation.key
+                type     = text_transformation.value
+              }
+            }
+          }
+        }
       }
 
       visibility_config {
