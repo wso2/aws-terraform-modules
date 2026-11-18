@@ -517,6 +517,31 @@ variable "rules" {
     # of them still lets the rest of the query string through the relaxed
     # sub-rule: pair it with a uri_path_scoped_query_string_regex_statement
     # rule to keep the dangerous pattern blocked on the exempt endpoint.
+    #
+    # exempt_scopes replaces the exempt_* fields above when one rule needs
+    # more than one exemption (e.g. a console write path on one host and an
+    # OAuth endpoint on another). Each scope is its own set of ANDed
+    # conditions, and a request is exempt when it matches EVERY condition of
+    # ANY scope, so one scope's host never combines with another scope's
+    # path. Renders as
+    #   AND(label_match ..., NOT(<scope 1>), NOT(<scope 2>), ...)
+    # with each scope rendered exactly as the exempt_* fields are, so the
+    # nesting depth is unchanged and a rule using the exempt_* fields keeps
+    # its rendering. A scope:
+    #   - needs exactly one of uri_path_prefix and uri_path_regex, and neither
+    #     may match the bare root path "/";
+    #   - needs host_header_suffix, or any_host = true to exempt the path on
+    #     every host behind the Web ACL on purpose;
+    #   - takes query_string_regex, matched after URL_DECODE + LOWERCASE
+    #     (query_string_match = "decoded", the default) or after LOWERCASE
+    #     only (query_string_match = "raw"). A raw match keeps "&" and "="
+    #     literal, so a percent-encoded "%26name%3D" inside another parameter
+    #     cannot fake a parameter boundary; write raw patterns to accept both
+    #     the encoded and the plain form of ":" and "/";
+    #   - takes body_regex, matched on the raw body after LOWERCASE only. A
+    #     body beyond the Web ACL's body inspection limit never matches
+    #     (oversize_handling NO_MATCH), so it is never exempt.
+    # Set exempt_scopes (1-5 distinct scopes) or the exempt_* fields, not both.
     labeled_request_scoped_block_statement = optional(object({
       label_names               = list(string)
       exempt_uri_path_prefix    = optional(string)
@@ -524,6 +549,16 @@ variable "rules" {
       exempt_methods            = optional(list(string), [])
       exempt_host_header_suffix = optional(string)
       exempt_query_string_regex = optional(string)
+      exempt_scopes = optional(list(object({
+        host_header_suffix = optional(string)
+        any_host           = optional(bool, false)
+        uri_path_prefix    = optional(string)
+        uri_path_regex     = optional(string)
+        methods            = optional(list(string), [])
+        query_string_regex = optional(string)
+        query_string_match = optional(string, "decoded")
+        body_regex         = optional(string)
+      })))
     }))
 
     # Narrow purpose-built rule: matches requests whose URI path (after
@@ -905,16 +940,66 @@ variable "rules" {
   # of exempt_uri_path_prefix (starting with "/") and exempt_uri_path_regex
   # (1-512 characters, the AWS WAF regex limit). Without a path condition the
   # statement would exempt whole hosts, which labeled_host_scoped_block_statement
-  # already does.
+  # already does. A statement that sets exempt_scopes is checked by 12c-12d
+  # instead.
   validation {
     condition = alltrue([
       for v in var.rules :
       (v.labeled_request_scoped_block_statement.exempt_uri_path_prefix != null) != (v.labeled_request_scoped_block_statement.exempt_uri_path_regex != null)
       && (v.labeled_request_scoped_block_statement.exempt_uri_path_prefix == null || startswith(coalesce(v.labeled_request_scoped_block_statement.exempt_uri_path_prefix, "/"), "/"))
       && (v.labeled_request_scoped_block_statement.exempt_uri_path_regex == null || (length(coalesce(v.labeled_request_scoped_block_statement.exempt_uri_path_regex, "")) > 0 && length(coalesce(v.labeled_request_scoped_block_statement.exempt_uri_path_regex, "")) <= 512))
-      if try(v.labeled_request_scoped_block_statement, null) != null
+      if try(v.labeled_request_scoped_block_statement, null) != null && try(v.labeled_request_scoped_block_statement.exempt_scopes, null) == null
     ])
     error_message = "labeled_request_scoped_block_statement must set exactly one of exempt_uri_path_prefix (beginning with \"/\") or exempt_uri_path_regex (1-512 characters, the AWS WAF regex limit)."
+  }
+
+  # Validation 12c: exempt_scopes holds 1-5 distinct, non-null scopes and
+  # replaces the exempt_* fields, which must then be left unset. Five is a
+  # complexity limit: each scope adds roughly 40-85 WCU to the Web ACL.
+  validation {
+    condition = alltrue([
+      for v in var.rules :
+      length(v.labeled_request_scoped_block_statement.exempt_scopes) >= 1
+      && length(v.labeled_request_scoped_block_statement.exempt_scopes) <= 5
+      && alltrue([for s in v.labeled_request_scoped_block_statement.exempt_scopes : s != null])
+      && length(distinct(v.labeled_request_scoped_block_statement.exempt_scopes)) == length(v.labeled_request_scoped_block_statement.exempt_scopes)
+      && v.labeled_request_scoped_block_statement.exempt_uri_path_prefix == null
+      && v.labeled_request_scoped_block_statement.exempt_uri_path_regex == null
+      && v.labeled_request_scoped_block_statement.exempt_host_header_suffix == null
+      && v.labeled_request_scoped_block_statement.exempt_query_string_regex == null
+      && length(v.labeled_request_scoped_block_statement.exempt_methods) == 0
+      if try(v.labeled_request_scoped_block_statement.exempt_scopes, null) != null
+    ])
+    error_message = "labeled_request_scoped_block_statement exempt_scopes must hold 1-5 distinct scopes, and the exempt_* fields must be left unset when exempt_scopes is set."
+  }
+
+  # Validation 12d: each exempt scope needs exactly one path condition that
+  # does not match the bare root path "/" (a root-match check, not a catch-all
+  # guarantee: "^/.+" still passes and needs review), exactly one of a
+  # lowercase host_header_suffix or any_host = true, distinct uppercase
+  # methods, query_string_match "decoded" or "raw", and regexes within AWS
+  # WAF's 512-character limit. Terraform checks a regex with RE2 while AWS WAF
+  # uses a restricted PCRE, so a pattern that fails RE2 is rejected here and a
+  # pattern RE2 accepts can still be rejected by WAF at apply.
+  validation {
+    condition = alltrue(flatten([
+      for v in var.rules : [
+        for s in(try(v.labeled_request_scoped_block_statement.exempt_scopes, null) == null ? [] : v.labeled_request_scoped_block_statement.exempt_scopes) :
+        s == null ? false : (
+          ((s.uri_path_prefix != null) != (s.uri_path_regex != null))
+          && (s.uri_path_prefix == null ? true : (startswith(s.uri_path_prefix, "/") && s.uri_path_prefix != "/"))
+          && (s.uri_path_regex == null ? true : (length(s.uri_path_regex) > 0 && length(s.uri_path_regex) <= 512 && try(length(regexall(s.uri_path_regex, "/")) == 0, false)))
+          && ((s.host_header_suffix != null) != s.any_host)
+          && (s.host_header_suffix == null ? true : (length(s.host_header_suffix) > 0 && s.host_header_suffix == lower(s.host_header_suffix)))
+          && length(distinct(s.methods)) == length(s.methods)
+          && alltrue([for m in s.methods : can(regex("^[A-Z]+$", m))])
+          && contains(["decoded", "raw"], s.query_string_match)
+          && (s.query_string_regex == null ? true : (length(s.query_string_regex) > 0 && length(s.query_string_regex) <= 512))
+          && (s.body_regex == null ? true : (length(s.body_regex) > 0 && length(s.body_regex) <= 512))
+        )
+      ]
+    ]))
+    error_message = "Each exempt_scopes entry needs exactly one of uri_path_prefix (starting with \"/\", not \"/\" itself) or uri_path_regex (1-512 characters, not matching \"/\"), exactly one of a non-empty lowercase host_header_suffix or any_host = true, distinct uppercase methods, query_string_match of \"decoded\" or \"raw\", and query_string_regex / body_regex of 1-512 characters when set."
   }
 
   # Validation 12b: the optional host and query-string conditions. The Host
@@ -999,16 +1084,19 @@ variable "rules" {
   validation {
     condition = alltrue(flatten([
       for v in var.rules : [
-        for x in [
+        for x in concat([
           try(v.labeled_request_scoped_block_statement.exempt_uri_path_regex, null),
           try(v.labeled_request_scoped_block_statement.exempt_query_string_regex, null),
           try(v.uri_path_scoped_body_regex_statement.regex_string, null),
           try(v.uri_path_scoped_query_string_regex_statement.regex_string, null),
           try(v.multi_field_regex_statement.regex_string, null),
-        ] : length(regexall("\\(", replace(replace(x, "\\(", ""), "(?", ""))) == 0 if x != null
+          ], flatten([
+            for s in(try(v.labeled_request_scoped_block_statement.exempt_scopes, null) == null ? [] : v.labeled_request_scoped_block_statement.exempt_scopes) :
+            [try(s.uri_path_regex, null), try(s.query_string_regex, null), try(s.body_regex, null)]
+        ])) : length(regexall("\\(", replace(replace(x, "\\(", ""), "(?", ""))) == 0 if x != null
       ]
     ]))
-    error_message = "AWS WAF does not support capturing groups: write every group in exempt_uri_path_regex, exempt_query_string_regex and regex_string as (?:...), and escape a literal parenthesis as \\(."
+    error_message = "AWS WAF does not support capturing groups: write every group in exempt_uri_path_regex, exempt_query_string_regex, the exempt_scopes regexes and regex_string as (?:...), and escape a literal parenthesis as \\(."
   }
 }
 
