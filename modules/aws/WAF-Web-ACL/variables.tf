@@ -525,21 +525,25 @@ variable "rules" {
     # ANY scope, so one scope's host never combines with another scope's
     # path. Renders as
     #   AND(label_match ..., NOT(<scope 1>), NOT(<scope 2>), ...)
-    # with each scope rendered exactly as the exempt_* fields are, so the
+    # with each scope using the same structure as the exempt_* fields, so the
     # nesting depth is unchanged and a rule using the exempt_* fields keeps
     # its rendering. A scope:
     #   - needs exactly one of uri_path_prefix and uri_path_regex, and neither
     #     may match the bare root path "/";
     #   - needs host_header_suffix, or any_host = true to exempt the path on
-    #     every host behind the Web ACL on purpose;
+    #     every host behind the Web ACL on purpose. The Host header is matched
+    #     as-is, case-sensitively against the lowercase suffix; an uppercase
+    #     Host does not match and stays blocked;
     #   - takes query_string_regex, matched after URL_DECODE + LOWERCASE
-    #     (query_string_match = "decoded", the default) or after LOWERCASE
-    #     only (query_string_match = "raw"). A raw match keeps "&" and "="
-    #     literal, so a percent-encoded "%26name%3D" inside another parameter
+    #     (query_string_match = "decoded", the default) or with no
+    #     transformation (query_string_match = "raw"). A raw match is
+    #     case-sensitive and keeps "&" and "=" literal, so a percent-encoded
+    #     "%26name%3D" inside another parameter
     #     cannot fake a parameter boundary; write raw patterns to accept both
-    #     the encoded and the plain form of ":" and "/";
-    #   - takes body_regex, matched on the raw body after LOWERCASE only. A
-    #     body beyond the Web ACL's body inspection limit never matches
+    #     hex cases and the plain forms, e.g. "%3[aA]"/":" and "%2[fF]"/"/";
+    #   - takes body_regex, matched on the raw body with no transformation
+    #     (case-sensitive); write patterns with both hex cases as above. A body
+    #     beyond the Web ACL's body inspection limit never matches
     #     (oversize_handling NO_MATCH), so it is never exempt.
     # Set exempt_scopes (1-5 distinct scopes) or the exempt_* fields, not both.
     labeled_request_scoped_block_statement = optional(object({
@@ -955,7 +959,7 @@ variable "rules" {
 
   # Validation 12c: exempt_scopes holds 1-5 distinct, non-null scopes and
   # replaces the exempt_* fields, which must then be left unset. Five is a
-  # complexity limit: each scope adds roughly 40-85 WCU to the Web ACL.
+  # complexity limit: each scope adds roughly 25-55 WCU to the Web ACL.
   validation {
     condition = alltrue([
       for v in var.rules :

@@ -27,6 +27,7 @@ locals {
     for k, r in var.rules : k => (
       r.labeled_request_scoped_block_statement.exempt_scopes != null ? [
         for s in r.labeled_request_scoped_block_statement.exempt_scopes : {
+          legacy             = false
           host_header_suffix = s.host_header_suffix
           uri_path_prefix    = s.uri_path_prefix
           uri_path_regex     = s.uri_path_regex
@@ -36,6 +37,7 @@ locals {
           body_regex         = s.body_regex
         }
         ] : [{
+          legacy             = true
           host_header_suffix = r.labeled_request_scoped_block_statement.exempt_host_header_suffix
           uri_path_prefix    = r.labeled_request_scoped_block_statement.exempt_uri_path_prefix
           uri_path_regex     = r.labeled_request_scoped_block_statement.exempt_uri_path_regex
@@ -64,7 +66,10 @@ locals {
   # Order is fixed (host, path, method, query string, body) so a scope's
   # rendering does not shift when an optional condition is added, and a scope
   # built from the exempt_* fields renders exactly as before exempt_scopes
-  # existed.
+  # existed. Legacy hosts keep LOWERCASE; exempt_scopes hosts, raw queries
+  # and bodies use NONE for case-sensitive matching at lower WCU cost.
+  # Decoded queries keep URL_DECODE + LOWERCASE, and paths keep URL_DECODE
+  # + NORMALIZE_PATH.
   labeled_request_scoped_exempt_scopes = {
     for k, scopes in local.labeled_request_scoped_exempt_scope_inputs : k => [
       for s in scopes : concat(
@@ -73,7 +78,7 @@ locals {
           match           = s.host_header_suffix
           constraint      = "ENDS_WITH"
           field           = "host"
-          transformations = ["LOWERCASE"]
+          transformations = s.legacy ? ["LOWERCASE"] : ["NONE"]
         }] : [],
         s.uri_path_prefix != null ? [{
           type            = "byte_match"
@@ -101,14 +106,14 @@ locals {
           match           = s.query_string_regex
           constraint      = ""
           field           = "query_string"
-          transformations = s.query_string_match == "raw" ? ["LOWERCASE"] : ["URL_DECODE", "LOWERCASE"]
+          transformations = s.query_string_match == "raw" ? ["NONE"] : ["URL_DECODE", "LOWERCASE"]
         }] : [],
         s.body_regex != null ? [{
           type            = "regex_match"
           match           = s.body_regex
           constraint      = ""
           field           = "body"
-          transformations = ["LOWERCASE"]
+          transformations = ["NONE"]
         }] : [],
       )
     ]
