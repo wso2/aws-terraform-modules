@@ -1,0 +1,419 @@
+# -------------------------------------------------------------------------------------
+#
+# Copyright (c) 2026, WSO2 LLC. (https://www.wso2.com) All Rights Reserved.
+#
+# WSO2 LLC. licenses this file to you under the Apache License,
+# Version 2.0 (the "License"); you may not use this file except
+# in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+# --------------------------------------------------------------------------------------
+
+resource "kubernetes_namespace_v1" "namespace" {
+  metadata {
+    name = var.namespace
+  }
+}
+
+resource "kubernetes_namespace_v1" "extra" {
+  for_each = toset(var.extra_namespaces)
+
+  metadata {
+    name = each.value
+  }
+}
+
+resource "kubernetes_config_map_v1" "config_map" {
+  for_each = var.config_maps
+
+  metadata {
+    name      = each.key
+    namespace = each.value.namespace
+  }
+  data = each.value.data
+
+  depends_on = [kubernetes_namespace_v1.namespace, kubernetes_namespace_v1.extra]
+}
+
+resource "tls_private_key" "tunnel_client" {
+  for_each = toset(var.tunnel_client_identities)
+
+  algorithm = "ED25519"
+}
+
+resource "kubernetes_secret_v1" "tunnel_server_authorized_keys" {
+  count = length(var.tunnel_client_identities) > 0 ? 1 : 0
+
+  metadata {
+    name      = "tunnel-server-authorized-keys"
+    namespace = var.namespace
+  }
+  data = {
+    "authorized_keys" = local.tunnel_authorized_keys
+  }
+
+  depends_on = [kubernetes_namespace_v1.namespace]
+}
+
+resource "kubernetes_namespace_v1" "cert_manager" {
+  count = var.install_cert_manager ? 1 : 0
+
+  metadata {
+    name = var.cert_manager_namespace
+  }
+}
+
+resource "helm_release" "cert_manager" {
+  count = var.install_cert_manager ? 1 : 0
+
+  name             = "cert-manager"
+  repository       = var.cert_manager_helm_repo
+  chart            = "cert-manager"
+  version          = var.cert_manager_chart_version
+  namespace        = var.cert_manager_namespace
+  create_namespace = false
+
+  set {
+    name  = "crds.enabled"
+    value = "true"
+  }
+
+  depends_on = [kubernetes_namespace_v1.cert_manager]
+}
+
+resource "kubectl_manifest" "selfsigned_issuer" {
+  count = var.install_cert_manager ? 1 : 0
+
+  yaml_body = yamlencode({
+    apiVersion = "cert-manager.io/v1"
+    kind       = "Issuer"
+    metadata = {
+      name      = "selfsigned-bootstrap"
+      namespace = var.cert_manager_namespace
+    }
+    spec = { selfSigned = {} }
+  })
+
+  depends_on = [helm_release.cert_manager]
+}
+
+resource "kubectl_manifest" "nats_ca_certificate" {
+  count = var.install_cert_manager ? 1 : 0
+
+  yaml_body = yamlencode({
+    apiVersion = "cert-manager.io/v1"
+    kind       = "Certificate"
+    metadata = {
+      name      = "nats-client-ca"
+      namespace = var.cert_manager_namespace
+    }
+    spec = {
+      isCA       = true
+      commonName = "nats-client-ca"
+      secretName = "nats-client-ca-secret"
+      duration   = "8760h"
+      # Never (not cert-manager >=1.18's default of Always): the CA's own
+      # renewal reuses its private key instead of generating a new one, so
+      # every client cert already issued by it stays trusted across a CA
+      # renewal. Without this, the CA's ~8-month renewal silently breaks
+      # mTLS for every data plane at once - they're still presenting certs
+      # signed by a key the broker no longer trusts. See the rotation
+      # runbook below for what Never does NOT fix (leaf certs still expire
+      # on their own 90-day clock and still need manual re-distribution).
+      privateKey = { algorithm = "ECDSA", size = 256, rotationPolicy = "Never" }
+      issuerRef = {
+        name = "selfsigned-bootstrap"
+        kind = "Issuer"
+      }
+    }
+  })
+
+  depends_on = [kubectl_manifest.selfsigned_issuer]
+}
+
+resource "kubectl_manifest" "nats_ca_issuer" {
+  count = var.install_cert_manager ? 1 : 0
+
+  yaml_body = yamlencode({
+    apiVersion = "cert-manager.io/v1"
+    kind       = "ClusterIssuer"
+    metadata = {
+      name = "nats-client-ca-issuer"
+    }
+    spec = {
+      ca = { secretName = "nats-client-ca-secret" }
+    }
+  })
+
+  depends_on = [kubectl_manifest.nats_ca_certificate]
+}
+
+resource "kubectl_manifest" "nats_server_certificate" {
+  count = var.install_cert_manager ? 1 : 0
+
+  yaml_body = yamlencode({
+    apiVersion = "cert-manager.io/v1"
+    kind       = "Certificate"
+    metadata = {
+      name      = "nats-server-cert"
+      namespace = var.namespace
+    }
+    spec = {
+      commonName  = "nats-server"
+      secretName  = "nats-server-cert"
+      duration    = "2160h"
+      renewBefore = "360h"
+      privateKey  = { algorithm = "ECDSA", size = 256 }
+      usages      = ["server auth", "client auth"]
+      dnsNames    = concat(["nats.${var.namespace}.svc.cluster.local", "nats"], var.nats_server_external_dns_names)
+      issuerRef = {
+        name = "nats-client-ca-issuer"
+        kind = "ClusterIssuer"
+      }
+    }
+  })
+
+  depends_on = [kubectl_manifest.nats_ca_issuer, kubernetes_namespace_v1.namespace]
+}
+
+resource "kubectl_manifest" "nats_client_certificate" {
+  for_each = var.install_cert_manager ? toset(var.nats_client_identities) : []
+
+  yaml_body = yamlencode({
+    apiVersion = "cert-manager.io/v1"
+    kind       = "Certificate"
+    metadata = {
+      name      = "nats-client-${each.value}"
+      namespace = var.namespace
+    }
+    spec = {
+      commonName  = each.value
+      secretName  = "nats-client-${each.value}-secret"
+      duration    = "2160h"
+      renewBefore = "360h"
+      privateKey  = { algorithm = "ECDSA", size = 256 }
+      usages      = ["client auth"]
+      issuerRef = {
+        name = "nats-client-ca-issuer"
+        kind = "ClusterIssuer"
+      }
+    }
+  })
+
+  # Without this, the secret read below can run before cert-manager has
+  # issued it, leaving the nats_client_* outputs null until a second apply.
+  wait_for {
+    condition {
+      type   = "Ready"
+      status = "True"
+    }
+  }
+
+  depends_on = [kubectl_manifest.nats_ca_issuer, kubernetes_namespace_v1.namespace]
+}
+
+data "kubernetes_secret_v1" "nats_client_certificate" {
+  for_each = var.install_cert_manager ? toset(var.nats_client_identities) : []
+
+  metadata {
+    name      = "nats-client-${each.value}-secret"
+    namespace = var.namespace
+  }
+
+  depends_on = [kubectl_manifest.nats_client_certificate]
+}
+
+resource "kubernetes_storage_class_v1" "gp3" {
+  metadata {
+    name = "gp3"
+    annotations = {
+      "storageclass.kubernetes.io/is-default-class" = "true"
+    }
+  }
+
+  storage_provisioner    = "ebs.csi.aws.com"
+  reclaim_policy         = "Delete"
+  volume_binding_mode    = "WaitForFirstConsumer"
+  allow_volume_expansion = true
+
+  parameters = {
+    type = "gp3"
+  }
+}
+
+resource "helm_release" "nats" {
+  name             = "nats"
+  repository       = var.nats_helm_repo
+  chart            = "nats"
+  version          = var.nats_chart_version
+  namespace        = var.namespace
+  create_namespace = false
+  values           = var.nats_values
+
+  depends_on = [kubernetes_namespace_v1.namespace, kubectl_manifest.nats_server_certificate, kubernetes_storage_class_v1.gp3]
+}
+
+resource "helm_release" "argo_workflows" {
+  name             = "argo-workflows"
+  repository       = var.argo_helm_repo
+  chart            = "argo-workflows"
+  version          = var.argo_workflows_chart_version
+  namespace        = var.namespace
+  create_namespace = false
+  values           = var.argo_workflows_values
+
+  depends_on = [kubernetes_namespace_v1.namespace]
+}
+
+resource "helm_release" "argo_events" {
+  name             = "argo-events"
+  repository       = var.argo_helm_repo
+  chart            = "argo-events"
+  version          = var.argo_events_chart_version
+  namespace        = var.namespace
+  create_namespace = false
+  values           = var.argo_events_values
+
+  depends_on = [kubernetes_namespace_v1.namespace]
+}
+
+resource "kubernetes_namespace_v1" "external_secrets" {
+  count = var.install_external_secrets ? 1 : 0
+
+  metadata {
+    name = var.eso_namespace
+  }
+}
+
+resource "helm_release" "external_secrets" {
+  count = var.install_external_secrets ? 1 : 0
+
+  name             = "external-secrets"
+  repository       = var.eso_helm_repo
+  chart            = "external-secrets"
+  version          = var.eso_chart_version
+  namespace        = var.eso_namespace
+  create_namespace = false
+
+  set {
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = var.eso_role_arn
+  }
+
+  depends_on = [kubernetes_namespace_v1.external_secrets]
+}
+
+resource "helm_release" "traefik" {
+  count = var.install_traefik ? 1 : 0
+
+  name             = "traefik"
+  repository       = var.traefik_helm_repo
+  chart            = "traefik"
+  version          = var.traefik_chart_version
+  namespace        = var.traefik_namespace
+  create_namespace = true
+  values           = var.traefik_values
+
+  depends_on = [kubernetes_namespace_v1.extra]
+}
+
+# kubectl_manifest: kubernetes_manifest doesn't work reliably with exec auth.
+resource "kubectl_manifest" "kubernetes_object" {
+  for_each = { for d in local.manifest_documents : d.key => d if !d.is_sa_token }
+
+  yaml_body = each.value.body
+
+  wait_for_rollout = false
+
+  depends_on = [helm_release.nats, helm_release.argo_workflows, helm_release.argo_events, helm_release.traefik, helm_release.external_secrets, kubernetes_namespace_v1.extra, kubernetes_config_map_v1.config_map]
+}
+
+resource "kubectl_manifest" "extra" {
+  for_each = { for d in local.kubectl_manifest_documents : d.key => d if !d.is_sa_token }
+
+  yaml_body          = each.value.body
+  override_namespace = each.value.namespace
+
+  depends_on = [helm_release.external_secrets, helm_release.nats, helm_release.argo_workflows, helm_release.argo_events]
+}
+
+# A service-account-token Secret is deleted by Kubernetes if its
+# ServiceAccount does not exist yet, so these are applied after every other
+# caller-supplied manifest instead of in parallel with them.
+resource "kubectl_manifest" "service_account_token" {
+  for_each = merge(
+    { for d in local.manifest_documents : "manifest-${d.key}" => d if d.is_sa_token },
+    { for d in local.kubectl_manifest_documents : "kubectl-${d.key}" => d if d.is_sa_token },
+  )
+
+  yaml_body          = each.value.body
+  override_namespace = try(each.value.namespace, null)
+
+  wait_for_rollout = false
+
+  depends_on = [kubectl_manifest.kubernetes_object, kubectl_manifest.extra]
+}
+
+resource "kubernetes_role_binding_v1" "group" {
+  for_each = var.group_role_bindings
+
+  metadata {
+    name      = "group-${each.key}"
+    namespace = each.value.namespace
+  }
+
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = each.value.cluster_role
+  }
+
+  subject {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Group"
+    name      = each.value.group_name
+  }
+
+  depends_on = [kubernetes_namespace_v1.namespace, kubernetes_namespace_v1.extra]
+}
+
+# NetworkPolicy has no deny rule, so each tiered namespace allows ingress
+# from every namespace except the other tiers'. Anything that isn't a pod
+# (a load balancer, another VNet/VPC) is dropped as well, which fits the
+# no-inbound design of the tier namespaces.
+resource "kubernetes_network_policy_v1" "tier_isolation" {
+  for_each = local.tier_namespaces
+
+  metadata {
+    name      = "deny-other-tiers"
+    namespace = each.key
+  }
+
+  spec {
+    pod_selector {}
+    policy_types = ["Ingress"]
+
+    ingress {
+      from {
+        namespace_selector {
+          match_expressions {
+            key      = "kubernetes.io/metadata.name"
+            operator = "NotIn"
+            values   = each.value
+          }
+        }
+      }
+    }
+  }
+
+  depends_on = [kubernetes_namespace_v1.namespace, kubernetes_namespace_v1.extra]
+}
