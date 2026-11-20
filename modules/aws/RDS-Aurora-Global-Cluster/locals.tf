@@ -19,5 +19,5 @@
 # --------------------------------------------------------------------------------------
 
 locals {
-  cluster_name = join("-", [var.project, var.application, var.environment, var.region, "aurora-rds-global-cluster"])
+  cluster_name = coalesce(var.name_override, join("-", [var.project, var.application, var.environment, var.region, "aurora-rds-global-cluster"]))
 }

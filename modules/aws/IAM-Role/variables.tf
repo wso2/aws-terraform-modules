@@ -38,3 +38,21 @@ variable "permissions_boundary" {
   description = "ARN of the managed policy to set as the permissions boundary of the IAM Role; null for none"
   default     = null
 }
+variable "name_override" {
+  description = "Role name to use instead of the generated name"
+  type        = string
+  default     = null
+}
+variable "description" {
+  description = "Description of the IAM Role"
+  type        = string
+  default     = null
+}
+variable "inline_policies" {
+  description = "Inline policies to embed in the IAM Role keyed by a stable label with the policy name and JSON document"
+  type = map(object({
+    name   = string
+    policy = string
+  }))
+  default = {}
+}

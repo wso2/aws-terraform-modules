@@ -48,6 +48,12 @@ variable "source_db_cluster_identifier" {
   default     = null
 }
 
+variable "force_destroy" {
+  description = "Remove member clusters from the global cluster on destroy; null keeps the default of true only when source_db_cluster_identifier is null"
+  type        = bool
+  default     = null
+}
+
 variable "tags" {
   description = "Tags for string"
   type        = map(string)
@@ -78,4 +84,10 @@ variable "storage_encrypted" {
   description = "Enable storage encryption for the DB Cluster"
   type        = bool
   default     = true
+}
+
+variable "name_override" {
+  description = "Global cluster identifier to use instead of the generated name"
+  type        = string
+  default     = null
 }
