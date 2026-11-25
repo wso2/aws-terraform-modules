@@ -493,7 +493,7 @@ resource "aws_wafv2_web_acl" "web_acl" {
                     }
                     text_transformation {
                       priority = 1
-                      type     = "NORMALIZE_PATH"
+                      type     = "NORMALIZE_PATH_WIN"
                     }
                     text_transformation {
                       priority = 2
@@ -537,7 +537,7 @@ resource "aws_wafv2_web_acl" "web_acl" {
                         }
                         text_transformation {
                           priority = 1
-                          type     = "NORMALIZE_PATH"
+                          type     = "NORMALIZE_PATH_WIN"
                         }
                         text_transformation {
                           priority = 2
@@ -580,7 +580,7 @@ resource "aws_wafv2_web_acl" "web_acl" {
                               }
                               text_transformation {
                                 priority = 1
-                                type     = "NORMALIZE_PATH"
+                                type     = "NORMALIZE_PATH_WIN"
                               }
                               text_transformation {
                                 priority = 2
@@ -970,7 +970,7 @@ resource "aws_wafv2_web_acl" "web_acl" {
                 }
                 text_transformation {
                   priority = 1
-                  type     = "NORMALIZE_PATH"
+                  type     = "NORMALIZE_PATH_WIN"
                 }
                 text_transformation {
                   priority = 2
@@ -995,7 +995,7 @@ resource "aws_wafv2_web_acl" "web_acl" {
                       }
                       text_transformation {
                         priority = 1
-                        type     = "NORMALIZE_PATH"
+                        type     = "NORMALIZE_PATH_WIN"
                       }
                       text_transformation {
                         priority = 2
@@ -1063,7 +1063,7 @@ resource "aws_wafv2_web_acl" "web_acl" {
                 }
                 text_transformation {
                   priority = 1
-                  type     = "NORMALIZE_PATH"
+                  type     = "NORMALIZE_PATH_WIN"
                 }
                 text_transformation {
                   priority = 2
@@ -1088,7 +1088,7 @@ resource "aws_wafv2_web_acl" "web_acl" {
                       }
                       text_transformation {
                         priority = 1
-                        type     = "NORMALIZE_PATH"
+                        type     = "NORMALIZE_PATH_WIN"
                       }
                       text_transformation {
                         priority = 2
