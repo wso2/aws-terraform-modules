@@ -265,6 +265,9 @@ variable "rules" {
         #       [NOT(ip_set_reference exempt_ip_set_arn)])
         # or as the bare uri byte_match when no optional field is set (AWS
         # WAF rejects an and_statement with fewer than 2 nested statements).
+        # Every uri match runs URL_DECODE, NORMALIZE_PATH and LOWERCASE first,
+        # so the path is compared in the form the gateway routes on; write
+        # prefixes decoded, normalized and lowercase.
         uri_path_scoped_statement = optional(object({
           uri_path_prefix            = string
           host_header                = optional(string)
@@ -423,7 +426,10 @@ variable "rules" {
     # entry in excluded_uri_path_prefixes are matched against a LOWERCASE-
     # transformed field and WAF does not transform the search_string, so all
     # must be provided lowercase; uri_path_prefix and each excluded prefix
-    # must begin with '/'.
+    # must begin with '/'. The uri path runs URL_DECODE and NORMALIZE_PATH
+    # before LOWERCASE, so '//', '/./', '/x/../' and percent-encoded
+    # spellings of a locked path still match (the gateway behind the WAF
+    # normalizes before routing); write prefixes decoded and normalized.
     host_and_path_scoped_ip_allowlist_block_statement = optional(object({
       host_header                = string
       uri_path_prefix            = string
@@ -447,7 +453,10 @@ variable "rules" {
     # uri_path_prefix, and every entry in excluded_uri_path_prefixes are
     # matched against a LOWERCASE-transformed field and WAF does not transform
     # the search_string, so all must be provided lowercase; uri_path_prefix
-    # and each excluded prefix must begin with '/'.
+    # and each excluded prefix must begin with '/'. The uri path runs
+    # URL_DECODE and NORMALIZE_PATH before LOWERCASE, so an allowed prefix
+    # cannot be used to climb out to another path ('/open/../locked' is
+    # compared as '/locked'); write prefixes decoded and normalized.
     host_and_path_scoped_statement = optional(object({
       host_header                = string
       uri_path_prefix            = string
