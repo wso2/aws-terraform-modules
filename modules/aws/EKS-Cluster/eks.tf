@@ -49,6 +49,16 @@ resource "aws_eks_cluster" "eks_cluster" {
     service_ipv4_cidr = var.service_ipv4_cidr
   }
 
+  # EKS Provisioned Control Plane: a control plane sized above the standard one, for
+  # clusters whose node, pod or API-caller counts outgrow it. Left out when the tier is
+  # null, so AWS keeps the tier the cluster already has and nothing else is touched.
+  dynamic "control_plane_scaling_config" {
+    for_each = var.control_plane_scaling_tier != null ? [1] : []
+    content {
+      tier = var.control_plane_scaling_tier
+    }
+  }
+
   enabled_cluster_log_types = var.enabled_cluster_log_types
 
   # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling.

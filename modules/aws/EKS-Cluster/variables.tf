@@ -134,3 +134,12 @@ variable "oidc_thumbprint_override" {
   description = "This is to manually override the default thumbprint setting for the OIDC provider"
   default     = []
 }
+variable "control_plane_scaling_tier" {
+  type        = string
+  description = "EKS Provisioned Control Plane scaling tier of the cluster: standard, tier-xl, tier-2xl, tier-4xl or tier-8xl. null leaves the tier to AWS (standard on a new cluster) and keeps the block out of the configuration, so a cluster that does not set it plans no change."
+  default     = null
+  validation {
+    condition     = contains(["standard", "tier-xl", "tier-2xl", "tier-4xl", "tier-8xl"], coalesce(var.control_plane_scaling_tier, "standard"))
+    error_message = "control_plane_scaling_tier must be null, standard, tier-xl, tier-2xl, tier-4xl or tier-8xl."
+  }
+}
