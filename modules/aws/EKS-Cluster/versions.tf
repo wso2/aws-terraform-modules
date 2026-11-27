@@ -12,9 +12,10 @@
 terraform {
   required_version = ">= 1.3.8"
   required_providers {
+    # control_plane_scaling_config (EKS Provisioned Control Plane) landed in AWS 6.23.0.
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = ">= 6.23, < 7.0"
     }
     tls = {
       source  = "hashicorp/tls"
