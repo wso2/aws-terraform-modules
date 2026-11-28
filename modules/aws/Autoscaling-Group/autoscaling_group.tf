@@ -31,6 +31,14 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   wait_for_capacity_timeout = var.wait_for_capacity_timeout
   protect_from_scale_in     = var.protect_from_scale_in
 
+  dynamic "instance_maintenance_policy" {
+    for_each = var.instance_maintenance_policy == null ? [] : [var.instance_maintenance_policy]
+    content {
+      min_healthy_percentage = instance_maintenance_policy.value.min_healthy_percentage
+      max_healthy_percentage = instance_maintenance_policy.value.max_healthy_percentage
+    }
+  }
+
   instance_refresh {
     strategy = "Rolling"
     preferences {

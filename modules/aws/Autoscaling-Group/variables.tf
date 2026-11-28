@@ -102,6 +102,26 @@ variable "min_healthy_percentage" {
   default     = 66
 }
 
+variable "instance_maintenance_policy" {
+  description = "Instance maintenance policy: how many instances may be healthy while the group replaces one (an unhealthy instance, an instance refresh, a maximum-lifetime or AZ-rebalancing replacement). min_healthy_percentage 100 with max_healthy_percentage 110 makes the group launch the replacement first and terminate the old instance only once it is in service, so a failing health check cannot take capacity away before the replacement exists. Both values are required; max may exceed min by at most 100. null (the default) sets no policy and keeps today's terminate-then-launch behaviour. Needs max_size above desired capacity to leave room for the extra instance."
+  type = object({
+    min_healthy_percentage = number
+    max_healthy_percentage = number
+  })
+  default = null
+
+  validation {
+    condition = var.instance_maintenance_policy == null ? true : (
+      var.instance_maintenance_policy.min_healthy_percentage >= 0 &&
+      var.instance_maintenance_policy.min_healthy_percentage <= 100 &&
+      var.instance_maintenance_policy.max_healthy_percentage >= 100 &&
+      var.instance_maintenance_policy.max_healthy_percentage <= 200 &&
+      var.instance_maintenance_policy.max_healthy_percentage - var.instance_maintenance_policy.min_healthy_percentage <= 100
+    )
+    error_message = "instance_maintenance_policy: min_healthy_percentage must be 0-100, max_healthy_percentage 100-200, and max may exceed min by at most 100."
+  }
+}
+
 variable "enabled_metrics" {
   description = "A list of Auto Scaling group metrics to collect. When non-empty, metrics are published at 1-minute granularity."
   type        = list(string)

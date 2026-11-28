@@ -55,6 +55,21 @@ variable "preserve_client_ip" {
   description = "Whether client IP preservation is enabled for the target group"
   default     = null
 }
+variable "health_check" {
+  type = object({
+    enabled             = optional(bool)
+    protocol            = optional(string)
+    port                = optional(string)
+    path                = optional(string)
+    interval            = optional(number)
+    timeout             = optional(number)
+    healthy_threshold   = optional(number)
+    unhealthy_threshold = optional(number)
+    matcher             = optional(string)
+  })
+  description = "Health check settings of the target group. null (the default) sets no health_check block, so the target group keeps the health check it has. When a block is set, a field left unset takes the AWS provider default (port traffic-port, interval 30, healthy and unhealthy threshold 3), not the value an existing target group has now, so set every field you care about to avoid a plan that changes them. The protocol falls back to the target group protocol when that is TCP, HTTP or HTTPS, and to TCP otherwise (the provider default of HTTP would break a TCP target group). A Network Load Balancer TCP target group defaults to a healthy threshold of 5 and an unhealthy threshold of 2, so a target is marked unhealthy after about 60 s at a 30 s interval; raise unhealthy_threshold (2-10) to tolerate longer stalls."
+  default     = null
+}
 variable "tags" {
   type        = map(string)
   description = "Tags to be added to the resources"
