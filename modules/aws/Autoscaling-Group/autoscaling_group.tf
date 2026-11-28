@@ -42,7 +42,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   instance_refresh {
     strategy = "Rolling"
     preferences {
-      min_healthy_percentage = var.min_healthy_percentage
+      min_healthy_percentage = var.instance_maintenance_policy == null ? var.min_healthy_percentage : var.instance_maintenance_policy.min_healthy_percentage
       instance_warmup        = 600
     }
     triggers = ["tag"]

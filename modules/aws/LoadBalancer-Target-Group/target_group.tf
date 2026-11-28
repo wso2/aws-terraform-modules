@@ -22,7 +22,7 @@ resource "aws_lb_target_group" "lb_target_group" {
     for_each = var.health_check == null ? [] : [var.health_check]
     content {
       enabled             = health_check.value.enabled
-      protocol            = coalesce(health_check.value.protocol, contains(["TCP", "HTTP", "HTTPS"], var.protocol) ? var.protocol : "TCP")
+      protocol            = coalesce(health_check.value.protocol, var.target_type == "alb" ? "HTTP" : (contains(["TCP", "HTTP", "HTTPS"], var.protocol) ? var.protocol : "TCP"))
       port                = health_check.value.port
       path                = health_check.value.path
       interval            = health_check.value.interval
